@@ -26,10 +26,18 @@ find_package(ImGui REQUIRED SourcesMiscCpp)
 find_package(Magnum REQUIRED GL Sdl2Application)
 
 set(OberonEditor_SRCS
-    Editor.cpp)
+    Console.cpp
+    Editor.cpp
+    Explorer.cpp
+    Hierarchy.cpp
+    Inspector.cpp)
 
 set(OberonEditor_HEADERS
-    Editor.hpp)
+    Console.hpp
+    Editor.hpp
+    Explorer.hpp
+    Hierarchy.hpp
+    Inspector.hpp)
 
 add_library(OberonEditor ${SHARED_OR_STATIC}
     ${OberonEditor_SRCS}

@@ -22,43 +22,13 @@
     SOFTWARE.
 */
 
-#pragma once
-
-#include <Magnum/GL/DefaultFramebuffer.h>
-#include <Magnum/GL/Renderer.h>
-#include <Magnum/ImGuiIntegration/Context.hpp>
-#include <Magnum/Platform/Sdl2Application.h>
-#include <imgui_internal.h>
-
-#include "Console.hpp"
-#include "Explorer.hpp"
 #include "Hierarchy.hpp"
-#include "Inspector.hpp"
 
-using namespace Magnum;
+void Hierarchy::newFrame()
+{
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
+    ImGui::Begin("Hierarchy");
+    ImGui::PopStyleVar();
 
-class Editor : public Platform::Application {
-public:
-    explicit Editor(const Arguments& arguments);
-
-private:
-    void drawEvent() override;
-
-    void viewportEvent(ViewportEvent& event) override;
-
-    void keyPressEvent(KeyEvent& event) override;
-    void keyReleaseEvent(KeyEvent& event) override;
-
-    void mousePressEvent(MouseEvent& event) override;
-    void mouseReleaseEvent(MouseEvent& event) override;
-    void mouseMoveEvent(MouseMoveEvent& event) override;
-    void mouseScrollEvent(MouseScrollEvent& event) override;
-    void textInputEvent(TextInputEvent& event) override;
-
-    ImGuiIntegration::Context _imgui{ NoCreate };
-
-    Console console;
-    Explorer explorer;
-    Hierarchy hierarchy;
-    Inspector inspector;
-};
+    ImGui::End();
+}

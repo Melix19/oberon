@@ -24,41 +24,9 @@
 
 #pragma once
 
-#include <Magnum/GL/DefaultFramebuffer.h>
-#include <Magnum/GL/Renderer.h>
-#include <Magnum/ImGuiIntegration/Context.hpp>
-#include <Magnum/Platform/Sdl2Application.h>
-#include <imgui_internal.h>
+#include <imgui.h>
 
-#include "Console.hpp"
-#include "Explorer.hpp"
-#include "Hierarchy.hpp"
-#include "Inspector.hpp"
-
-using namespace Magnum;
-
-class Editor : public Platform::Application {
+class Explorer {
 public:
-    explicit Editor(const Arguments& arguments);
-
-private:
-    void drawEvent() override;
-
-    void viewportEvent(ViewportEvent& event) override;
-
-    void keyPressEvent(KeyEvent& event) override;
-    void keyReleaseEvent(KeyEvent& event) override;
-
-    void mousePressEvent(MouseEvent& event) override;
-    void mouseReleaseEvent(MouseEvent& event) override;
-    void mouseMoveEvent(MouseMoveEvent& event) override;
-    void mouseScrollEvent(MouseScrollEvent& event) override;
-    void textInputEvent(TextInputEvent& event) override;
-
-    ImGuiIntegration::Context _imgui{ NoCreate };
-
-    Console console;
-    Explorer explorer;
-    Hierarchy hierarchy;
-    Inspector inspector;
+    void newFrame();
 };
