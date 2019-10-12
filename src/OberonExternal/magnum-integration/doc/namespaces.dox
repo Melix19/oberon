@@ -1,0 +1,314 @@
+/*
+    This file is part of Magnum.
+
+    Copyright © 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019
+              Vladimír Vondruš <mosra@centrum.cz>
+    Copyright © 2018 Jonathan Hale <squareys@googlemail.com>
+
+    Permission is hereby granted, free of charge, to any person obtaining a
+    copy of this software and associated documentation files (the "Software"),
+    to deal in the Software without restriction, including without limitation
+    the rights to use, copy, modify, merge, publish, distribute, sublicense,
+    and/or sell copies of the Software, and to permit persons to whom the
+    Software is furnished to do so, subject to the following conditions:
+
+    The above copyright notice and this permission notice shall be included
+    in all copies or substantial portions of the Software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+    THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+    FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+    DEALINGS IN THE SOFTWARE.
+*/
+
+/** @dir magnum-integration/src/Magnum
+ * @brief Namespace @ref Magnum (part of @ref building-integration "Magnum Integration library")
+ */
+
+/** @dir Magnum/BulletIntegration
+ * @brief Namespace @ref Magnum::BulletIntegration
+ */
+/** @namespace Magnum::BulletIntegration
+@brief Integration with Bullet Physics
+
+Conversion of matrix and vector classes, wrappers for rigid body dynamics.
+
+This library depends on the [Bullet Physics](http://bulletphysics.org/) library
+and is built if `WITH_BULLET` is enabled when building Magnum Integration. To
+use this library with CMake, you need to request the `Bullet` component of the
+`MagnumIntegration` package and link to the `MagnumIntegration::Bullet` target:
+
+@code{.cmake}
+find_package(MagnumIntegration REQUIRED Bullet)
+
+# ...
+target_link_libraries(your-app MagnumIntegration::Bullet)
+@endcode
+
+This library provides routines for explicit conversion between Bullet and
+Magnum math types, in the @ref Magnum/BulletIntegration/Integration.h header,
+see its documentation for more information. See also the @ref examples-bullet
+example, @ref building-integration and @ref cmake-integration.
+
+@m_class{m-block m-success}
+
+@thirdparty This library makes use of [Bullet Physics](http://bulletphysics.org/),
+    released under the @m_class{m-label m-success} **zlib license**
+    ([license text](http://zlib.net/zlib_license.html),
+    [choosealicense.com](https://choosealicense.com/licenses/zlib/)).
+    Attribution is appreciated but not required.
+*/
+
+/** @dir Magnum/DartIntegration
+ * @brief Namespace @ref Magnum::DartIntegration
+ */
+/** @namespace Magnum::DartIntegration
+@brief Integration with DART Dynamic Animation and Robotics Toolkit
+
+Conversion of nodes and shapes for visualizing physics simulation.
+
+This library depends on the [DART](https://dartsim.github.io/) library
+and is built if `WITH_DART` is enabled when building Magnum Integration. To
+use this library with CMake, you need to request the `Dart` component of the
+`MagnumIntegration` package and link to the `MagnumIntegration::Dart` target:
+
+@code{.cmake}
+find_package(MagnumIntegration REQUIRED Dart)
+
+# ...
+target_link_libraries(your-app MagnumIntegration::Dart)
+@endcode
+
+DART is using Eigen for mathematics and you might want to use the
+@ref EigenIntegration library for easy conversion between Eigen and Magnum math
+types. See also the @ref examples-dart example, @ref building-integration and
+@ref cmake-integration for more information.
+
+@experimental
+
+<b></b>
+
+@m_class{m-block m-success}
+
+@thirdparty This library makes use of [DART Dynamic Animation and Robotics Toolkit](https://dartsim.github.io/),
+    licensed under @m_class{m-label m-success} **BSD 3-clause**
+    ([license text](https://github.com/dartsim/dart/blob/master/LICENSE),
+    [choosealicense.com](https://choosealicense.com/licenses/bsd-2-clause/)).
+    Attribution is required for public use.
+*/
+
+/** @dir Magnum/EigenIntegration
+ * @brief Namespace @ref Magnum::EigenIntegration
+ */
+/** @namespace Magnum::EigenIntegration
+@brief Integration with Eigen
+
+Conversion of math types from and to the Eigen library.
+
+This library depends on the [Eigen](http://eigen.tuxfamily.org/) library and is
+built if `WITH_EIGEN` is enabled when building Magnum Integration. To use this
+library with CMake, you need to request the `Eigen` component of the
+`MagnumIntegration` package and link to the `MagnumIntegration::Eigen` target:
+
+@code{.cmake}
+find_package(MagnumIntegration REQUIRED Eigen)
+
+# ...
+target_link_libraries(your-app MagnumIntegration::Eigen)
+@endcode
+
+The integration routines are provided in the
+@ref Magnum/EigenIntegration/Integration.h header, see its documentation
+for more information. See also @ref building-integration and
+@ref cmake-integration.
+
+@m_class{m-block m-warning}
+
+@thirdparty This library makes use of the
+    [Eigen](http://eigen.tuxfamily.org/),
+    released under @m_class{m-label m-warning} **MPL 2.0**
+    ([license text](http://www.mozilla.org/MPL/2.0),
+    [choosealicense.com](https://choosealicense.com/licenses/mpl-2.0/)).
+    Attribution is required for public use, source code of licensed files and
+    modifications of these files have to be made available under the same
+    license. Additionally, some parts rely on third-party code licensed under
+    @m_class{m-label m-warning} **LGPLv3**
+    ([license text](http://eigen.tuxfamily.org/index.php?title=Main_Page#License),
+    [choosealicense.com](https://choosealicense.com/licenses/lgpl-3.0/)),
+    requiring either dynamic linking or full source disclosure for public use.
+    See the [license notes](http://eigen.tuxfamily.org/index.php?title=Main_Page#License)
+    for details.
+
+@m_class{m-block m-success}
+
+@par Single-header version
+    This library is also available as a part of the single-header,
+    dependency-less [MagnumMath.h](https://github.com/mosra/magnum-singles/tree/master/MagnumMath.h)
+    library in the Magnum Singles repository for easier integration into your
+    projects. Opt-in by specifying @cpp #define MAGNUM_MATH_EIGEN_INTEGRATION @ce
+    before including the file. See @ref singles and @ref Math for more
+    information.
+
+*/
+/** @dir Magnum/GlmIntegration
+ * @brief Namespace @ref Magnum::GlmIntegration
+ */
+/** @namespace Magnum::GlmIntegration
+@brief Integration with OpenGL Mathematics (GLM)
+
+Conversion of math types from and to the GLM library, debug output.
+
+This library depends on the [GLM](https://glm.g-truc.net/) library and is built
+if `WITH_GLM` is enabled when building Magnum Integration. To use this
+library with CMake, you need to copy [FindGLM.cmake](https://github.com/mosra/magnum-integration/blob/master/modules/FindGLM.cmake)
+from the `modules/` directory in Magnum Integration sources to the `modules/`
+dir in your project and pointing `CMAKE_MODULE_PATH` to it (if not done
+already) so it is able to correctly find the GLM library. Then request the
+`Glm` component of the `MagnumIntegration` package and link to the
+`MagnumIntegration::Glm` target:
+
+@code{.cmake}
+# Path where FindGLM.cmake can be found, adapt as needed
+set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/modules/" ${CMAKE_MODULE_PATH})
+
+find_package(MagnumIntegration REQUIRED Glm)
+
+# ...
+target_link_libraries(your-app MagnumIntegration::Glm)
+@endcode
+
+The integration routines are provided in @ref Magnum/GlmIntegration/Integration.h,
+@ref Magnum/GlmIntegration/GtcIntegration.h and
+@ref Magnum/GlmIntegration/GtxIntegration.h headers, see their documentation
+for more information. See also @ref building-integration and
+@ref cmake-integration.
+
+@m_class{m-block m-success}
+
+@thirdparty This library makes use of the
+    [OpenGL Mathematics library](https://glm.g-truc.net/),
+    released under @m_class{m-label m-success} **The Happy Bunny License**
+    (Modified MIT License) ([license text](https://github.com/g-truc/glm/blob/master/manual.md#the-happy-bunny-license-modified-mit-license))
+    or under @m_class{m-label m-success} **MIT**
+    ([license text](https://github.com/g-truc/glm/blob/master/manual.md#the-mit-license),
+    [choosealicense.com](https://choosealicense.com/licenses/mit/)).
+    Attribution is required for public use.
+
+@m_class{m-block m-success}
+
+@par Single-header version
+    This library is also available as a part of the single-header,
+    dependency-less [MagnumMath.h](https://github.com/mosra/magnum-singles/tree/master/MagnumMath.h)
+    library in the Magnum Singles repository for easier integration into your
+    projects. Opt-in by specifying @cpp #define MAGNUM_MATH_GLM_INTEGRATION @ce
+    before including the file. See @ref singles and @ref Math for more
+    information.
+*/
+/** @namespace glm
+@brief GLM namespace.
+
+Extensions to the [GLM](https://glm.g-truc.net/) library.
+
+This library depends on the [GLM](https://glm.g-truc.net/) library and is built
+if `WITH_GLM` is enabled when building Magnum Integration. To use this
+library with CMake, you need to copy [FindGLM.cmake](https://github.com/mosra/magnum-integration/blob/master/modules/FindGLM.cmake)
+from the `modules/` directory in Magnum Integration sources to the `modules/`
+dir in your project and pointing `CMAKE_MODULE_PATH` to it (if not done
+already) so it is able to correctly find the GLM library. Then request the
+`Glm` component of the `MagnumIntegration` package and link to the
+`MagnumIntegration::Glm` target:
+
+@code{.cmake}
+# Path where FindGLM.cmake can be found, adapt as needed
+set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/modules/" ${CMAKE_MODULE_PATH})
+
+find_package(MagnumIntegration REQUIRED Glm)
+
+# ...
+target_link_libraries(your-app MagnumIntegration::Glm)
+@endcode
+
+See also @ref building-integration and @ref cmake-integration. See the
+@ref Magnum::GlmIntegration namespace for license information.
+*/
+
+/** @dir Magnum/ImGuiIntegration
+ * @brief Namespace @ref Magnum::ImGuiIntegration
+ */
+/** @namespace Magnum::ImGuiIntegration
+@brief Integration with Dear ImGui
+
+Conversion of math classes and rendering of Dear ImGui using Magnum.
+
+This library depends on [Dear ImGui](https://github.com/ocornut/imgui) and is
+built if `WITH_IMGUI` is enabled when building Magnum Integration. To use this
+library with CMake, you need to copy [FindImGui.cmake](https://github.com/mosra/magnum-integration/blob/master/modules/FindImGui.cmake)
+from the `modules/` directory in Magnum Integration sources to the `modules/`
+dir in your project and pointing `CMAKE_MODULE_PATH` to it (if not done
+already) so it is able to correctly find the ImGui library on all platforms.
+Then request the `ImGui` component of the `MagnumIntegration` package and link
+to the `MagnumIntegration::ImGui` target:
+
+@code{.cmake}
+# Path where FindImGui.cmake can be found, adapt as needed
+set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/modules/" ${CMAKE_MODULE_PATH})
+
+find_package(MagnumIntegration REQUIRED ImGui)
+
+# ...
+target_link_libraries(your-app MagnumIntegration::ImGui)
+@endcode
+
+Routines for math type conversion are provided in @ref Magnum/ImGuiIntegration/Integration.h,
+Magnum-based rendering backend for Dear ImGui is in the @ref Context class. See
+also the @ref examples-imgui example, @ref building-integration and
+@ref cmake-integration.
+
+@m_class{m-block m-success}
+
+@thirdparty This library makes use of [Dear ImGui](https://github.com/ocornut/imgui),
+    licensed under @m_class{m-label m-success} **MIT**
+    ([license text](https://github.com/ocornut/imgui/blob/master/LICENSE.txt),
+    [choosealicense.com](https://choosealicense.com/licenses/mit/)).
+    Attribution is required for public use.
+*/
+
+/** @dir Magnum/OvrIntegration
+ * @brief Namespace @ref Magnum::OvrIntegration
+ */
+/** @namespace Magnum::OvrIntegration
+@brief Integration with the Oculus SDK (LibOVR)
+
+Conversion of math classes, wrappers for most OVR CAPI structures and functions.
+
+This library depends on the [Oculus SDK](https://developer.oculus.com/) and is
+built if `WITH_OVR` is enabled when building Magnum Integration. To use this
+library with CMake, you need to copy [FindOVR.cmake](https://github.com/mosra/magnum-integration/blob/master/modules/FindOVR.cmake)
+from the `modules/` directory in Magnum Integration sources to the `modules/`
+dir in your project and pointing `CMAKE_MODULE_PATH` to it (if not done
+already) so it is able to correctly find the OVR SDK. Then request the `Ovr`
+component of the `MagnumIntegration` package and link to the
+`MagnumIntegration::Ovr` target:
+
+@code{.cmake}
+# Path where FindOVR.cmake can be found, adapt as needed
+set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/modules/" ${CMAKE_MODULE_PATH})
+
+find_package(MagnumIntegration REQUIRED Ovr)
+
+# ...
+target_link_libraries(your-app MagnumIntegration::Ovr)
+@endcode
+
+See the @ref examples-ovr example, @ref building-integration and
+@ref cmake-integration for more information.
+
+@m_class{m-block m-warning}
+
+@thirdparty This library makes use of [Oculus SDK](https://developer.oculus.com/),
+    released under the @m_class{m-label m-warning} **Oculus SDK license**
+    ([license text](https://developer.oculus.com/licenses/sdk-3.5/)).
+*/
