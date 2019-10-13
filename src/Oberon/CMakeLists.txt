@@ -26,7 +26,7 @@ find_package(Corrade REQUIRED Utility)
 
 set_directory_properties(PROPERTIES
     CORRADE_CXX_STANDARD 11
-    CORRADE_USE_PEDANTIC_FLAGS ON)
+    CORRADE_USE_PEDANTIC_FLAGS OFF)
 
 add_subdirectory(Editor)
 
