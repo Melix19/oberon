@@ -39,7 +39,7 @@ using namespace Magnum;
 
 class Editor : public Platform::Application {
 public:
-    explicit Editor(const Arguments& arguments);
+    explicit Editor(const Arguments& arguments, const std::string& projectPath);
 
 private:
     void drawEvent() override;

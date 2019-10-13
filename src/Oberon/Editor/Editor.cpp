@@ -24,7 +24,7 @@
 
 #include "Editor.hpp"
 
-Editor::Editor(const Arguments& arguments)
+Editor::Editor(const Arguments& arguments, const std::string& projectPath)
     : Platform::Application{
         arguments,
         Configuration{}.setTitle("Oberon").setWindowFlags(Configuration::WindowFlag::Maximized | Configuration::WindowFlag::Resizable)

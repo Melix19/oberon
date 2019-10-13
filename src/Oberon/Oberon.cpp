@@ -27,16 +27,18 @@
 
 int main(int argc, char** argv)
 {
-    int exit_code;
+    int exitCode;
+    std::string projectPath;
 
     {
-        ProjectManager app({ argc, argv });
-        exit_code = app.exec();
+        ProjectManager projectManager({ argc, argv });
+        exitCode = projectManager.exec();
+        projectPath = projectManager._projectPath;
     }
 
-    if (exit_code == 0) {
-        Editor app({ argc, argv });
-        return app.exec();
+    if (exitCode == 0 && !projectPath.empty()) {
+        Editor editor({ argc, argv }, projectPath);
+        return editor.exec();
     } else
-        return exit_code;
+        return exitCode;
 }
