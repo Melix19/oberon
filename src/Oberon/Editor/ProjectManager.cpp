@@ -29,6 +29,7 @@ ProjectManager::ProjectManager(const Arguments& arguments)
         arguments,
         Configuration{}.setSize(Vector2i(1024, 576)).setTitle("Oberon - Project Manager").setWindowFlags(Configuration::WindowFlag::Resizable)
     }
+    , _projectPath("")
 {
     ImGui::CreateContext();
 
@@ -101,6 +102,27 @@ void ProjectManager::drawEvent()
     ImGui::End();
 
     ImGui::Begin("Main");
+
+    if (ImGui::Button("Open")) {
+        _projectPath = pfd::select_folder("").result();
+
+        if (!_projectPath.empty()) {
+            _projectPath.pop_back();
+            Platform::Sdl2Application::exit();
+        }
+    }
+
+    ImGui::SameLine();
+
+    if (ImGui::Button("Create")) {
+        _projectPath = pfd::select_folder("").result();
+
+        if (!_projectPath.empty()) {
+            _projectPath.pop_back();
+            Platform::Sdl2Application::exit();
+        }
+    }
+
     ImGui::End();
 
     ImGui::Begin("List");

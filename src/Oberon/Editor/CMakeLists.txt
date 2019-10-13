@@ -54,6 +54,7 @@ target_link_libraries(OberonEditor PUBLIC
     Magnum::Application
     Magnum::GL
     Magnum::Magnum
-    MagnumIntegration::ImGui)
+    MagnumIntegration::ImGui
+    portable_file_dialogs)
 
 add_library(Oberon::Editor ALIAS OberonEditor)

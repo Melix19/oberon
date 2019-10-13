@@ -29,6 +29,7 @@
 #include <Magnum/ImGuiIntegration/Context.hpp>
 #include <Magnum/Platform/Sdl2Application.h>
 #include <imgui_internal.h>
+#include <portable-file-dialogs.h>
 
 using namespace Magnum;
 
@@ -51,4 +52,6 @@ private:
     void textInputEvent(TextInputEvent& event) override;
 
     ImGuiIntegration::Context _imgui{ NoCreate };
+
+    std::string _projectPath;
 };

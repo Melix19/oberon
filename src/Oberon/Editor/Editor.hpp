@@ -57,8 +57,8 @@ private:
 
     ImGuiIntegration::Context _imgui{ NoCreate };
 
-    Console console;
-    Explorer explorer;
-    Hierarchy hierarchy;
-    Inspector inspector;
+    Console _console;
+    Explorer _explorer;
+    Hierarchy _hierarchy;
+    Inspector _inspector;
 };

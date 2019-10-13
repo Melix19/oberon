@@ -105,10 +105,10 @@ void Editor::drawEvent()
     ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), ImGuiDockNodeFlags_PassthruCentralNode);
     ImGui::End();
 
-    console.newFrame();
-    explorer.newFrame();
-    hierarchy.newFrame();
-    inspector.newFrame();
+    _console.newFrame();
+    _explorer.newFrame();
+    _hierarchy.newFrame();
+    _inspector.newFrame();
 
     /* Set appropriate states. */
     GL::Renderer::enable(GL::Renderer::Feature::Blending);
