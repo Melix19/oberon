@@ -24,9 +24,37 @@
 
 #pragma once
 
+#include <Corrade/Utility/Directory.h>
 #include <imgui.h>
+#include <misc/cpp/imgui_stdlib.h>
+#include <vector>
+
+using namespace Corrade;
+
+struct FileNode {
+    typedef std::unique_ptr<FileNode> Ptr;
+
+    FileNode(const std::string& path, FileNode* parent = nullptr);
+    FileNode* addChild(const std::string& path = "");
+
+    std::string path;
+
+    FileNode* parent;
+    std::vector<Ptr> children;
+    bool is_selected;
+};
 
 class Explorer {
 public:
+    Explorer(const std::string& project_path);
     void newFrame();
+
+private:
+    void updateFileNodeChildren(FileNode* node);
+    void displayFileTree(FileNode* node);
+
+    static bool sortFileNodes(const FileNode::Ptr& a, const FileNode::Ptr& b);
+
+    FileNode root_node;
+    std::vector<FileNode*> selected_nodes;
 };

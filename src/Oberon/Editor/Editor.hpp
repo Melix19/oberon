@@ -39,7 +39,7 @@ using namespace Magnum;
 
 class Editor : public Platform::Application {
 public:
-    explicit Editor(const Arguments& arguments, const std::string& projectPath);
+    explicit Editor(const Arguments& arguments, const std::string& project_path);
 
 private:
     void drawEvent() override;
@@ -55,10 +55,10 @@ private:
     void mouseScrollEvent(MouseScrollEvent& event) override;
     void textInputEvent(TextInputEvent& event) override;
 
-    ImGuiIntegration::Context _imgui{ NoCreate };
+    ImGuiIntegration::Context imgui{ NoCreate };
 
-    Console _console;
-    Explorer _explorer;
-    Hierarchy _hierarchy;
-    Inspector _inspector;
+    Console console;
+    Explorer explorer;
+    Hierarchy hierarchy;
+    Inspector inspector;
 };

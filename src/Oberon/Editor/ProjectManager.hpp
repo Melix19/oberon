@@ -37,7 +37,7 @@ class ProjectManager : public Platform::Application {
 public:
     explicit ProjectManager(const Arguments& arguments);
 
-    std::string _projectPath;
+    std::string project_path;
 
 private:
     void drawEvent() override;
@@ -53,5 +53,5 @@ private:
     void mouseScrollEvent(MouseScrollEvent& event) override;
     void textInputEvent(TextInputEvent& event) override;
 
-    ImGuiIntegration::Context _imgui{ NoCreate };
+    ImGuiIntegration::Context imgui{ NoCreate };
 };

@@ -24,11 +24,12 @@
 
 #include "Editor.hpp"
 
-Editor::Editor(const Arguments& arguments, const std::string& projectPath)
+Editor::Editor(const Arguments& arguments, const std::string& project_path)
     : Platform::Application{
         arguments,
         Configuration{}.setTitle("Oberon").setWindowFlags(Configuration::WindowFlag::Maximized | Configuration::WindowFlag::Resizable)
     }
+    , explorer(project_path)
 {
     ImGui::CreateContext();
 
@@ -45,7 +46,7 @@ Editor::Editor(const Arguments& arguments, const std::string& projectPath)
         io.Fonts->AddFontFromMemoryTTF(const_cast<char*>(font.data()), font.size(), 18.0f * framebufferSize().x() / size.x(), &fontConfig);
     }
 
-    _imgui = ImGuiIntegration::Context(*ImGui::GetCurrentContext(), size, windowSize(), framebufferSize());
+    imgui = ImGuiIntegration::Context(*ImGui::GetCurrentContext(), size, windowSize(), framebufferSize());
 
     /* Set up proper blending to be used by ImGui. */
     GL::Renderer::setBlendEquation(GL::Renderer::BlendEquation::Add, GL::Renderer::BlendEquation::Add);
@@ -58,7 +59,7 @@ void Editor::drawEvent()
 {
     GL::defaultFramebuffer.clear(GL::FramebufferClear::Color);
 
-    _imgui.newFrame();
+    imgui.newFrame();
 
     /* Enable text input, if needed */
     if (ImGui::GetIO().WantTextInput && !isTextInputActive())
@@ -105,16 +106,16 @@ void Editor::drawEvent()
     ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), ImGuiDockNodeFlags_PassthruCentralNode);
     ImGui::End();
 
-    _console.newFrame();
-    _explorer.newFrame();
-    _hierarchy.newFrame();
-    _inspector.newFrame();
+    console.newFrame();
+    explorer.newFrame();
+    hierarchy.newFrame();
+    inspector.newFrame();
 
     /* Set appropriate states. */
     GL::Renderer::enable(GL::Renderer::Feature::Blending);
     GL::Renderer::enable(GL::Renderer::Feature::ScissorTest);
 
-    _imgui.drawFrame();
+    imgui.drawFrame();
 
     /* Reset state. */
     GL::Renderer::disable(GL::Renderer::Feature::ScissorTest);
@@ -128,43 +129,42 @@ void Editor::viewportEvent(ViewportEvent& event)
 {
     GL::defaultFramebuffer.setViewport({ {}, event.framebufferSize() });
 
-    _imgui.relayout(Vector2{ event.windowSize() } / event.dpiScaling(),
-        event.windowSize(), event.framebufferSize());
+    imgui.relayout(Vector2{ event.windowSize() } / event.dpiScaling(), event.windowSize(), event.framebufferSize());
 }
 
 void Editor::keyPressEvent(KeyEvent& event)
 {
-    if (_imgui.handleKeyPressEvent(event))
+    if (imgui.handleKeyPressEvent(event))
         return;
 }
 
 void Editor::keyReleaseEvent(KeyEvent& event)
 {
-    if (_imgui.handleKeyReleaseEvent(event))
+    if (imgui.handleKeyReleaseEvent(event))
         return;
 }
 
 void Editor::mousePressEvent(MouseEvent& event)
 {
-    if (_imgui.handleMousePressEvent(event))
+    if (imgui.handleMousePressEvent(event))
         return;
 }
 
 void Editor::mouseReleaseEvent(MouseEvent& event)
 {
-    if (_imgui.handleMouseReleaseEvent(event))
+    if (imgui.handleMouseReleaseEvent(event))
         return;
 }
 
 void Editor::mouseMoveEvent(MouseMoveEvent& event)
 {
-    if (_imgui.handleMouseMoveEvent(event))
+    if (imgui.handleMouseMoveEvent(event))
         return;
 }
 
 void Editor::mouseScrollEvent(MouseScrollEvent& event)
 {
-    if (_imgui.handleMouseScrollEvent(event)) {
+    if (imgui.handleMouseScrollEvent(event)) {
         /* Prevent scrolling the page */
         event.setAccepted();
         return;
@@ -173,6 +173,6 @@ void Editor::mouseScrollEvent(MouseScrollEvent& event)
 
 void Editor::textInputEvent(TextInputEvent& event)
 {
-    if (_imgui.handleTextInputEvent(event))
+    if (imgui.handleTextInputEvent(event))
         return;
 }

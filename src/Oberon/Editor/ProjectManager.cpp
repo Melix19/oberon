@@ -29,7 +29,7 @@ ProjectManager::ProjectManager(const Arguments& arguments)
         arguments,
         Configuration{}.setSize(Vector2i(1024, 576)).setTitle("Oberon - Project Manager").setWindowFlags(Configuration::WindowFlag::Resizable)
     }
-    , _projectPath("")
+    , project_path("")
 {
     ImGui::CreateContext();
 
@@ -46,7 +46,7 @@ ProjectManager::ProjectManager(const Arguments& arguments)
         io.Fonts->AddFontFromMemoryTTF(const_cast<char*>(font.data()), font.size(), 18.0f * framebufferSize().x() / size.x(), &fontConfig);
     }
 
-    _imgui = ImGuiIntegration::Context(*ImGui::GetCurrentContext(), size, windowSize(), framebufferSize());
+    imgui = ImGuiIntegration::Context(*ImGui::GetCurrentContext(), size, windowSize(), framebufferSize());
 
     /* Set up proper blending to be used by ImGui. */
     GL::Renderer::setBlendEquation(GL::Renderer::BlendEquation::Add, GL::Renderer::BlendEquation::Add);
@@ -59,7 +59,7 @@ void ProjectManager::drawEvent()
 {
     GL::defaultFramebuffer.clear(GL::FramebufferClear::Color);
 
-    _imgui.newFrame();
+    imgui.newFrame();
 
     /* Enable text input, if needed */
     if (ImGui::GetIO().WantTextInput && !isTextInputActive())
@@ -104,10 +104,10 @@ void ProjectManager::drawEvent()
     ImGui::Begin("Main");
 
     if (ImGui::Button("Open")) {
-        _projectPath = pfd::select_folder("").result();
+        project_path = pfd::select_folder("").result();
 
-        if (!_projectPath.empty()) {
-            _projectPath.pop_back();
+        if (!project_path.empty()) {
+            project_path.pop_back();
             Platform::Sdl2Application::exit();
         }
     }
@@ -115,10 +115,10 @@ void ProjectManager::drawEvent()
     ImGui::SameLine();
 
     if (ImGui::Button("Create")) {
-        _projectPath = pfd::select_folder("").result();
+        project_path = pfd::select_folder("").result();
 
-        if (!_projectPath.empty()) {
-            _projectPath.pop_back();
+        if (!project_path.empty()) {
+            project_path.pop_back();
             Platform::Sdl2Application::exit();
         }
     }
@@ -132,7 +132,7 @@ void ProjectManager::drawEvent()
     GL::Renderer::enable(GL::Renderer::Feature::Blending);
     GL::Renderer::enable(GL::Renderer::Feature::ScissorTest);
 
-    _imgui.drawFrame();
+    imgui.drawFrame();
 
     /* Reset state. */
     GL::Renderer::disable(GL::Renderer::Feature::ScissorTest);
@@ -146,43 +146,43 @@ void ProjectManager::viewportEvent(ViewportEvent& event)
 {
     GL::defaultFramebuffer.setViewport({ {}, event.framebufferSize() });
 
-    _imgui.relayout(Vector2{ event.windowSize() } / event.dpiScaling(),
+    imgui.relayout(Vector2{ event.windowSize() } / event.dpiScaling(),
         event.windowSize(), event.framebufferSize());
 }
 
 void ProjectManager::keyPressEvent(KeyEvent& event)
 {
-    if (_imgui.handleKeyPressEvent(event))
+    if (imgui.handleKeyPressEvent(event))
         return;
 }
 
 void ProjectManager::keyReleaseEvent(KeyEvent& event)
 {
-    if (_imgui.handleKeyReleaseEvent(event))
+    if (imgui.handleKeyReleaseEvent(event))
         return;
 }
 
 void ProjectManager::mousePressEvent(MouseEvent& event)
 {
-    if (_imgui.handleMousePressEvent(event))
+    if (imgui.handleMousePressEvent(event))
         return;
 }
 
 void ProjectManager::mouseReleaseEvent(MouseEvent& event)
 {
-    if (_imgui.handleMouseReleaseEvent(event))
+    if (imgui.handleMouseReleaseEvent(event))
         return;
 }
 
 void ProjectManager::mouseMoveEvent(MouseMoveEvent& event)
 {
-    if (_imgui.handleMouseMoveEvent(event))
+    if (imgui.handleMouseMoveEvent(event))
         return;
 }
 
 void ProjectManager::mouseScrollEvent(MouseScrollEvent& event)
 {
-    if (_imgui.handleMouseScrollEvent(event)) {
+    if (imgui.handleMouseScrollEvent(event)) {
         /* Prevent scrolling the page */
         event.setAccepted();
         return;
@@ -191,6 +191,6 @@ void ProjectManager::mouseScrollEvent(MouseScrollEvent& event)
 
 void ProjectManager::textInputEvent(TextInputEvent& event)
 {
-    if (_imgui.handleTextInputEvent(event))
+    if (imgui.handleTextInputEvent(event))
         return;
 }
