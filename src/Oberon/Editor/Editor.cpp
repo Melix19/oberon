@@ -34,8 +34,16 @@ Editor::Editor(const Arguments& arguments)
 
     const Vector2 size = Vector2{ windowSize() } / dpiScaling();
 
-    ImGuiIO& io = ImGui::GetIO();
-    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+    {
+        ImFontConfig fontConfig;
+        fontConfig.FontDataOwnedByAtlas = false;
+
+        const Containers::ArrayView<const char> font = Utility::Resource{ "OberonEditor" }.getRaw("NotoSans-Regular.ttf");
+
+        ImGuiIO& io = ImGui::GetIO();
+        io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+        io.Fonts->AddFontFromMemoryTTF(const_cast<char*>(font.data()), font.size(), 18.0f * framebufferSize().x() / size.x(), &fontConfig);
+    }
 
     _imgui = ImGuiIntegration::Context(*ImGui::GetCurrentContext(), size, windowSize(), framebufferSize());
 

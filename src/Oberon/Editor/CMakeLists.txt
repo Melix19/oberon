@@ -25,12 +25,16 @@
 find_package(ImGui REQUIRED SourcesMiscCpp)
 find_package(Magnum REQUIRED GL Sdl2Application)
 
+corrade_add_resource(OberonEditor_RCS resources.conf)
+
 set(OberonEditor_SRCS
     Console.cpp
     Editor.cpp
     Explorer.cpp
     Hierarchy.cpp
-    Inspector.cpp)
+    Inspector.cpp
+    
+    ${OberonEditor_RCS})
 
 set(OberonEditor_HEADERS
     Console.hpp
