@@ -22,12 +22,12 @@
     SOFTWARE.
 */
 
-#include "Editor.hpp"
+#include "ProjectManager.hpp"
 
-Editor::Editor(const Arguments& arguments)
+ProjectManager::ProjectManager(const Arguments& arguments)
     : Platform::Application{
         arguments,
-        Configuration{}.setTitle("Oberon").setWindowFlags(Configuration::WindowFlag::Maximized | Configuration::WindowFlag::Resizable)
+        Configuration{}.setSize(Vector2i(1024, 576)).setTitle("Oberon - Project Manager").setWindowFlags(Configuration::WindowFlag::Resizable)
     }
 {
     ImGui::CreateContext();
@@ -54,7 +54,7 @@ Editor::Editor(const Arguments& arguments)
     setMinimalLoopPeriod(16);
 }
 
-void Editor::drawEvent()
+void ProjectManager::drawEvent()
 {
     GL::defaultFramebuffer.clear(GL::FramebufferClear::Color);
 
@@ -78,7 +78,7 @@ void Editor::drawEvent()
     ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
     ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
-    ImGui::Begin("Editor", nullptr, window_flags);
+    ImGui::Begin("Project Manager", nullptr, window_flags);
     ImGui::PopStyleVar(3);
 
     ImGuiID dockspace_id = ImGui::GetID("DockSpace");
@@ -89,15 +89,10 @@ void Editor::drawEvent()
         ImGui::DockBuilderSetNodeSize(dockspace_id, viewport->Size);
 
         ImGuiID dock_main_id = dockspace_id;
-        ImGuiID dock_id_left = ImGui::DockBuilderSplitNode(dock_main_id, ImGuiDir_Left, 0.2f, nullptr, &dock_main_id);
-        ImGuiID dock_id_right = ImGui::DockBuilderSplitNode(dock_main_id, ImGuiDir_Right, 0.2f, nullptr, &dock_main_id);
-        ImGuiID dock_id_bottom = ImGui::DockBuilderSplitNode(dock_main_id, ImGuiDir_Down, 0.3f, nullptr, &dock_main_id);
-        ImGuiID dock_id_right_bottom = ImGui::DockBuilderSplitNode(dock_id_right, ImGuiDir_Down, 0.7f, nullptr, &dock_id_right);
+        ImGuiID dock_id_right = ImGui::DockBuilderSplitNode(dock_main_id, ImGuiDir_Right, 0.4f, nullptr, &dock_main_id);
 
-        ImGui::DockBuilderDockWindow("Explorer", dock_id_left);
-        ImGui::DockBuilderDockWindow("Console", dock_id_bottom);
-        ImGui::DockBuilderDockWindow("Hierarchy", dock_id_right);
-        ImGui::DockBuilderDockWindow("Inspector", dock_id_right_bottom);
+        ImGui::DockBuilderDockWindow("Main", dock_main_id);
+        ImGui::DockBuilderDockWindow("List", dock_id_right);
 
         ImGui::DockBuilderFinish(dockspace_id);
     }
@@ -105,10 +100,11 @@ void Editor::drawEvent()
     ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), ImGuiDockNodeFlags_PassthruCentralNode);
     ImGui::End();
 
-    console.newFrame();
-    explorer.newFrame();
-    hierarchy.newFrame();
-    inspector.newFrame();
+    ImGui::Begin("Main");
+    ImGui::End();
+
+    ImGui::Begin("List");
+    ImGui::End();
 
     /* Set appropriate states. */
     GL::Renderer::enable(GL::Renderer::Feature::Blending);
@@ -124,7 +120,7 @@ void Editor::drawEvent()
     redraw();
 }
 
-void Editor::viewportEvent(ViewportEvent& event)
+void ProjectManager::viewportEvent(ViewportEvent& event)
 {
     GL::defaultFramebuffer.setViewport({ {}, event.framebufferSize() });
 
@@ -132,37 +128,37 @@ void Editor::viewportEvent(ViewportEvent& event)
         event.windowSize(), event.framebufferSize());
 }
 
-void Editor::keyPressEvent(KeyEvent& event)
+void ProjectManager::keyPressEvent(KeyEvent& event)
 {
     if (_imgui.handleKeyPressEvent(event))
         return;
 }
 
-void Editor::keyReleaseEvent(KeyEvent& event)
+void ProjectManager::keyReleaseEvent(KeyEvent& event)
 {
     if (_imgui.handleKeyReleaseEvent(event))
         return;
 }
 
-void Editor::mousePressEvent(MouseEvent& event)
+void ProjectManager::mousePressEvent(MouseEvent& event)
 {
     if (_imgui.handleMousePressEvent(event))
         return;
 }
 
-void Editor::mouseReleaseEvent(MouseEvent& event)
+void ProjectManager::mouseReleaseEvent(MouseEvent& event)
 {
     if (_imgui.handleMouseReleaseEvent(event))
         return;
 }
 
-void Editor::mouseMoveEvent(MouseMoveEvent& event)
+void ProjectManager::mouseMoveEvent(MouseMoveEvent& event)
 {
     if (_imgui.handleMouseMoveEvent(event))
         return;
 }
 
-void Editor::mouseScrollEvent(MouseScrollEvent& event)
+void ProjectManager::mouseScrollEvent(MouseScrollEvent& event)
 {
     if (_imgui.handleMouseScrollEvent(event)) {
         /* Prevent scrolling the page */
@@ -171,7 +167,7 @@ void Editor::mouseScrollEvent(MouseScrollEvent& event)
     }
 }
 
-void Editor::textInputEvent(TextInputEvent& event)
+void ProjectManager::textInputEvent(TextInputEvent& event)
 {
     if (_imgui.handleTextInputEvent(event))
         return;

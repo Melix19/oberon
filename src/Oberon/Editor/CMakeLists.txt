@@ -33,6 +33,7 @@ set(OberonEditor_SRCS
     Explorer.cpp
     Hierarchy.cpp
     Inspector.cpp
+    ProjectManager.cpp
     
     ${OberonEditor_RCS})
 
@@ -41,7 +42,8 @@ set(OberonEditor_HEADERS
     Editor.hpp
     Explorer.hpp
     Hierarchy.hpp
-    Inspector.hpp)
+    Inspector.hpp
+    ProjectManager.hpp)
 
 add_library(OberonEditor ${SHARED_OR_STATIC}
     ${OberonEditor_SRCS}

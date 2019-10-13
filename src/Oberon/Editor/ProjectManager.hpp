@@ -22,21 +22,33 @@
     SOFTWARE.
 */
 
-#include "Editor/Editor.hpp"
-#include "Editor/ProjectManager.hpp"
+#pragma once
 
-int main(int argc, char** argv)
-{
-    int exit_code;
+#include <Magnum/GL/DefaultFramebuffer.h>
+#include <Magnum/GL/Renderer.h>
+#include <Magnum/ImGuiIntegration/Context.hpp>
+#include <Magnum/Platform/Sdl2Application.h>
+#include <imgui_internal.h>
 
-    {
-        ProjectManager app({ argc, argv });
-        exit_code = app.exec();
-    }
+using namespace Magnum;
 
-    if (exit_code == 0) {
-        Editor app({ argc, argv });
-        return app.exec();
-    } else
-        return exit_code;
-}
+class ProjectManager : public Platform::Application {
+public:
+    explicit ProjectManager(const Arguments& arguments);
+
+private:
+    void drawEvent() override;
+
+    void viewportEvent(ViewportEvent& event) override;
+
+    void keyPressEvent(KeyEvent& event) override;
+    void keyReleaseEvent(KeyEvent& event) override;
+
+    void mousePressEvent(MouseEvent& event) override;
+    void mouseReleaseEvent(MouseEvent& event) override;
+    void mouseMoveEvent(MouseMoveEvent& event) override;
+    void mouseScrollEvent(MouseScrollEvent& event) override;
+    void textInputEvent(TextInputEvent& event) override;
+
+    ImGuiIntegration::Context _imgui{ NoCreate };
+};
