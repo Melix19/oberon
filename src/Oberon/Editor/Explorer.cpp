@@ -39,6 +39,7 @@ FileNode* FileNode::addChild(const std::string& path)
 
 Explorer::Explorer(const std::string& project_path)
     : root_node(project_path)
+    , delete_selected_nodes(false)
 {
     updateFileNodeChildren(&root_node);
 }
@@ -55,6 +56,23 @@ void Explorer::newFrame()
     ImGui::PopStyleVar();
 
     ImGui::End();
+
+    if (delete_selected_nodes) {
+        if (!selected_nodes.empty()) {
+            for (auto& selected_node_ptr : selected_nodes) {
+                auto& parent_children = selected_node_ptr->parent->children;
+                auto found = std::find_if(parent_children.begin(), parent_children.end(), [&](FileNode::Ptr& p) { return p.get() == selected_node_ptr; });
+                assert(found != parent_children.end());
+
+                removeEntireFile((*found)->path);
+                parent_children.erase(found);
+            }
+
+            selected_nodes.clear();
+        }
+
+        delete_selected_nodes = false;
+    }
 }
 
 void Explorer::updateFileNodeChildren(FileNode* node)
@@ -103,19 +121,24 @@ void Explorer::displayFileTree(FileNode* node)
                 selected_nodes.push_back(node);
 
             node->is_selected = !node->is_selected;
-        } else {
-            if (!node->is_selected || ImGui::IsItemClicked(0)) {
-                if (!selected_nodes.empty()) {
-                    for (auto& selected_node : selected_nodes)
-                        selected_node->is_selected = false;
+        } else if (!node->is_selected) {
+            if (!selected_nodes.empty()) {
+                for (auto& selected_node : selected_nodes)
+                    selected_node->is_selected = false;
 
-                    selected_nodes.clear();
-                }
-
-                selected_nodes.push_back(node);
-                node->is_selected = true;
+                selected_nodes.clear();
             }
+
+            selected_nodes.push_back(node);
+            node->is_selected = true;
         }
+    }
+
+    if (ImGui::BeginPopupContextItem()) {
+        if (ImGui::MenuItem("Delete"))
+            delete_selected_nodes = true;
+
+        ImGui::EndPopup();
     }
 
     if (node_open) {
@@ -124,6 +147,20 @@ void Explorer::displayFileTree(FileNode* node)
 
         ImGui::TreePop();
     }
+}
+
+void Explorer::removeEntireFile(const std::string& path)
+{
+    bool is_directory = Utility::Directory::isDirectory(path);
+
+    if (is_directory) {
+        auto file_list = Utility::Directory::list(path, Utility::Directory::Flag::SkipDotAndDotDot);
+
+        for (auto& filename : file_list)
+            removeEntireFile(Utility::Directory::join(path, filename));
+    }
+
+    Utility::Directory::rm(path);
 }
 
 bool Explorer::sortFileNodes(const FileNode::Ptr& a, const FileNode::Ptr& b)

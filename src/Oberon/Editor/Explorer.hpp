@@ -52,9 +52,11 @@ public:
 private:
     void updateFileNodeChildren(FileNode* node);
     void displayFileTree(FileNode* node);
+    void removeEntireFile(const std::string& path);
 
     static bool sortFileNodes(const FileNode::Ptr& a, const FileNode::Ptr& b);
 
     FileNode root_node;
     std::vector<FileNode*> selected_nodes;
+    bool delete_selected_nodes;
 };
