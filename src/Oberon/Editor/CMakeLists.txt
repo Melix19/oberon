@@ -25,17 +25,20 @@
 find_package(ImGui REQUIRED SourcesMiscCpp)
 find_package(Magnum REQUIRED GL Sdl2Application)
 
-corrade_add_resource(OberonEditor_RCS resources.conf)
+set_directory_properties(PROPERTIES CORRADE_USE_PEDANTIC_FLAGS ON)
 
-set(OberonEditor_SRCS
+corrade_add_resource(OberonEditor_RESOURCES resources.conf)
+
+set(OberonEditor_SOURCES
     Console.cpp
     Editor.cpp
     Explorer.cpp
     Hierarchy.cpp
     Inspector.cpp
+    Oberon.cpp
     ProjectManager.cpp
     
-    ${OberonEditor_RCS})
+    ${OberonEditor_RESOURCES})
 
 set(OberonEditor_HEADERS
     Console.hpp
@@ -45,16 +48,14 @@ set(OberonEditor_HEADERS
     Inspector.hpp
     ProjectManager.hpp)
 
-add_library(OberonEditor ${SHARED_OR_STATIC}
-    ${OberonEditor_SRCS}
+add_executable(Oberon
+    ${OberonEditor_SOURCES}
     ${OberonEditor_HEADERS})
 
-target_link_libraries(OberonEditor PUBLIC
+target_link_libraries(Oberon PRIVATE
     ImGui::SourcesMiscCpp
     Magnum::Application
     Magnum::GL
     Magnum::Magnum
     MagnumIntegration::ImGui
     portable_file_dialogs)
-
-add_library(Oberon::Editor ALIAS OberonEditor)

@@ -28,12 +28,4 @@ project(Oberon CXX)
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/modules/" ${CMAKE_MODULE_PATH})
 
-option(BUILD_STATIC "Build static libraries (default are shared)" OFF)
-
-if(NOT BUILD_STATIC)
-    set(SHARED_OR_STATIC SHARED)
-else()
-    set(SHARED_OR_STATIC STATIC)
-endif()
-
 add_subdirectory(src)

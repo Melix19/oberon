@@ -22,8 +22,8 @@
     SOFTWARE.
 */
 
-#include "Editor/Editor.hpp"
-#include "Editor/ProjectManager.hpp"
+#include "Editor.hpp"
+#include "ProjectManager.hpp"
 
 int main(int argc, char** argv)
 {

@@ -23,7 +23,3 @@
 #
 
 add_subdirectory(Editor)
-
-add_executable(Oberon Oberon.cpp)
-target_link_libraries(Oberon PRIVATE
-    Oberon::Editor)
