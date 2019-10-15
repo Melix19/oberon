@@ -48,7 +48,7 @@ set(OberonEditor_HEADERS
     Inspector.hpp
     ProjectManager.hpp)
 
-add_executable(Oberon
+add_executable(Oberon MACOSX_BUNDLE
     ${OberonEditor_SOURCES}
     ${OberonEditor_HEADERS})
 
@@ -59,3 +59,13 @@ target_link_libraries(Oberon PRIVATE
     Magnum::Magnum
     MagnumIntegration::ImGui
     portable_file_dialogs)
+
+if(CORRADE_TARGET_APPLE)
+    set_target_properties(Oberon PROPERTIES
+        MACOSX_BUNDLE ON
+        MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/Resources/MacOSXBundleInfo.plist.in
+        XCODE_ATTRIBUTE_CODE_SIGNING_REQUIRED "YES")
+endif()
+
+# Make the executable a default target to build & run in Visual Studio
+set_property(DIRECTORY ${PROJECT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT Oberon)
