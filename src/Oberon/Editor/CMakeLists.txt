@@ -37,7 +37,7 @@ set(OberonEditor_SOURCES
     Inspector.cpp
     Oberon.cpp
     ProjectManager.cpp
-    
+
     ${OberonEditor_RESOURCES})
 
 set(OberonEditor_HEADERS
@@ -58,6 +58,7 @@ target_link_libraries(Oberon PRIVATE
     Magnum::GL
     Magnum::Magnum
     MagnumIntegration::ImGui
+    Oberon::Core
     portable_file_dialogs)
 
 if(CORRADE_TARGET_APPLE)

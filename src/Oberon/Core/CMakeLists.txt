@@ -22,5 +22,22 @@
 #   SOFTWARE.
 #
 
-add_subdirectory(Core)
-add_subdirectory(Editor)
+find_package(Magnum REQUIRED SceneGraph)
+
+set_directory_properties(PROPERTIES CORRADE_USE_PEDANTIC_FLAGS ON)
+
+set(OberonCore_SOURCES
+    GameObject.cpp)
+
+set(OberonCore_HEADERS
+    GameObject.hpp)
+
+add_library(OberonCore
+    ${OberonCore_SOURCES}
+    ${OberonCore_HEADERS})
+
+target_link_libraries(OberonCore PRIVATE
+    Magnum::SceneGraph)
+
+# Oberon Core library for superprojects
+add_library(Oberon::Core ALIAS OberonCore)
