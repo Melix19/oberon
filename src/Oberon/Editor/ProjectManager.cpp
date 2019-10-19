@@ -108,7 +108,7 @@ void ProjectManager::drawEvent()
 
         if (!project_path.empty()) {
             project_path.pop_back();
-            Platform::Sdl2Application::exit();
+            exit();
         }
     }
 
@@ -119,7 +119,7 @@ void ProjectManager::drawEvent()
 
         if (!project_path.empty()) {
             project_path.pop_back();
-            Platform::Sdl2Application::exit();
+            exit();
         }
     }
 
