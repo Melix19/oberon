@@ -11,8 +11,6 @@
 #
 #  SDL2_LIBRARY_DEBUG       - SDL2 debug library, if found
 #  SDL2_LIBRARY_RELEASE     - SDL2 release library, if found
-#  SDL2_DLL_DEBUG           - SDL2 debug DLL on Windows, if found
-#  SDL2_DLL_RELEASE         - SDL2 release DLL on Windows, if found
 #  SDL2_INCLUDE_DIR         - Root include dir
 #
 
@@ -47,33 +45,11 @@
 if(CORRADE_TARGET_EMSCRIPTEN)
     set(_SDL2_PATH_SUFFIXES SDL)
 else()
-    set(_SDL2_PATH_SUFFIXES SDL2)
-    if(WIN32)
-        # Precompiled libraries for MSVC are in x86/x64 subdirectories
-        if(MSVC)
-            if(CMAKE_SIZEOF_VOID_P EQUAL 8)
-                set(_SDL2_LIBRARY_PATH_SUFFIX lib/x64)
-            elseif(CMAKE_SIZEOF_VOID_P EQUAL 4)
-                set(_SDL2_LIBRARY_PATH_SUFFIX lib/x86)
-            endif()
-
-        # Both includes and libraries for MinGW are in some directory deep
-        # inside. There's also a CMake config file but it has HARDCODED path
-        # to /opt/local/i686-w64-mingw32, which doesn't make ANY SENSE,
-        # especially on Windows.
-        elseif(MINGW)
-            if(CMAKE_SIZEOF_VOID_P EQUAL 8)
-                set(_SDL2_LIBRARY_PATH_SUFFIX x86_64-w64-mingw32/lib)
-                set(_SDL2_RUNTIME_PATH_SUFFIX x86_64-w64-mingw32/bin)
-                list(APPEND _SDL2_PATH_SUFFIXES x86_64-w64-mingw32/include/SDL2)
-            elseif(CMAKE_SIZEOF_VOID_P EQUAL 4)
-                set(_SDL2_LIBRARY_PATH_SUFFIX i686-w64-mingw32/lib)
-                set(_SDL2_RUNTIME_PATH_SUFFIX i686-w64-mingw32/lib)
-                list(APPEND _SDL2_PATH_SUFFIXES i686-w64-mingw32/include/SDL2)
-            endif()
-        else()
-            message(FATAL_ERROR "Unsupported compiler")
-        endif()
+    # Precompiled libraries for Windows are in x86/x64 subdirectories
+    if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+        set(_SDL_LIBRARY_PATH_SUFFIX lib/x64)
+    elseif(CMAKE_SIZEOF_VOID_P EQUAL 4)
+        set(_SDL_LIBRARY_PATH_SUFFIX lib/x86)
     endif()
 
     find_library(SDL2_LIBRARY_RELEASE
@@ -82,14 +58,15 @@ else()
         # the dylib first so it is preferred. Not sure how this maps to debug
         # config though :/
         NAMES SDL2-2.0 SDL2
-        PATH_SUFFIXES ${_SDL2_LIBRARY_PATH_SUFFIX})
+        PATH_SUFFIXES ${_SDL_LIBRARY_PATH_SUFFIX})
     find_library(SDL2_LIBRARY_DEBUG
         NAMES SDL2d
-        PATH_SUFFIXES ${_SDL2_LIBRARY_PATH_SUFFIX})
+        PATH_SUFFIXES ${_SDL_LIBRARY_PATH_SUFFIX})
     # FPHSA needs one of the _DEBUG/_RELEASE variables to check that the
     # library was found -- using SDL_LIBRARY, which will get populated by
     # select_library_configurations() below.
     set(SDL2_LIBRARY_NEEDED SDL2_LIBRARY)
+    set(_SDL2_PATH_SUFFIXES SDL2)
 endif()
 
 include(SelectLibraryConfigurations)
@@ -106,16 +83,6 @@ find_path(SDL2_INCLUDE_DIR
     # find SDL.framework/Headers/SDL.h if SDL1 is installed, which is wrong.
     NAMES SDL_scancode.h
     PATH_SUFFIXES ${_SDL2_PATH_SUFFIXES})
-
-# DLL on Windows
-if(CORRADE_TARGET_WINDOWS)
-    find_file(SDL2_DLL_RELEASE
-        NAMES SDL2.dll
-        PATH_SUFFIXES ${_SDL2_RUNTIME_PATH_SUFFIX} ${_SDL2_LIBRARY_PATH_SUFFIX})
-    find_file(SDL2_DLL_DEBUG
-        NAMES SDL2d.dll # not sure?
-        PATH_SUFFIXES ${_SDL2_RUNTIME_PATH_SUFFIX} ${_SDL2_LIBRARY_PATH_SUFFIX})
-endif()
 
 # iOS dependencies
 if(CORRADE_TARGET_IOS)

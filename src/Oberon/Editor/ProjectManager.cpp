@@ -146,8 +146,7 @@ void ProjectManager::viewportEvent(ViewportEvent& event)
 {
     GL::defaultFramebuffer.setViewport({ {}, event.framebufferSize() });
 
-    imgui.relayout(Vector2{ event.windowSize() } / event.dpiScaling(),
-        event.windowSize(), event.framebufferSize());
+    imgui.relayout(Vector2{ event.windowSize() } / event.dpiScaling(), event.windowSize(), event.framebufferSize());
 }
 
 void ProjectManager::keyPressEvent(KeyEvent& event)
