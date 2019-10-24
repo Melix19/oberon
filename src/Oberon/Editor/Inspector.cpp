@@ -40,10 +40,10 @@ void Inspector::newFrame()
         ImGui::Text("Position");
         ImGui::SameLine(COLUMN_WIDTH);
         ImGui::SetNextItemWidth(-1);
-        ImVec2 position = ImVec2(entity_node_ptr->j_value["position"][0].GetFloat(), entity_node_ptr->j_value["position"][1].GetFloat());
-        ImGui::DragFloat2("##Position", (float*)&position, 0.5f);
-        entity_node_ptr->j_value["position"][0] = position.x;
-        entity_node_ptr->j_value["position"][1] = position.y;
+        float position[2] = { entity_node_ptr->j_value["position"][0].GetFloat(), entity_node_ptr->j_value["position"][1].GetFloat() };
+        ImGui::DragFloat2("##Position", position, 0.5f);
+        entity_node_ptr->j_value["position"][0] = position[0];
+        entity_node_ptr->j_value["position"][1] = position[1];
 
         // Rotation
         ImGui::AlignTextToFramePadding();
@@ -59,10 +59,10 @@ void Inspector::newFrame()
         ImGui::Text("Scale");
         ImGui::SameLine(COLUMN_WIDTH);
         ImGui::SetNextItemWidth(-1);
-        ImVec2 scale = ImVec2(entity_node_ptr->j_value["scale"][0].GetFloat(), entity_node_ptr->j_value["scale"][1].GetFloat());
-        ImGui::DragFloat2("##Scale", (float*)&scale, 0.005f);
-        entity_node_ptr->j_value["scale"][0] = scale.x;
-        entity_node_ptr->j_value["scale"][1] = scale.y;
+        float scale[2] = { entity_node_ptr->j_value["scale"][0].GetFloat(), entity_node_ptr->j_value["scale"][1].GetFloat() };
+        ImGui::DragFloat2("##Scale", scale, 0.005f);
+        entity_node_ptr->j_value["scale"][0] = scale[0];
+        entity_node_ptr->j_value["scale"][1] = scale[1];
     }
 
     ImGui::End();
