@@ -98,7 +98,7 @@ endif()
 set(MAGNUMINTEGRATION_CMAKE_MODULE_INSTALL_DIR share/cmake/MagnumIntegration)
 
 # Library version
-set(MAGNUM_LIBRARY_VERSION 2.2)
+set(MAGNUM_LIBRARY_VERSION 2.3)
 set(MAGNUM_LIBRARY_SOVERSION 2)
 
 # A single output location. After a decade of saying NO THIS IS A NON-SOLUTION
@@ -126,7 +126,7 @@ set(MAGNUM_LIBRARY_SOVERSION 2)
 # <CONFIG>/lib/magnum/importers/ instead of lib/magnum/importers/<CONFIG>. Also
 # adding this to cache, making superprojects pick that up implicitly as well,
 # without forcing them to explicitly mirror this setting.
-if(NOT DEFINED CMAKE_RUNTIME_OUTPUT_DIRECTORY)
+if(NOT DEFINED CMAKE_RUNTIME_OUTPUT_DIRECTORY AND NOT DEFINED CMAKE_LIBRARY_OUTPUT_DIRECTORY AND NOT DEFINED CMAKE_ARCHIVE_OUTPUT_DIRECTORY)
     set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/$<CONFIG>/bin CACHE PATH "" FORCE)
     set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/$<CONFIG>/lib CACHE PATH "" FORCE)
     set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/$<CONFIG>/lib CACHE PATH "" FORCE)
