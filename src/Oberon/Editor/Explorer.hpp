@@ -24,6 +24,7 @@
 
 #pragma once
 
+#include <Corrade/Containers/Pointer.h>
 #include <Corrade/Utility/Directory.h>
 #include <imgui.h>
 #include <misc/cpp/imgui_stdlib.h>
@@ -32,15 +33,13 @@
 using namespace Corrade;
 
 struct FileNode {
-    typedef std::unique_ptr<FileNode> Ptr;
-
     FileNode(const std::string& path, FileNode* parent = nullptr);
     FileNode* addChild(const std::string& path = "");
 
     std::string path;
 
     FileNode* parent;
-    std::vector<Ptr> children;
+    std::vector<Containers::Pointer<FileNode>> children;
     bool is_selected;
 };
 
@@ -56,7 +55,7 @@ private:
     void displayFileTree(FileNode* node);
     void removeEntireFile(const std::string& path);
 
-    static bool sortFileNodes(const FileNode::Ptr& a, const FileNode::Ptr& b);
+    static bool sortFileNodes(const Containers::Pointer<FileNode>& a, const Containers::Pointer<FileNode>& b);
 
     FileNode root_node;
     std::vector<FileNode*> selected_nodes;

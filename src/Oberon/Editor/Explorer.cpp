@@ -33,7 +33,7 @@ FileNode::FileNode(const std::string& path, FileNode* parent)
 
 FileNode* FileNode::addChild(const std::string& path)
 {
-    children.push_back(std::make_unique<FileNode>(path, this));
+    children.push_back(Containers::pointer<FileNode>(path, this));
     return children.back().get();
 }
 
@@ -64,7 +64,7 @@ void Explorer::newFrame()
         if (!selected_nodes.empty()) {
             for (auto& selected_node : selected_nodes) {
                 auto& parent_children = selected_node->parent->children;
-                auto found = std::find_if(parent_children.begin(), parent_children.end(), [&](FileNode::Ptr& p) { return p.get() == selected_node; });
+                auto found = std::find_if(parent_children.begin(), parent_children.end(), [&](Containers::Pointer<FileNode>& p) { return p.get() == selected_node; });
                 assert(found != parent_children.end());
 
                 removeEntireFile((*found)->path);
@@ -169,7 +169,7 @@ void Explorer::removeEntireFile(const std::string& path)
     Utility::Directory::rm(path);
 }
 
-bool Explorer::sortFileNodes(const FileNode::Ptr& a, const FileNode::Ptr& b)
+bool Explorer::sortFileNodes(const Containers::Pointer<FileNode>& a, const Containers::Pointer<FileNode>& b)
 {
     bool a_is_directory = Utility::Directory::isDirectory(a->path);
     bool b_is_directory = Utility::Directory::isDirectory(b->path);

@@ -114,12 +114,12 @@ void Editor::drawEvent()
         std::string extension = Utility::Directory::splitExtension(path).second;
 
         if (extension == ".col") {
-            auto panel_found = std::find_if(collection_panels.begin(), collection_panels.end(), [&](std::unique_ptr<CollectionPanel>& p) { return p->path == path; });
+            auto panel_found = std::find_if(collection_panels.begin(), collection_panels.end(), [&](Containers::Pointer<CollectionPanel>& p) { return p->path == path; });
 
             if (panel_found != collection_panels.end())
                 (*panel_found)->needs_focus = true;
             else
-                collection_panels.push_back(std::make_unique<CollectionPanel>(path));
+                collection_panels.push_back(Containers::pointer<CollectionPanel>(path));
         }
     }
 

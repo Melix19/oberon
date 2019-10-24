@@ -63,5 +63,5 @@ private:
     Hierarchy hierarchy;
     Inspector inspector;
 
-    std::vector<std::unique_ptr<CollectionPanel>> collection_panels;
+    std::vector<Containers::Pointer<CollectionPanel>> collection_panels;
 };
