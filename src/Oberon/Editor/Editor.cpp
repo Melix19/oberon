@@ -109,8 +109,8 @@ void Editor::drawEvent()
     console.newFrame();
     explorer.newFrame();
 
-    if (explorer.clicked_node) {
-        std::string path = explorer.clicked_node->path;
+    if (explorer.clicked_node_ptr) {
+        std::string path = explorer.clicked_node_ptr->path;
         std::string extension = Utility::Directory::splitExtension(path).second;
 
         if (extension == ".col") {
@@ -131,9 +131,12 @@ void Editor::drawEvent()
 
         (*panel_it)->newFrame();
 
-        if ((*panel_it)->is_open)
+        if ((*panel_it)->is_open) {
+            if ((*panel_it)->is_focused)
+                hierarchy.root_node_ptr = (*panel_it)->root_node.get();
+
             ++panel_it;
-        else
+        } else
             panel_it = collection_panels.erase(panel_it);
     }
 

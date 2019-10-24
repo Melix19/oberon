@@ -24,21 +24,23 @@
 
 #include "Explorer.hpp"
 
-FileNode::FileNode(const std::string& path, FileNode* parent)
+FileNode::FileNode(const std::string& path)
     : path(path)
-    , parent(parent)
     , is_selected(false)
 {
 }
 
 FileNode* FileNode::addChild(const std::string& path)
 {
-    children.push_back(Containers::pointer<FileNode>(path, this));
+    auto child = Containers::pointer<FileNode>(path);
+    child->parent = this;
+
+    children.push_back(std::move(child));
     return children.back().get();
 }
 
 Explorer::Explorer(const std::string& project_path)
-    : clicked_node(nullptr)
+    : clicked_node_ptr(nullptr)
     , root_node(project_path)
     , delete_selected_nodes(false)
 {
@@ -47,7 +49,7 @@ Explorer::Explorer(const std::string& project_path)
 
 void Explorer::newFrame()
 {
-    clicked_node = nullptr;
+    clicked_node_ptr = nullptr;
 
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
     ImGui::Begin("Explorer");
@@ -78,29 +80,29 @@ void Explorer::newFrame()
     }
 }
 
-void Explorer::updateFileNodeChildren(FileNode* node)
+void Explorer::updateFileNodeChildren(FileNode* node_ptr)
 {
-    auto file_list = Utility::Directory::list(node->path, Utility::Directory::Flag::SkipDotAndDotDot);
+    auto file_list = Utility::Directory::list(node_ptr->path, Utility::Directory::Flag::SkipDotAndDotDot);
 
     for (auto& filename : file_list) {
-        bool is_directory = Utility::Directory::isDirectory(node->path);
-        std::string child_path = Utility::Directory::join(node->path, filename);
-        FileNode* child_node = node->addChild(child_path);
+        bool is_directory = Utility::Directory::isDirectory(node_ptr->path);
+        std::string child_path = Utility::Directory::join(node_ptr->path, filename);
+        FileNode* child_node = node_ptr->addChild(child_path);
 
         if (is_directory)
             updateFileNodeChildren(child_node);
     }
 
-    std::sort(node->children.begin(), node->children.end(), sortFileNodes);
+    std::sort(node_ptr->children.begin(), node_ptr->children.end(), sortFileNodes);
 }
 
-void Explorer::displayFileTree(FileNode* node)
+void Explorer::displayFileTree(FileNode* node_ptr)
 {
     ImGuiTreeNodeFlags node_flags = ImGuiTreeNodeFlags_FramePadding | ImGuiTreeNodeFlags_SpanFullWidth;
-    std::string node_name = Utility::Directory::filename(node->path);
-    bool is_directory = Utility::Directory::isDirectory(node->path);
+    std::string node_name = Utility::Directory::filename(node_ptr->path);
+    bool is_directory = Utility::Directory::isDirectory(node_ptr->path);
 
-    if (node->is_selected)
+    if (node_ptr->is_selected)
         node_flags |= ImGuiTreeNodeFlags_Selected;
 
     if (!is_directory)
@@ -115,16 +117,16 @@ void Explorer::displayFileTree(FileNode* node)
         const bool is_shortcut_key = (io.ConfigMacOSXBehaviors ? (io.KeySuper && !io.KeyCtrl) : (io.KeyCtrl && !io.KeySuper)) && !io.KeyAlt && !io.KeyShift;
 
         if (is_shortcut_key && ImGui::IsItemClicked(0)) {
-            if (node->is_selected) {
-                auto found = std::find_if(selected_nodes.begin(), selected_nodes.end(), [&](FileNode* p) { return p == node; });
+            if (node_ptr->is_selected) {
+                auto found = std::find_if(selected_nodes.begin(), selected_nodes.end(), [&](FileNode* p) { return p == node_ptr; });
                 assert(found != selected_nodes.end());
 
                 selected_nodes.erase(found);
             } else
-                selected_nodes.push_back(node);
+                selected_nodes.push_back(node_ptr);
 
-            node->is_selected = !node->is_selected;
-        } else if (!node->is_selected) {
+            node_ptr->is_selected = !node_ptr->is_selected;
+        } else if (!node_ptr->is_selected) {
             if (!selected_nodes.empty()) {
                 for (auto& selected_node : selected_nodes)
                     selected_node->is_selected = false;
@@ -132,11 +134,11 @@ void Explorer::displayFileTree(FileNode* node)
                 selected_nodes.clear();
             }
 
-            selected_nodes.push_back(node);
-            node->is_selected = true;
+            selected_nodes.push_back(node_ptr);
+            node_ptr->is_selected = true;
 
             if (ImGui::IsItemClicked(0))
-                clicked_node = node;
+                clicked_node_ptr = node_ptr;
         }
     }
 
@@ -148,7 +150,7 @@ void Explorer::displayFileTree(FileNode* node)
     }
 
     if (node_open) {
-        for (auto& child : node->children)
+        for (auto& child : node_ptr->children)
             displayFileTree(child.get());
 
         ImGui::TreePop();

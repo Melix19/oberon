@@ -24,12 +24,34 @@
 
 #include "CollectionPanel.hpp"
 
+EntityNode::EntityNode(Value& j_value)
+    : j_value(j_value)
+    , is_selected(false)
+{
+}
+
+EntityNode* EntityNode::addChild(Value& j_value)
+{
+    auto child = Containers::pointer<EntityNode>(j_value);
+    child->parent = this;
+
+    children.push_back(std::move(child));
+    return children.back().get();
+}
+
 CollectionPanel::CollectionPanel(const std::string& path)
     : path(path)
     , is_open(true)
+    , is_focused(false)
     , needs_focus(true)
     , needs_docking(true)
 {
+    std::string json = Utility::Directory::readString(path);
+    j_document.Parse(json.c_str());
+
+    root_node = Containers::pointer<EntityNode>(j_document);
+
+    updateEntityNodeChildren(root_node.get());
 }
 
 void CollectionPanel::newFrame()
@@ -43,5 +65,20 @@ void CollectionPanel::newFrame()
 
     ImGui::Begin(filename.c_str(), &is_open);
 
+    is_focused = ImGui::IsWindowFocused();
+
     ImGui::End();
+}
+
+void CollectionPanel::updateEntityNodeChildren(EntityNode* node)
+{
+    auto j_children = node->j_value["children"].GetArray();
+
+    for (auto& j_child : j_children) {
+        bool has_children = j_children.Empty();
+        EntityNode* child_node = node->addChild(j_child);
+
+        if (has_children)
+            updateEntityNodeChildren(child_node);
+    }
 }

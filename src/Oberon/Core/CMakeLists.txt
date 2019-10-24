@@ -36,7 +36,7 @@ add_library(OberonCore
     ${OberonCore_SOURCES}
     ${OberonCore_HEADERS})
 
-target_include_directories(OberonCore PRIVATE
+target_include_directories(OberonCore PUBLIC
     "${CMAKE_CURRENT_SOURCE_DIR}/../../OberonExternal/rapidjson/")
 
 target_link_libraries(OberonCore PRIVATE

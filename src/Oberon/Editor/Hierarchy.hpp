@@ -24,9 +24,19 @@
 
 #pragma once
 
-#include <imgui.h>
+#include "CollectionPanel.hpp"
 
 class Hierarchy {
 public:
+    Hierarchy();
     void newFrame();
+
+    EntityNode* root_node_ptr;
+    EntityNode* clicked_node_ptr;
+
+private:
+    void displayEntityTree(EntityNode* node_ptr);
+
+    std::vector<EntityNode*> selected_nodes;
+    bool delete_selected_nodes;
 };

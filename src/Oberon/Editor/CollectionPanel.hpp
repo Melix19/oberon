@@ -24,20 +24,42 @@
 
 #pragma once
 
+#include <Corrade/Containers/Pointer.h>
 #include <Corrade/Utility/Directory.h>
+#include <document.h>
 #include <imgui.h>
 #include <string>
+#include <vector>
 
 using namespace Corrade;
+using namespace rapidjson;
+
+struct EntityNode {
+    EntityNode(Value& j_value);
+    EntityNode* addChild(Value& j_value);
+
+    Value& j_value;
+    bool is_selected;
+
+    EntityNode* parent;
+    std::vector<Containers::Pointer<EntityNode>> children;
+};
 
 class CollectionPanel {
 public:
     CollectionPanel(const std::string& path);
     void newFrame();
 
+    Containers::Pointer<EntityNode> root_node;
     std::string path;
 
     bool is_open;
+    bool is_focused;
     bool needs_focus;
     bool needs_docking;
+
+private:
+    void updateEntityNodeChildren(EntityNode* node);
+
+    Document j_document;
 };

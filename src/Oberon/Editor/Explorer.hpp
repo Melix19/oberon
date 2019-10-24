@@ -33,14 +33,14 @@
 using namespace Corrade;
 
 struct FileNode {
-    FileNode(const std::string& path, FileNode* parent = nullptr);
-    FileNode* addChild(const std::string& path = "");
+    FileNode(const std::string& path);
+    FileNode* addChild(const std::string& path);
 
     std::string path;
+    bool is_selected;
 
     FileNode* parent;
     std::vector<Containers::Pointer<FileNode>> children;
-    bool is_selected;
 };
 
 class Explorer {
@@ -48,11 +48,11 @@ public:
     Explorer(const std::string& project_path);
     void newFrame();
 
-    FileNode* clicked_node;
+    FileNode* clicked_node_ptr;
 
 private:
-    void updateFileNodeChildren(FileNode* node);
-    void displayFileTree(FileNode* node);
+    void updateFileNodeChildren(FileNode* node_ptr);
+    void displayFileTree(FileNode* node_ptr);
     void removeEntireFile(const std::string& path);
 
     static bool sortFileNodes(const Containers::Pointer<FileNode>& a, const Containers::Pointer<FileNode>& b);
