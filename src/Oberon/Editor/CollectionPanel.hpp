@@ -37,6 +37,7 @@ public:
 
     std::string path;
 
+    bool is_open;
     bool needs_focus;
     bool needs_docking;
 };

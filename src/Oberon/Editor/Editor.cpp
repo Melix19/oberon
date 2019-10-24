@@ -131,7 +131,10 @@ void Editor::drawEvent()
 
         (*panel_it)->newFrame();
 
-        ++panel_it;
+        if ((*panel_it)->is_open)
+            ++panel_it;
+        else
+            panel_it = collection_panels.erase(panel_it);
     }
 
     hierarchy.newFrame();

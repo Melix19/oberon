@@ -26,6 +26,7 @@
 
 CollectionPanel::CollectionPanel(const std::string& path)
     : path(path)
+    , is_open(true)
     , needs_focus(true)
     , needs_docking(true)
 {
@@ -40,7 +41,7 @@ void CollectionPanel::newFrame()
 
     std::string filename = Utility::Directory::filename(path);
 
-    ImGui::Begin(filename.c_str());
+    ImGui::Begin(filename.c_str(), &is_open);
 
     ImGui::End();
 }
