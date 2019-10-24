@@ -141,6 +141,10 @@ void Editor::drawEvent()
     }
 
     hierarchy.newFrame();
+
+    if (hierarchy.clicked_node_ptr)
+        inspector.entity_node_ptr = hierarchy.clicked_node_ptr;
+
     inspector.newFrame();
 
     /* Set appropriate states. */

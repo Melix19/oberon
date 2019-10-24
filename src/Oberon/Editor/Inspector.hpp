@@ -24,9 +24,15 @@
 
 #pragma once
 
-#include <imgui.h>
+#include "CollectionPanel.hpp"
 
 class Inspector {
 public:
+    Inspector();
     void newFrame();
+
+    EntityNode* entity_node_ptr;
+
+private:
+    const int COLUMN_WIDTH;
 };
