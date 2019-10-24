@@ -24,44 +24,19 @@
 
 #pragma once
 
-#include "CollectionPanel.hpp"
-#include "Console.hpp"
-#include "Explorer.hpp"
-#include "Hierarchy.hpp"
-#include "Inspector.hpp"
+#include <Corrade/Utility/Directory.h>
+#include <imgui.h>
+#include <string>
 
-#include <Magnum/GL/DefaultFramebuffer.h>
-#include <Magnum/GL/Renderer.h>
-#include <Magnum/ImGuiIntegration/Context.hpp>
-#include <Magnum/Platform/Sdl2Application.h>
-#include <imgui_internal.h>
+using namespace Corrade;
 
-using namespace Magnum;
-
-class Editor : public Platform::Application {
+class CollectionPanel {
 public:
-    explicit Editor(const Arguments& arguments, const std::string& project_path);
+    CollectionPanel(const std::string& path);
+    void newFrame();
 
-private:
-    void drawEvent() override;
+    std::string path;
 
-    void viewportEvent(ViewportEvent& event) override;
-
-    void keyPressEvent(KeyEvent& event) override;
-    void keyReleaseEvent(KeyEvent& event) override;
-
-    void mousePressEvent(MouseEvent& event) override;
-    void mouseReleaseEvent(MouseEvent& event) override;
-    void mouseMoveEvent(MouseMoveEvent& event) override;
-    void mouseScrollEvent(MouseScrollEvent& event) override;
-    void textInputEvent(TextInputEvent& event) override;
-
-    ImGuiIntegration::Context imgui{ NoCreate };
-
-    Console console;
-    Explorer explorer;
-    Hierarchy hierarchy;
-    Inspector inspector;
-
-    std::vector<std::unique_ptr<CollectionPanel>> collection_panels;
+    bool needs_focus;
+    bool needs_docking;
 };

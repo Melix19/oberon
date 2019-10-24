@@ -22,19 +22,10 @@
     SOFTWARE.
 */
 
-#pragma once
+#include "Entity.hpp"
 
-#include <Magnum/SceneGraph/TranslationRotationScalingTransformation2D.h>
-#include <string>
-
-using namespace Magnum;
-
-typedef SceneGraph::Object<SceneGraph::TranslationRotationScalingTransformation2D> Object2D;
-typedef SceneGraph::Scene<SceneGraph::TranslationRotationScalingTransformation2D> Scene2D;
-
-class GameObject : public Object2D {
-public:
-    explicit GameObject(const std::string& name, Object2D* parent);
-
-    std::string name;
-};
+Entity::Entity(const std::string& name, Object2D* parent)
+    : Object2D{ parent }
+    , name(name)
+{
+}

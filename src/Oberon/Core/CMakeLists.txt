@@ -27,14 +27,17 @@ find_package(Magnum REQUIRED SceneGraph)
 set_directory_properties(PROPERTIES CORRADE_USE_PEDANTIC_FLAGS ON)
 
 set(OberonCore_SOURCES
-    GameObject.cpp)
+    Entity.cpp)
 
 set(OberonCore_HEADERS
-    GameObject.hpp)
+    Entity.hpp)
 
 add_library(OberonCore
     ${OberonCore_SOURCES}
     ${OberonCore_HEADERS})
+
+target_include_directories(OberonCore PRIVATE
+    "${CMAKE_CURRENT_SOURCE_DIR}/../../OberonExternal/rapidjson/")
 
 target_link_libraries(OberonCore PRIVATE
     Magnum::SceneGraph)

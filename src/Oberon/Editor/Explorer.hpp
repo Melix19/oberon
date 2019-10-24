@@ -49,6 +49,8 @@ public:
     Explorer(const std::string& project_path);
     void newFrame();
 
+    FileNode* clicked_node;
+
 private:
     void updateFileNodeChildren(FileNode* node);
     void displayFileTree(FileNode* node);

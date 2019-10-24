@@ -38,7 +38,8 @@ FileNode* FileNode::addChild(const std::string& path)
 }
 
 Explorer::Explorer(const std::string& project_path)
-    : root_node(project_path)
+    : clicked_node(nullptr)
+    , root_node(project_path)
     , delete_selected_nodes(false)
 {
     updateFileNodeChildren(&root_node);
@@ -46,6 +47,8 @@ Explorer::Explorer(const std::string& project_path)
 
 void Explorer::newFrame()
 {
+    clicked_node = nullptr;
+
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
     ImGui::Begin("Explorer");
     ImGui::PopStyleVar();
@@ -59,9 +62,9 @@ void Explorer::newFrame()
 
     if (delete_selected_nodes) {
         if (!selected_nodes.empty()) {
-            for (auto& selected_node_ptr : selected_nodes) {
-                auto& parent_children = selected_node_ptr->parent->children;
-                auto found = std::find_if(parent_children.begin(), parent_children.end(), [&](FileNode::Ptr& p) { return p.get() == selected_node_ptr; });
+            for (auto& selected_node : selected_nodes) {
+                auto& parent_children = selected_node->parent->children;
+                auto found = std::find_if(parent_children.begin(), parent_children.end(), [&](FileNode::Ptr& p) { return p.get() == selected_node; });
                 assert(found != parent_children.end());
 
                 removeEntireFile((*found)->path);
@@ -131,6 +134,9 @@ void Explorer::displayFileTree(FileNode* node)
 
             selected_nodes.push_back(node);
             node->is_selected = true;
+
+            if (ImGui::IsItemClicked(0))
+                clicked_node = node;
         }
     }
 

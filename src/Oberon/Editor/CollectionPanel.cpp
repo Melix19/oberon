@@ -22,46 +22,25 @@
     SOFTWARE.
 */
 
-#pragma once
-
 #include "CollectionPanel.hpp"
-#include "Console.hpp"
-#include "Explorer.hpp"
-#include "Hierarchy.hpp"
-#include "Inspector.hpp"
 
-#include <Magnum/GL/DefaultFramebuffer.h>
-#include <Magnum/GL/Renderer.h>
-#include <Magnum/ImGuiIntegration/Context.hpp>
-#include <Magnum/Platform/Sdl2Application.h>
-#include <imgui_internal.h>
+CollectionPanel::CollectionPanel(const std::string& path)
+    : path(path)
+    , needs_focus(true)
+    , needs_docking(true)
+{
+}
 
-using namespace Magnum;
+void CollectionPanel::newFrame()
+{
+    if (needs_focus) {
+        ImGui::SetNextWindowFocus();
+        needs_focus = false;
+    }
 
-class Editor : public Platform::Application {
-public:
-    explicit Editor(const Arguments& arguments, const std::string& project_path);
+    std::string filename = Utility::Directory::filename(path);
 
-private:
-    void drawEvent() override;
+    ImGui::Begin(filename.c_str());
 
-    void viewportEvent(ViewportEvent& event) override;
-
-    void keyPressEvent(KeyEvent& event) override;
-    void keyReleaseEvent(KeyEvent& event) override;
-
-    void mousePressEvent(MouseEvent& event) override;
-    void mouseReleaseEvent(MouseEvent& event) override;
-    void mouseMoveEvent(MouseMoveEvent& event) override;
-    void mouseScrollEvent(MouseScrollEvent& event) override;
-    void textInputEvent(TextInputEvent& event) override;
-
-    ImGuiIntegration::Context imgui{ NoCreate };
-
-    Console console;
-    Explorer explorer;
-    Hierarchy hierarchy;
-    Inspector inspector;
-
-    std::vector<std::unique_ptr<CollectionPanel>> collection_panels;
-};
+    ImGui::End();
+}

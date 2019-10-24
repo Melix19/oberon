@@ -108,6 +108,32 @@ void Editor::drawEvent()
 
     console.newFrame();
     explorer.newFrame();
+
+    if (explorer.clicked_node) {
+        std::string path = explorer.clicked_node->path;
+        std::string extension = Utility::Directory::splitExtension(path).second;
+
+        if (extension == ".col") {
+            auto panel_found = std::find_if(collection_panels.begin(), collection_panels.end(), [&](std::unique_ptr<CollectionPanel>& p) { return p->path == path; });
+
+            if (panel_found != collection_panels.end())
+                (*panel_found)->needs_focus = true;
+            else
+                collection_panels.push_back(std::make_unique<CollectionPanel>(path));
+        }
+    }
+
+    for (auto panel_it = collection_panels.begin(); panel_it != collection_panels.end();) {
+        if ((*panel_it)->needs_docking) {
+            ImGui::SetNextWindowDockID(dockspace_id);
+            (*panel_it)->needs_docking = false;
+        }
+
+        (*panel_it)->newFrame();
+
+        ++panel_it;
+    }
+
     hierarchy.newFrame();
     inspector.newFrame();
 
