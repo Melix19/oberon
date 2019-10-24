@@ -126,16 +126,18 @@ void Explorer::displayFileTree(FileNode* node_ptr)
                 selected_nodes.push_back(node_ptr);
 
             node_ptr->is_selected = !node_ptr->is_selected;
-        } else if (!node_ptr->is_selected) {
-            if (!selected_nodes.empty()) {
-                for (auto& selected_node : selected_nodes)
-                    selected_node->is_selected = false;
+        } else {
+            if (!node_ptr->is_selected || ImGui::IsItemClicked(0)) {
+                if (!selected_nodes.empty()) {
+                    for (auto& selected_node_ptr : selected_nodes)
+                        selected_node_ptr->is_selected = false;
 
-                selected_nodes.clear();
+                    selected_nodes.clear();
+                }
+
+                selected_nodes.push_back(node_ptr);
+                node_ptr->is_selected = true;
             }
-
-            selected_nodes.push_back(node_ptr);
-            node_ptr->is_selected = true;
 
             if (ImGui::IsItemClicked(0))
                 clicked_node_ptr = node_ptr;
