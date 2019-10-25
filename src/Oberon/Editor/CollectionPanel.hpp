@@ -59,7 +59,8 @@ public:
     bool needs_docking;
 
 private:
-    void updateEntityNodeChildren(EntityNode* node);
+    void displayEntity(EntityNode* node_ptr);
+    void updateEntityNodeChildren(EntityNode* node_ptr);
 
     Document j_document;
 };

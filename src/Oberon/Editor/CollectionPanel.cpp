@@ -63,20 +63,56 @@ void CollectionPanel::newFrame()
 
     std::string filename = Utility::Directory::filename(path);
 
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
     ImGui::Begin(filename.c_str(), &is_open);
+    ImGui::PopStyleVar();
 
     is_focused = ImGui::IsWindowFocused();
+
+    displayEntity(root_node.get());
 
     ImGui::End();
 }
 
-void CollectionPanel::updateEntityNodeChildren(EntityNode* node)
+void CollectionPanel::displayEntity(EntityNode* node_ptr)
 {
-    auto j_children = node->j_value["children"].GetArray();
+    auto j_components = node_ptr->j_value["components"].GetArray();
+    for (auto& j_component : j_components) {
+        std::string type = j_component["type"].GetString();
+
+        if (type == "rectangle_shape") {
+            // Position
+            float position_x = node_ptr->j_value["position"][0].GetFloat();
+            float position_y = node_ptr->j_value["position"][1].GetFloat();
+
+            // Size
+            float size_x = j_component["size"][0].GetFloat();
+            float size_y = j_component["size"][1].GetFloat();
+
+            // Color
+            float color_r = j_component["color"][0].GetFloat();
+            float color_g = j_component["color"][1].GetFloat();
+            float color_b = j_component["color"][2].GetFloat();
+            float color_a = j_component["color"][3].GetFloat();
+
+            ImVec2 p1 = ImVec2(position_x + ImGui::GetCursorScreenPos().x, position_y + ImGui::GetCursorScreenPos().y);
+            ImVec2 p2 = ImVec2(p1.x + size_x, p1.y + size_y);
+
+            ImGui::GetWindowDrawList()->AddRectFilled(p1, p2, IM_COL32(color_r * 255, color_g * 255, color_b * 255, color_a * 255));
+        }
+    }
+
+    for (auto& child : node_ptr->children)
+        displayEntity(child.get());
+}
+
+void CollectionPanel::updateEntityNodeChildren(EntityNode* node_ptr)
+{
+    auto j_children = node_ptr->j_value["children"].GetArray();
 
     for (auto& j_child : j_children) {
         bool has_children = j_children.Empty();
-        EntityNode* child_node = node->addChild(j_child);
+        EntityNode* child_node = node_ptr->addChild(j_child);
 
         if (has_children)
             updateEntityNodeChildren(child_node);

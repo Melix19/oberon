@@ -80,22 +80,6 @@ void Explorer::newFrame()
     }
 }
 
-void Explorer::updateFileNodeChildren(FileNode* node_ptr)
-{
-    auto file_list = Utility::Directory::list(node_ptr->path, Utility::Directory::Flag::SkipDotAndDotDot);
-
-    for (auto& filename : file_list) {
-        bool is_directory = Utility::Directory::isDirectory(node_ptr->path);
-        std::string child_path = Utility::Directory::join(node_ptr->path, filename);
-        FileNode* child_node = node_ptr->addChild(child_path);
-
-        if (is_directory)
-            updateFileNodeChildren(child_node);
-    }
-
-    std::sort(node_ptr->children.begin(), node_ptr->children.end(), sortFileNodes);
-}
-
 void Explorer::displayFileTree(FileNode* node_ptr)
 {
     ImGuiTreeNodeFlags node_flags = ImGuiTreeNodeFlags_FramePadding | ImGuiTreeNodeFlags_SpanFullWidth;
@@ -157,6 +141,22 @@ void Explorer::displayFileTree(FileNode* node_ptr)
 
         ImGui::TreePop();
     }
+}
+
+void Explorer::updateFileNodeChildren(FileNode* node_ptr)
+{
+    auto file_list = Utility::Directory::list(node_ptr->path, Utility::Directory::Flag::SkipDotAndDotDot);
+
+    for (auto& filename : file_list) {
+        bool is_directory = Utility::Directory::isDirectory(node_ptr->path);
+        std::string child_path = Utility::Directory::join(node_ptr->path, filename);
+        FileNode* child_node = node_ptr->addChild(child_path);
+
+        if (is_directory)
+            updateFileNodeChildren(child_node);
+    }
+
+    std::sort(node_ptr->children.begin(), node_ptr->children.end(), sortFileNodes);
 }
 
 void Explorer::removeEntireFile(const std::string& path)

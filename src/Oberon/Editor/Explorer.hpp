@@ -51,8 +51,8 @@ public:
     FileNode* clicked_node_ptr;
 
 private:
-    void updateFileNodeChildren(FileNode* node_ptr);
     void displayFileTree(FileNode* node_ptr);
+    void updateFileNodeChildren(FileNode* node_ptr);
     void removeEntireFile(const std::string& path);
 
     static bool sortFileNodes(const Containers::Pointer<FileNode>& a, const Containers::Pointer<FileNode>& b);

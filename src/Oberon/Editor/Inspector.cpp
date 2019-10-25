@@ -63,6 +63,40 @@ void Inspector::newFrame()
         ImGui::DragFloat2("##Scale", scale, 0.005f);
         entity_node_ptr->j_value["scale"][0] = scale[0];
         entity_node_ptr->j_value["scale"][1] = scale[1];
+
+        // Components
+        auto j_components = entity_node_ptr->j_value["components"].GetArray();
+        for (auto& j_component : j_components) {
+            std::string type = j_component["type"].GetString();
+
+            if (type == "rectangle_shape") {
+                // Type
+                ImGui::AlignTextToFramePadding();
+                ImGui::Text("Rectangle shape");
+
+                // Size
+                ImGui::AlignTextToFramePadding();
+                ImGui::Text("Size");
+                ImGui::SameLine(COLUMN_WIDTH);
+                ImGui::SetNextItemWidth(-1);
+                float size[2] = { j_component["size"][0].GetFloat(), j_component["size"][1].GetFloat() };
+                ImGui::DragFloat2("##Size", size, 0.5f);
+                j_component["size"][0] = size[0];
+                j_component["size"][1] = size[1];
+
+                // Color
+                ImGui::AlignTextToFramePadding();
+                ImGui::Text("Color");
+                ImGui::SameLine(COLUMN_WIDTH);
+                ImGui::SetNextItemWidth(-1);
+                float color[4] = { j_component["color"][0].GetFloat(), j_component["color"][1].GetFloat(), j_component["color"][2].GetFloat(), j_component["color"][3].GetFloat() };
+                ImGui::ColorEdit4("##Color", color);
+                j_component["color"][0] = color[0];
+                j_component["color"][1] = color[1];
+                j_component["color"][2] = color[2];
+                j_component["color"][3] = color[3];
+            }
+        }
     }
 
     ImGui::End();
