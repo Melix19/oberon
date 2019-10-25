@@ -26,12 +26,17 @@
 
 #include <Corrade/Containers/Pointer.h>
 #include <Corrade/Utility/Directory.h>
+#include <Magnum/Magnum.h>
+#include <Magnum/Math/Complex.h>
+#include <Magnum/Math/Functions.h>
+#include <Magnum/Math/Matrix3.h>
 #include <document.h>
 #include <imgui.h>
+#include <imgui_internal.h>
 #include <string>
 #include <vector>
 
-using namespace Corrade;
+using namespace Magnum;
 using namespace rapidjson;
 
 struct EntityNode {
@@ -59,7 +64,7 @@ public:
     bool needs_docking;
 
 private:
-    void displayEntity(EntityNode* node_ptr);
+    void displayEntity(EntityNode* node_ptr, const Matrix3& parent_transformation);
     void updateEntityNodeChildren(EntityNode* node_ptr);
 
     Document j_document;
