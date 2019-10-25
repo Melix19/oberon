@@ -33,8 +33,6 @@ Hierarchy::Hierarchy()
 
 void Hierarchy::newFrame()
 {
-    clicked_node_ptr = nullptr;
-
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
     ImGui::Begin("Hierarchy");
     ImGui::PopStyleVar();
@@ -62,6 +60,17 @@ void Hierarchy::newFrame()
 
         delete_selected_nodes = false;
     }
+}
+
+void Hierarchy::clear()
+{
+    root_node_ptr = nullptr;
+    clicked_node_ptr = nullptr;
+
+    for (auto& selected_node_ptr : selected_nodes)
+        selected_node_ptr->is_selected = false;
+
+    selected_nodes.clear();
 }
 
 void Hierarchy::displayEntityTree(EntityNode* node_ptr)

@@ -30,6 +30,7 @@ class Hierarchy {
 public:
     Hierarchy();
     void newFrame();
+    void clear();
 
     EntityNode* root_node_ptr;
     EntityNode* clicked_node_ptr;

@@ -132,19 +132,24 @@ void Editor::drawEvent()
         (*panel_it)->newFrame();
 
         if ((*panel_it)->is_open) {
-            if ((*panel_it)->is_focused)
+            if ((*panel_it)->is_focused && hierarchy.root_node_ptr != (*panel_it)->root_node.get()) {
+                hierarchy.clear();
                 hierarchy.root_node_ptr = (*panel_it)->root_node.get();
+            }
 
             ++panel_it;
-        } else
+        } else {
+            if ((*panel_it)->root_node.get() == hierarchy.root_node_ptr) {
+                hierarchy.clear();
+            }
+
             panel_it = collection_panels.erase(panel_it);
+        }
     }
 
     hierarchy.newFrame();
 
-    if (hierarchy.clicked_node_ptr)
-        inspector.entity_node_ptr = hierarchy.clicked_node_ptr;
-
+    inspector.entity_node_ptr = hierarchy.clicked_node_ptr;
     inspector.newFrame();
 
     /* Set appropriate states. */
