@@ -57,7 +57,11 @@ Editor::Editor(const Arguments& arguments, const std::string& project_path)
 
 void Editor::drawEvent()
 {
-    GL::defaultFramebuffer.clear(GL::FramebufferClear::Color);
+    for (auto& panel_it : collection_panels)
+        panel_it->drawContent();
+
+    GL::defaultFramebuffer.clear(GL::FramebufferClear::Color)
+        .bind();
 
     imgui.newFrame();
 

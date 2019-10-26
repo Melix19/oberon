@@ -76,7 +76,7 @@ void Hierarchy::clear()
 void Hierarchy::displayEntityTree(EntityNode* node_ptr)
 {
     ImGuiTreeNodeFlags node_flags = ImGuiTreeNodeFlags_FramePadding | ImGuiTreeNodeFlags_SpanFullWidth | ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_OpenOnArrow;
-    std::string node_name = node_ptr->j_value["name"].GetString();
+    std::string node_name = node_ptr->j_entity["name"].GetString();
     bool has_children = !node_ptr->children.empty();
 
     if (node_ptr->is_selected)

@@ -26,19 +26,24 @@
 
 #include <Corrade/Containers/Pointer.h>
 #include <Corrade/Utility/Directory.h>
-#include <document.h>
-#include <imgui.h>
-#include <string>
-#include <vector>
+#include <Magnum/GL/Framebuffer.h>
+#include <Magnum/GL/Texture.h>
+#include <Magnum/GL/TextureFormat.h>
+#include <Magnum/ImGuiIntegration/Widgets.h>
+#include <Magnum/SceneGraph/Camera.h>
+#include <Magnum/SceneGraph/Drawable.h>
+#include <Magnum/SceneGraph/Scene.h>
+#include <Oberon/Core/Entity.hpp>
+#include <OberonExternal/rapidjson/document.h>
 
-using namespace Corrade;
 using namespace rapidjson;
 
 struct EntityNode {
-    EntityNode(Value& j_value);
-    EntityNode* addChild(Value& j_value);
+    EntityNode(Entity* entity_ptr, Value& j_entity);
+    EntityNode* addChild(Entity* entity_ptr, Value& j_entity);
 
-    Value& j_value;
+    Entity* entity_ptr;
+    Value& j_entity;
     bool is_selected;
 
     EntityNode* parent;
@@ -48,6 +53,7 @@ struct EntityNode {
 class CollectionPanel {
 public:
     CollectionPanel(const std::string& path);
+    void drawContent();
     void newFrame();
 
     Containers::Pointer<EntityNode> root_node;
@@ -59,7 +65,17 @@ public:
     bool needs_docking;
 
 private:
-    void updateEntityNodeChildren(EntityNode* node_ptr);
+    void addEntityNodeChild(Value& j_entity, EntityNode* parent_node_ptr = nullptr);
+    Entity* createEntityFromJson(Value& j_entity, Object2D* parent);
+
+    GL::Framebuffer framebuffer{ NoCreate };
+    GL::Texture2D content_texture;
+    Vector2i content_size;
+
+    Scene2D scene;
+    Object2D* camera_object;
+    SceneGraph::Camera2D* camera;
+    SceneGraph::DrawableGroup2D drawables;
 
     Document j_document;
 };

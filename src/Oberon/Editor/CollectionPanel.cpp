@@ -24,15 +24,16 @@
 
 #include "CollectionPanel.hpp"
 
-EntityNode::EntityNode(Value& j_value)
-    : j_value(j_value)
+EntityNode::EntityNode(Entity* entity_ptr, Value& j_entity)
+    : entity_ptr(entity_ptr)
+    , j_entity(j_entity)
     , is_selected(false)
 {
 }
 
-EntityNode* EntityNode::addChild(Value& j_value)
+EntityNode* EntityNode::addChild(Entity* entity_ptr, Value& j_entity)
 {
-    auto child = Containers::pointer<EntityNode>(j_value);
+    auto child = Containers::pointer<EntityNode>(entity_ptr, j_entity);
     child->parent = this;
 
     children.push_back(std::move(child));
@@ -46,12 +47,29 @@ CollectionPanel::CollectionPanel(const std::string& path)
     , needs_focus(true)
     , needs_docking(true)
 {
+    camera_object = new Object2D{ &scene };
+    camera = new SceneGraph::Camera2D{ *camera_object };
+    camera->setAspectRatioPolicy(SceneGraph::AspectRatioPolicy::Extend)
+        .setProjectionMatrix(Matrix3::projection({ 4.0f / 3.0f, 1.0f }))
+        .setViewport(framebuffer.viewport().size());
+
+    framebuffer = GL::Framebuffer{ { {}, content_size } };
+
     std::string json = Utility::Directory::readString(path);
     j_document.Parse(json.c_str());
 
-    root_node = Containers::pointer<EntityNode>(j_document);
+    addEntityNodeChild(j_document);
+}
 
-    updateEntityNodeChildren(root_node.get());
+void CollectionPanel::drawContent()
+{
+    content_texture.setStorage(1, GL::TextureFormat::RGBA8, content_size);
+    framebuffer.attachTexture(GL::Framebuffer::ColorAttachment{ 0 }, content_texture, 0);
+
+    framebuffer.clear(GL::FramebufferClear::Color)
+        .bind();
+
+    camera->draw(drawables);
 }
 
 void CollectionPanel::newFrame()
@@ -63,22 +81,46 @@ void CollectionPanel::newFrame()
 
     std::string filename = Utility::Directory::filename(path);
 
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.f, 0.f));
     ImGui::Begin(filename.c_str(), &is_open);
+    ImGui::PopStyleVar();
 
     is_focused = ImGui::IsWindowFocused();
+
+    ImVec2 content_min = ImGui::GetWindowContentRegionMin();
+    ImVec2 content_max = ImGui::GetWindowContentRegionMax();
+
+    content_size = { int(content_max.x - content_min.x), int(content_max.y - content_min.y) };
+
+    ImGuiIntegration::image(content_texture, Vector2{ content_size });
 
     ImGui::End();
 }
 
-void CollectionPanel::updateEntityNodeChildren(EntityNode* node_ptr)
+void CollectionPanel::addEntityNodeChild(Value& j_entity, EntityNode* parent_node_ptr)
 {
-    auto j_children = node_ptr->j_value["children"].GetArray();
+    EntityNode* node_ptr;
 
-    for (auto& j_child : j_children) {
-        bool has_children = j_children.Empty();
-        EntityNode* child_node = node_ptr->addChild(j_child);
-
-        if (has_children)
-            updateEntityNodeChildren(child_node);
+    if (parent_node_ptr) {
+        Entity* entity_ptr = createEntityFromJson(j_entity, parent_node_ptr->entity_ptr);
+        node_ptr = parent_node_ptr->addChild(entity_ptr, j_entity);
+    } else {
+        Entity* entity_ptr = createEntityFromJson(j_entity, &scene);
+        root_node = Containers::pointer<EntityNode>(entity_ptr, j_entity);
+        node_ptr = root_node.get();
     }
+
+    auto j_children = j_entity["children"].GetArray();
+    for (auto& j_child : j_children) {
+        if (!j_children.Empty())
+            addEntityNodeChild(j_child, node_ptr);
+    }
+}
+
+Entity* CollectionPanel::createEntityFromJson(Value& j_entity, Object2D* parent)
+{
+    std::string entity_name = j_entity["name"].GetString();
+    Entity* entity_ptr = new Entity{ entity_name, parent };
+
+    return entity_ptr;
 }

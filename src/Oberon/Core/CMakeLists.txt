@@ -37,7 +37,8 @@ add_library(OberonCore
     ${OberonCore_HEADERS})
 
 target_include_directories(OberonCore PUBLIC
-    "${CMAKE_CURRENT_SOURCE_DIR}/../../OberonExternal/rapidjson/")
+    ${PROJECT_SOURCE_DIR}/src
+    ${PROJECT_BINARY_DIR}/src)
 
 target_link_libraries(OberonCore PRIVATE
     Magnum::SceneGraph)
