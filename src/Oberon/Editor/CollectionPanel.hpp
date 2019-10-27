@@ -30,10 +30,9 @@
 #include <Magnum/GL/Texture.h>
 #include <Magnum/GL/TextureFormat.h>
 #include <Magnum/ImGuiIntegration/Widgets.h>
-#include <Magnum/SceneGraph/Camera.h>
-#include <Magnum/SceneGraph/Drawable.h>
 #include <Magnum/SceneGraph/Scene.h>
 #include <Oberon/Core/Entity.hpp>
+#include <Oberon/Core/RectangleShape.hpp>
 #include <OberonExternal/rapidjson/document.h>
 
 using namespace rapidjson;
@@ -70,7 +69,7 @@ private:
 
     GL::Framebuffer framebuffer{ NoCreate };
     GL::Texture2D content_texture;
-    Vector2i content_size;
+    Shaders::Flat2D shader;
 
     Scene2D scene;
     Object2D* camera_object;

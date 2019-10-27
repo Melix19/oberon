@@ -22,15 +22,21 @@
 #   SOFTWARE.
 #
 
-find_package(Magnum REQUIRED SceneGraph)
+find_package(Magnum REQUIRED
+    MeshTools
+    Primitives
+    SceneGraph
+    Shaders)
 
 set_directory_properties(PROPERTIES CORRADE_USE_PEDANTIC_FLAGS ON)
 
 set(OberonCore_SOURCES
-    Entity.cpp)
+    Entity.cpp
+    RectangleShape.cpp)
 
 set(OberonCore_HEADERS
-    Entity.hpp)
+    Entity.hpp
+    RectangleShape.hpp)
 
 add_library(OberonCore
     ${OberonCore_SOURCES}
@@ -41,7 +47,10 @@ target_include_directories(OberonCore PUBLIC
     ${PROJECT_BINARY_DIR}/src)
 
 target_link_libraries(OberonCore PRIVATE
-    Magnum::SceneGraph)
+    Magnum::MeshTools
+    Magnum::Primitives
+    Magnum::SceneGraph
+    Magnum::Shaders)
 
 # Oberon Core library for superprojects
 add_library(Oberon::Core ALIAS OberonCore)

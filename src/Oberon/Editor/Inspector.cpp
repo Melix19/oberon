@@ -44,6 +44,7 @@ void Inspector::newFrame()
         ImGui::DragFloat2("##Position", position, 0.5f);
         entity_node_ptr->j_entity["position"][0] = position[0];
         entity_node_ptr->j_entity["position"][1] = position[1];
+        entity_node_ptr->entity_ptr->setTranslation({ position[0], position[1] });
 
         // Rotation
         ImGui::AlignTextToFramePadding();
@@ -53,6 +54,7 @@ void Inspector::newFrame()
         float rotation = entity_node_ptr->j_entity["rotation"].GetFloat();
         ImGui::DragFloat("##Rotation", &rotation, 0.5f);
         entity_node_ptr->j_entity["rotation"] = rotation;
+        entity_node_ptr->entity_ptr->setRotation(Complex::rotation(Deg(rotation)));
 
         // Scale
         ImGui::AlignTextToFramePadding();
@@ -63,9 +65,11 @@ void Inspector::newFrame()
         ImGui::DragFloat2("##Scale", scale, 0.005f);
         entity_node_ptr->j_entity["scale"][0] = scale[0];
         entity_node_ptr->j_entity["scale"][1] = scale[1];
+        entity_node_ptr->entity_ptr->setScaling({ scale[0], scale[1] });
 
         // Components
         auto j_components = entity_node_ptr->j_entity["components"].GetArray();
+        auto& components = entity_node_ptr->entity_ptr->features();
         for (auto& j_component : j_components) {
             std::string type = j_component["type"].GetString();
 
@@ -73,6 +77,13 @@ void Inspector::newFrame()
                 // Type
                 ImGui::AlignTextToFramePadding();
                 ImGui::Text("Rectangle shape");
+
+                RectangleShape* rect_ptr;
+                for (auto& component : components) {
+                    rect_ptr = dynamic_cast<RectangleShape*>(&component);
+                    if (rect_ptr)
+                        break;
+                }
 
                 // Size
                 ImGui::AlignTextToFramePadding();
@@ -83,6 +94,7 @@ void Inspector::newFrame()
                 ImGui::DragFloat2("##Size", size, 0.5f);
                 j_component["size"][0] = size[0];
                 j_component["size"][1] = size[1];
+                rect_ptr->setSize({ size[0], size[1] });
 
                 // Color
                 ImGui::AlignTextToFramePadding();
@@ -95,6 +107,7 @@ void Inspector::newFrame()
                 j_component["color"][1] = color[1];
                 j_component["color"][2] = color[2];
                 j_component["color"][3] = color[3];
+                rect_ptr->setColor({ color[0], color[1], color[2], color[3] });
             }
         }
     }

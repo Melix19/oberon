@@ -57,8 +57,8 @@ Editor::Editor(const Arguments& arguments, const std::string& project_path)
 
 void Editor::drawEvent()
 {
-    for (auto& panel_it : collection_panels)
-        panel_it->drawContent();
+    for (auto& panel : collection_panels)
+        panel->drawContent();
 
     GL::defaultFramebuffer.clear(GL::FramebufferClear::Color)
         .bind();

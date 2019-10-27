@@ -47,13 +47,15 @@ CollectionPanel::CollectionPanel(const std::string& path)
     , needs_focus(true)
     , needs_docking(true)
 {
+    content_texture.setStorage(1, GL::TextureFormat::RGBA8, GL::Texture2D::maxSize());
+    framebuffer = GL::Framebuffer{ { {}, content_texture.imageSize(0) } };
+    framebuffer.attachTexture(GL::Framebuffer::ColorAttachment{ 0 }, content_texture, 0);
+
     camera_object = new Object2D{ &scene };
     camera = new SceneGraph::Camera2D{ *camera_object };
     camera->setAspectRatioPolicy(SceneGraph::AspectRatioPolicy::Extend)
-        .setProjectionMatrix(Matrix3::projection({ 4.0f / 3.0f, 1.0f }))
-        .setViewport(framebuffer.viewport().size());
-
-    framebuffer = GL::Framebuffer{ { {}, content_size } };
+        .setProjectionMatrix(Matrix3::projection(Vector2{ content_texture.imageSize(0) }))
+        .setViewport(content_texture.imageSize(0));
 
     std::string json = Utility::Directory::readString(path);
     j_document.Parse(json.c_str());
@@ -63,9 +65,6 @@ CollectionPanel::CollectionPanel(const std::string& path)
 
 void CollectionPanel::drawContent()
 {
-    content_texture.setStorage(1, GL::TextureFormat::RGBA8, content_size);
-    framebuffer.attachTexture(GL::Framebuffer::ColorAttachment{ 0 }, content_texture, 0);
-
     framebuffer.clear(GL::FramebufferClear::Color)
         .bind();
 
@@ -82,17 +81,19 @@ void CollectionPanel::newFrame()
     std::string filename = Utility::Directory::filename(path);
 
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.f, 0.f));
-    ImGui::Begin(filename.c_str(), &is_open);
+    ImGui::Begin(filename.c_str(), &is_open, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
     ImGui::PopStyleVar();
 
     is_focused = ImGui::IsWindowFocused();
 
-    ImVec2 content_min = ImGui::GetWindowContentRegionMin();
-    ImVec2 content_max = ImGui::GetWindowContentRegionMax();
+    auto image_size = Vector2{ content_texture.imageSize(0) };
+    auto content_min = ImGui::GetWindowContentRegionMin();
+    auto content_max = ImGui::GetWindowContentRegionMax();
+    auto content_size = ImVec2(content_max.x - content_min.x, content_max.y - content_min.y);
 
-    content_size = { int(content_max.x - content_min.x), int(content_max.y - content_min.y) };
-
-    ImGuiIntegration::image(content_texture, Vector2{ content_size });
+    ImGuiIntegration::image(content_texture, image_size);
+    ImGui::SetScrollX((image_size.x() - content_size.x) / 2);
+    ImGui::SetScrollY((image_size.y() - content_size.y) / 2);
 
     ImGui::End();
 }
@@ -121,6 +122,39 @@ Entity* CollectionPanel::createEntityFromJson(Value& j_entity, Object2D* parent)
 {
     std::string entity_name = j_entity["name"].GetString();
     Entity* entity_ptr = new Entity{ entity_name, parent };
+
+    // Position
+    float position_x = j_entity["position"][0].GetFloat();
+    float position_y = j_entity["position"][1].GetFloat();
+    entity_ptr->setTranslation({ position_x, position_y });
+
+    // Rotation
+    float rotation = j_entity["rotation"].GetFloat();
+    entity_ptr->setRotation(Complex::rotation(Deg(rotation)));
+
+    // Scale
+    float scale_x = j_entity["scale"][0].GetFloat();
+    float scale_y = j_entity["scale"][1].GetFloat();
+    entity_ptr->setScaling({ scale_x, scale_y });
+
+    auto j_components = j_entity["components"].GetArray();
+    for (auto& j_component : j_components) {
+        std::string type = j_component["type"].GetString();
+
+        if (type == "rectangle_shape") {
+            // Size
+            float size_x = j_component["size"][0].GetFloat();
+            float size_y = j_component["size"][1].GetFloat();
+
+            // Color
+            float color_r = j_component["color"][0].GetFloat();
+            float color_g = j_component["color"][1].GetFloat();
+            float color_b = j_component["color"][2].GetFloat();
+            float color_a = j_component["color"][3].GetFloat();
+
+            entity_ptr->addFeature<RectangleShape>(&drawables, shader, Vector2{ size_x, size_y }, Color4{ color_r, color_g, color_b, color_a });
+        }
+    }
 
     return entity_ptr;
 }
