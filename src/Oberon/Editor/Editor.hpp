@@ -29,6 +29,7 @@
 #include "Explorer.hpp"
 #include "Hierarchy.hpp"
 #include "Inspector.hpp"
+#include "Themer.hpp"
 
 #include <Magnum/GL/DefaultFramebuffer.h>
 #include <Magnum/GL/Renderer.h>

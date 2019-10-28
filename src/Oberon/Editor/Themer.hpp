@@ -24,36 +24,9 @@
 
 #pragma once
 
-#include "Themer.hpp"
+#include <imgui.h>
 
-#include <Magnum/GL/DefaultFramebuffer.h>
-#include <Magnum/GL/Renderer.h>
-#include <Magnum/ImGuiIntegration/Context.hpp>
-#include <Magnum/Platform/Sdl2Application.h>
-#include <imgui_internal.h>
-#include <portable-file-dialogs.h>
-
-using namespace Magnum;
-
-class ProjectManager : public Platform::Application {
-public:
-    explicit ProjectManager(const Arguments& arguments);
-
-    std::string project_path;
-
-private:
-    void drawEvent() override;
-
-    void viewportEvent(ViewportEvent& event) override;
-
-    void keyPressEvent(KeyEvent& event) override;
-    void keyReleaseEvent(KeyEvent& event) override;
-
-    void mousePressEvent(MouseEvent& event) override;
-    void mouseReleaseEvent(MouseEvent& event) override;
-    void mouseMoveEvent(MouseMoveEvent& event) override;
-    void mouseScrollEvent(MouseScrollEvent& event) override;
-    void textInputEvent(TextInputEvent& event) override;
-
-    ImGuiIntegration::Context imgui{ NoCreate };
-};
+namespace Themer {
+void styleColorsDark();
+void styleColorsLight();
+}

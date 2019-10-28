@@ -32,6 +32,7 @@ Editor::Editor(const Arguments& arguments, const std::string& project_path)
     , explorer(project_path)
 {
     ImGui::CreateContext();
+    Themer::styleColorsDark();
 
     const Vector2 size = Vector2{ windowSize() } / dpiScaling();
 

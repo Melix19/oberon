@@ -38,6 +38,7 @@ set(OberonEditor_SOURCES
     Inspector.cpp
     Oberon.cpp
     ProjectManager.cpp
+    Themer.cpp
 
     ${OberonEditor_RESOURCES})
 
@@ -48,7 +49,8 @@ set(OberonEditor_HEADERS
     Explorer.hpp
     Hierarchy.hpp
     Inspector.hpp
-    ProjectManager.hpp)
+    ProjectManager.hpp
+    Themer.hpp)
 
 add_executable(Oberon MACOSX_BUNDLE
     ${OberonEditor_SOURCES}

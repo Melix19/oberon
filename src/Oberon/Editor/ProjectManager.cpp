@@ -32,6 +32,7 @@ ProjectManager::ProjectManager(const Arguments& arguments)
     , project_path("")
 {
     ImGui::CreateContext();
+    Themer::styleColorsDark();
 
     const Vector2 size = Vector2{ windowSize() } / dpiScaling();
 
