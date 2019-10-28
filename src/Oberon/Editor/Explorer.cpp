@@ -43,6 +43,7 @@ Explorer::Explorer(const std::string& project_path)
     : clicked_node_ptr(nullptr)
     , root_node(project_path)
     , delete_selected_nodes(false)
+    , edit_node_ptr(nullptr)
 {
     updateFileNodeChildren(&root_node);
 }
@@ -54,6 +55,28 @@ void Explorer::newFrame()
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
     ImGui::Begin("Explorer");
     ImGui::PopStyleVar();
+
+    if (ImGui::BeginPopupContextWindow()) {
+        if (ImGui::BeginMenu("New file")) {
+            if (ImGui::MenuItem("Collection")) {
+                edit_node_ptr = root_node.addChild();
+                edit_node_mode = EditMode::File_Creation;
+                edit_node_string = ".col";
+                edit_node_needs_focus = true;
+            }
+
+            ImGui::EndMenu();
+        }
+
+        if (ImGui::MenuItem("New folder")) {
+            edit_node_ptr = root_node.addChild();
+            edit_node_mode = EditMode::Folder_Creation;
+            edit_node_string = "";
+            edit_node_needs_focus = true;
+        }
+
+        ImGui::EndPopup();
+    }
 
     ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0.0f, 0.0f));
     for (auto& child : root_node.children)
@@ -82,64 +105,128 @@ void Explorer::newFrame()
 
 void Explorer::displayFileTree(FileNode* node_ptr)
 {
-    ImGuiTreeNodeFlags node_flags = ImGuiTreeNodeFlags_FramePadding | ImGuiTreeNodeFlags_SpanFullWidth;
-    std::string node_name = Utility::Directory::filename(node_ptr->path);
-    bool is_directory = Utility::Directory::isDirectory(node_ptr->path);
+    if (node_ptr == edit_node_ptr) {
+        ImGui::Indent(ImGui::GetTreeNodeToLabelSpacing());
+        ImGui::SetNextItemWidth(ImGui::GetWindowContentRegionWidth() - ImGui::GetTreeNodeToLabelSpacing());
 
-    if (node_ptr->is_selected)
-        node_flags |= ImGuiTreeNodeFlags_Selected;
+        if (edit_node_needs_focus)
+            ImGui::SetKeyboardFocusHere(); // Set focus when it's created
 
-    if (!is_directory)
-        node_flags |= ImGuiTreeNodeFlags_Leaf;
+        if (ImGui::InputText("##FileName", &edit_node_string, ImGuiInputTextFlags_EnterReturnsTrue)) {
+            std::string new_path = Utility::Directory::join(node_ptr->parent->path, edit_node_string);
+            bool success = false;
 
-    bool node_open = ImGui::TreeNodeEx(node_name.c_str(), node_flags);
-
-    if (ImGui::IsItemClicked(0) || ImGui::IsItemClicked(1)) {
-        ImGuiIO& io = ImGui::GetIO();
-
-        // macOS style: Shortcuts using Cmd/Super instead of Ctrl
-        const bool is_shortcut_key = (io.ConfigMacOSXBehaviors ? (io.KeySuper && !io.KeyCtrl) : (io.KeyCtrl && !io.KeySuper)) && !io.KeyAlt && !io.KeyShift;
-
-        if (is_shortcut_key && ImGui::IsItemClicked(0)) {
-            if (node_ptr->is_selected) {
-                auto found = std::find_if(selected_nodes.begin(), selected_nodes.end(), [&](FileNode* p) { return p == node_ptr; });
-                assert(found != selected_nodes.end());
-
-                selected_nodes.erase(found);
-            } else
-                selected_nodes.push_back(node_ptr);
-
-            node_ptr->is_selected = !node_ptr->is_selected;
-        } else {
-            if (!node_ptr->is_selected || ImGui::IsItemClicked(0)) {
-                if (!selected_nodes.empty()) {
-                    for (auto& selected_node_ptr : selected_nodes)
-                        selected_node_ptr->is_selected = false;
-
-                    selected_nodes.clear();
-                }
-
-                selected_nodes.push_back(node_ptr);
-                node_ptr->is_selected = true;
+            switch (edit_node_mode) {
+            case EditMode::File_Creation:
+                success = Utility::Directory::writeString(new_path, "");
+                break;
+            case EditMode::Folder_Creation:
+                success = Utility::Directory::mkpath(new_path);
+                break;
+            case EditMode::Rename:
+                success = Utility::Directory::move(node_ptr->path, new_path);
+                break;
             }
 
-            if (ImGui::IsItemClicked(0))
-                clicked_node_ptr = node_ptr;
+            if (success) {
+                node_ptr->path = new_path;
+                std::sort(node_ptr->parent->children.begin(), node_ptr->parent->children.end(), sortFileNodes);
+            }
         }
-    }
 
-    if (ImGui::BeginPopupContextItem()) {
-        if (ImGui::MenuItem("Delete"))
-            delete_selected_nodes = true;
+        if (edit_node_needs_focus)
+            edit_node_needs_focus = false;
+        else if (!ImGui::IsItemActive()) // We need to delay this check on the next frame
+            edit_node_ptr = nullptr;
 
-        ImGui::EndPopup();
-    }
+        ImGui::Unindent(ImGui::GetTreeNodeToLabelSpacing());
+    } else {
+        ImGuiTreeNodeFlags node_flags = ImGuiTreeNodeFlags_FramePadding | ImGuiTreeNodeFlags_SpanFullWidth;
+        std::string node_name = Utility::Directory::filename(node_ptr->path);
+        bool is_directory = Utility::Directory::isDirectory(node_ptr->path);
 
-    if (node_open) {
-        for (auto& child : node_ptr->children)
-            displayFileTree(child.get());
+        if (node_ptr->is_selected)
+            node_flags |= ImGuiTreeNodeFlags_Selected;
 
-        ImGui::TreePop();
+        if (!is_directory)
+            node_flags |= ImGuiTreeNodeFlags_Leaf;
+
+        bool node_open = ImGui::TreeNodeEx(node_name.c_str(), node_flags);
+
+        if (ImGui::IsItemClicked(0) || ImGui::IsItemClicked(1)) {
+            ImGuiIO& io = ImGui::GetIO();
+
+            // macOS style: Shortcuts using Cmd/Super instead of Ctrl
+            const bool is_shortcut_key = (io.ConfigMacOSXBehaviors ? (io.KeySuper && !io.KeyCtrl) : (io.KeyCtrl && !io.KeySuper)) && !io.KeyAlt && !io.KeyShift;
+
+            if (is_shortcut_key && ImGui::IsItemClicked(0)) {
+                if (node_ptr->is_selected) {
+                    auto found = std::find_if(selected_nodes.begin(), selected_nodes.end(), [&](FileNode* p) { return p == node_ptr; });
+                    assert(found != selected_nodes.end());
+
+                    selected_nodes.erase(found);
+                } else
+                    selected_nodes.push_back(node_ptr);
+
+                node_ptr->is_selected = !node_ptr->is_selected;
+            } else {
+                if (!node_ptr->is_selected || ImGui::IsItemClicked(0)) {
+                    if (!selected_nodes.empty()) {
+                        for (auto& selected_node_ptr : selected_nodes)
+                            selected_node_ptr->is_selected = false;
+
+                        selected_nodes.clear();
+                    }
+
+                    selected_nodes.push_back(node_ptr);
+                    node_ptr->is_selected = true;
+                }
+
+                if (ImGui::IsItemClicked(0))
+                    clicked_node_ptr = node_ptr;
+            }
+        }
+
+        if (ImGui::BeginPopupContextItem()) {
+            if (is_directory) {
+                if (ImGui::BeginMenu("New file")) {
+                    if (ImGui::MenuItem("Collection")) {
+                        edit_node_ptr = node_ptr->addChild();
+                        edit_node_mode = EditMode::File_Creation;
+                        edit_node_string = ".col";
+                        edit_node_needs_focus = true;
+                    }
+
+                    ImGui::EndMenu();
+                }
+
+                if (ImGui::MenuItem("New folder")) {
+                    edit_node_ptr = node_ptr->addChild();
+                    edit_node_mode = EditMode::Folder_Creation;
+                    edit_node_string = "";
+                    edit_node_needs_focus = true;
+                }
+            }
+
+            if (ImGui::MenuItem("Rename")) {
+                edit_node_ptr = node_ptr;
+                edit_node_mode = EditMode::Rename;
+                edit_node_string = node_name;
+                edit_node_needs_focus = true;
+            }
+
+            if (ImGui::MenuItem("Delete"))
+                delete_selected_nodes = true;
+
+            ImGui::EndPopup();
+        }
+
+        if (node_open) {
+            for (auto& child : node_ptr->children)
+                displayFileTree(child.get());
+
+            ImGui::TreePop();
+        }
     }
 }
 

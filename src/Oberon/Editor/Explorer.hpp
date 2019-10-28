@@ -34,7 +34,7 @@ using namespace Corrade;
 
 struct FileNode {
     FileNode(const std::string& path);
-    FileNode* addChild(const std::string& path);
+    FileNode* addChild(const std::string& path = "");
 
     std::string path;
     bool is_selected;
@@ -60,4 +60,15 @@ private:
     FileNode root_node;
     std::vector<FileNode*> selected_nodes;
     bool delete_selected_nodes;
+
+    enum class EditMode {
+        File_Creation,
+        Folder_Creation,
+        Rename
+    };
+
+    FileNode* edit_node_ptr;
+    EditMode edit_node_mode;
+    std::string edit_node_string;
+    bool edit_node_needs_focus;
 };
