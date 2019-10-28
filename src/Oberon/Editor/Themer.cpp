@@ -35,16 +35,14 @@ void Themer::styleColorsDark()
     style.Colors[ImGuiCol_TitleBg] = titlebar_color;
     style.Colors[ImGuiCol_TitleBgActive] = titlebar_color;
 
-    ImVec4 separator_color(0.2f, 0.2f, 0.2f, 1.0f);
-    style.Colors[ImGuiCol_Separator] = separator_color;
-    style.Colors[ImGuiCol_TabUnfocusedActive] = separator_color;
-
-    ImVec4 widget_color(0.3f, 0.3f, 0.3f, 1.0f);
+    ImVec4 widget_color(0.25f, 0.25f, 0.25f, 0.8f);
     style.Colors[ImGuiCol_Button] = widget_color;
     style.Colors[ImGuiCol_HeaderActive] = widget_color;
     style.Colors[ImGuiCol_FrameBg] = widget_color;
+    style.Colors[ImGuiCol_Separator] = widget_color;
+    style.Colors[ImGuiCol_TabUnfocusedActive] = widget_color;
 
-    ImVec4 hovered_color(0.5f, 0.5f, 0.5f, 0.8f);
+    ImVec4 hovered_color(0.4f, 0.4f, 0.4f, 0.8f);
     style.Colors[ImGuiCol_ButtonHovered] = hovered_color;
     style.Colors[ImGuiCol_FrameBgHovered] = hovered_color;
     style.Colors[ImGuiCol_HeaderHovered] = hovered_color;
@@ -67,19 +65,17 @@ void Themer::styleColorsLight()
 
     style.Colors[ImGuiCol_WindowBg] = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);
 
-    ImVec4 titlebar_color(0.9f, 0.9f, 0.9f, 1.0f);
+    ImVec4 titlebar_color(0.95f, 0.95f, 0.95f, 1.0f);
     style.Colors[ImGuiCol_PopupBg] = titlebar_color;
     style.Colors[ImGuiCol_TitleBg] = titlebar_color;
     style.Colors[ImGuiCol_TitleBgActive] = titlebar_color;
 
-    ImVec4 separator_color(0.85f, 0.85f, 0.85f, 1.0f);
-    style.Colors[ImGuiCol_Separator] = separator_color;
-    style.Colors[ImGuiCol_TabUnfocusedActive] = separator_color;
-
-    ImVec4 widget_color(0.8f, 0.8f, 0.8f, 1.0f);
+    ImVec4 widget_color(0.85f, 0.85f, 0.85f, 0.8f);
     style.Colors[ImGuiCol_Button] = widget_color;
     style.Colors[ImGuiCol_HeaderActive] = widget_color;
     style.Colors[ImGuiCol_FrameBg] = widget_color;
+    style.Colors[ImGuiCol_Separator] = widget_color;
+    style.Colors[ImGuiCol_TabUnfocusedActive] = widget_color;
 
     ImVec4 hovered_color(0.6f, 0.6f, 0.6f, 0.8f);
     style.Colors[ImGuiCol_ButtonHovered] = hovered_color;

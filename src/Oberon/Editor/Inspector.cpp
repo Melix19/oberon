@@ -26,7 +26,7 @@
 
 Inspector::Inspector()
     : entity_node_ptr(nullptr)
-    , COLUMN_WIDTH(80)
+    , COLUMN_WIDTH(100)
 {
 }
 
