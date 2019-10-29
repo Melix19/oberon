@@ -23,7 +23,7 @@
 #
 
 cmake_minimum_required(VERSION 3.4)
-project(Oberon CXX)
+project(Oberon)
 
 set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/modules/" ${CMAKE_MODULE_PATH})
 
