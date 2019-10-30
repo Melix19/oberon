@@ -47,7 +47,7 @@ CollectionPanel::CollectionPanel(const std::string& path)
     , needs_focus(true)
     , needs_docking(true)
 {
-    content_texture.setStorage(1, GL::TextureFormat::RGBA8, GL::Texture2D::maxSize());
+    content_texture.setStorage(1, GL::TextureFormat::RGBA8, Vector2i{ 2560, 1440 }); // FIXME: Maybe get the screen resolution and use that instead of using a fixed resolution
     framebuffer = GL::Framebuffer{ { {}, content_texture.imageSize(0) } };
     framebuffer.attachTexture(GL::Framebuffer::ColorAttachment{ 0 }, content_texture, 0);
 
@@ -60,7 +60,8 @@ CollectionPanel::CollectionPanel(const std::string& path)
     std::string json = Utility::Directory::readString(path);
     j_document.Parse(json.c_str());
 
-    addEntityNodeChild(j_document);
+    if (j_document.IsObject())
+        addEntityNodeChild(j_document);
 }
 
 void CollectionPanel::drawContent()
