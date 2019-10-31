@@ -30,9 +30,9 @@ class Hierarchy {
 public:
     Hierarchy();
     void newFrame();
-    void clear();
+    void clearContent();
 
-    EntityNode* root_node_ptr;
+    CollectionPanel* collection_panel_ptr;
     EntityNode* clicked_node_ptr;
 
 private:

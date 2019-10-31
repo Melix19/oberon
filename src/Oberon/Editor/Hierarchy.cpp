@@ -25,7 +25,7 @@
 #include "Hierarchy.hpp"
 
 Hierarchy::Hierarchy()
-    : root_node_ptr(nullptr)
+    : collection_panel_ptr(nullptr)
     , clicked_node_ptr(nullptr)
     , delete_selected_nodes(false)
 {
@@ -33,14 +33,22 @@ Hierarchy::Hierarchy()
 
 void Hierarchy::newFrame()
 {
-    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
-    ImGui::Begin("Hierarchy");
-    ImGui::PopStyleVar();
+    if (collection_panel_ptr && collection_panel_ptr->root_node.get())
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
 
-    if (root_node_ptr) {
-        ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0.0f, 0.0f));
-        displayEntityTree(root_node_ptr);
-        ImGui::PopStyleVar();
+    ImGui::Begin("Hierarchy");
+
+    if (collection_panel_ptr) {
+        EntityNode* root_node_ptr = collection_panel_ptr->root_node.get();
+
+        if (root_node_ptr) {
+            ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0.0f, 0.0f));
+            displayEntityTree(root_node_ptr);
+            ImGui::PopStyleVar(2);
+        } else {
+            ImGui::Text("Create root entity:");
+            ImGui::Button("Entity");
+        }
     }
 
     ImGui::End();
@@ -62,9 +70,9 @@ void Hierarchy::newFrame()
     }
 }
 
-void Hierarchy::clear()
+void Hierarchy::clearContent()
 {
-    root_node_ptr = nullptr;
+    collection_panel_ptr = nullptr;
     clicked_node_ptr = nullptr;
 
     for (auto& selected_node_ptr : selected_nodes)

@@ -45,6 +45,10 @@ void Themer::styleColorsDark()
     ImVec4 separator_color(0.24f, 0.24f, 0.24f, 1.0f);
     style.Colors[ImGuiCol_Separator] = separator_color;
 
+    ImVec4 unfocused_color(0.28f, 0.28f, 0.28f, 1.0f);
+    style.Colors[ImGuiCol_Tab] = unfocused_color;
+    style.Colors[ImGuiCol_TabUnfocused] = unfocused_color;
+
     ImVec4 hovered_color(0.36f, 0.36f, 0.36f, 0.8f);
     style.Colors[ImGuiCol_ButtonHovered] = hovered_color;
     style.Colors[ImGuiCol_FrameBgHovered] = hovered_color;
@@ -83,6 +87,10 @@ void Themer::styleColorsLight()
 
     ImVec4 separator_color(0.88f, 0.88f, 0.88f, 1.0f);
     style.Colors[ImGuiCol_Separator] = separator_color;
+
+    ImVec4 unfocused_color(0.84f, 0.84f, 0.84f, 1.0f);
+    style.Colors[ImGuiCol_Tab] = unfocused_color;
+    style.Colors[ImGuiCol_TabUnfocused] = unfocused_color;
 
     ImVec4 hovered_color(0.72f, 0.72f, 0.72f, 0.8f);
     style.Colors[ImGuiCol_ButtonHovered] = hovered_color;

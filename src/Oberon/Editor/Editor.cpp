@@ -137,16 +137,15 @@ void Editor::drawEvent()
         (*panel_it)->newFrame();
 
         if ((*panel_it)->is_open) {
-            if ((*panel_it)->is_focused && hierarchy.root_node_ptr != (*panel_it)->root_node.get()) {
-                hierarchy.clear();
-                hierarchy.root_node_ptr = (*panel_it)->root_node.get();
+            if ((*panel_it)->is_focused && hierarchy.collection_panel_ptr != panel_it->get()) {
+                hierarchy.clearContent();
+                hierarchy.collection_panel_ptr = panel_it->get();
             }
 
             ++panel_it;
         } else {
-            if ((*panel_it)->root_node.get() == hierarchy.root_node_ptr) {
-                hierarchy.clear();
-            }
+            if (panel_it->get() == hierarchy.collection_panel_ptr)
+                hierarchy.clearContent();
 
             panel_it = collection_panels.erase(panel_it);
         }
