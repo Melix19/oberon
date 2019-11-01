@@ -40,10 +40,10 @@ void Inspector::newFrame()
         ImGui::Text("Position");
         ImGui::SameLine(COLUMN_WIDTH);
         ImGui::SetNextItemWidth(-1);
-        float position[2] = { entity_node_ptr->j_entity["position"][0].GetFloat(), entity_node_ptr->j_entity["position"][1].GetFloat() };
+        float position[2] = { (*entity_node_ptr->j_entity_ptr)["position"][0].GetFloat(), (*entity_node_ptr->j_entity_ptr)["position"][1].GetFloat() };
         ImGui::DragFloat2("##Position", position, 0.5f);
-        entity_node_ptr->j_entity["position"][0] = position[0];
-        entity_node_ptr->j_entity["position"][1] = position[1];
+        (*entity_node_ptr->j_entity_ptr)["position"][0] = position[0];
+        (*entity_node_ptr->j_entity_ptr)["position"][1] = position[1];
         entity_node_ptr->entity_ptr->setTranslation({ position[0], position[1] });
 
         // Rotation
@@ -51,9 +51,9 @@ void Inspector::newFrame()
         ImGui::Text("Rotation");
         ImGui::SameLine(COLUMN_WIDTH);
         ImGui::SetNextItemWidth(-1);
-        float rotation = entity_node_ptr->j_entity["rotation"].GetFloat();
+        float rotation = (*entity_node_ptr->j_entity_ptr)["rotation"].GetFloat();
         ImGui::DragFloat("##Rotation", &rotation, 0.5f);
-        entity_node_ptr->j_entity["rotation"] = rotation;
+        (*entity_node_ptr->j_entity_ptr)["rotation"] = rotation;
         entity_node_ptr->entity_ptr->setRotation(Complex::rotation(Deg(rotation)));
 
         // Scale
@@ -61,14 +61,14 @@ void Inspector::newFrame()
         ImGui::Text("Scale");
         ImGui::SameLine(COLUMN_WIDTH);
         ImGui::SetNextItemWidth(-1);
-        float scale[2] = { entity_node_ptr->j_entity["scale"][0].GetFloat(), entity_node_ptr->j_entity["scale"][1].GetFloat() };
+        float scale[2] = { (*entity_node_ptr->j_entity_ptr)["scale"][0].GetFloat(), (*entity_node_ptr->j_entity_ptr)["scale"][1].GetFloat() };
         ImGui::DragFloat2("##Scale", scale, 0.005f);
-        entity_node_ptr->j_entity["scale"][0] = scale[0];
-        entity_node_ptr->j_entity["scale"][1] = scale[1];
+        (*entity_node_ptr->j_entity_ptr)["scale"][0] = scale[0];
+        (*entity_node_ptr->j_entity_ptr)["scale"][1] = scale[1];
         entity_node_ptr->entity_ptr->setScaling({ scale[0], scale[1] });
 
         // Components
-        auto j_components = entity_node_ptr->j_entity["components"].GetArray();
+        auto j_components = (*entity_node_ptr->j_entity_ptr)["components"].GetArray();
         auto& components = entity_node_ptr->entity_ptr->features();
         for (auto& j_component : j_components) {
             std::string type = j_component["type"].GetString();

@@ -24,16 +24,16 @@
 
 #include "CollectionPanel.hpp"
 
-EntityNode::EntityNode(Entity* entity_ptr, Value& j_entity)
+EntityNode::EntityNode(Entity* entity_ptr, Value* j_entity_ptr)
     : entity_ptr(entity_ptr)
-    , j_entity(j_entity)
+    , j_entity_ptr(j_entity_ptr)
     , is_selected(false)
 {
 }
 
-EntityNode* EntityNode::addChild(Entity* entity_ptr, Value& j_entity)
+EntityNode* EntityNode::addChild(Entity* entity_ptr, Value* j_entity_ptr)
 {
-    auto child = Containers::pointer<EntityNode>(entity_ptr, j_entity);
+    auto child = Containers::pointer<EntityNode>(entity_ptr, j_entity_ptr);
     child->parent = this;
 
     children.push_back(std::move(child));
@@ -61,7 +61,7 @@ CollectionPanel::CollectionPanel(const std::string& path)
     j_document.Parse(json.c_str());
 
     if (j_document.IsObject())
-        addEntityNodeChild(j_document);
+        addEntityNodeChild(&j_document);
 }
 
 void CollectionPanel::drawContent()
@@ -99,46 +99,46 @@ void CollectionPanel::newFrame()
     ImGui::End();
 }
 
-void CollectionPanel::addEntityNodeChild(Value& j_entity, EntityNode* parent_node_ptr)
+void CollectionPanel::addEntityNodeChild(Value* j_entity_ptr, EntityNode* parent_node_ptr)
 {
     EntityNode* node_ptr;
 
     if (parent_node_ptr) {
-        Entity* entity_ptr = createEntityFromJson(j_entity, parent_node_ptr->entity_ptr);
-        node_ptr = parent_node_ptr->addChild(entity_ptr, j_entity);
+        Entity* entity_ptr = createEntityFromJson(j_entity_ptr, parent_node_ptr->entity_ptr);
+        node_ptr = parent_node_ptr->addChild(entity_ptr, j_entity_ptr);
     } else {
-        Entity* entity_ptr = createEntityFromJson(j_entity, &scene);
-        root_node = Containers::pointer<EntityNode>(entity_ptr, j_entity);
+        Entity* entity_ptr = createEntityFromJson(j_entity_ptr, &scene);
+        root_node = Containers::pointer<EntityNode>(entity_ptr, j_entity_ptr);
         node_ptr = root_node.get();
     }
 
-    auto j_children = j_entity["children"].GetArray();
+    auto j_children = (*j_entity_ptr)["children"].GetArray();
     for (auto& j_child : j_children) {
         if (!j_children.Empty())
-            addEntityNodeChild(j_child, node_ptr);
+            addEntityNodeChild(&j_child, node_ptr);
     }
 }
 
-Entity* CollectionPanel::createEntityFromJson(Value& j_entity, Object2D* parent)
+Entity* CollectionPanel::createEntityFromJson(Value* j_entity_ptr, Object2D* parent)
 {
-    std::string entity_name = j_entity["name"].GetString();
+    std::string entity_name = (*j_entity_ptr)["name"].GetString();
     Entity* entity_ptr = new Entity{ entity_name, parent };
 
     // Position
-    float position_x = j_entity["position"][0].GetFloat();
-    float position_y = j_entity["position"][1].GetFloat();
+    float position_x = (*j_entity_ptr)["position"][0].GetFloat();
+    float position_y = (*j_entity_ptr)["position"][1].GetFloat();
     entity_ptr->setTranslation({ position_x, position_y });
 
     // Rotation
-    float rotation = j_entity["rotation"].GetFloat();
+    float rotation = (*j_entity_ptr)["rotation"].GetFloat();
     entity_ptr->setRotation(Complex::rotation(Deg(rotation)));
 
     // Scale
-    float scale_x = j_entity["scale"][0].GetFloat();
-    float scale_y = j_entity["scale"][1].GetFloat();
+    float scale_x = (*j_entity_ptr)["scale"][0].GetFloat();
+    float scale_y = (*j_entity_ptr)["scale"][1].GetFloat();
     entity_ptr->setScaling({ scale_x, scale_y });
 
-    auto j_components = j_entity["components"].GetArray();
+    auto j_components = (*j_entity_ptr)["components"].GetArray();
     for (auto& j_component : j_components) {
         std::string type = j_component["type"].GetString();
 

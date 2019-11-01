@@ -38,11 +38,11 @@
 using namespace rapidjson;
 
 struct EntityNode {
-    EntityNode(Entity* entity_ptr, Value& j_entity);
-    EntityNode* addChild(Entity* entity_ptr, Value& j_entity);
+    EntityNode(Entity* entity_ptr, Value* j_entity_ptr);
+    EntityNode* addChild(Entity* entity_ptr, Value* j_entity_ptr);
 
     Entity* entity_ptr;
-    Value& j_entity;
+    Value* j_entity_ptr;
     bool is_selected;
 
     EntityNode* parent;
@@ -64,8 +64,8 @@ public:
     bool needs_docking;
 
 private:
-    void addEntityNodeChild(Value& j_entity, EntityNode* parent_node_ptr = nullptr);
-    Entity* createEntityFromJson(Value& j_entity, Object2D* parent);
+    void addEntityNodeChild(Value* j_entity_ptr, EntityNode* parent_node_ptr = nullptr);
+    Entity* createEntityFromJson(Value* j_entity_ptr, Object2D* parent);
 
     GL::Framebuffer framebuffer{ NoCreate };
     GL::Texture2D content_texture;
