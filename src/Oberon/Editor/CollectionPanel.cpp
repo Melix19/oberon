@@ -104,10 +104,10 @@ void CollectionPanel::addEntityNodeChild(Value* j_entity_ptr, EntityNode* parent
     EntityNode* node_ptr;
 
     if (parent_node_ptr) {
-        Entity* entity_ptr = createEntityFromJson(j_entity_ptr, parent_node_ptr->entity_ptr);
+        Entity* entity_ptr = EntitySerializer::createEntityFromJson(j_entity_ptr, parent_node_ptr->entity_ptr, &drawables, shader);
         node_ptr = parent_node_ptr->addChild(entity_ptr, j_entity_ptr);
     } else {
-        Entity* entity_ptr = createEntityFromJson(j_entity_ptr, &scene);
+        Entity* entity_ptr = EntitySerializer::createEntityFromJson(j_entity_ptr, &scene, &drawables, shader);
         root_node = Containers::pointer<EntityNode>(entity_ptr, j_entity_ptr);
         node_ptr = root_node.get();
     }
@@ -117,45 +117,4 @@ void CollectionPanel::addEntityNodeChild(Value* j_entity_ptr, EntityNode* parent
         if (!j_children.Empty())
             addEntityNodeChild(&j_child, node_ptr);
     }
-}
-
-Entity* CollectionPanel::createEntityFromJson(Value* j_entity_ptr, Object2D* parent)
-{
-    std::string entity_name = (*j_entity_ptr)["name"].GetString();
-    Entity* entity_ptr = new Entity{ entity_name, parent };
-
-    // Position
-    float position_x = (*j_entity_ptr)["position"][0].GetFloat();
-    float position_y = (*j_entity_ptr)["position"][1].GetFloat();
-    entity_ptr->setTranslation({ position_x, position_y });
-
-    // Rotation
-    float rotation = (*j_entity_ptr)["rotation"].GetFloat();
-    entity_ptr->setRotation(Complex::rotation(Deg(rotation)));
-
-    // Scale
-    float scale_x = (*j_entity_ptr)["scale"][0].GetFloat();
-    float scale_y = (*j_entity_ptr)["scale"][1].GetFloat();
-    entity_ptr->setScaling({ scale_x, scale_y });
-
-    auto j_components = (*j_entity_ptr)["components"].GetArray();
-    for (auto& j_component : j_components) {
-        std::string type = j_component["type"].GetString();
-
-        if (type == "rectangle_shape") {
-            // Size
-            float size_x = j_component["size"][0].GetFloat();
-            float size_y = j_component["size"][1].GetFloat();
-
-            // Color
-            float color_r = j_component["color"][0].GetFloat();
-            float color_g = j_component["color"][1].GetFloat();
-            float color_b = j_component["color"][2].GetFloat();
-            float color_a = j_component["color"][3].GetFloat();
-
-            entity_ptr->addFeature<RectangleShape>(&drawables, shader, Vector2{ size_x, size_y }, Color4{ color_r, color_g, color_b, color_a });
-        }
-    }
-
-    return entity_ptr;
 }

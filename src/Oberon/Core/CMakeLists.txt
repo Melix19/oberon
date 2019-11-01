@@ -32,10 +32,12 @@ set_directory_properties(PROPERTIES CORRADE_USE_PEDANTIC_FLAGS ON)
 
 set(OberonCore_SOURCES
     Entity.cpp
+    EntitySerializer.cpp
     RectangleShape.cpp)
 
 set(OberonCore_HEADERS
     Entity.hpp
+    EntitySerializer.hpp
     RectangleShape.hpp)
 
 add_library(OberonCore

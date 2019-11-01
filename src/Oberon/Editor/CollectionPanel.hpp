@@ -31,11 +31,7 @@
 #include <Magnum/GL/TextureFormat.h>
 #include <Magnum/ImGuiIntegration/Widgets.h>
 #include <Magnum/SceneGraph/Scene.h>
-#include <Oberon/Core/Entity.hpp>
-#include <Oberon/Core/RectangleShape.hpp>
-#include <OberonExternal/rapidjson/document.h>
-
-using namespace rapidjson;
+#include <Oberon/Core/EntitySerializer.hpp>
 
 struct EntityNode {
     EntityNode(Entity* entity_ptr, Value* j_entity_ptr);
@@ -66,7 +62,6 @@ public:
 
 private:
     void addEntityNodeChild(Value* j_entity_ptr, EntityNode* parent_node_ptr = nullptr);
-    Entity* createEntityFromJson(Value* j_entity_ptr, Object2D* parent);
 
     GL::Framebuffer framebuffer{ NoCreate };
     GL::Texture2D content_texture;
