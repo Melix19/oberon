@@ -35,6 +35,9 @@ typedef SceneGraph::Scene<SceneGraph::TranslationRotationScalingTransformation2D
 class Entity : public Object2D {
 public:
     explicit Entity(const std::string& name, Object2D* parent);
+    void setName(const std::string& name);
+    std::string name();
 
-    std::string name;
+private:
+    std::string _name;
 };

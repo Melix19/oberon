@@ -26,6 +26,16 @@
 
 Entity::Entity(const std::string& name, Object2D* parent)
     : Object2D{ parent }
-    , name(name)
+    , _name(name)
 {
+}
+
+void Entity::setName(const std::string& name)
+{
+    _name = name;
+}
+
+std::string Entity::name()
+{
+    return _name;
 }

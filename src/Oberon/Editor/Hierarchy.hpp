@@ -26,6 +26,8 @@
 
 #include "CollectionPanel.hpp"
 
+#include <misc/cpp/imgui_stdlib.h>
+
 class Hierarchy {
 public:
     Hierarchy();
@@ -40,4 +42,14 @@ private:
 
     std::vector<EntityNode*> selected_nodes;
     bool delete_selected_nodes;
+
+    enum class EditMode {
+        EntityCreation,
+        Rename
+    };
+
+    EntityNode* edit_node_ptr;
+    EditMode edit_node_mode;
+    std::string edit_node_string;
+    bool edit_node_needs_focus;
 };

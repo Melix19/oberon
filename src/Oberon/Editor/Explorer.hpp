@@ -62,8 +62,8 @@ private:
     bool delete_selected_nodes;
 
     enum class EditMode {
-        File_Creation,
-        Folder_Creation,
+        FileCreation,
+        FolderCreation,
         Rename
     };
 

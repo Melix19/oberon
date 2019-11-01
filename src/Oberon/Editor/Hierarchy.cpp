@@ -28,6 +28,7 @@ Hierarchy::Hierarchy()
     : collection_panel_ptr(nullptr)
     , clicked_node_ptr(nullptr)
     , delete_selected_nodes(false)
+    , edit_node_ptr(nullptr)
 {
 }
 
@@ -42,9 +43,11 @@ void Hierarchy::newFrame()
         EntityNode* root_node_ptr = collection_panel_ptr->root_node.get();
 
         if (root_node_ptr) {
+            ImGui::PopStyleVar();
+
             ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0.0f, 0.0f));
             displayEntityTree(root_node_ptr);
-            ImGui::PopStyleVar(2);
+            ImGui::PopStyleVar();
         } else {
             ImGui::Text("Create root entity:");
             ImGui::Button("Entity");
@@ -83,63 +86,112 @@ void Hierarchy::clearContent()
 
 void Hierarchy::displayEntityTree(EntityNode* node_ptr)
 {
-    ImGuiTreeNodeFlags node_flags = ImGuiTreeNodeFlags_FramePadding | ImGuiTreeNodeFlags_SpanFullWidth | ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_OpenOnArrow;
-    std::string node_name = (*node_ptr->j_entity_ptr)["name"].GetString();
-    bool has_children = !node_ptr->children.empty();
+    if (node_ptr == edit_node_ptr) {
+        ImGui::Indent(ImGui::GetTreeNodeToLabelSpacing());
+        ImGui::SetNextItemWidth(ImGui::GetWindowContentRegionWidth() - ImGui::GetTreeNodeToLabelSpacing());
+        bool success = false;
 
-    if (node_ptr->is_selected)
-        node_flags |= ImGuiTreeNodeFlags_Selected;
+        if (edit_node_needs_focus)
+            ImGui::SetKeyboardFocusHere(); // Set focus when it's created
 
-    if (!has_children)
-        node_flags |= ImGuiTreeNodeFlags_Leaf;
+        if (ImGui::InputText("##FileName", &edit_node_string, ImGuiInputTextFlags_EnterReturnsTrue)) {
+            switch (edit_node_mode) {
+            case EditMode::EntityCreation:
+                // TODO: implement this
+                break;
+            case EditMode::Rename:
+                node_ptr->entity_ptr->setName(edit_node_string);
+                (*node_ptr->j_entity_ptr)["name"].SetString(edit_node_string.c_str(), collection_panel_ptr->j_document.GetAllocator());
+                success = true;
+                break;
+            }
+        }
 
-    bool node_open = ImGui::TreeNodeEx(node_name.c_str(), node_flags);
-
-    if (ImGui::IsItemClicked(0) || ImGui::IsItemClicked(1)) {
-        ImGuiIO& io = ImGui::GetIO();
-
-        // macOS style: Shortcuts using Cmd/Super instead of Ctrl
-        const bool is_shortcut_key = (io.ConfigMacOSXBehaviors ? (io.KeySuper && !io.KeyCtrl) : (io.KeyCtrl && !io.KeySuper)) && !io.KeyAlt && !io.KeyShift;
-
-        if (is_shortcut_key && ImGui::IsItemClicked(0)) {
-            if (node_ptr->is_selected) {
-                auto found = std::find_if(selected_nodes.begin(), selected_nodes.end(), [&](EntityNode* p) { return p == node_ptr; });
-                assert(found != selected_nodes.end());
-
-                selected_nodes.erase(found);
-            } else
-                selected_nodes.push_back(node_ptr);
-
-            node_ptr->is_selected = !node_ptr->is_selected;
-        } else {
-            if (!node_ptr->is_selected || ImGui::IsItemClicked(0)) {
-                if (!selected_nodes.empty()) {
-                    for (auto& selected_node_ptr : selected_nodes)
-                        selected_node_ptr->is_selected = false;
-
-                    selected_nodes.clear();
-                }
-
-                selected_nodes.push_back(node_ptr);
-                node_ptr->is_selected = true;
+        if (edit_node_needs_focus)
+            edit_node_needs_focus = false;
+        else if (!ImGui::IsItemActive()) { // We need to delay this check on the next frame
+            if (!success && edit_node_mode != EditMode::Rename) {
+                auto& parent_children = node_ptr->parent->children;
+                parent_children.erase(parent_children.end() - 1); // The EditNode is always the last in creation mode
             }
 
-            if (ImGui::IsItemClicked(0))
-                clicked_node_ptr = node_ptr;
+            edit_node_ptr = nullptr;
         }
-    }
 
-    if (ImGui::BeginPopupContextItem()) {
-        if (ImGui::MenuItem("Delete"))
-            delete_selected_nodes = true;
+        ImGui::Unindent(ImGui::GetTreeNodeToLabelSpacing());
+    } else {
+        ImGuiTreeNodeFlags node_flags = ImGuiTreeNodeFlags_FramePadding | ImGuiTreeNodeFlags_SpanFullWidth | ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_OpenOnArrow;
+        std::string node_name = (*node_ptr->j_entity_ptr)["name"].GetString();
+        bool has_children = !node_ptr->children.empty();
 
-        ImGui::EndPopup();
-    }
+        if (node_ptr->is_selected)
+            node_flags |= ImGuiTreeNodeFlags_Selected;
 
-    if (node_open) {
-        for (auto& child : node_ptr->children)
-            displayEntityTree(child.get());
+        if (!has_children)
+            node_flags |= ImGuiTreeNodeFlags_Leaf;
 
-        ImGui::TreePop();
+        bool node_open = ImGui::TreeNodeEx(node_name.c_str(), node_flags);
+
+        if (ImGui::IsItemClicked(0) || ImGui::IsItemClicked(1)) {
+            ImGuiIO& io = ImGui::GetIO();
+
+            // macOS style: Shortcuts using Cmd/Super instead of Ctrl
+            const bool is_shortcut_key = (io.ConfigMacOSXBehaviors ? (io.KeySuper && !io.KeyCtrl) : (io.KeyCtrl && !io.KeySuper)) && !io.KeyAlt && !io.KeyShift;
+
+            if (is_shortcut_key && ImGui::IsItemClicked(0)) {
+                if (node_ptr->is_selected) {
+                    auto found = std::find_if(selected_nodes.begin(), selected_nodes.end(), [&](EntityNode* p) { return p == node_ptr; });
+                    assert(found != selected_nodes.end());
+
+                    selected_nodes.erase(found);
+                } else
+                    selected_nodes.push_back(node_ptr);
+
+                node_ptr->is_selected = !node_ptr->is_selected;
+            } else {
+                if (!node_ptr->is_selected || ImGui::IsItemClicked(0)) {
+                    if (!selected_nodes.empty()) {
+                        for (auto& selected_node_ptr : selected_nodes)
+                            selected_node_ptr->is_selected = false;
+
+                        selected_nodes.clear();
+                    }
+
+                    selected_nodes.push_back(node_ptr);
+                    node_ptr->is_selected = true;
+                }
+
+                if (ImGui::IsItemClicked(0))
+                    clicked_node_ptr = node_ptr;
+            }
+        }
+
+        if (ImGui::BeginPopupContextItem()) {
+            if (ImGui::MenuItem("Add child")) {
+                edit_node_ptr = node_ptr->addChild();
+                edit_node_mode = EditMode::EntityCreation;
+                edit_node_string = "";
+                edit_node_needs_focus = true;
+            }
+
+            if (ImGui::MenuItem("Rename")) {
+                edit_node_ptr = node_ptr;
+                edit_node_mode = EditMode::Rename;
+                edit_node_string = node_name;
+                edit_node_needs_focus = true;
+            }
+
+            if (ImGui::MenuItem("Delete"))
+                delete_selected_nodes = true;
+
+            ImGui::EndPopup();
+        }
+
+        if (node_open) {
+            for (auto& child : node_ptr->children)
+                displayEntityTree(child.get());
+
+            ImGui::TreePop();
+        }
     }
 }

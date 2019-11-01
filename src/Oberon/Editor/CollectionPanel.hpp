@@ -39,7 +39,7 @@ using namespace rapidjson;
 
 struct EntityNode {
     EntityNode(Entity* entity_ptr, Value* j_entity_ptr);
-    EntityNode* addChild(Entity* entity_ptr, Value* j_entity_ptr);
+    EntityNode* addChild(Entity* entity_ptr = nullptr, Value* j_entity_ptr = nullptr);
 
     Entity* entity_ptr;
     Value* j_entity_ptr;
@@ -55,8 +55,9 @@ public:
     void drawContent();
     void newFrame();
 
-    Containers::Pointer<EntityNode> root_node;
     std::string path;
+    Document j_document;
+    Containers::Pointer<EntityNode> root_node;
 
     bool is_open;
     bool is_focused;
@@ -75,6 +76,4 @@ private:
     Object2D* camera_object;
     SceneGraph::Camera2D* camera;
     SceneGraph::DrawableGroup2D drawables;
-
-    Document j_document;
 };

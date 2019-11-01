@@ -26,26 +26,26 @@
 
 RectangleShape::RectangleShape(SceneGraph::AbstractObject2D& object, SceneGraph::DrawableGroup2D* drawables, Shaders::Flat2D& shader, const Vector2& size, const Color4& color)
     : SceneGraph::Drawable2D{ object, drawables }
-    , shader(shader)
-    , size{ size }
-    , color{ color }
+    , _shader(shader)
+    , _size{ size }
+    , _color{ color }
 {
-    mesh = MeshTools::compile(Primitives::squareSolid());
+    _mesh = MeshTools::compile(Primitives::squareSolid());
 }
 
 void RectangleShape::setSize(const Vector2& size)
 {
-    this->size = size;
+    _size = size;
 }
 
 void RectangleShape::setColor(const Color4& color)
 {
-    this->color = color;
+    _color = color;
 }
 
 void RectangleShape::draw(const Matrix3& transformation_matrix, SceneGraph::Camera2D& camera)
 {
-    shader.setTransformationProjectionMatrix(camera.projectionMatrix() * transformation_matrix * Matrix3::scaling(size / 2))
-        .setColor(color);
-    mesh.draw(shader);
+    _shader.setTransformationProjectionMatrix(camera.projectionMatrix() * transformation_matrix * Matrix3::scaling(_size / 2))
+        .setColor(_color);
+    _mesh.draw(_shader);
 }

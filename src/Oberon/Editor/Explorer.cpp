@@ -60,7 +60,7 @@ void Explorer::newFrame()
         if (ImGui::BeginMenu("New file")) {
             if (ImGui::MenuItem("Collection")) {
                 edit_node_ptr = root_node.addChild();
-                edit_node_mode = EditMode::File_Creation;
+                edit_node_mode = EditMode::FileCreation;
                 edit_node_string = ".col";
                 edit_node_needs_focus = true;
             }
@@ -70,7 +70,7 @@ void Explorer::newFrame()
 
         if (ImGui::MenuItem("New folder")) {
             edit_node_ptr = root_node.addChild();
-            edit_node_mode = EditMode::Folder_Creation;
+            edit_node_mode = EditMode::FolderCreation;
             edit_node_string = "";
             edit_node_needs_focus = true;
         }
@@ -108,19 +108,19 @@ void Explorer::displayFileTree(FileNode* node_ptr)
     if (node_ptr == edit_node_ptr) {
         ImGui::Indent(ImGui::GetTreeNodeToLabelSpacing());
         ImGui::SetNextItemWidth(ImGui::GetWindowContentRegionWidth() - ImGui::GetTreeNodeToLabelSpacing());
+        bool success = false;
 
         if (edit_node_needs_focus)
             ImGui::SetKeyboardFocusHere(); // Set focus when it's created
 
         if (ImGui::InputText("##FileName", &edit_node_string, ImGuiInputTextFlags_EnterReturnsTrue)) {
             std::string new_path = Utility::Directory::join(node_ptr->parent->path, edit_node_string);
-            bool success = false;
 
             switch (edit_node_mode) {
-            case EditMode::File_Creation:
+            case EditMode::FileCreation:
                 success = Utility::Directory::writeString(new_path, "");
                 break;
-            case EditMode::Folder_Creation:
+            case EditMode::FolderCreation:
                 success = Utility::Directory::mkpath(new_path);
                 break;
             case EditMode::Rename:
@@ -136,8 +136,14 @@ void Explorer::displayFileTree(FileNode* node_ptr)
 
         if (edit_node_needs_focus)
             edit_node_needs_focus = false;
-        else if (!ImGui::IsItemActive()) // We need to delay this check on the next frame
+        else if (!ImGui::IsItemActive()) { // We need to delay this check on the next frame
+            if (!success && edit_node_mode != EditMode::Rename) {
+                auto& parent_children = node_ptr->parent->children;
+                parent_children.erase(parent_children.end() - 1); // The EditNode is always the last in creation mode
+            }
+
             edit_node_ptr = nullptr;
+        }
 
         ImGui::Unindent(ImGui::GetTreeNodeToLabelSpacing());
     } else {
@@ -192,7 +198,7 @@ void Explorer::displayFileTree(FileNode* node_ptr)
                 if (ImGui::BeginMenu("New file")) {
                     if (ImGui::MenuItem("Collection")) {
                         edit_node_ptr = node_ptr->addChild();
-                        edit_node_mode = EditMode::File_Creation;
+                        edit_node_mode = EditMode::FileCreation;
                         edit_node_string = ".col";
                         edit_node_needs_focus = true;
                     }
@@ -202,7 +208,7 @@ void Explorer::displayFileTree(FileNode* node_ptr)
 
                 if (ImGui::MenuItem("New folder")) {
                     edit_node_ptr = node_ptr->addChild();
-                    edit_node_mode = EditMode::Folder_Creation;
+                    edit_node_mode = EditMode::FolderCreation;
                     edit_node_string = "";
                     edit_node_needs_focus = true;
                 }

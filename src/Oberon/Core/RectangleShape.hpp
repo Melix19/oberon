@@ -44,9 +44,9 @@ public:
 private:
     void draw(const Matrix3& transformation_matrix, SceneGraph::Camera2D& camera) override;
 
-    GL::Mesh mesh{ NoCreate };
-    Shaders::Flat2D& shader;
+    GL::Mesh _mesh{ NoCreate };
+    Shaders::Flat2D& _shader;
 
-    Vector2 size;
-    Color4 color;
+    Vector2 _size;
+    Color4 _color;
 };
