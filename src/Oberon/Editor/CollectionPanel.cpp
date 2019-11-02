@@ -42,6 +42,7 @@ EntityNode* EntityNode::addChild(Entity* entity_ptr, Value* j_entity_ptr)
 
 CollectionPanel::CollectionPanel(const std::string& path)
     : path(path)
+    , root_node()
     , is_open(true)
     , is_focused(false)
     , needs_focus(true)
@@ -61,7 +62,7 @@ CollectionPanel::CollectionPanel(const std::string& path)
     j_document.Parse(json.c_str());
 
     if (j_document.IsObject())
-        addEntityNodeChild(&j_document);
+        addEntityNodeChild(&j_document, &root_node);
 }
 
 void CollectionPanel::drawContent()
@@ -99,18 +100,17 @@ void CollectionPanel::newFrame()
     ImGui::End();
 }
 
-void CollectionPanel::addEntityNodeChild(Value* j_entity_ptr, EntityNode* parent_node_ptr)
+void CollectionPanel::addEntityNodeChild(Value* j_entity_ptr, EntityNode* parent_node)
 {
-    EntityNode* node_ptr;
+    Object2D* parent;
 
-    if (parent_node_ptr) {
-        Entity* entity_ptr = EntitySerializer::createEntityFromJson(j_entity_ptr, parent_node_ptr->entity_ptr, &drawables, shader);
-        node_ptr = parent_node_ptr->addChild(entity_ptr, j_entity_ptr);
-    } else {
-        Entity* entity_ptr = EntitySerializer::createEntityFromJson(j_entity_ptr, &scene, &drawables, shader);
-        root_node = Containers::pointer<EntityNode>(entity_ptr, j_entity_ptr);
-        node_ptr = root_node.get();
-    }
+    if (parent_node->entity_ptr)
+        parent = parent_node->entity_ptr;
+    else
+        parent = &scene;
+
+    Entity* entity_ptr = EntitySerializer::createEntityFromJson(j_entity_ptr, parent, &drawables, shader);
+    EntityNode* node_ptr = parent_node->addChild(entity_ptr, j_entity_ptr);
 
     auto j_children = (*j_entity_ptr)["children"].GetArray();
     for (auto& j_child : j_children) {

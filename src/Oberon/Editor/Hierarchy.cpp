@@ -34,23 +34,27 @@ Hierarchy::Hierarchy()
 
 void Hierarchy::newFrame()
 {
-    if (collection_panel_ptr && collection_panel_ptr->root_node.get())
+    if (collection_panel_ptr && !collection_panel_ptr->root_node.children.empty())
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
 
     ImGui::Begin("Hierarchy");
 
     if (collection_panel_ptr) {
-        EntityNode* root_node_ptr = collection_panel_ptr->root_node.get();
-
-        if (root_node_ptr) {
+        if (!collection_panel_ptr->root_node.children.empty()) {
             ImGui::PopStyleVar();
 
             ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0.0f, 0.0f));
-            displayEntityTree(root_node_ptr);
+            displayEntityTree(collection_panel_ptr->root_node.children.front().get());
             ImGui::PopStyleVar();
         } else {
             ImGui::Text("Create root entity:");
-            ImGui::Button("Entity");
+
+            if (ImGui::Button("Entity")) {
+                edit_node_ptr = collection_panel_ptr->root_node.addChild();
+                edit_node_mode = EditMode::EntityCreation;
+                edit_node_string = "";
+                edit_node_needs_focus = true;
+            }
         }
     }
 

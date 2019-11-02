@@ -34,7 +34,7 @@
 #include <Oberon/Core/EntitySerializer.hpp>
 
 struct EntityNode {
-    EntityNode(Entity* entity_ptr, Value* j_entity_ptr);
+    EntityNode(Entity* entity_ptr = nullptr, Value* j_entity_ptr = nullptr);
     EntityNode* addChild(Entity* entity_ptr = nullptr, Value* j_entity_ptr = nullptr);
 
     Entity* entity_ptr;
@@ -53,7 +53,7 @@ public:
 
     std::string path;
     Document j_document;
-    Containers::Pointer<EntityNode> root_node;
+    EntityNode root_node;
 
     bool is_open;
     bool is_focused;
@@ -61,7 +61,7 @@ public:
     bool needs_docking;
 
 private:
-    void addEntityNodeChild(Value* j_entity_ptr, EntityNode* parent_node_ptr = nullptr);
+    void addEntityNodeChild(Value* j_entity_ptr, EntityNode* parent_node);
 
     GL::Framebuffer framebuffer{ NoCreate };
     GL::Texture2D content_texture;

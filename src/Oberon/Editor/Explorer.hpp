@@ -33,7 +33,7 @@
 using namespace Corrade;
 
 struct FileNode {
-    FileNode(const std::string& path);
+    FileNode(const std::string& path = "");
     FileNode* addChild(const std::string& path = "");
 
     std::string path;
