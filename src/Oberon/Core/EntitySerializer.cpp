@@ -24,43 +24,41 @@
 
 #include "EntitySerializer.hpp"
 
-Entity* EntitySerializer::createEntityFromJson(Value* j_entity, Object2D* parent, SceneGraph::DrawableGroup2D* drawables, Shaders::Flat2D& shader)
+Object2D* EntitySerializer::createEntityFromJson(Value& jsonEntity, Object2D* parent, SceneGraph::DrawableGroup2D* drawables, Shaders::Flat2D& shader)
 {
-    std::string entity_name = (*j_entity)["name"].GetString();
-    Entity* entity_ptr = new Entity{ entity_name, parent };
+    Object2D* entity = new Object2D{parent};
+
+    // Name
+    std::string name = jsonEntity["name"].GetString();
+    entity->addFeature<Entity>(name);
 
     // Position
-    float position_x = (*j_entity)["position"][0].GetFloat();
-    float position_y = (*j_entity)["position"][1].GetFloat();
-    entity_ptr->setTranslation({ position_x, position_y });
+    Vector2 position{jsonEntity["position"][0].GetFloat(), jsonEntity["position"][1].GetFloat()};
+    entity->setTranslation(position);
 
     // Rotation
-    float rotation = (*j_entity)["rotation"].GetFloat();
-    entity_ptr->setRotation(Complex::rotation(Deg(rotation)));
+    float rotation = jsonEntity["rotation"].GetFloat();
+    entity->setRotation(Complex::rotation(Deg(rotation)));
 
     // Scale
-    float scale_x = (*j_entity)["scale"][0].GetFloat();
-    float scale_y = (*j_entity)["scale"][1].GetFloat();
-    entity_ptr->setScaling({ scale_x, scale_y });
+    Vector2 scale{jsonEntity["scale"][0].GetFloat(), jsonEntity["scale"][1].GetFloat()};
+    entity->setScaling(scale);
 
-    auto j_components = (*j_entity)["components"].GetArray();
-    for (auto& j_component : j_components) {
-        std::string type = j_component["type"].GetString();
+    auto jsonComponents = jsonEntity["components"].GetArray();
+    for (auto& jsonComponent : jsonComponents) {
+        std::string type = jsonComponent["type"].GetString();
 
         if (type == "rectangle_shape") {
             // Size
-            float size_x = j_component["size"][0].GetFloat();
-            float size_y = j_component["size"][1].GetFloat();
+            Vector2 size{jsonComponent["size"][0].GetFloat(), jsonComponent["size"][1].GetFloat()};
 
             // Color
-            float color_r = j_component["color"][0].GetFloat();
-            float color_g = j_component["color"][1].GetFloat();
-            float color_b = j_component["color"][2].GetFloat();
-            float color_a = j_component["color"][3].GetFloat();
+            Color4 color{jsonComponent["color"][0].GetFloat(), jsonComponent["color"][1].GetFloat(), jsonComponent["color"][2].GetFloat(), jsonComponent["color"][3].GetFloat()};
 
-            entity_ptr->addFeature<RectangleShape>(drawables, shader, Vector2{ size_x, size_y }, Color4{ color_r, color_g, color_b, color_a });
+            // RectangleShape
+            entity->addFeature<RectangleShape>(drawables, shader, size, color);
         }
     }
 
-    return entity_ptr;
+    return entity;
 }

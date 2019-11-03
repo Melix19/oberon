@@ -34,10 +34,10 @@
 #include <Oberon/Core/EntitySerializer.hpp>
 
 struct EntityNode {
-    EntityNode(Entity* entity_ptr = nullptr, Value* j_entity_ptr = nullptr);
-    EntityNode* addChild(Entity* entity_ptr = nullptr, Value* j_entity_ptr = nullptr);
+    EntityNode(Object2D* entity_ptr = nullptr, Value* j_entity_ptr = nullptr);
+    EntityNode* addChild(Object2D* entity_ptr = nullptr, Value* j_entity_ptr = nullptr);
 
-    Entity* entity_ptr;
+    Object2D* entity_ptr;
     Value* j_entity_ptr;
     bool is_selected;
 
@@ -50,9 +50,10 @@ public:
     CollectionPanel(const std::string& path);
     void drawContent();
     void newFrame();
+    void addEntityNodeChild(const std::string& name, EntityNode* parent_node);
 
     std::string path;
-    Document j_document;
+    Document jsonDocument;
     EntityNode root_node;
 
     bool is_open;

@@ -35,18 +35,32 @@
 
 using namespace Magnum;
 
-class RectangleShape : public SceneGraph::Drawable2D {
-public:
-    explicit RectangleShape(SceneGraph::AbstractObject2D& object, SceneGraph::DrawableGroup2D* drawables, Shaders::Flat2D& shader, const Vector2& size, const Color4& color);
-    void setSize(const Vector2& size);
-    void setColor(const Color4& color);
+class RectangleShape: public SceneGraph::Drawable2D {
+    public:
+        explicit RectangleShape(SceneGraph::AbstractObject2D& object, SceneGraph::DrawableGroup2D* drawables, Shaders::Flat2D& shader, const Vector2& size, const Color4& color): SceneGraph::Drawable2D{object, drawables}, _shader(shader), _size{size}, _color{color} {
+            _mesh = MeshTools::compile(Primitives::squareSolid());
+        }
 
-private:
-    void draw(const Matrix3& transformation_matrix, SceneGraph::Camera2D& camera) override;
+        RectangleShape& setSize(const Vector2& size) {
+            _size = size;
+            return *this;
+        }
 
-    GL::Mesh _mesh{ NoCreate };
-    Shaders::Flat2D& _shader;
+        RectangleShape& setColor(const Color4& color) {
+            _color = color;
+            return *this;
+        }
 
-    Vector2 _size;
-    Color4 _color;
+    private:
+        void draw(const Matrix3& transformationMatrix, SceneGraph::Camera2D& camera) override {
+            _shader.setTransformationProjectionMatrix(camera.projectionMatrix() * transformationMatrix * Matrix3::scaling(_size / 2))
+                .setColor(_color);
+            _mesh.draw(_shader);
+        }
+
+        GL::Mesh _mesh{NoCreate};
+        Shaders::Flat2D& _shader;
+
+        Vector2 _size;
+        Color4 _color;
 };

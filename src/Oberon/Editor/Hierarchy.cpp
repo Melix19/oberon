@@ -100,20 +100,32 @@ void Hierarchy::displayEntityTree(EntityNode* node_ptr)
 
         if (ImGui::InputText("##FileName", &edit_node_string, ImGuiInputTextFlags_EnterReturnsTrue)) {
             switch (edit_node_mode) {
-            case EditMode::EntityCreation:
-                // TODO: implement this
-                break;
-            case EditMode::Rename:
-                node_ptr->entity_ptr->setName(edit_node_string);
-                (*node_ptr->j_entity_ptr)["name"].SetString(edit_node_string.c_str(), collection_panel_ptr->j_document.GetAllocator());
-                success = true;
-                break;
+                case EditMode::EntityCreation: {
+                    EntityNode* parent = node_ptr->parent;
+
+                    // Remove EditNode
+                    auto& parent_children = parent->children;
+                    parent_children.erase(parent_children.end() - 1);
+
+                    // Add the new EntityNode
+                    collection_panel_ptr->addEntityNodeChild(edit_node_string, parent);
+                    success = true;
+                    break;
+                }
+                case EditMode::Rename: {
+                    Entity* entity_cast = static_cast<Entity*>(node_ptr->entity_ptr->features().first());
+                    entity_cast->setName(edit_node_string);
+
+                    (*node_ptr->j_entity_ptr)["name"].SetString(edit_node_string.c_str(), collection_panel_ptr->jsonDocument.GetAllocator());
+                    success = true;
+                    break;
+                }
             }
         }
 
         if (edit_node_needs_focus)
             edit_node_needs_focus = false;
-        else if (!ImGui::IsItemActive()) { // We need to delay this check on the next frame
+        else if (!ImGui::IsItemActive()) {
             if (!success && edit_node_mode != EditMode::Rename) {
                 auto& parent_children = node_ptr->parent->children;
                 parent_children.erase(parent_children.end() - 1); // The EditNode is always the last in creation mode

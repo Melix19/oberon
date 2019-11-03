@@ -24,20 +24,22 @@
 
 #pragma once
 
-#include <Magnum/SceneGraph/TranslationRotationScalingTransformation2D.h>
+#include <Magnum/SceneGraph/AbstractFeature.h>
 #include <string>
 
 using namespace Magnum;
 
-typedef SceneGraph::Object<SceneGraph::TranslationRotationScalingTransformation2D> Object2D;
-typedef SceneGraph::Scene<SceneGraph::TranslationRotationScalingTransformation2D> Scene2D;
+class Entity: public SceneGraph::AbstractFeature2D {
+    public:
+        explicit Entity(SceneGraph::AbstractObject2D& object, const std::string& name): SceneGraph::AbstractFeature2D{object}, _name(name) {}
 
-class Entity : public Object2D {
-public:
-    explicit Entity(const std::string& name, Object2D* parent);
-    void setName(const std::string& name);
-    std::string name();
+        Entity& setName(const std::string& name) {
+            _name = name;
+            return *this;
+        }
 
-private:
-    std::string _name;
+        std::string name() const { return _name; }
+
+    private:
+        std::string _name;
 };

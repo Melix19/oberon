@@ -136,7 +136,7 @@ void Explorer::displayFileTree(FileNode* node_ptr)
 
         if (edit_node_needs_focus)
             edit_node_needs_focus = false;
-        else if (!ImGui::IsItemActive()) { // We need to delay this check on the next frame
+        else if (!ImGui::IsItemActive()) {
             if (!success && edit_node_mode != EditMode::Rename) {
                 auto& parent_children = node_ptr->parent->children;
                 parent_children.erase(parent_children.end() - 1); // The EditNode is always the last in creation mode
