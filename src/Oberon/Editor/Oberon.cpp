@@ -25,8 +25,7 @@
 #include "Editor.hpp"
 #include "ProjectManager.hpp"
 
-int main(int argc, char** argv)
-{
+int main(int argc, char** argv) {
     int exitCode;
     std::string projectPath;
 
@@ -36,9 +35,8 @@ int main(int argc, char** argv)
         projectPath = projectManager.projectPath();
     }
 
-    if (exitCode == 0 && !projectPath.empty()) {
+    if(exitCode == 0 && !projectPath.empty()) {
         Editor editor({argc, argv}, projectPath);
         return editor.exec();
-    } else
-        return exitCode;
+    } else return exitCode;
 }

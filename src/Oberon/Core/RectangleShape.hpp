@@ -57,7 +57,7 @@ class RectangleShape: public SceneGraph::Drawable2D {
 
     private:
         void draw(const Matrix3& transformationMatrix, SceneGraph::Camera2D& camera) override {
-            _shader.setTransformationProjectionMatrix(camera.projectionMatrix() * transformationMatrix * Matrix3::scaling(_size / 2))
+            _shader.setTransformationProjectionMatrix(camera.projectionMatrix()*transformationMatrix*Matrix3::scaling(_size/2))
                 .setColor(_color);
             _mesh.draw(_shader);
         }

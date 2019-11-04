@@ -27,34 +27,34 @@
 Object2D* EntitySerializer::createEntityFromJson(Value& jsonEntity, Object2D* parent, SceneGraph::DrawableGroup2D* drawables, Shaders::Flat2D& shader) {
     Object2D* entity = new Object2D{parent};
 
-    // Name
+    /* Name and Entity */
     std::string name = jsonEntity["name"].GetString();
     entity->addFeature<Entity>(name);
 
-    // Position
+    /* Position */
     Vector2 position{jsonEntity["position"][0].GetFloat(), jsonEntity["position"][1].GetFloat()};
     entity->setTranslation(position);
 
-    // Rotation
-    float rotation = jsonEntity["rotation"].GetFloat();
+    /* Rotation */
+    Float rotation = jsonEntity["rotation"].GetFloat();
     entity->setRotation(Complex::rotation(Deg(rotation)));
 
-    // Scale
+    /* Scale */
     Vector2 scale{jsonEntity["scale"][0].GetFloat(), jsonEntity["scale"][1].GetFloat()};
     entity->setScaling(scale);
 
     auto jsonComponents = jsonEntity["components"].GetArray();
-    for (auto& jsonComponent : jsonComponents) {
+    for(auto& jsonComponent: jsonComponents) {
         std::string type = jsonComponent["type"].GetString();
 
-        if (type == "rectangle_shape") {
-            // Size
+        if(type == "rectangle_shape") {
+            /* Size */
             Vector2 size{jsonComponent["size"][0].GetFloat(), jsonComponent["size"][1].GetFloat()};
 
-            // Color
+            /* Color */
             Color4 color{jsonComponent["color"][0].GetFloat(), jsonComponent["color"][1].GetFloat(), jsonComponent["color"][2].GetFloat(), jsonComponent["color"][3].GetFloat()};
 
-            // RectangleShape
+            /* RectangleShape */
             entity->addFeature<RectangleShape>(drawables, shader, size, color);
         }
     }

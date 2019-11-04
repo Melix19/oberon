@@ -25,10 +25,9 @@
 #include "ProjectManager.hpp"
 
 ProjectManager::ProjectManager(const Arguments& arguments): Platform::Application{arguments,
-    Configuration{}.setSize({1024, 576})
-                   .setTitle("Oberon - Project Manager")
-                   .setWindowFlags(Configuration::WindowFlag::Resizable)},
-    _projectPath("")
+    Configuration{}.setTitle("Oberon - Project Manager")
+                   .setSize({1024, 576})
+                   .setWindowFlags(Configuration::WindowFlag::Resizable)}
 {
     ImGui::CreateContext();
     Themer::styleColorsDark();
@@ -60,8 +59,7 @@ ProjectManager::ProjectManager(const Arguments& arguments): Platform::Applicatio
     setMinimalLoopPeriod(16);
 }
 
-void ProjectManager::drawEvent()
-{
+void ProjectManager::drawEvent() {
     GL::defaultFramebuffer.clear(GL::FramebufferClear::Color);
 
     _imgui.newFrame();
@@ -87,23 +85,23 @@ void ProjectManager::drawEvent()
     ImGui::Begin("Project Manager", nullptr, windowFlags);
     ImGui::PopStyleVar(3);
 
-    ImGuiID dockspaceId = ImGui::GetID("DockSpace");
+    ImGuiID dockSpaceId = ImGui::GetID("DockSpace");
 
-    if (!ImGui::DockBuilderGetNode(dockspaceId)) {
-        ImGui::DockBuilderRemoveNode(dockspaceId);
-        ImGui::DockBuilderAddNode(dockspaceId, ImGuiDockNodeFlags_DockSpace);
-        ImGui::DockBuilderSetNodeSize(dockspaceId, viewport->Size);
+    if(!ImGui::DockBuilderGetNode(dockSpaceId)) {
+        ImGui::DockBuilderRemoveNode(dockSpaceId);
+        ImGui::DockBuilderAddNode(dockSpaceId, ImGuiDockNodeFlags_DockSpace);
+        ImGui::DockBuilderSetNodeSize(dockSpaceId, viewport->Size);
 
-        ImGuiID dockMainId = dockspaceId;
+        ImGuiID dockMainId = dockSpaceId;
         ImGuiID dockRightId = ImGui::DockBuilderSplitNode(dockMainId, ImGuiDir_Right, 0.4f, nullptr, &dockMainId);
 
         ImGui::DockBuilderDockWindow("Main", dockMainId);
         ImGui::DockBuilderDockWindow("List", dockRightId);
 
-        ImGui::DockBuilderFinish(dockspaceId);
+        ImGui::DockBuilderFinish(dockSpaceId);
     }
 
-    ImGui::DockSpace(dockspaceId, ImVec2(0.0f, 0.0f), ImGuiDockNodeFlags_PassthruCentralNode);
+    ImGui::DockSpace(dockSpaceId, ImVec2(0.0f, 0.0f), ImGuiDockNodeFlags_PassthruCentralNode);
     ImGui::End();
 
     ImGui::Begin("Main");

@@ -39,7 +39,7 @@ class ProjectManager: public Platform::Application {
     public:
         explicit ProjectManager(const Arguments& arguments);
 
-        const std::string& projectPath() const { return _projectPath; }
+        std::string projectPath() const { return _projectPath; }
 
     private:
         void drawEvent() override;

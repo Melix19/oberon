@@ -45,7 +45,7 @@ struct EntityNode {
     std::vector<Containers::Pointer<EntityNode>> children;
 };
 
-class CollectionPanel {
+class CollectionPanel: public Containers::LinkedListItem<CollectionPanel> {
 public:
     CollectionPanel(const std::string& path);
     void drawContent();

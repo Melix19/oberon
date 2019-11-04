@@ -35,34 +35,34 @@
 #include <Magnum/GL/Renderer.h>
 #include <Magnum/ImGuiIntegration/Context.hpp>
 #include <Magnum/Platform/Sdl2Application.h>
-#include <imgui_internal.h>
+#include <OberonExternal/imgui/imgui_internal.h>
 
 using namespace Magnum;
 
-class Editor : public Platform::Application {
-public:
-    explicit Editor(const Arguments& arguments, const std::string& project_path);
+class Editor: public Platform::Application {
+    public:
+        explicit Editor(const Arguments& arguments, const std::string& projectPath);
 
-private:
-    void drawEvent() override;
+    private:
+        void drawEvent() override;
 
-    void viewportEvent(ViewportEvent& event) override;
+        void viewportEvent(ViewportEvent& event) override;
 
-    void keyPressEvent(KeyEvent& event) override;
-    void keyReleaseEvent(KeyEvent& event) override;
+        void keyPressEvent(KeyEvent& event) override;
+        void keyReleaseEvent(KeyEvent& event) override;
 
-    void mousePressEvent(MouseEvent& event) override;
-    void mouseReleaseEvent(MouseEvent& event) override;
-    void mouseMoveEvent(MouseMoveEvent& event) override;
-    void mouseScrollEvent(MouseScrollEvent& event) override;
-    void textInputEvent(TextInputEvent& event) override;
+        void mousePressEvent(MouseEvent& event) override;
+        void mouseReleaseEvent(MouseEvent& event) override;
+        void mouseMoveEvent(MouseMoveEvent& event) override;
+        void mouseScrollEvent(MouseScrollEvent& event) override;
+        void textInputEvent(TextInputEvent& event) override;
 
-    ImGuiIntegration::Context imgui{ NoCreate };
+        ImGuiIntegration::Context _imgui{NoCreate};
 
-    Console console;
-    Explorer explorer;
-    Hierarchy hierarchy;
-    Inspector inspector;
+        Console _console;
+        Explorer _explorer;
+        Hierarchy _hierarchy;
+        Inspector _inspector;
 
-    std::vector<Containers::Pointer<CollectionPanel>> collection_panels;
+        Containers::LinkedList<CollectionPanel> _collectionPanels;
 };
