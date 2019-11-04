@@ -33,12 +33,12 @@ class Entity: public SceneGraph::AbstractFeature2D {
     public:
         explicit Entity(SceneGraph::AbstractObject2D& object, const std::string& name): SceneGraph::AbstractFeature2D{object}, _name(name) {}
 
+        std::string name() const { return _name; }
+
         Entity& setName(const std::string& name) {
             _name = name;
             return *this;
         }
-
-        std::string name() const { return _name; }
 
     private:
         std::string _name;

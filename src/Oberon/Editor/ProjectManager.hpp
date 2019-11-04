@@ -30,30 +30,32 @@
 #include <Magnum/GL/Renderer.h>
 #include <Magnum/ImGuiIntegration/Context.hpp>
 #include <Magnum/Platform/Sdl2Application.h>
-#include <imgui_internal.h>
-#include <portable-file-dialogs.h>
+#include <OberonExternal/imgui/imgui_internal.h>
+#include <OberonExternal/portable-file-dialogs/portable-file-dialogs.h>
 
 using namespace Magnum;
 
-class ProjectManager : public Platform::Application {
-public:
-    explicit ProjectManager(const Arguments& arguments);
+class ProjectManager: public Platform::Application {
+    public:
+        explicit ProjectManager(const Arguments& arguments);
 
-    std::string project_path;
+        const std::string& projectPath() const { return _projectPath; }
 
-private:
-    void drawEvent() override;
+    private:
+        void drawEvent() override;
 
-    void viewportEvent(ViewportEvent& event) override;
+        void viewportEvent(ViewportEvent& event) override;
 
-    void keyPressEvent(KeyEvent& event) override;
-    void keyReleaseEvent(KeyEvent& event) override;
+        void keyPressEvent(KeyEvent& event) override;
+        void keyReleaseEvent(KeyEvent& event) override;
 
-    void mousePressEvent(MouseEvent& event) override;
-    void mouseReleaseEvent(MouseEvent& event) override;
-    void mouseMoveEvent(MouseMoveEvent& event) override;
-    void mouseScrollEvent(MouseScrollEvent& event) override;
-    void textInputEvent(TextInputEvent& event) override;
+        void mousePressEvent(MouseEvent& event) override;
+        void mouseReleaseEvent(MouseEvent& event) override;
+        void mouseMoveEvent(MouseMoveEvent& event) override;
+        void mouseScrollEvent(MouseScrollEvent& event) override;
+        void textInputEvent(TextInputEvent& event) override;
 
-    ImGuiIntegration::Context imgui{ NoCreate };
+        ImGuiIntegration::Context _imgui{NoCreate};
+
+        std::string _projectPath;
 };

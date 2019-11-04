@@ -41,10 +41,14 @@ class RectangleShape: public SceneGraph::Drawable2D {
             _mesh = MeshTools::compile(Primitives::squareSolid());
         }
 
+        Vector2 size() const { return _size; }
+
         RectangleShape& setSize(const Vector2& size) {
             _size = size;
             return *this;
         }
+
+        Color4 color() const { return _color; }
 
         RectangleShape& setColor(const Color4& color) {
             _color = color;
