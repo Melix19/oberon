@@ -26,7 +26,7 @@
 
 CollectionPanel::CollectionPanel(const std::string& path): _path(path),
     _rootNode(&_scene, _jsonDocument), _isOpen(true), _isFocused(false), _needsFocus(true),
-    _needsDocking(true)
+    _needsDocking(true), _isVisible(true)
 {
     _viewportTexture.setStorage(1, GL::TextureFormat::RGBA8, {2560, 1440});
     _framebuffer = GL::Framebuffer{{{}, _viewportTexture.imageSize(0)}};
@@ -46,6 +46,10 @@ CollectionPanel::CollectionPanel(const std::string& path): _path(path),
 }
 
 void CollectionPanel::drawViewport() {
+    /* If the window is not visible, just end the method here. */
+    if(!_isVisible || !_isOpen)
+        return;
+
     _framebuffer.clear(GL::FramebufferClear::Color)
         .bind();
 
@@ -55,12 +59,18 @@ void CollectionPanel::drawViewport() {
 void CollectionPanel::newFrame() {
     std::string filename = Utility::Directory::filename(_path);
 
-    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.f, 0.f));
-    ImGui::Begin(filename.c_str(), &_isOpen, ImGuiWindowFlags_NoScrollbar |
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
+    _isVisible = ImGui::Begin(filename.c_str(), &_isOpen, ImGuiWindowFlags_NoScrollbar |
         ImGuiWindowFlags_NoScrollWithMouse);
     ImGui::PopStyleVar();
 
     _isFocused = ImGui::IsWindowFocused();
+
+    /* If the window is not visible, just end the method here. */
+    if(!_isVisible || !_isOpen) {
+        ImGui::End();
+        return;
+    }
 
     Vector2 imageSize{_viewportTexture.imageSize(0)};
     ImVec2 contentSize(ImGui::GetWindowContentRegionMax().x - ImGui::GetWindowContentRegionMin().x,

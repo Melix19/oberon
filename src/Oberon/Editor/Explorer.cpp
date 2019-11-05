@@ -34,8 +34,14 @@ void Explorer::newFrame() {
     _clickedNode = nullptr;
 
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
-    ImGui::Begin("Explorer");
+    bool isVisible = ImGui::Begin("Explorer");
     ImGui::PopStyleVar();
+
+    /* If the window is not visible, just end the method here. */
+    if(!isVisible) {
+        ImGui::End();
+        return;
+    }
 
     if(ImGui::BeginPopupContextWindow()) {
         if(ImGui::BeginMenu("New file")) {

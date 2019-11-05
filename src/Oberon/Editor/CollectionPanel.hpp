@@ -73,6 +73,7 @@ class CollectionPanel: public Containers::LinkedListItem<CollectionPanel> {
         bool _isFocused;
         bool _needsFocus;
         bool _needsDocking;
+        bool _isVisible;
 
         GL::Framebuffer _framebuffer{NoCreate};
         GL::Texture2D _viewportTexture;

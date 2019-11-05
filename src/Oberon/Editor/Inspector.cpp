@@ -27,7 +27,13 @@
 void Inspector::newFrame() {
     const Int columnWidth = 100;
 
-    ImGui::Begin("Inspector");
+    bool isVisible = ImGui::Begin("Inspector");
+
+    /* If the window is not visible, just end the method here. */
+    if(!isVisible) {
+        ImGui::End();
+        return;
+    }
 
     if(_entityNode) {
         /* Position */

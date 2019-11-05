@@ -36,7 +36,14 @@ void Hierarchy::newFrame() {
 
     if(showTree) ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
 
-    ImGui::Begin("Hierarchy");
+    bool isVisible = ImGui::Begin("Hierarchy");
+
+    /* If the window is not visible, just end the method here. */
+    if(!isVisible) {
+        if(showTree) ImGui::PopStyleVar();
+        ImGui::End();
+        return;
+    }
 
     if(_panel) {
         EntityNode* rootNode = &_panel->rootNode();
