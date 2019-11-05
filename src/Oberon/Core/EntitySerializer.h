@@ -24,43 +24,19 @@
 
 #pragma once
 
-#include "CollectionPanel.hpp"
+#include "Entity.h"
+#include "RectangleShape.h"
 
-#include <misc/cpp/imgui_stdlib.h>
+#include <Magnum/SceneGraph/TranslationRotationScalingTransformation2D.h>
+#include <OberonExternal/rapidjson/document.h>
 
-class Hierarchy {
-    public:
-        Hierarchy(): _panel(nullptr), _deleteSelectedNodes(false), _clickedNode(nullptr), _editNode(nullptr) {}
+using namespace rapidjson;
 
-        void newFrame();
-        void clearContent();
+typedef SceneGraph::Object<SceneGraph::TranslationRotationScalingTransformation2D> Object2D;
+typedef SceneGraph::Scene<SceneGraph::TranslationRotationScalingTransformation2D> Scene2D;
 
-        CollectionPanel* panel() { return _panel; }
+namespace EntitySerializer {
 
-        Hierarchy& setPanel(CollectionPanel* panel) {
-            _panel = panel;
-            return *this;
-        }
+Object2D* createEntityFromJson(Value& jsonEntity, Object2D* parent, SceneGraph::DrawableGroup2D* drawables, Shaders::Flat2D& shader);
 
-        EntityNode* clickedNode() const { return _clickedNode; }
-
-    private:
-        void displayEntityTree(EntityNode* node);
-        void displayEditNode(EntityNode* node);
-
-        CollectionPanel* _panel;
-
-        std::vector<EntityNode*> _selectedNodes;
-        bool _deleteSelectedNodes;
-        EntityNode* _clickedNode;
-
-        enum class EditMode {
-            EntityCreation,
-            Rename
-        };
-
-        EntityNode* _editNode;
-        EditMode _editNodeMode;
-        std::string _editNodeText;
-        bool _editNodeNeedsFocus;
-};
+}

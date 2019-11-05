@@ -22,7 +22,7 @@
     SOFTWARE.
 */
 
-#include "Explorer.hpp"
+#include "Explorer.h"
 
 Explorer::Explorer(const std::string& rootPath): _rootNode(rootPath),
     _deleteSelectedNodes(false), _clickedNode(nullptr), _editNode(nullptr)

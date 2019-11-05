@@ -22,7 +22,7 @@
     SOFTWARE.
 */
 
-#include "Hierarchy.hpp"
+#include "Hierarchy.h"
 
 void Hierarchy::newFrame() {
     _clickedNode = nullptr;

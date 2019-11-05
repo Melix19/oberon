@@ -22,7 +22,7 @@
     SOFTWARE.
 */
 
-#include "Themer.hpp"
+#include "Themer.h"
 
 void Themer::styleColorsDark() {
     ImGuiStyle& style = ImGui::GetStyle();

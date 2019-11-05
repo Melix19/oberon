@@ -22,7 +22,7 @@
     SOFTWARE.
 */
 
-#include "CollectionPanel.hpp"
+#include "CollectionPanel.h"
 
 CollectionPanel::CollectionPanel(const std::string& path): _path(path),
     _rootNode(&_scene, _jsonDocument), _isOpen(true), _isFocused(false), _needsFocus(true),

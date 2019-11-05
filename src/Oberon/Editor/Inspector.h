@@ -24,19 +24,21 @@
 
 #pragma once
 
-#include "Entity.hpp"
-#include "RectangleShape.hpp"
+#include "CollectionPanel.h"
 
-#include <Magnum/SceneGraph/TranslationRotationScalingTransformation2D.h>
-#include <OberonExternal/rapidjson/document.h>
+#include <Corrade/Utility/Assert.h>
 
-using namespace rapidjson;
+class Inspector {
+    public:
+        Inspector(): _entityNode(nullptr) {}
+        void newFrame();
+        void clearContent();
 
-typedef SceneGraph::Object<SceneGraph::TranslationRotationScalingTransformation2D> Object2D;
-typedef SceneGraph::Scene<SceneGraph::TranslationRotationScalingTransformation2D> Scene2D;
+        Inspector& setEntityNode(EntityNode* entityNode) {
+            _entityNode = entityNode;
+            return *this;
+        }
 
-namespace EntitySerializer {
-
-Object2D* createEntityFromJson(Value& jsonEntity, Object2D* parent, SceneGraph::DrawableGroup2D* drawables, Shaders::Flat2D& shader);
-
-}
+    private:
+        EntityNode* _entityNode;
+};

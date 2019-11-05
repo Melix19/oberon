@@ -24,7 +24,7 @@
 
 #pragma once
 
-#include "Themer.hpp"
+#include "Themer.h"
 
 #include <Magnum/GL/DefaultFramebuffer.h>
 #include <Magnum/GL/Renderer.h>

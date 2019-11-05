@@ -22,7 +22,7 @@
     SOFTWARE.
 */
 
-#include "Console.hpp"
+#include "Console.h"
 
 void Console::newFrame() {
     ImGui::Begin("Console");

@@ -22,8 +22,8 @@
     SOFTWARE.
 */
 
-#include "Editor.hpp"
-#include "ProjectManager.hpp"
+#include "Editor.h"
+#include "ProjectManager.h"
 
 int main(int argc, char** argv) {
     int exitCode;

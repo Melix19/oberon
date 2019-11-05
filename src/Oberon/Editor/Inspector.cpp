@@ -22,7 +22,7 @@
     SOFTWARE.
 */
 
-#include "Inspector.hpp"
+#include "Inspector.h"
 
 void Inspector::newFrame() {
     const Int columnWidth = 100;

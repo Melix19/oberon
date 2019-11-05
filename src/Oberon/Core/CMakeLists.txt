@@ -34,9 +34,9 @@ set(OberonCore_SOURCES
     EntitySerializer.cpp)
 
 set(OberonCore_HEADERS
-    Entity.hpp
-    EntitySerializer.hpp
-    RectangleShape.hpp)
+    Entity.h
+    EntitySerializer.h
+    RectangleShape.h)
 
 add_library(OberonCore
     ${OberonCore_SOURCES}

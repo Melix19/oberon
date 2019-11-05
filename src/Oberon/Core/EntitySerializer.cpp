@@ -22,7 +22,7 @@
     SOFTWARE.
 */
 
-#include "EntitySerializer.hpp"
+#include "EntitySerializer.h"
 
 Object2D* EntitySerializer::createEntityFromJson(Value& jsonEntity, Object2D* parent, SceneGraph::DrawableGroup2D* drawables, Shaders::Flat2D& shader) {
     Object2D* entity = new Object2D{parent};

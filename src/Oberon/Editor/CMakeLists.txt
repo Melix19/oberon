@@ -43,16 +43,16 @@ set(OberonEditor_SOURCES
     ${OberonEditor_RESOURCES})
 
 set(OberonEditor_HEADERS
-    CollectionPanel.hpp
-    Console.hpp
-    Editor.hpp
+    CollectionPanel.h
+    Console.h
+    Editor.h
     EntityNode.h
-    Explorer.hpp
+    Explorer.h
     FileNode.h
-    Hierarchy.hpp
-    Inspector.hpp
-    ProjectManager.hpp
-    Themer.hpp)
+    Hierarchy.h
+    Inspector.h
+    ProjectManager.h
+    Themer.h)
 
 add_executable(Oberon MACOSX_BUNDLE
     ${OberonEditor_SOURCES}

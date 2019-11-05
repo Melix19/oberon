@@ -24,12 +24,12 @@
 
 #pragma once
 
-#include "CollectionPanel.hpp"
-#include "Console.hpp"
-#include "Explorer.hpp"
-#include "Hierarchy.hpp"
-#include "Inspector.hpp"
-#include "Themer.hpp"
+#include "CollectionPanel.h"
+#include "Console.h"
+#include "Explorer.h"
+#include "Hierarchy.h"
+#include "Inspector.h"
+#include "Themer.h"
 
 #include <Magnum/GL/DefaultFramebuffer.h>
 #include <Magnum/GL/Renderer.h>

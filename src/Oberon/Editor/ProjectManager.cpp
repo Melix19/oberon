@@ -22,7 +22,7 @@
     SOFTWARE.
 */
 
-#include "ProjectManager.hpp"
+#include "ProjectManager.h"
 
 ProjectManager::ProjectManager(const Arguments& arguments): Platform::Application{arguments,
     Configuration{}.setTitle("Oberon - Project Manager")

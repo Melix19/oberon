@@ -25,7 +25,7 @@
 #pragma once
 
 #include <Corrade/Containers/Pointer.h>
-#include <Oberon/Core/EntitySerializer.hpp>
+#include <Oberon/Core/EntitySerializer.h>
 
 class EntityNode {
     public:

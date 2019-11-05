@@ -24,21 +24,43 @@
 
 #pragma once
 
-#include "CollectionPanel.hpp"
+#include "CollectionPanel.h"
 
-#include <Corrade/Utility/Assert.h>
+#include <misc/cpp/imgui_stdlib.h>
 
-class Inspector {
+class Hierarchy {
     public:
-        Inspector(): _entityNode(nullptr) {}
+        Hierarchy(): _panel(nullptr), _deleteSelectedNodes(false), _clickedNode(nullptr), _editNode(nullptr) {}
+
         void newFrame();
         void clearContent();
 
-        Inspector& setEntityNode(EntityNode* entityNode) {
-            _entityNode = entityNode;
+        CollectionPanel* panel() { return _panel; }
+
+        Hierarchy& setPanel(CollectionPanel* panel) {
+            _panel = panel;
             return *this;
         }
 
+        EntityNode* clickedNode() const { return _clickedNode; }
+
     private:
-        EntityNode* _entityNode;
+        void displayEntityTree(EntityNode* node);
+        void displayEditNode(EntityNode* node);
+
+        CollectionPanel* _panel;
+
+        std::vector<EntityNode*> _selectedNodes;
+        bool _deleteSelectedNodes;
+        EntityNode* _clickedNode;
+
+        enum class EditMode {
+            EntityCreation,
+            Rename
+        };
+
+        EntityNode* _editNode;
+        EditMode _editNodeMode;
+        std::string _editNodeText;
+        bool _editNodeNeedsFocus;
 };

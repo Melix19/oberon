@@ -22,7 +22,7 @@
     SOFTWARE.
 */
 
-#include "Editor.hpp"
+#include "Editor.h"
 
 Editor::Editor(const Arguments& arguments, const std::string& projectPath): Platform::Application{arguments,
     Configuration{}.setTitle("Oberon")
