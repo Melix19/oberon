@@ -24,93 +24,99 @@
 
 #include "Inspector.hpp"
 
-Inspector::Inspector()
-    : entity_node_ptr(nullptr)
-    , COLUMN_WIDTH(100)
-{
-}
+void Inspector::newFrame() {
+    const Int columnWidth = 100;
 
-void Inspector::newFrame()
-{
     ImGui::Begin("Inspector");
 
-    if (entity_node_ptr) {
-        // Position
+    if(_entityNode) {
+        /* Position */
         ImGui::AlignTextToFramePadding();
         ImGui::Text("Position");
-        ImGui::SameLine(COLUMN_WIDTH);
+        ImGui::SameLine(columnWidth);
         ImGui::SetNextItemWidth(-1);
-        float position[2] = { (*entity_node_ptr->j_entity_ptr)["position"][0].GetFloat(), (*entity_node_ptr->j_entity_ptr)["position"][1].GetFloat() };
+        Float position[2] = {_entityNode->jsonEntity()["position"][0].GetFloat(),
+            _entityNode->jsonEntity()["position"][1].GetFloat()};
         ImGui::DragFloat2("##Position", position, 0.5f);
-        (*entity_node_ptr->j_entity_ptr)["position"][0] = position[0];
-        (*entity_node_ptr->j_entity_ptr)["position"][1] = position[1];
-        entity_node_ptr->entity_ptr->setTranslation({ position[0], position[1] });
+        _entityNode->jsonEntity()["position"][0] = position[0];
+        _entityNode->jsonEntity()["position"][1] = position[1];
+        _entityNode->entity()->setTranslation({position[0], position[1]});
 
-        // Rotation
+        /* Rotation */
         ImGui::AlignTextToFramePadding();
         ImGui::Text("Rotation");
-        ImGui::SameLine(COLUMN_WIDTH);
+        ImGui::SameLine(columnWidth);
         ImGui::SetNextItemWidth(-1);
-        float rotation = (*entity_node_ptr->j_entity_ptr)["rotation"].GetFloat();
+        Float rotation = _entityNode->jsonEntity()["rotation"].GetFloat();
         ImGui::DragFloat("##Rotation", &rotation, 0.5f);
-        (*entity_node_ptr->j_entity_ptr)["rotation"] = rotation;
-        entity_node_ptr->entity_ptr->setRotation(Complex::rotation(Deg(rotation)));
+        _entityNode->jsonEntity()["rotation"] = rotation;
+        _entityNode->entity()->setRotation(Complex::rotation(Deg(rotation)));
 
-        // Scale
+        /* Scale */
         ImGui::AlignTextToFramePadding();
         ImGui::Text("Scale");
-        ImGui::SameLine(COLUMN_WIDTH);
+        ImGui::SameLine(columnWidth);
         ImGui::SetNextItemWidth(-1);
-        float scale[2] = { (*entity_node_ptr->j_entity_ptr)["scale"][0].GetFloat(), (*entity_node_ptr->j_entity_ptr)["scale"][1].GetFloat() };
+        Float scale[2] = {_entityNode->jsonEntity()["scale"][0].GetFloat(),
+            _entityNode->jsonEntity()["scale"][1].GetFloat()};
         ImGui::DragFloat2("##Scale", scale, 0.005f);
-        (*entity_node_ptr->j_entity_ptr)["scale"][0] = scale[0];
-        (*entity_node_ptr->j_entity_ptr)["scale"][1] = scale[1];
-        entity_node_ptr->entity_ptr->setScaling({ scale[0], scale[1] });
+        _entityNode->jsonEntity()["scale"][0] = scale[0];
+        _entityNode->jsonEntity()["scale"][1] = scale[1];
+        _entityNode->entity()->setScaling({scale[0], scale[1]});
 
-        // Components
-        auto j_components = (*entity_node_ptr->j_entity_ptr)["components"].GetArray();
-        auto& components = entity_node_ptr->entity_ptr->features();
-        for (auto& j_component : j_components) {
-            std::string type = j_component["type"].GetString();
+        /* Components */
+        auto jsonComponents = _entityNode->jsonEntity()["components"].GetArray();
+        for(auto& jsonComponent: jsonComponents) {
+            std::string type = jsonComponent["type"].GetString();
 
-            if (type == "rectangle_shape") {
-                // Type
-                ImGui::AlignTextToFramePadding();
-                ImGui::Text("Rectangle shape");
+            /* RectangleShape */
+            if(type == "rectangle_shape") {
+                auto& components = _entityNode->entity()->features();
+                RectangleShape* rectangleShape = nullptr;
 
-                RectangleShape* rect_ptr;
-                for (auto& component : components) {
-                    rect_ptr = dynamic_cast<RectangleShape*>(&component);
-                    if (rect_ptr)
+                for(auto& component: components) {
+                    rectangleShape = dynamic_cast<RectangleShape*>(&component);
+                    if(rectangleShape)
                         break;
                 }
 
-                // Size
+                CORRADE_INTERNAL_ASSERT(rectangleShape != nullptr);
+
+                /* Type */
+                ImGui::AlignTextToFramePadding();
+                ImGui::Text("Rectangle shape");
+
+                /* Size */
                 ImGui::AlignTextToFramePadding();
                 ImGui::Text("Size");
-                ImGui::SameLine(COLUMN_WIDTH);
+                ImGui::SameLine(columnWidth);
                 ImGui::SetNextItemWidth(-1);
-                float size[2] = { j_component["size"][0].GetFloat(), j_component["size"][1].GetFloat() };
+                Float size[2] = {jsonComponent["size"][0].GetFloat(), jsonComponent["size"][1].GetFloat()};
                 ImGui::DragFloat2("##Size", size, 0.5f);
-                j_component["size"][0] = size[0];
-                j_component["size"][1] = size[1];
-                rect_ptr->setSize({ size[0], size[1] });
+                jsonComponent["size"][0] = size[0];
+                jsonComponent["size"][1] = size[1];
+                rectangleShape->setSize({size[0], size[1]});
 
-                // Color
+                /* Color */
                 ImGui::AlignTextToFramePadding();
                 ImGui::Text("Color");
-                ImGui::SameLine(COLUMN_WIDTH);
+                ImGui::SameLine(columnWidth);
                 ImGui::SetNextItemWidth(-1);
-                float color[4] = { j_component["color"][0].GetFloat(), j_component["color"][1].GetFloat(), j_component["color"][2].GetFloat(), j_component["color"][3].GetFloat() };
+                Float color[4] = {jsonComponent["color"][0].GetFloat(), jsonComponent["color"][1].GetFloat(),
+                    jsonComponent["color"][2].GetFloat(), jsonComponent["color"][3].GetFloat()};
                 ImGui::ColorEdit4("##Color", color);
-                j_component["color"][0] = color[0];
-                j_component["color"][1] = color[1];
-                j_component["color"][2] = color[2];
-                j_component["color"][3] = color[3];
-                rect_ptr->setColor({ color[0], color[1], color[2], color[3] });
-            }
-        }
-    }
+                jsonComponent["color"][0] = color[0];
+                jsonComponent["color"][1] = color[1];
+                jsonComponent["color"][2] = color[2];
+                jsonComponent["color"][3] = color[3];
+                rectangleShape->setColor({color[0], color[1], color[2], color[3]});
+           }
+       }
+   }
 
     ImGui::End();
+}
+
+void Inspector::clearContent() {
+    _entityNode = nullptr;
 }

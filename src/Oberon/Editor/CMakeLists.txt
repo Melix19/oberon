@@ -46,7 +46,9 @@ set(OberonEditor_HEADERS
     CollectionPanel.hpp
     Console.hpp
     Editor.hpp
+    EntityNode.h
     Explorer.hpp
+    FileNode.h
     Hierarchy.hpp
     Inspector.hpp
     ProjectManager.hpp

@@ -24,88 +24,86 @@
 
 #include "Themer.hpp"
 
-void Themer::styleColorsDark()
-{
+void Themer::styleColorsDark() {
     ImGuiStyle& style = ImGui::GetStyle();
 
-    ImVec4 window_color(0.12f, 0.12f, 0.12f, 1.0f);
-    style.Colors[ImGuiCol_WindowBg] = window_color;
+    ImVec4 windowColor(0.12f, 0.12f, 0.12f, 1.0f);
+    style.Colors[ImGuiCol_WindowBg] = windowColor;
 
-    ImVec4 titlebar_color(0.16f, 0.16f, 0.16f, 1.0f);
-    style.Colors[ImGuiCol_PopupBg] = titlebar_color;
-    style.Colors[ImGuiCol_TitleBg] = titlebar_color;
-    style.Colors[ImGuiCol_TitleBgActive] = titlebar_color;
+    ImVec4 titlebarColor(0.16f, 0.16f, 0.16f, 1.0f);
+    style.Colors[ImGuiCol_PopupBg] = titlebarColor;
+    style.Colors[ImGuiCol_TitleBg] = titlebarColor;
+    style.Colors[ImGuiCol_TitleBgActive] = titlebarColor;
 
-    ImVec4 widget_color(0.2f, 0.2f, 0.2f, 1.0f);
-    style.Colors[ImGuiCol_Button] = widget_color;
-    style.Colors[ImGuiCol_HeaderActive] = widget_color;
-    style.Colors[ImGuiCol_FrameBg] = widget_color;
-    style.Colors[ImGuiCol_TabUnfocusedActive] = widget_color;
+    ImVec4 widgetColor(0.2f, 0.2f, 0.2f, 1.0f);
+    style.Colors[ImGuiCol_Button] = widgetColor;
+    style.Colors[ImGuiCol_HeaderActive] = widgetColor;
+    style.Colors[ImGuiCol_FrameBg] = widgetColor;
+    style.Colors[ImGuiCol_TabUnfocusedActive] = widgetColor;
 
-    ImVec4 separator_color(0.24f, 0.24f, 0.24f, 1.0f);
-    style.Colors[ImGuiCol_Separator] = separator_color;
+    ImVec4 separatorColor(0.24f, 0.24f, 0.24f, 1.0f);
+    style.Colors[ImGuiCol_Separator] = separatorColor;
 
-    ImVec4 unfocused_color(0.28f, 0.28f, 0.28f, 1.0f);
-    style.Colors[ImGuiCol_Tab] = unfocused_color;
-    style.Colors[ImGuiCol_TabUnfocused] = unfocused_color;
+    ImVec4 unfocusedColor(0.28f, 0.28f, 0.28f, 1.0f);
+    style.Colors[ImGuiCol_Tab] = unfocusedColor;
+    style.Colors[ImGuiCol_TabUnfocused] = unfocusedColor;
 
-    ImVec4 hovered_color(0.36f, 0.36f, 0.36f, 0.8f);
-    style.Colors[ImGuiCol_ButtonHovered] = hovered_color;
-    style.Colors[ImGuiCol_FrameBgHovered] = hovered_color;
-    style.Colors[ImGuiCol_HeaderHovered] = hovered_color;
-    style.Colors[ImGuiCol_SeparatorHovered] = hovered_color;
-    style.Colors[ImGuiCol_TabHovered] = hovered_color;
+    ImVec4 hoveredColor(0.36f, 0.36f, 0.36f, 0.8f);
+    style.Colors[ImGuiCol_ButtonHovered] = hoveredColor;
+    style.Colors[ImGuiCol_FrameBgHovered] = hoveredColor;
+    style.Colors[ImGuiCol_HeaderHovered] = hoveredColor;
+    style.Colors[ImGuiCol_SeparatorHovered] = hoveredColor;
+    style.Colors[ImGuiCol_TabHovered] = hoveredColor;
 
-    ImVec4 active_color(0.2f, 0.5f, 0.9f, 0.8f);
-    style.Colors[ImGuiCol_ButtonActive] = active_color;
-    style.Colors[ImGuiCol_FrameBgActive] = active_color;
-    style.Colors[ImGuiCol_Header] = active_color;
-    style.Colors[ImGuiCol_SeparatorActive] = active_color;
-    style.Colors[ImGuiCol_TabActive] = active_color;
+    ImVec4 activeColor(0.2f, 0.5f, 0.9f, 0.8f);
+    style.Colors[ImGuiCol_ButtonActive] = activeColor;
+    style.Colors[ImGuiCol_FrameBgActive] = activeColor;
+    style.Colors[ImGuiCol_Header] = activeColor;
+    style.Colors[ImGuiCol_SeparatorActive] = activeColor;
+    style.Colors[ImGuiCol_TabActive] = activeColor;
 
-    ImVec4 text_color(1.0f, 1.0f, 1.0f, 1.0f);
-    style.Colors[ImGuiCol_Text] = text_color;
+    ImVec4 textColor(1.0f, 1.0f, 1.0f, 1.0f);
+    style.Colors[ImGuiCol_Text] = textColor;
 }
 
-void Themer::styleColorsLight()
-{
+void Themer::styleColorsLight() {
     ImGuiStyle& style = ImGui::GetStyle();
 
-    ImVec4 window_color(1.0f, 1.0f, 1.0f, 1.0f);
-    style.Colors[ImGuiCol_WindowBg] = window_color;
+    ImVec4 windowColor(1.0f, 1.0f, 1.0f, 1.0f);
+    style.Colors[ImGuiCol_WindowBg] = windowColor;
 
-    ImVec4 titlebar_color(0.96f, 0.96f, 0.96f, 1.0f);
-    style.Colors[ImGuiCol_PopupBg] = titlebar_color;
-    style.Colors[ImGuiCol_TitleBg] = titlebar_color;
-    style.Colors[ImGuiCol_TitleBgActive] = titlebar_color;
+    ImVec4 titlebarColor(0.96f, 0.96f, 0.96f, 1.0f);
+    style.Colors[ImGuiCol_PopupBg] = titlebarColor;
+    style.Colors[ImGuiCol_TitleBg] = titlebarColor;
+    style.Colors[ImGuiCol_TitleBgActive] = titlebarColor;
 
-    ImVec4 widget_color(0.92f, 0.92f, 0.92f, 1.0f);
-    style.Colors[ImGuiCol_Button] = widget_color;
-    style.Colors[ImGuiCol_HeaderActive] = widget_color;
-    style.Colors[ImGuiCol_FrameBg] = widget_color;
-    style.Colors[ImGuiCol_TabUnfocusedActive] = widget_color;
+    ImVec4 widgetColor(0.92f, 0.92f, 0.92f, 1.0f);
+    style.Colors[ImGuiCol_Button] = widgetColor;
+    style.Colors[ImGuiCol_HeaderActive] = widgetColor;
+    style.Colors[ImGuiCol_FrameBg] = widgetColor;
+    style.Colors[ImGuiCol_TabUnfocusedActive] = widgetColor;
 
-    ImVec4 separator_color(0.88f, 0.88f, 0.88f, 1.0f);
-    style.Colors[ImGuiCol_Separator] = separator_color;
+    ImVec4 separatorColor(0.88f, 0.88f, 0.88f, 1.0f);
+    style.Colors[ImGuiCol_Separator] = separatorColor;
 
-    ImVec4 unfocused_color(0.84f, 0.84f, 0.84f, 1.0f);
-    style.Colors[ImGuiCol_Tab] = unfocused_color;
-    style.Colors[ImGuiCol_TabUnfocused] = unfocused_color;
+    ImVec4 unfocusedColor(0.84f, 0.84f, 0.84f, 1.0f);
+    style.Colors[ImGuiCol_Tab] = unfocusedColor;
+    style.Colors[ImGuiCol_TabUnfocused] = unfocusedColor;
 
-    ImVec4 hovered_color(0.72f, 0.72f, 0.72f, 0.8f);
-    style.Colors[ImGuiCol_ButtonHovered] = hovered_color;
-    style.Colors[ImGuiCol_FrameBgHovered] = hovered_color;
-    style.Colors[ImGuiCol_HeaderHovered] = hovered_color;
-    style.Colors[ImGuiCol_SeparatorHovered] = hovered_color;
-    style.Colors[ImGuiCol_TabHovered] = hovered_color;
+    ImVec4 hoveredColor(0.72f, 0.72f, 0.72f, 0.8f);
+    style.Colors[ImGuiCol_ButtonHovered] = hoveredColor;
+    style.Colors[ImGuiCol_FrameBgHovered] = hoveredColor;
+    style.Colors[ImGuiCol_HeaderHovered] = hoveredColor;
+    style.Colors[ImGuiCol_SeparatorHovered] = hoveredColor;
+    style.Colors[ImGuiCol_TabHovered] = hoveredColor;
 
-    ImVec4 active_color(0.2f, 0.5f, 0.9f, 0.8f);
-    style.Colors[ImGuiCol_ButtonActive] = active_color;
-    style.Colors[ImGuiCol_FrameBgActive] = active_color;
-    style.Colors[ImGuiCol_Header] = active_color;
-    style.Colors[ImGuiCol_SeparatorActive] = active_color;
-    style.Colors[ImGuiCol_TabActive] = active_color;
+    ImVec4 activeColor(0.2f, 0.5f, 0.9f, 0.8f);
+    style.Colors[ImGuiCol_ButtonActive] = activeColor;
+    style.Colors[ImGuiCol_FrameBgActive] = activeColor;
+    style.Colors[ImGuiCol_Header] = activeColor;
+    style.Colors[ImGuiCol_SeparatorActive] = activeColor;
+    style.Colors[ImGuiCol_TabActive] = activeColor;
 
-    ImVec4 text_color(0.0f, 0.0f, 0.0f, 1.0f);
-    style.Colors[ImGuiCol_Text] = text_color;
+    ImVec4 textColor(0.0f, 0.0f, 0.0f, 1.0f);
+    style.Colors[ImGuiCol_Text] = textColor;
 }

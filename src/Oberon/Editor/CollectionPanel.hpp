@@ -31,45 +31,56 @@
 #include <Magnum/GL/TextureFormat.h>
 #include <Magnum/ImGuiIntegration/Widgets.h>
 #include <Magnum/SceneGraph/Scene.h>
-#include <Oberon/Core/EntitySerializer.hpp>
 
-struct EntityNode {
-    EntityNode(Object2D* entity_ptr = nullptr, Value* j_entity_ptr = nullptr);
-    EntityNode* addChild(Object2D* entity_ptr = nullptr, Value* j_entity_ptr = nullptr);
-
-    Object2D* entity_ptr;
-    Value* j_entity_ptr;
-    bool is_selected;
-
-    EntityNode* parent;
-    std::vector<Containers::Pointer<EntityNode>> children;
-};
+#include "EntityNode.h"
 
 class CollectionPanel: public Containers::LinkedListItem<CollectionPanel> {
-public:
-    CollectionPanel(const std::string& path);
-    void drawContent();
-    void newFrame();
-    void addEntityNodeChild(const std::string& name, EntityNode* parent_node);
+    public:
+        CollectionPanel(const std::string& path);
+        void drawViewport();
+        void newFrame();
+        void addEntityNodeChild(const std::string& name, EntityNode* parentNode);
 
-    std::string path;
-    Document jsonDocument;
-    EntityNode root_node;
+        const std::string& path() { return _path; }
 
-    bool is_open;
-    bool is_focused;
-    bool needs_focus;
-    bool needs_docking;
+        EntityNode& rootNode() { return _rootNode; }
+        Document& jsonDocument() { return _jsonDocument; }
 
-private:
-    void addEntityNodeChild(Value* j_entity_ptr, EntityNode* parent_node);
+        bool isOpen() { return _isOpen; }
+        bool isFocused() { return _isFocused; }
 
-    GL::Framebuffer framebuffer{ NoCreate };
-    GL::Texture2D content_texture;
-    Shaders::Flat2D shader;
+        bool needsFocus() { return _needsFocus; }
+        CollectionPanel& setNeedsFocus(bool needsFocus) {
+            _needsFocus = needsFocus;
+            return *this;
+        }
 
-    Scene2D scene;
-    Object2D* camera_object;
-    SceneGraph::Camera2D* camera;
-    SceneGraph::DrawableGroup2D drawables;
+        bool needsDocking() { return _needsDocking; }
+        CollectionPanel& setNeedsDocking(bool needsDocking) {
+            _needsDocking = needsDocking;
+            return *this;
+        }
+
+    private:
+        void addEntityNodeChild(Value& jsonEntity, EntityNode* parentNode);
+
+        std::string _path;
+
+        EntityNode _rootNode;
+        Document _jsonDocument;
+
+        bool _isOpen;
+        bool _isFocused;
+        bool _needsFocus;
+        bool _needsDocking;
+
+        GL::Framebuffer _framebuffer{NoCreate};
+        GL::Texture2D _viewportTexture;
+
+        SceneGraph::DrawableGroup2D _drawables;
+        Shaders::Flat2D _shader;
+
+        Scene2D _scene;
+        Object2D* _cameraObject;
+        SceneGraph::Camera2D* _camera;
 };

@@ -22,10 +22,48 @@
     SOFTWARE.
 */
 
-#include "Console.hpp"
+#pragma once
 
-void Console::newFrame() {
-    ImGui::Begin("Console");
+#include <Corrade/Containers/Pointer.h>
+#include <string>
+#include <vector>
 
-    ImGui::End();
-}
+using namespace Corrade;
+
+class FileNode {
+    public:
+        FileNode(const std::string& path = ""): _path(path), _isSelected(false) {}
+
+        std::string path() const { return _path; }
+
+        FileNode& setPath(const std::string& path) {
+            _path = path;
+            return *this;
+        }
+
+        bool isSelected() const { return _isSelected; }
+
+        FileNode& setSelected(bool select) {
+            _isSelected = select;
+            return *this;
+        }
+
+        FileNode* addChild(const std::string& path = "") {
+            auto child = Containers::pointer<FileNode>(path);
+            child->_parent = this;
+
+            _children.push_back(std::move(child));
+            return _children.back().get();
+        }
+
+        FileNode* parent() const { return _parent; }
+
+        std::vector<Containers::Pointer<FileNode>>& children() { return _children; }
+
+    private:
+        std::string _path;
+        bool _isSelected;
+
+        FileNode* _parent;
+        std::vector<Containers::Pointer<FileNode>> _children;
+};

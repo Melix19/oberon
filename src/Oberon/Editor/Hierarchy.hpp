@@ -29,27 +29,38 @@
 #include <misc/cpp/imgui_stdlib.h>
 
 class Hierarchy {
-public:
-    Hierarchy();
-    void newFrame();
-    void clearContent();
+    public:
+        Hierarchy(): _panel(nullptr), _deleteSelectedNodes(false), _clickedNode(nullptr), _editNode(nullptr) {}
 
-    CollectionPanel* collection_panel_ptr;
-    EntityNode* clicked_node_ptr;
+        void newFrame();
+        void clearContent();
 
-private:
-    void displayEntityTree(EntityNode* node_ptr);
+        CollectionPanel* panel() { return _panel; }
 
-    std::vector<EntityNode*> selected_nodes;
-    bool delete_selected_nodes;
+        Hierarchy& setPanel(CollectionPanel* panel) {
+            _panel = panel;
+            return *this;
+        }
 
-    enum class EditMode {
-        EntityCreation,
-        Rename
-    };
+        EntityNode* clickedNode() const { return _clickedNode; }
 
-    EntityNode* edit_node_ptr;
-    EditMode edit_node_mode;
-    std::string edit_node_string;
-    bool edit_node_needs_focus;
+    private:
+        void displayEntityTree(EntityNode* node);
+        void displayEditNode(EntityNode* node);
+
+        CollectionPanel* _panel;
+
+        std::vector<EntityNode*> _selectedNodes;
+        bool _deleteSelectedNodes;
+        EntityNode* _clickedNode;
+
+        enum class EditMode {
+            EntityCreation,
+            Rename
+        };
+
+        EntityNode* _editNode;
+        EditMode _editNodeMode;
+        std::string _editNodeText;
+        bool _editNodeNeedsFocus;
 };

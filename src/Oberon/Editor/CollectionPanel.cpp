@@ -24,85 +24,57 @@
 
 #include "CollectionPanel.hpp"
 
-EntityNode::EntityNode(Object2D* entity_ptr, Value* j_entity_ptr)
-    : entity_ptr(entity_ptr)
-    , j_entity_ptr(j_entity_ptr)
-    , is_selected(false)
+CollectionPanel::CollectionPanel(const std::string& path): _path(path),
+    _rootNode(&_scene, _jsonDocument), _isOpen(true), _isFocused(false), _needsFocus(true),
+    _needsDocking(true)
 {
+    _viewportTexture.setStorage(1, GL::TextureFormat::RGBA8, {2560, 1440});
+    _framebuffer = GL::Framebuffer{{{}, _viewportTexture.imageSize(0)}};
+    _framebuffer.attachTexture(GL::Framebuffer::ColorAttachment{0}, _viewportTexture, 0);
+
+    _cameraObject = new Object2D{&_scene};
+    _camera = new SceneGraph::Camera2D{*_cameraObject};
+    _camera->setAspectRatioPolicy(SceneGraph::AspectRatioPolicy::Extend)
+        .setProjectionMatrix(Matrix3::projection(Vector2{_viewportTexture.imageSize(0)}))
+        .setViewport(_viewportTexture.imageSize(0));
+
+    std::string json = Utility::Directory::readString(_path);
+    _jsonDocument.Parse(json.c_str());
+
+    if(_jsonDocument.IsObject())
+        addEntityNodeChild(_jsonDocument, &_rootNode);
 }
 
-EntityNode* EntityNode::addChild(Object2D* entity_ptr, Value* j_entity_ptr)
-{
-    auto child = Containers::pointer<EntityNode>(entity_ptr, j_entity_ptr);
-    child->parent = this;
-
-    children.push_back(std::move(child));
-    return children.back().get();
-}
-
-CollectionPanel::CollectionPanel(const std::string& path)
-    : path(path)
-    , root_node(&scene)
-    , is_open(true)
-    , is_focused(false)
-    , needs_focus(true)
-    , needs_docking(true)
-{
-    content_texture.setStorage(1, GL::TextureFormat::RGBA8, Vector2i{ 2560, 1440 }); // FIXME: Maybe get the screen resolution and use that instead of using a fixed resolution
-    framebuffer = GL::Framebuffer{ { {}, content_texture.imageSize(0) } };
-    framebuffer.attachTexture(GL::Framebuffer::ColorAttachment{ 0 }, content_texture, 0);
-
-    camera_object = new Object2D{ &scene };
-    camera = new SceneGraph::Camera2D{ *camera_object };
-    camera->setAspectRatioPolicy(SceneGraph::AspectRatioPolicy::Extend)
-        .setProjectionMatrix(Matrix3::projection(Vector2{ content_texture.imageSize(0) }))
-        .setViewport(content_texture.imageSize(0));
-
-    std::string json = Utility::Directory::readString(path);
-    jsonDocument.Parse(json.c_str());
-
-    if (jsonDocument.IsObject())
-        addEntityNodeChild(&jsonDocument, &root_node);
-}
-
-void CollectionPanel::drawContent()
-{
-    framebuffer.clear(GL::FramebufferClear::Color)
+void CollectionPanel::drawViewport() {
+    _framebuffer.clear(GL::FramebufferClear::Color)
         .bind();
 
-    camera->draw(drawables);
+    _camera->draw(_drawables);
 }
 
-void CollectionPanel::newFrame()
-{
-    if (needs_focus) {
-        ImGui::SetNextWindowFocus();
-        needs_focus = false;
-    }
-
-    std::string filename = Utility::Directory::filename(path);
+void CollectionPanel::newFrame() {
+    std::string filename = Utility::Directory::filename(_path);
 
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.f, 0.f));
-    ImGui::Begin(filename.c_str(), &is_open, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
+    ImGui::Begin(filename.c_str(), &_isOpen, ImGuiWindowFlags_NoScrollbar |
+        ImGuiWindowFlags_NoScrollWithMouse);
     ImGui::PopStyleVar();
 
-    is_focused = ImGui::IsWindowFocused();
+    _isFocused = ImGui::IsWindowFocused();
 
-    auto image_size = Vector2{ content_texture.imageSize(0) };
-    auto content_min = ImGui::GetWindowContentRegionMin();
-    auto content_max = ImGui::GetWindowContentRegionMax();
-    auto content_size = ImVec2(content_max.x - content_min.x, content_max.y - content_min.y);
+    Vector2 imageSize{_viewportTexture.imageSize(0)};
+    ImVec2 contentSize(ImGui::GetWindowContentRegionMax().x - ImGui::GetWindowContentRegionMin().x,
+        ImGui::GetWindowContentRegionMax().y - ImGui::GetWindowContentRegionMin().y);
 
-    ImGuiIntegration::image(content_texture, image_size);
-    ImGui::SetScrollX((image_size.x() - content_size.x) / 2);
-    ImGui::SetScrollY((image_size.y() - content_size.y) / 2);
+    ImGuiIntegration::image(_viewportTexture, imageSize);
+    ImGui::SetScrollX((imageSize.x() - contentSize.x)/2);
+    ImGui::SetScrollY((imageSize.y() - contentSize.y)/2);
 
     ImGui::End();
 }
 
-void CollectionPanel::addEntityNodeChild(const std::string& name, EntityNode* parentNode)
-{
-    auto& allocator = jsonDocument.GetAllocator();
+void CollectionPanel::addEntityNodeChild(const std::string& name, EntityNode* parentNode) {
+    auto& allocator = _jsonDocument.GetAllocator();
     Value jsonEntity(kObjectType);
     jsonEntity.SetObject();
 
@@ -121,26 +93,27 @@ void CollectionPanel::addEntityNodeChild(const std::string& name, EntityNode* pa
     jsonEntity.AddMember("components", Value(kArrayType).Move(), allocator);
     jsonEntity.AddMember("children", Value(kArrayType).Move(), allocator);
 
-    Object2D* entity = EntitySerializer::createEntityFromJson(jsonEntity, parentNode->entity_ptr, &drawables, shader);
+    Object2D* entity = EntitySerializer::createEntityFromJson(jsonEntity, parentNode->entity(),
+        &_drawables, _shader);
 
-    if (parentNode->j_entity_ptr) {
-        auto& parentNodeChildren = (*parentNode->j_entity_ptr)["children"];
-        parentNodeChildren.PushBack(jsonEntity, allocator);
-        parentNode->addChild(entity, &parentNodeChildren[parentNodeChildren.Size() - 1]);
+    if(parentNode->entity() == &_scene) {
+        _jsonDocument.CopyFrom(jsonEntity, allocator);
+        parentNode->addChild(entity, _jsonDocument);
     } else {
-        jsonDocument.CopyFrom(jsonEntity, allocator);
-        parentNode->addChild(entity, &jsonDocument);
+        auto& parentNodeChildren = parentNode->jsonEntity()["children"];
+        parentNodeChildren.PushBack(jsonEntity, allocator);
+        parentNode->addChild(entity, parentNodeChildren[parentNodeChildren.Size() - 1]);
     }
 }
 
-void CollectionPanel::addEntityNodeChild(Value* j_entity_ptr, EntityNode* parent_node)
-{
-    Object2D* entity_ptr = EntitySerializer::createEntityFromJson(*j_entity_ptr, parent_node->entity_ptr, &drawables, shader);
-    EntityNode* node_ptr = parent_node->addChild(entity_ptr, j_entity_ptr);
+void CollectionPanel::addEntityNodeChild(Value& jsonEntity, EntityNode* parentNode) {
+    Object2D* entity = EntitySerializer::createEntityFromJson(jsonEntity, parentNode->entity(),
+        &_drawables, _shader);
+    EntityNode* node = parentNode->addChild(entity, jsonEntity);
 
-    auto j_children = (*j_entity_ptr)["children"].GetArray();
-    for (auto& j_child : j_children) {
-        if (!j_children.Empty())
-            addEntityNodeChild(&j_child, node_ptr);
+    auto jsonChildren = jsonEntity["children"].GetArray();
+    for(auto& jsonChild : jsonChildren) {
+        if(!jsonChildren.Empty())
+            addEntityNodeChild(jsonChild, node);
     }
 }

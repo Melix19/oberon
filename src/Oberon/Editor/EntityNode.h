@@ -24,11 +24,42 @@
 
 #pragma once
 
-#include <OberonExternal/imgui/imgui.h>
+#include <Corrade/Containers/Pointer.h>
+#include <Oberon/Core/EntitySerializer.hpp>
 
-namespace Themer {
+class EntityNode {
+    public:
+        EntityNode(Object2D* entity, Value& jsonEntity): _entity(entity),
+            _jsonEntity(jsonEntity), _isSelected(false) {}
 
-void styleColorsDark();
-void styleColorsLight();
+        Object2D* entity() const { return _entity; }
 
-}
+        Value& jsonEntity() const { return _jsonEntity; }
+
+        bool isSelected() const { return _isSelected; }
+
+        EntityNode& setSelected(bool select) {
+            _isSelected = select;
+            return *this;
+        }
+
+        EntityNode* addChild(Object2D* entity, Value& jsonEntity) {
+            auto child = Containers::pointer<EntityNode>(entity, jsonEntity);
+            child->_parent = this;
+
+            _children.push_back(std::move(child));
+            return _children.back().get();
+        }
+
+        EntityNode* parent() const { return _parent; }
+
+        std::vector<Containers::Pointer<EntityNode>>& children() { return _children; }
+
+    private:
+        Object2D* _entity;
+        Value& _jsonEntity;
+        bool _isSelected;
+
+        EntityNode* _parent;
+        std::vector<Containers::Pointer<EntityNode>> _children;
+};

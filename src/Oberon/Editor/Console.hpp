@@ -24,9 +24,9 @@
 
 #pragma once
 
-#include <imgui.h>
+#include <OberonExternal/imgui/imgui.h>
 
 class Console {
-public:
-    void newFrame();
+    public:
+        void newFrame();
 };

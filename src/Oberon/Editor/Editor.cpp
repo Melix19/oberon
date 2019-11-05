@@ -61,7 +61,7 @@ Editor::Editor(const Arguments& arguments, const std::string& projectPath): Plat
 
 void Editor::drawEvent() {
     for(auto& panel: _collectionPanels)
-        panel.drawContent();
+        panel.drawViewport();
 
     GL::defaultFramebuffer.clear(GL::FramebufferClear::Color)
         .bind();
@@ -89,7 +89,7 @@ void Editor::drawEvent() {
     ImGui::Begin("Editor", nullptr, windowFlags);
     ImGui::PopStyleVar(3);
 
-    ImGuiID dockSpaceId = ImGui::GetID("DockSpace");
+    ImGuiID dockSpaceId = ImGui::GetID("Editor DockSpace");
 
     if(!ImGui::DockBuilderGetNode(dockSpaceId)) {
         ImGui::DockBuilderRemoveNode(dockSpaceId);
@@ -116,41 +116,45 @@ void Editor::drawEvent() {
     _console.newFrame();
     _explorer.newFrame();
 
-    if(_explorer.clicked_node_ptr) {
-        std::string path = _explorer.clicked_node_ptr->path;
+    if(_explorer.clickedNode()) {
+        std::string path = _explorer.clickedNode()->path();
         std::string extension = Utility::Directory::splitExtension(path).second;
 
         if(extension == ".col") {
             CollectionPanel* found = nullptr;
 
-            for(auto& panel: _collectionPanels) {
-                if(panel.path == path)
-                    found = &panel;
-            }
+            for(auto& panel: _collectionPanels)
+                if(panel.path() == path) found = &panel;
 
-            if(found)
-                found->needs_focus = true;
-            else
-                _collectionPanels.insert(new CollectionPanel(path));
+            if(found) found->setNeedsFocus(true);
+            else _collectionPanels.insert(new CollectionPanel(path));
         }
     }
 
     for(auto& panel: _collectionPanels) {
-        if(panel.needs_docking) {
+        if(panel.needsFocus()) {
+            ImGui::SetNextWindowFocus();
+            panel.setNeedsFocus(false);
+        }
+
+        if(panel.needsDocking()) {
             ImGui::SetNextWindowDockID(dockSpaceId);
-            panel.needs_docking = false;
+            panel.setNeedsDocking(false);
         }
 
         panel.newFrame();
 
-        if(panel.is_open) {
-            if(panel.is_focused && _hierarchy.collection_panel_ptr != &panel) {
+        if(panel.isOpen()) {
+            if(panel.isFocused() && _hierarchy.panel() != &panel) {
+                _inspector.clearContent();
                 _hierarchy.clearContent();
-                _hierarchy.collection_panel_ptr = &panel;
+                _hierarchy.setPanel(&panel);
             }
         } else {
-            if(_hierarchy.collection_panel_ptr == &panel)
+            if(_hierarchy.panel() == &panel) {
+                _inspector.clearContent();
                 _hierarchy.clearContent();
+            }
 
             _collectionPanels.erase(&panel);
         }
@@ -158,7 +162,8 @@ void Editor::drawEvent() {
 
     _hierarchy.newFrame();
 
-    _inspector.entityNode = _hierarchy.clicked_node_ptr;
+    if(_hierarchy.clickedNode()) _inspector.setEntityNode(_hierarchy.clickedNode());
+
     _inspector.newFrame();
 
     /* Set appropriate states. */

@@ -26,13 +26,19 @@
 
 #include "CollectionPanel.hpp"
 
+#include <Corrade/Utility/Assert.h>
+
 class Inspector {
-public:
-    Inspector();
-    void newFrame();
+    public:
+        Inspector(): _entityNode(nullptr) {}
+        void newFrame();
+        void clearContent();
 
-    EntityNode* entity_node_ptr;
+        Inspector& setEntityNode(EntityNode* entityNode) {
+            _entityNode = entityNode;
+            return *this;
+        }
 
-private:
-    const int COLUMN_WIDTH;
+    private:
+        EntityNode* _entityNode;
 };

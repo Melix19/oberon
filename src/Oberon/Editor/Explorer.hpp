@@ -24,51 +24,39 @@
 
 #pragma once
 
-#include <Corrade/Containers/Pointer.h>
+#include "FileNode.h"
+
 #include <Corrade/Utility/Directory.h>
-#include <imgui.h>
-#include <misc/cpp/imgui_stdlib.h>
-#include <vector>
-
-using namespace Corrade;
-
-struct FileNode {
-    FileNode(const std::string& path = "");
-    FileNode* addChild(const std::string& path = "");
-
-    std::string path;
-    bool is_selected;
-
-    FileNode* parent;
-    std::vector<Containers::Pointer<FileNode>> children;
-};
+#include <OberonExternal/imgui/imgui.h>
+#include <OberonExternal/imgui/misc/cpp/imgui_stdlib.h>
 
 class Explorer {
-public:
-    Explorer(const std::string& project_path);
-    void newFrame();
+    public:
+        Explorer(const std::string& rootPath);
+        void newFrame();
 
-    FileNode* clicked_node_ptr;
+        FileNode* clickedNode() const { return _clickedNode; }
 
-private:
-    void displayFileTree(FileNode* node_ptr);
-    void updateFileNodeChildren(FileNode* node_ptr);
-    void removeEntireFile(const std::string& path);
+    private:
+        void displayFileTree(FileNode* node);
+        void updateFileNodeChildren(FileNode* node);
+        void removeEntireFile(const std::string& path);
 
-    static bool sortFileNodes(const Containers::Pointer<FileNode>& a, const Containers::Pointer<FileNode>& b);
+        static bool sortFileNodes(const Containers::Pointer<FileNode>& a, const Containers::Pointer<FileNode>& b);
 
-    FileNode root_node;
-    std::vector<FileNode*> selected_nodes;
-    bool delete_selected_nodes;
+        FileNode _rootNode;
+        std::vector<FileNode*> _selectedNodes;
+        bool _deleteSelectedNodes;
+        FileNode* _clickedNode;
 
-    enum class EditMode {
-        FileCreation,
-        FolderCreation,
-        Rename
-    };
+        enum class EditMode {
+            FileCreation,
+            FolderCreation,
+            Rename
+        };
 
-    FileNode* edit_node_ptr;
-    EditMode edit_node_mode;
-    std::string edit_node_string;
-    bool edit_node_needs_focus;
+        FileNode* _editNode;
+        EditMode _editNodeMode;
+        std::string _editNodeText;
+        bool _editNodeNeedsFocus;
 };

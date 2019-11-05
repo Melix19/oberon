@@ -85,7 +85,7 @@ void ProjectManager::drawEvent() {
     ImGui::Begin("Project Manager", nullptr, windowFlags);
     ImGui::PopStyleVar(3);
 
-    ImGuiID dockSpaceId = ImGui::GetID("DockSpace");
+    ImGuiID dockSpaceId = ImGui::GetID("ProjectManager DockSpace");
 
     if(!ImGui::DockBuilderGetNode(dockSpaceId)) {
         ImGui::DockBuilderRemoveNode(dockSpaceId);
