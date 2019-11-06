@@ -39,6 +39,8 @@ class Explorer {
 
     private:
         void displayFileTree(FileNode* node);
+        void displayEditNode(FileNode* node);
+
         void updateFileNodeChildren(FileNode* node);
         void removeEntireFile(const std::string& path);
 

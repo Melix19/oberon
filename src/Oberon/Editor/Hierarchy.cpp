@@ -51,7 +51,8 @@ void Hierarchy::newFrame() {
         if(showTree) {
             ImGui::PopStyleVar();
 
-            if(rootNode == _editNode) displayEditNode(rootNode);
+            if(rootNode == _editNode && _editNodeMode != EditMode::Rename)
+                displayEditNode(rootNode);
             else {
                 ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0.0f, 0.0f));
                 displayEntityTree(rootNode->children().front().get());
@@ -190,7 +191,7 @@ void Hierarchy::displayEditNode(EntityNode* node) {
     /* Set focus in it's first frame. */
     if(_editNodeNeedsFocus) ImGui::SetKeyboardFocusHere();
 
-    if(ImGui::InputText("##FileName", &_editNodeText, ImGuiInputTextFlags_EnterReturnsTrue)) {
+    if(ImGui::InputText("##EntityName", &_editNodeText, ImGuiInputTextFlags_EnterReturnsTrue)) {
         switch (_editNodeMode) {
             case EditMode::EntityCreation:
                 /* Add the new EntityNode. */

@@ -32,7 +32,7 @@ using namespace Corrade;
 
 class FileNode {
     public:
-        FileNode(const std::string& path = ""): _path(path), _isSelected(false) {}
+        FileNode(const std::string& path): _path(path), _isSelected(false) {}
 
         std::string path() const { return _path; }
 
@@ -48,7 +48,7 @@ class FileNode {
             return *this;
         }
 
-        FileNode* addChild(const std::string& path = "") {
+        FileNode* addChild(const std::string& path) {
             auto child = Containers::pointer<FileNode>(path);
             child->_parent = this;
 
