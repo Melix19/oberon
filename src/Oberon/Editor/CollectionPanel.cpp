@@ -116,6 +116,14 @@ void CollectionPanel::addEntityNodeChild(const std::string& name, EntityNode* pa
     }
 }
 
+void CollectionPanel::save() {
+    StringBuffer buffer;
+    Writer<StringBuffer> writer(buffer);
+    _jsonDocument.Accept(writer);
+
+    Utility::Directory::writeString(_path, buffer.GetString());
+}
+
 void CollectionPanel::addEntityNodeChild(Value& jsonEntity, EntityNode* parentNode) {
     Object2D* entity = EntitySerializer::createEntityFromJson(jsonEntity, parentNode->entity(),
         &_drawables, _shader);

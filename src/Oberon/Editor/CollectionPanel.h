@@ -31,6 +31,7 @@
 #include <Magnum/GL/TextureFormat.h>
 #include <Magnum/ImGuiIntegration/Widgets.h>
 #include <Magnum/SceneGraph/Scene.h>
+#include <OberonExternal/rapidjson/writer.h>
 
 #include "EntityNode.h"
 
@@ -40,6 +41,7 @@ class CollectionPanel: public Containers::LinkedListItem<CollectionPanel> {
         void drawViewport();
         void newFrame();
         void addEntityNodeChild(const std::string& name, EntityNode* parentNode);
+        void save();
 
         const std::string& path() { return _path; }
 

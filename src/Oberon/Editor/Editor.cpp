@@ -27,7 +27,7 @@
 Editor::Editor(const Arguments& arguments, const std::string& projectPath): Platform::Application{arguments,
     Configuration{}.setTitle("Oberon")
                    .setWindowFlags(Configuration::WindowFlag::Maximized|Configuration::WindowFlag::Resizable)},
-    _explorer(projectPath)
+    _explorer(projectPath), _activePanel(nullptr)
 {
     ImGui::CreateContext();
     Themer::styleColorsDark();
@@ -145,13 +145,16 @@ void Editor::drawEvent() {
         panel.newFrame();
 
         if(panel.isOpen()) {
-            if(panel.isFocused() && _hierarchy.panel() != &panel) {
+            if(panel.isFocused() && _activePanel != &panel) {
+                _activePanel = &panel;
+
                 _inspector.clearContent();
                 _hierarchy.clearContent();
+
                 _hierarchy.setPanel(&panel);
             }
         } else {
-            if(_hierarchy.panel() == &panel) {
+            if(_activePanel == &panel) {
                 _inspector.clearContent();
                 _hierarchy.clearContent();
             }
@@ -188,6 +191,15 @@ void Editor::viewportEvent(ViewportEvent& event) {
 }
 
 void Editor::keyPressEvent(KeyEvent& event) {
+    if(_activePanel) {
+        /* Use the macOS style shortcuts (Cmd/Super instead of Ctrl) for macOS. */
+        ImGuiIO& io = ImGui::GetIO();
+        const bool isShortcutKey = (io.ConfigMacOSXBehaviors ? (io.KeySuper && !io.KeyCtrl) :
+            (io.KeyCtrl && !io.KeySuper)) && !io.KeyAlt && !io.KeyShift;
+
+        if(isShortcutKey && event.key() == KeyEvent::Key::S) _activePanel->save();
+    }
+
     if(_imgui.handleKeyPressEvent(event)) return;
 }
 

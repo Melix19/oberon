@@ -35,8 +35,6 @@ class Hierarchy {
         void newFrame();
         void clearContent();
 
-        CollectionPanel* panel() { return _panel; }
-
         Hierarchy& setPanel(CollectionPanel* panel) {
             _panel = panel;
             return *this;

@@ -65,4 +65,5 @@ class Editor: public Platform::Application {
         Inspector _inspector;
 
         Containers::LinkedList<CollectionPanel> _collectionPanels;
+        CollectionPanel* _activePanel;
 };
