@@ -24,14 +24,13 @@
 
 #pragma once
 
-#include <Corrade/Containers/Pointer.h>
+#include <Corrade/Utility/Configuration.h>
 #include <Corrade/Utility/Directory.h>
 #include <Magnum/GL/Framebuffer.h>
 #include <Magnum/GL/Texture.h>
 #include <Magnum/GL/TextureFormat.h>
 #include <Magnum/ImGuiIntegration/Widgets.h>
 #include <Magnum/SceneGraph/Scene.h>
-#include <OberonExternal/rapidjson/writer.h>
 
 #include "EntityNode.h"
 
@@ -40,13 +39,12 @@ class CollectionPanel: public Containers::LinkedListItem<CollectionPanel> {
         CollectionPanel(const std::string& path);
         void drawViewport();
         void newFrame();
-        void addEntityNodeChild(const std::string& name, EntityNode* parentNode);
+        void addEntityNodeChild(Utility::ConfigurationGroup* entityGroup, EntityNode* parentNode);
         void save();
 
         const std::string& path() { return _path; }
 
         EntityNode& rootNode() { return _rootNode; }
-        Document& jsonDocument() { return _jsonDocument; }
 
         bool isOpen() { return _isOpen; }
         bool isFocused() { return _isFocused; }
@@ -64,18 +62,16 @@ class CollectionPanel: public Containers::LinkedListItem<CollectionPanel> {
         }
 
     private:
-        void addEntityNodeChild(Value& jsonEntity, EntityNode* parentNode);
-
         std::string _path;
 
+        Utility::Configuration _collectionConfig;
         EntityNode _rootNode;
-        Document _jsonDocument;
 
         bool _isOpen;
+        bool _isVisible;
         bool _isFocused;
         bool _needsFocus;
         bool _needsDocking;
-        bool _isVisible;
 
         GL::Framebuffer _framebuffer{NoCreate};
         GL::Texture2D _viewportTexture;

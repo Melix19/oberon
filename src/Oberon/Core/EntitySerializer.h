@@ -25,18 +25,16 @@
 #pragma once
 
 #include "Entity.h"
+#include "EntitySerializer.hpp"
 #include "RectangleShape.h"
 
 #include <Magnum/SceneGraph/TranslationRotationScalingTransformation2D.h>
-#include <OberonExternal/rapidjson/document.h>
-
-using namespace rapidjson;
 
 typedef SceneGraph::Object<SceneGraph::TranslationRotationScalingTransformation2D> Object2D;
 typedef SceneGraph::Scene<SceneGraph::TranslationRotationScalingTransformation2D> Scene2D;
 
 namespace EntitySerializer {
 
-Object2D* createEntityFromJson(Value& jsonEntity, Object2D* parent, SceneGraph::DrawableGroup2D* drawables, Shaders::Flat2D& shader);
+Object2D* createEntityFromConfig(Utility::ConfigurationGroup* entityGroup, Object2D* parent, SceneGraph::DrawableGroup2D* drawables, Shaders::Flat2D& shader);
 
 }

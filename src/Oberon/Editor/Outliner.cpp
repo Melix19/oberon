@@ -75,13 +75,20 @@ void Outliner::newFrame() {
     if(_deleteSelectedNodes) {
         if(!_selectedNodes.empty()) {
             for(auto& selectedNode : _selectedNodes) {
-                auto& parentChildren = selectedNode->parent()->children();
-                auto found = std::find_if(parentChildren.begin(), parentChildren.end(),
+                delete selectedNode->entity();
+
+                std::string name = selectedNode->entityGroup()->value("name");
+                EntityNode* parent =  selectedNode->parent();
+
+                parent->entityGroup()->removeAllGroups(name + "-component");
+                parent->entityGroup()->removeGroup(selectedNode->entityGroup());
+
+                auto found = std::find_if(parent->children().begin(), parent->children().end(),
                     [&](Containers::Pointer<EntityNode>& p) { return p.get() == selectedNode; });
 
-                CORRADE_INTERNAL_ASSERT(found != parentChildren.end());
+                CORRADE_INTERNAL_ASSERT(found != parent->children().end());
 
-                parentChildren.erase(found);
+                parent->children().erase(found);
             }
 
             _selectedNodes.clear();
@@ -108,7 +115,7 @@ void Outliner::displayEntityTree(EntityNode* node) {
 
     ImGuiTreeNodeFlags nodeFlags = ImGuiTreeNodeFlags_FramePadding | ImGuiTreeNodeFlags_SpanFullWidth |
         ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_OpenOnArrow;
-    std::string nodeName = node->jsonEntity()["name"].GetString();
+    std::string nodeName = node->entityGroup()->value("name");
     bool hasChildren = !node->children().empty();
 
     if(node->isSelected()) nodeFlags |= ImGuiTreeNodeFlags_Selected;
@@ -193,16 +200,18 @@ void Outliner::displayEditNode(EntityNode* node) {
 
     if(ImGui::InputText("##EntityName", &_editNodeText, ImGuiInputTextFlags_EnterReturnsTrue)) {
         switch (_editNodeMode) {
-            case EditMode::EntityCreation:
+            case EditMode::EntityCreation: {
                 /* Add the new EntityNode. */
-                _panel->addEntityNodeChild(_editNodeText, node);
-                break;
+                Utility::ConfigurationGroup* childGroup = node->entityGroup()->addGroup("child");
+                childGroup->setValue("name", _editNodeText);
+
+                _panel->addEntityNodeChild(childGroup, node);
+            } break;
             case EditMode::Rename: {
+                node->entityGroup()->setValue("name", _editNodeText);
+
                 Entity* entity_cast = static_cast<Entity*>(node->entity()->features().first());
                 entity_cast->setName(_editNodeText);
-
-                Document& document = _panel->jsonDocument();
-                node->jsonEntity()["name"].SetString(_editNodeText.c_str(), document.GetAllocator());
             } break;
         }
     }

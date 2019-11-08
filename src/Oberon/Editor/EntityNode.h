@@ -29,12 +29,12 @@
 
 class EntityNode {
     public:
-        EntityNode(Object2D* entity, Value& jsonEntity): _entity(entity),
-            _jsonEntity(jsonEntity), _isSelected(false) {}
+        EntityNode(Object2D* entity, Utility::ConfigurationGroup* entityGroup): _entity(entity),
+            _entityGroup(entityGroup), _isSelected(false) {}
 
         Object2D* entity() const { return _entity; }
 
-        Value& jsonEntity() const { return _jsonEntity; }
+        Utility::ConfigurationGroup* entityGroup() const { return _entityGroup; }
 
         bool isSelected() const { return _isSelected; }
 
@@ -43,8 +43,8 @@ class EntityNode {
             return *this;
         }
 
-        EntityNode* addChild(Object2D* entity, Value& jsonEntity) {
-            auto child = Containers::pointer<EntityNode>(entity, jsonEntity);
+        EntityNode* addChild(Object2D* entity, Utility::ConfigurationGroup* entityGroup) {
+            auto child = Containers::pointer<EntityNode>(entity, entityGroup);
             child->_parent = this;
 
             _children.push_back(std::move(child));
@@ -57,7 +57,7 @@ class EntityNode {
 
     private:
         Object2D* _entity;
-        Value& _jsonEntity;
+        Utility::ConfigurationGroup* _entityGroup;
         bool _isSelected;
 
         EntityNode* _parent;

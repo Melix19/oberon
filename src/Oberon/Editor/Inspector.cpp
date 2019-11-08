@@ -41,21 +41,19 @@ void Inspector::newFrame() {
         ImGui::Text("Position");
         ImGui::SameLine(columnWidth);
         ImGui::SetNextItemWidth(-1);
-        Float position[2] = {_entityNode->jsonEntity()["position"][0].GetFloat(),
-            _entityNode->jsonEntity()["position"][1].GetFloat()};
-        ImGui::DragFloat2("##Position", position, 0.5f);
-        _entityNode->jsonEntity()["position"][0] = position[0];
-        _entityNode->jsonEntity()["position"][1] = position[1];
-        _entityNode->entity()->setTranslation({position[0], position[1]});
+        Vector2 position = _entityNode->entityGroup()->value<Vector2>("position");
+        ImGui::DragFloat2("##Position", position.data(), 0.5f);
+        _entityNode->entityGroup()->setValue("position", position);
+        _entityNode->entity()->setTranslation(position);
 
         /* Rotation */
         ImGui::AlignTextToFramePadding();
         ImGui::Text("Rotation");
         ImGui::SameLine(columnWidth);
         ImGui::SetNextItemWidth(-1);
-        Float rotation = _entityNode->jsonEntity()["rotation"].GetFloat();
+        Float rotation = _entityNode->entityGroup()->value<Float>("rotation");
         ImGui::DragFloat("##Rotation", &rotation, 0.5f);
-        _entityNode->jsonEntity()["rotation"] = rotation;
+        _entityNode->entityGroup()->setValue("rotation", rotation);
         _entityNode->entity()->setRotation(Complex::rotation(Deg(rotation)));
 
         /* Scale */
@@ -63,17 +61,15 @@ void Inspector::newFrame() {
         ImGui::Text("Scale");
         ImGui::SameLine(columnWidth);
         ImGui::SetNextItemWidth(-1);
-        Float scale[2] = {_entityNode->jsonEntity()["scale"][0].GetFloat(),
-            _entityNode->jsonEntity()["scale"][1].GetFloat()};
-        ImGui::DragFloat2("##Scale", scale, 0.005f);
-        _entityNode->jsonEntity()["scale"][0] = scale[0];
-        _entityNode->jsonEntity()["scale"][1] = scale[1];
-        _entityNode->entity()->setScaling({scale[0], scale[1]});
+        Vector2 scale = _entityNode->entityGroup()->value<Vector2>("scale");
+        ImGui::DragFloat2("##Scale", scale.data(), 0.005f);
+        _entityNode->entityGroup()->setValue("scale", scale);
+        _entityNode->entity()->setScaling(scale);
 
         /* Components */
-        auto jsonComponents = _entityNode->jsonEntity()["components"].GetArray();
-        for(auto& jsonComponent: jsonComponents) {
-            std::string type = jsonComponent["type"].GetString();
+        std::string name = _entityNode->entityGroup()->value("name");
+        for(auto& componentGroup: _entityNode->entityGroup()->groups(name + "-component")) {
+            std::string type = componentGroup->value("type");
 
             /* RectangleShape */
             if(type == "rectangle_shape") {
@@ -97,25 +93,20 @@ void Inspector::newFrame() {
                 ImGui::Text("Size");
                 ImGui::SameLine(columnWidth);
                 ImGui::SetNextItemWidth(-1);
-                Float size[2] = {jsonComponent["size"][0].GetFloat(), jsonComponent["size"][1].GetFloat()};
-                ImGui::DragFloat2("##Size", size, 0.5f);
-                jsonComponent["size"][0] = size[0];
-                jsonComponent["size"][1] = size[1];
-                rectangleShape->setSize({size[0], size[1]});
+                Vector2 size = componentGroup->value<Vector2>("size");
+                ImGui::DragFloat2("##Size", size.data(), 0.5f);
+                componentGroup->setValue("size", size);
+                rectangleShape->setSize(size);
 
                 /* Color */
                 ImGui::AlignTextToFramePadding();
                 ImGui::Text("Color");
                 ImGui::SameLine(columnWidth);
                 ImGui::SetNextItemWidth(-1);
-                Float color[4] = {jsonComponent["color"][0].GetFloat(), jsonComponent["color"][1].GetFloat(),
-                    jsonComponent["color"][2].GetFloat(), jsonComponent["color"][3].GetFloat()};
-                ImGui::ColorEdit4("##Color", color);
-                jsonComponent["color"][0] = color[0];
-                jsonComponent["color"][1] = color[1];
-                jsonComponent["color"][2] = color[2];
-                jsonComponent["color"][3] = color[3];
-                rectangleShape->setColor({color[0], color[1], color[2], color[3]});
+                Color4 color = componentGroup->value<Color4>("color");
+                ImGui::ColorEdit4("##Color", color.data());
+                componentGroup->setValue("color", color);
+                rectangleShape->setColor(color);
            }
        }
    }

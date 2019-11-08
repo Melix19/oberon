@@ -24,35 +24,34 @@
 
 #include "EntitySerializer.h"
 
-Object2D* EntitySerializer::createEntityFromJson(Value& jsonEntity, Object2D* parent, SceneGraph::DrawableGroup2D* drawables, Shaders::Flat2D& shader) {
+Object2D* EntitySerializer::createEntityFromConfig(Utility::ConfigurationGroup* entityGroup, Object2D* parent, SceneGraph::DrawableGroup2D* drawables, Shaders::Flat2D& shader) {
     Object2D* entity = new Object2D{parent};
 
     /* Name and Entity */
-    std::string name = jsonEntity["name"].GetString();
+    std::string name = entityGroup->value("name");
     entity->addFeature<Entity>(name);
 
     /* Position */
-    Vector2 position{jsonEntity["position"][0].GetFloat(), jsonEntity["position"][1].GetFloat()};
+    Vector2 position = entityGroup->value<Vector2>("position");
     entity->setTranslation(position);
 
     /* Rotation */
-    Float rotation = jsonEntity["rotation"].GetFloat();
+    Float rotation = entityGroup->value<Float>("rotation");
     entity->setRotation(Complex::rotation(Deg(rotation)));
 
     /* Scale */
-    Vector2 scale{jsonEntity["scale"][0].GetFloat(), jsonEntity["scale"][1].GetFloat()};
+    Vector2 scale = entityGroup->value<Vector2>("scale");
     entity->setScaling(scale);
 
-    auto jsonComponents = jsonEntity["components"].GetArray();
-    for(auto& jsonComponent: jsonComponents) {
-        std::string type = jsonComponent["type"].GetString();
+    for(auto& componentGroup: entityGroup->groups(name + "-component")) {
+        std::string type = componentGroup->value("type");
 
         if(type == "rectangle_shape") {
             /* Size */
-            Vector2 size{jsonComponent["size"][0].GetFloat(), jsonComponent["size"][1].GetFloat()};
+            Vector2 size = componentGroup->value<Vector2>("size");
 
             /* Color */
-            Color4 color{jsonComponent["color"][0].GetFloat(), jsonComponent["color"][1].GetFloat(), jsonComponent["color"][2].GetFloat(), jsonComponent["color"][3].GetFloat()};
+            Color4 color = componentGroup->value<Color4>("color");
 
             /* RectangleShape */
             entity->addFeature<RectangleShape>(drawables, shader, size, color);

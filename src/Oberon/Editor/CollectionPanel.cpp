@@ -25,8 +25,8 @@
 #include "CollectionPanel.h"
 
 CollectionPanel::CollectionPanel(const std::string& path): _path(path),
-    _rootNode(&_scene, _jsonDocument), _isOpen(true), _isFocused(false), _needsFocus(true),
-    _needsDocking(true), _isVisible(true)
+    _collectionConfig{_path}, _rootNode(&_scene, nullptr), _isOpen(true),
+    _isVisible(true), _isFocused(false), _needsFocus(true), _needsDocking(true)
 {
     _viewportTexture.setStorage(1, GL::TextureFormat::RGBA8, {2560, 1440});
     _framebuffer = GL::Framebuffer{{{}, _viewportTexture.imageSize(0)}};
@@ -38,11 +38,7 @@ CollectionPanel::CollectionPanel(const std::string& path): _path(path),
         .setProjectionMatrix(Matrix3::projection(Vector2{_viewportTexture.imageSize(0)}))
         .setViewport(_viewportTexture.imageSize(0));
 
-    std::string json = Utility::Directory::readString(_path);
-    _jsonDocument.Parse(json.c_str());
-
-    if(_jsonDocument.IsObject())
-        addEntityNodeChild(_jsonDocument, &_rootNode);
+    addEntityNodeChild(&_collectionConfig, &_rootNode);
 }
 
 void CollectionPanel::drawViewport() {
@@ -83,55 +79,15 @@ void CollectionPanel::newFrame() {
     ImGui::End();
 }
 
-void CollectionPanel::addEntityNodeChild(const std::string& name, EntityNode* parentNode) {
-    auto& allocator = _jsonDocument.GetAllocator();
-    Value jsonEntity(kObjectType);
-    jsonEntity.SetObject();
-
-    jsonEntity.AddMember("name", Value(name.c_str(), allocator).Move(), allocator);
-
-    Value positionValue(kArrayType);
-    positionValue.PushBack(0, allocator).PushBack(0, allocator);
-    jsonEntity.AddMember("position", positionValue, allocator);
-
-    jsonEntity.AddMember("rotation", 0, allocator);
-
-    Value scaleValue(kArrayType);
-    scaleValue.PushBack(1, allocator).PushBack(1, allocator);
-    jsonEntity.AddMember("scale", scaleValue, allocator);
-
-    jsonEntity.AddMember("components", Value(kArrayType).Move(), allocator);
-    jsonEntity.AddMember("children", Value(kArrayType).Move(), allocator);
-
-    Object2D* entity = EntitySerializer::createEntityFromJson(jsonEntity, parentNode->entity(),
-        &_drawables, _shader);
-
-    if(parentNode->entity() == &_scene) {
-        _jsonDocument.CopyFrom(jsonEntity, allocator);
-        parentNode->addChild(entity, _jsonDocument);
-    } else {
-        auto& parentNodeChildren = parentNode->jsonEntity()["children"];
-        parentNodeChildren.PushBack(jsonEntity, allocator);
-        parentNode->addChild(entity, parentNodeChildren[parentNodeChildren.Size() - 1]);
-    }
-}
-
 void CollectionPanel::save() {
-    StringBuffer buffer;
-    Writer<StringBuffer> writer(buffer);
-    _jsonDocument.Accept(writer);
-
-    Utility::Directory::writeString(_path, buffer.GetString());
+    _collectionConfig.save();
 }
 
-void CollectionPanel::addEntityNodeChild(Value& jsonEntity, EntityNode* parentNode) {
-    Object2D* entity = EntitySerializer::createEntityFromJson(jsonEntity, parentNode->entity(),
+void CollectionPanel::addEntityNodeChild(Utility::ConfigurationGroup* entityGroup, EntityNode* parentNode) {
+    Object2D* entity = EntitySerializer::createEntityFromConfig(entityGroup, parentNode->entity(),
         &_drawables, _shader);
-    EntityNode* node = parentNode->addChild(entity, jsonEntity);
+    EntityNode* node = parentNode->addChild(entity, entityGroup);
 
-    auto jsonChildren = jsonEntity["children"].GetArray();
-    for(auto& jsonChild : jsonChildren) {
-        if(!jsonChildren.Empty())
-            addEntityNodeChild(jsonChild, node);
-    }
+    for(auto childGroup : entityGroup->groups("child"))
+        addEntityNodeChild(childGroup, node);
 }
