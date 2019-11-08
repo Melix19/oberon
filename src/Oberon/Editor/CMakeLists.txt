@@ -34,9 +34,9 @@ set(OberonEditor_SOURCES
     Console.cpp
     Editor.cpp
     Explorer.cpp
-    Hierarchy.cpp
     Inspector.cpp
     Oberon.cpp
+    Outliner.cpp
     ProjectManager.cpp
     Themer.cpp
 
@@ -49,8 +49,8 @@ set(OberonEditor_HEADERS
     EntityNode.h
     Explorer.h
     FileNode.h
-    Hierarchy.h
     Inspector.h
+    Outliner.h
     ProjectManager.h
     Themer.h)
 

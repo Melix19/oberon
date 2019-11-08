@@ -27,8 +27,8 @@
 #include "CollectionPanel.h"
 #include "Console.h"
 #include "Explorer.h"
-#include "Hierarchy.h"
 #include "Inspector.h"
+#include "Outliner.h"
 #include "Themer.h"
 
 #include <Magnum/GL/DefaultFramebuffer.h>
@@ -61,8 +61,8 @@ class Editor: public Platform::Application {
 
         Console _console;
         Explorer _explorer;
-        Hierarchy _hierarchy;
         Inspector _inspector;
+        Outliner _outliner;
 
         Containers::LinkedList<CollectionPanel> _collectionPanels;
         CollectionPanel* _activePanel;

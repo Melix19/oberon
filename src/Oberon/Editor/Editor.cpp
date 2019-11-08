@@ -104,7 +104,7 @@ void Editor::drawEvent() {
 
         ImGui::DockBuilderDockWindow("Explorer", dockLeftId);
         ImGui::DockBuilderDockWindow("Console", dockBottomId);
-        ImGui::DockBuilderDockWindow("Hierarchy", dockRightId);
+        ImGui::DockBuilderDockWindow("Outliner", dockRightId);
         ImGui::DockBuilderDockWindow("Inspector", dockRightBottomId);
 
         ImGui::DockBuilderFinish(dockSpaceId);
@@ -149,23 +149,23 @@ void Editor::drawEvent() {
                 _activePanel = &panel;
 
                 _inspector.clearContent();
-                _hierarchy.clearContent();
+                _outliner.clearContent();
 
-                _hierarchy.setPanel(&panel);
+                _outliner.setPanel(&panel);
             }
         } else {
             if(_activePanel == &panel) {
                 _inspector.clearContent();
-                _hierarchy.clearContent();
+                _outliner.clearContent();
             }
 
             _collectionPanels.erase(&panel);
         }
     }
 
-    _hierarchy.newFrame();
+    _outliner.newFrame();
 
-    if(_hierarchy.clickedNode()) _inspector.setEntityNode(_hierarchy.clickedNode());
+    if(_outliner.clickedNode()) _inspector.setEntityNode(_outliner.clickedNode());
 
     _inspector.newFrame();
 

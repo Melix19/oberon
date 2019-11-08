@@ -22,9 +22,9 @@
     SOFTWARE.
 */
 
-#include "Hierarchy.h"
+#include "Outliner.h"
 
-void Hierarchy::newFrame() {
+void Outliner::newFrame() {
     _clickedNode = nullptr;
 
     bool showTree = false;
@@ -36,7 +36,7 @@ void Hierarchy::newFrame() {
 
     if(showTree) ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
 
-    bool isVisible = ImGui::Begin("Hierarchy");
+    bool isVisible = ImGui::Begin("Outliner");
 
     /* If the window is not visible, just end the method here. */
     if(!isVisible) {
@@ -91,7 +91,7 @@ void Hierarchy::newFrame() {
     }
 }
 
-void Hierarchy::clearContent() {
+void Outliner::clearContent() {
     _panel = nullptr;
 
     for(auto& selectedNode : _selectedNodes)
@@ -100,7 +100,7 @@ void Hierarchy::clearContent() {
     _selectedNodes.clear();
 }
 
-void Hierarchy::displayEntityTree(EntityNode* node) {
+void Outliner::displayEntityTree(EntityNode* node) {
     if(node == _editNode && _editNodeMode == EditMode::Rename) {
         displayEditNode(node);
         return;
@@ -183,7 +183,7 @@ void Hierarchy::displayEntityTree(EntityNode* node) {
     }
 }
 
-void Hierarchy::displayEditNode(EntityNode* node) {
+void Outliner::displayEditNode(EntityNode* node) {
     ImGui::Indent(ImGui::GetTreeNodeToLabelSpacing());
     ImGui::SetNextItemWidth(ImGui::GetWindowContentRegionWidth() -
         ImGui::GetTreeNodeToLabelSpacing());

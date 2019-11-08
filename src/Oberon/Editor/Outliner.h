@@ -28,14 +28,14 @@
 
 #include <misc/cpp/imgui_stdlib.h>
 
-class Hierarchy {
+class Outliner {
     public:
-        Hierarchy(): _panel(nullptr), _deleteSelectedNodes(false), _clickedNode(nullptr), _editNode(nullptr) {}
+        Outliner(): _panel(nullptr), _deleteSelectedNodes(false), _clickedNode(nullptr), _editNode(nullptr) {}
 
         void newFrame();
         void clearContent();
 
-        Hierarchy& setPanel(CollectionPanel* panel) {
+        Outliner& setPanel(CollectionPanel* panel) {
             _panel = panel;
             return *this;
         }
