@@ -40,6 +40,7 @@ Object2D* EntitySerializer::createEntityFromConfig(Utility::ConfigurationGroup* 
     object->setRotation(Complex::rotation(Deg(rotation)));
 
     /* Scale */
+    if(!entityGroup->hasValue("scale")) entityGroup->setValue<Vector2>("scale", {1, 1});
     Vector2 scale = entityGroup->value<Vector2>("scale");
     object->setScaling(scale);
 
@@ -54,9 +55,11 @@ void EntitySerializer::addComponentFromConfig(Utility::ConfigurationGroup* compo
 
     if(type == "rectangle_shape") {
         /* Size */
+        if(!componentGroup->hasValue("size")) componentGroup->setValue<Vector2>("size", {200, 100});
         Vector2 size = componentGroup->value<Vector2>("size");
 
         /* Color */
+        if(!componentGroup->hasValue("color")) componentGroup->setValue<Color4>("color", {1, 1, 1, 1});
         Color4 color = componentGroup->value<Color4>("color");
 
         /* RectangleShape */
