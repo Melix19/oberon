@@ -40,11 +40,14 @@ class CollectionPanel: public Containers::LinkedListItem<CollectionPanel> {
         void drawViewport();
         void newFrame();
         void addEntityNodeChild(Utility::ConfigurationGroup* entityGroup, EntityNode* parentNode);
+        void addComponentToEntity(Utility::ConfigurationGroup* entityGroup, Object2D* object);
         void save();
 
         const std::string& path() { return _path; }
 
         EntityNode& rootNode() { return _rootNode; }
+
+        std::vector<EntityNode*>& selectedNodes() { return _selectedNodes; }
 
         bool isOpen() { return _isOpen; }
         bool isFocused() { return _isFocused; }
@@ -66,6 +69,7 @@ class CollectionPanel: public Containers::LinkedListItem<CollectionPanel> {
 
         Utility::Configuration _collectionConfig;
         EntityNode _rootNode;
+        std::vector<EntityNode*> _selectedNodes;
 
         bool _isOpen;
         bool _isVisible;

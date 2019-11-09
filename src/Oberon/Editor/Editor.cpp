@@ -148,15 +148,13 @@ void Editor::drawEvent() {
             if(panel.isFocused() && _activePanel != &panel) {
                 _activePanel = &panel;
 
-                _inspector.clearContent();
-                _outliner.clearContent();
-
                 _outliner.setPanel(&panel);
+                _inspector.setPanel(&panel);
             }
         } else {
             if(_activePanel == &panel) {
-                _inspector.clearContent();
-                _outliner.clearContent();
+                _outliner.setPanel(nullptr);
+                _inspector.setPanel(nullptr);
             }
 
             _collectionPanels.erase(&panel);
@@ -164,9 +162,6 @@ void Editor::drawEvent() {
     }
 
     _outliner.newFrame();
-
-    if(_outliner.clickedNode()) _inspector.setEntityNode(_outliner.clickedNode());
-
     _inspector.newFrame();
 
     /* Set appropriate states. */

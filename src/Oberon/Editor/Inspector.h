@@ -30,15 +30,14 @@
 
 class Inspector {
     public:
-        Inspector(): _entityNode(nullptr) {}
+        Inspector(): _panel(nullptr) {}
         void newFrame();
-        void clearContent();
 
-        Inspector& setEntityNode(EntityNode* entityNode) {
-            _entityNode = entityNode;
+        Inspector& setPanel(CollectionPanel* panel) {
+            _panel = panel;
             return *this;
         }
 
     private:
-        EntityNode* _entityNode;
+        CollectionPanel* _panel;
 };

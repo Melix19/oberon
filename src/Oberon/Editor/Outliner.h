@@ -30,27 +30,21 @@
 
 class Outliner {
     public:
-        Outliner(): _panel(nullptr), _deleteSelectedNodes(false), _clickedNode(nullptr), _editNode(nullptr) {}
+        Outliner(): _panel(nullptr), _deleteSelectedNodes(false), _editNode(nullptr) {}
 
         void newFrame();
-        void clearContent();
 
         Outliner& setPanel(CollectionPanel* panel) {
             _panel = panel;
             return *this;
         }
 
-        EntityNode* clickedNode() const { return _clickedNode; }
-
     private:
         void displayEntityTree(EntityNode* node);
         void displayEditNode(EntityNode* node);
 
         CollectionPanel* _panel;
-
-        std::vector<EntityNode*> _selectedNodes;
         bool _deleteSelectedNodes;
-        EntityNode* _clickedNode;
 
         enum class EditMode {
             EntityCreation,

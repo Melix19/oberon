@@ -25,8 +25,6 @@
 #include "Outliner.h"
 
 void Outliner::newFrame() {
-    _clickedNode = nullptr;
-
     bool showTree = false;
 
     if(_panel) {
@@ -73,14 +71,15 @@ void Outliner::newFrame() {
     ImGui::End();
 
     if(_deleteSelectedNodes) {
-        if(!_selectedNodes.empty()) {
-            for(auto& selectedNode : _selectedNodes) {
+        auto& selectedNodes = _panel->selectedNodes();
+
+        if(!selectedNodes.empty()) {
+            for(auto& selectedNode : selectedNodes) {
                 delete selectedNode->entity();
 
                 std::string name = selectedNode->entityGroup()->value("name");
                 EntityNode* parent =  selectedNode->parent();
 
-                parent->entityGroup()->removeAllGroups(name + "-component");
                 parent->entityGroup()->removeGroup(selectedNode->entityGroup());
 
                 auto found = std::find_if(parent->children().begin(), parent->children().end(),
@@ -91,20 +90,11 @@ void Outliner::newFrame() {
                 parent->children().erase(found);
             }
 
-            _selectedNodes.clear();
+            selectedNodes.clear();
         }
 
         _deleteSelectedNodes = false;
     }
-}
-
-void Outliner::clearContent() {
-    _panel = nullptr;
-
-    for(auto& selectedNode : _selectedNodes)
-        selectedNode->setSelected(false);
-
-    _selectedNodes.clear();
 }
 
 void Outliner::displayEntityTree(EntityNode* node) {
@@ -125,6 +115,7 @@ void Outliner::displayEntityTree(EntityNode* node) {
     bool nodeOpen = ImGui::TreeNodeEx(nodeName.c_str(), nodeFlags);
 
     if(ImGui::IsItemClicked(0) || ImGui::IsItemClicked(1)) {
+        auto& selectedNodes = _panel->selectedNodes();
         ImGuiIO& io = ImGui::GetIO();
 
         /* Use the macOS style shortcuts (Cmd/Super instead of Ctrl) for macOS. */
@@ -133,29 +124,27 @@ void Outliner::displayEntityTree(EntityNode* node) {
 
         if(isShortcutKey && ImGui::IsItemClicked(0)) {
             if(node->isSelected()) {
-                auto found = std::find_if(_selectedNodes.begin(), _selectedNodes.end(),
+                auto found = std::find_if(selectedNodes.begin(), selectedNodes.end(),
                     [&](EntityNode* p) { return p == node; });
 
-                CORRADE_INTERNAL_ASSERT(found != _selectedNodes.end());
+                CORRADE_INTERNAL_ASSERT(found != selectedNodes.end());
 
-                _selectedNodes.erase(found);
-            } else _selectedNodes.push_back(node);
+                selectedNodes.erase(found);
+            } else selectedNodes.push_back(node);
 
             node->setSelected(!node->isSelected());
         } else {
             if(!node->isSelected() || ImGui::IsItemClicked(0)) {
-                if(!_selectedNodes.empty()) {
-                    for(auto& selectedNode : _selectedNodes)
+                if(!selectedNodes.empty()) {
+                    for(auto& selectedNode : selectedNodes)
                         selectedNode->setSelected(false);
 
-                    _selectedNodes.clear();
+                    selectedNodes.clear();
                 }
 
-                _selectedNodes.push_back(node);
+                selectedNodes.push_back(node);
                 node->setSelected(true);
             }
-
-            if(ImGui::IsItemClicked(0)) _clickedNode = node;
         }
     }
 

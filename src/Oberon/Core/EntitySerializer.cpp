@@ -25,38 +25,41 @@
 #include "EntitySerializer.h"
 
 Object2D* EntitySerializer::createEntityFromConfig(Utility::ConfigurationGroup* entityGroup, Object2D* parent, SceneGraph::DrawableGroup2D* drawables, Shaders::Flat2D& shader) {
-    Object2D* entity = new Object2D{parent};
+    Object2D* object = new Object2D{parent};
 
     /* Name and Entity */
     std::string name = entityGroup->value("name");
-    entity->addFeature<Entity>(name);
+    object->addFeature<Entity>(name);
 
     /* Position */
     Vector2 position = entityGroup->value<Vector2>("position");
-    entity->setTranslation(position);
+    object->setTranslation(position);
 
     /* Rotation */
     Float rotation = entityGroup->value<Float>("rotation");
-    entity->setRotation(Complex::rotation(Deg(rotation)));
+    object->setRotation(Complex::rotation(Deg(rotation)));
 
     /* Scale */
     Vector2 scale = entityGroup->value<Vector2>("scale");
-    entity->setScaling(scale);
+    object->setScaling(scale);
 
-    for(auto& componentGroup: entityGroup->groups(name + "-component")) {
-        std::string type = componentGroup->value("type");
+    for(auto componentGroup: entityGroup->groups("component"))
+        addComponentFromConfig(componentGroup, object, drawables, shader);
 
-        if(type == "rectangle_shape") {
-            /* Size */
-            Vector2 size = componentGroup->value<Vector2>("size");
+    return object;
+}
 
-            /* Color */
-            Color4 color = componentGroup->value<Color4>("color");
+void EntitySerializer::addComponentFromConfig(Utility::ConfigurationGroup* componentGroup, Object2D* object, SceneGraph::DrawableGroup2D* drawables, Shaders::Flat2D& shader) {
+    std::string type = componentGroup->value("type");
 
-            /* RectangleShape */
-            entity->addFeature<RectangleShape>(drawables, shader, size, color);
-        }
+    if(type == "rectangle_shape") {
+        /* Size */
+        Vector2 size = componentGroup->value<Vector2>("size");
+
+        /* Color */
+        Color4 color = componentGroup->value<Color4>("color");
+
+        /* RectangleShape */
+        object->addFeature<RectangleShape>(drawables, shader, size, color);
     }
-
-    return entity;
 }

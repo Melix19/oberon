@@ -25,7 +25,6 @@
 #pragma once
 
 #include "Entity.h"
-#include "EntitySerializer.hpp"
 #include "RectangleShape.h"
 
 #include <Corrade/Utility/ConfigurationGroup.h>
@@ -38,5 +37,6 @@ typedef SceneGraph::Scene<SceneGraph::TranslationRotationScalingTransformation2D
 namespace EntitySerializer {
 
 Object2D* createEntityFromConfig(Utility::ConfigurationGroup* entityGroup, Object2D* parent, SceneGraph::DrawableGroup2D* drawables, Shaders::Flat2D& shader);
+void addComponentFromConfig(Utility::ConfigurationGroup* componentGroup, Object2D* object, SceneGraph::DrawableGroup2D* drawables, Shaders::Flat2D& shader);
 
 }

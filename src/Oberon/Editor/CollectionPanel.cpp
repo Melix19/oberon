@@ -25,7 +25,7 @@
 #include "CollectionPanel.h"
 
 CollectionPanel::CollectionPanel(const std::string& path): _path(path),
-    _collectionConfig{_path}, _rootNode(&_scene, nullptr), _isOpen(true),
+    _collectionConfig{_path}, _rootNode(&_scene, &_collectionConfig), _isOpen(true),
     _isVisible(true), _isFocused(false), _needsFocus(true), _needsDocking(true)
 {
     _viewportTexture.setStorage(1, GL::TextureFormat::RGBA8, {2560, 1440});
@@ -38,7 +38,8 @@ CollectionPanel::CollectionPanel(const std::string& path): _path(path),
         .setProjectionMatrix(Matrix3::projection(Vector2{_viewportTexture.imageSize(0)}))
         .setViewport(_viewportTexture.imageSize(0));
 
-    addEntityNodeChild(&_collectionConfig, &_rootNode);
+    if(_collectionConfig.hasGroup("child"))
+        addEntityNodeChild(_collectionConfig.group("child"), &_rootNode);
 }
 
 void CollectionPanel::drawViewport() {
@@ -77,6 +78,10 @@ void CollectionPanel::newFrame() {
     ImGui::SetScrollY((imageSize.y() - contentSize.y)/2);
 
     ImGui::End();
+}
+
+void CollectionPanel::addComponentToEntity(Utility::ConfigurationGroup* entityGroup, Object2D* object) {
+    EntitySerializer::addComponentFromConfig(entityGroup, object, &_drawables, _shader);
 }
 
 void CollectionPanel::save() {
