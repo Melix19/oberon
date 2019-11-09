@@ -39,35 +39,37 @@ void Inspector::newFrame() {
         auto& selectedNodes = _panel->selectedNodes();
         EntityNode* entityNode = selectedNodes.front();
 
-        /* Position */
-        ImGui::AlignTextToFramePadding();
-        ImGui::Text("Position");
-        ImGui::SameLine(columnWidth);
-        ImGui::SetNextItemWidth(-1);
-        Vector2 position = entityNode->entityGroup()->value<Vector2>("position");
-        ImGui::DragFloat2("##Position", position.data(), 0.5f);
-        entityNode->entityGroup()->setValue("position", position);
-        entityNode->entity()->setTranslation(position);
+        if(ImGui::CollapsingHeader("Transform", ImGuiTreeNodeFlags_DefaultOpen)) {
+            /* Position */
+            ImGui::AlignTextToFramePadding();
+            ImGui::Text("Position");
+            ImGui::SameLine(columnWidth);
+            ImGui::SetNextItemWidth(-1);
+            Vector2 position = entityNode->entityGroup()->value<Vector2>("position");
+            ImGui::DragFloat2("##Position", position.data(), 0.5f);
+            entityNode->entityGroup()->setValue("position", position);
+            entityNode->entity()->setTranslation(position);
 
-        /* Rotation */
-        ImGui::AlignTextToFramePadding();
-        ImGui::Text("Rotation");
-        ImGui::SameLine(columnWidth);
-        ImGui::SetNextItemWidth(-1);
-        Float rotation = entityNode->entityGroup()->value<Float>("rotation");
-        ImGui::DragFloat("##Rotation", &rotation, 0.5f);
-        entityNode->entityGroup()->setValue("rotation", rotation);
-        entityNode->entity()->setRotation(Complex::rotation(Deg(rotation)));
+            /* Rotation */
+            ImGui::AlignTextToFramePadding();
+            ImGui::Text("Rotation");
+            ImGui::SameLine(columnWidth);
+            ImGui::SetNextItemWidth(-1);
+            Float rotation = entityNode->entityGroup()->value<Float>("rotation");
+            ImGui::DragFloat("##Rotation", &rotation, 0.5f);
+            entityNode->entityGroup()->setValue("rotation", rotation);
+            entityNode->entity()->setRotation(Complex::rotation(Deg(rotation)));
 
-        /* Scale */
-        ImGui::AlignTextToFramePadding();
-        ImGui::Text("Scale");
-        ImGui::SameLine(columnWidth);
-        ImGui::SetNextItemWidth(-1);
-        Vector2 scale = entityNode->entityGroup()->value<Vector2>("scale");
-        ImGui::DragFloat2("##Scale", scale.data(), 0.005f);
-        entityNode->entityGroup()->setValue("scale", scale);
-        entityNode->entity()->setScaling(scale);
+            /* Scale */
+            ImGui::AlignTextToFramePadding();
+            ImGui::Text("Scale");
+            ImGui::SameLine(columnWidth);
+            ImGui::SetNextItemWidth(-1);
+            Vector2 scale = entityNode->entityGroup()->value<Vector2>("scale");
+            ImGui::DragFloat2("##Scale", scale.data(), 0.005f);
+            entityNode->entityGroup()->setValue("scale", scale);
+            entityNode->entity()->setScaling(scale);
+        }
 
         /* Components */
         for(auto componentGroup: entityNode->entityGroup()->groups("component")) {
@@ -86,29 +88,34 @@ void Inspector::newFrame() {
 
                 CORRADE_INTERNAL_ASSERT(rectangleShape != nullptr);
 
-                /* Type */
-                ImGui::AlignTextToFramePadding();
-                ImGui::Text("Rectangle shape");
+                bool componentIsOpen = true;
 
-                /* Size */
-                ImGui::AlignTextToFramePadding();
-                ImGui::Text("Size");
-                ImGui::SameLine(columnWidth);
-                ImGui::SetNextItemWidth(-1);
-                Vector2 size = componentGroup->value<Vector2>("size");
-                ImGui::DragFloat2("##Size", size.data(), 0.5f);
-                componentGroup->setValue("size", size);
-                rectangleShape->setSize(size);
+                if(ImGui::CollapsingHeader("Rectangle shape", &componentIsOpen, ImGuiTreeNodeFlags_DefaultOpen)) {
+                    /* Size */
+                    ImGui::AlignTextToFramePadding();
+                    ImGui::Text("Size");
+                    ImGui::SameLine(columnWidth);
+                    ImGui::SetNextItemWidth(-1);
+                    Vector2 size = componentGroup->value<Vector2>("size");
+                    ImGui::DragFloat2("##Size", size.data(), 0.5f);
+                    componentGroup->setValue("size", size);
+                    rectangleShape->setSize(size);
 
-                /* Color */
-                ImGui::AlignTextToFramePadding();
-                ImGui::Text("Color");
-                ImGui::SameLine(columnWidth);
-                ImGui::SetNextItemWidth(-1);
-                Color4 color = componentGroup->value<Color4>("color");
-                ImGui::ColorEdit4("##Color", color.data());
-                componentGroup->setValue("color", color);
-                rectangleShape->setColor(color);
+                    /* Color */
+                    ImGui::AlignTextToFramePadding();
+                    ImGui::Text("Color");
+                    ImGui::SameLine(columnWidth);
+                    ImGui::SetNextItemWidth(-1);
+                    Color4 color = componentGroup->value<Color4>("color");
+                    ImGui::ColorEdit4("##Color", color.data());
+                    componentGroup->setValue("color", color);
+                    rectangleShape->setColor(color);
+                }
+
+                if(!componentIsOpen) {
+                    delete rectangleShape;
+                    entityNode->entityGroup()->removeGroup(componentGroup);
+                }
            }
        }
 
