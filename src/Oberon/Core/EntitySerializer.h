@@ -28,6 +28,8 @@
 #include "EntitySerializer.hpp"
 #include "RectangleShape.h"
 
+#include <Corrade/Utility/ConfigurationGroup.h>
+#include <Magnum/Math/ConfigurationValue.h>
 #include <Magnum/SceneGraph/TranslationRotationScalingTransformation2D.h>
 
 typedef SceneGraph::Object<SceneGraph::TranslationRotationScalingTransformation2D> Object2D;
