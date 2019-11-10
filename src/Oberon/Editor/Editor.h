@@ -58,6 +58,7 @@ class Editor: public Platform::Application {
         void textInputEvent(TextInputEvent& event) override;
 
         ImGuiIntegration::Context _imgui{NoCreate};
+        OberonResourceManager _resourceManager;
 
         Console _console;
         Explorer _explorer;

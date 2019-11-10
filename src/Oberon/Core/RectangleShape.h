@@ -26,20 +26,15 @@
 
 #include <Magnum/GL/Mesh.h>
 #include <Magnum/Math/Color.h>
-#include <Magnum/MeshTools/Compile.h>
-#include <Magnum/Primitives/Square.h>
 #include <Magnum/SceneGraph/Camera.h>
 #include <Magnum/SceneGraph/Drawable.h>
 #include <Magnum/Shaders/Flat.h>
-#include <Magnum/Trade/MeshData2D.h>
 
 using namespace Magnum;
 
 class RectangleShape: public SceneGraph::Drawable2D {
     public:
-        explicit RectangleShape(SceneGraph::AbstractObject2D& object, SceneGraph::DrawableGroup2D* drawables, Shaders::Flat2D& shader, const Vector2& size, const Color4& color): SceneGraph::Drawable2D{object, drawables}, _shader(shader), _size{size}, _color{color} {
-            _mesh = MeshTools::compile(Primitives::squareSolid());
-        }
+        explicit RectangleShape(SceneGraph::AbstractObject2D& object, SceneGraph::DrawableGroup2D* drawables, GL::Mesh& mesh, Shaders::Flat2D& shader, const Vector2& size, const Color4& color): SceneGraph::Drawable2D{object, drawables}, _mesh(mesh), _shader(shader), _size{size}, _color{color} {}
 
         Vector2 size() const { return _size; }
 
@@ -62,7 +57,7 @@ class RectangleShape: public SceneGraph::Drawable2D {
             _mesh.draw(_shader);
         }
 
-        GL::Mesh _mesh{NoCreate};
+        GL::Mesh& _mesh;
         Shaders::Flat2D& _shader;
 
         Vector2 _size;

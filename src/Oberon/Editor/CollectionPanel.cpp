@@ -24,9 +24,9 @@
 
 #include "CollectionPanel.h"
 
-CollectionPanel::CollectionPanel(const std::string& path): _path(path),
-    _collectionConfig{_path}, _rootNode(&_scene, &_collectionConfig), _isOpen(true),
-    _isVisible(true), _isFocused(false), _needsFocus(true), _needsDocking(true)
+CollectionPanel::CollectionPanel(const std::string& path, OberonResourceManager& resourceManager): _path(path),
+    _resourceManager(resourceManager), _collectionConfig{_path}, _rootNode(&_scene, &_collectionConfig),
+    _isOpen(true), _isVisible(true), _isFocused(false), _needsFocus(true), _needsDocking(true)
 {
     _viewportTexture.setStorage(1, GL::TextureFormat::RGBA8, {2560, 1440});
     _framebuffer = GL::Framebuffer{{{}, _viewportTexture.imageSize(0)}};
@@ -81,7 +81,7 @@ void CollectionPanel::newFrame() {
 }
 
 void CollectionPanel::addComponentToEntity(Utility::ConfigurationGroup* entityGroup, Object2D* object) {
-    EntitySerializer::addComponentFromConfig(entityGroup, object, &_drawables, _shader);
+    EntitySerializer::addComponentFromConfig(entityGroup, object, &_drawables, _resourceManager);
 }
 
 void CollectionPanel::save() {
@@ -90,7 +90,7 @@ void CollectionPanel::save() {
 
 void CollectionPanel::addEntityNodeChild(Utility::ConfigurationGroup* entityGroup, EntityNode* parentNode) {
     Object2D* entity = EntitySerializer::createEntityFromConfig(entityGroup, parentNode->entity(),
-        &_drawables, _shader);
+        &_drawables, _resourceManager);
     EntityNode* node = parentNode->addChild(entity, entityGroup);
 
     for(auto childGroup : entityGroup->groups("child"))

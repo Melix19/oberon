@@ -127,7 +127,7 @@ void Editor::drawEvent() {
                 if(panel.path() == path) found = &panel;
 
             if(found) found->setNeedsFocus(true);
-            else _collectionPanels.insert(new CollectionPanel(path));
+            else _collectionPanels.insert(new CollectionPanel(path, _resourceManager));
         }
     }
 

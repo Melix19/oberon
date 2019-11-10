@@ -36,7 +36,7 @@
 
 class CollectionPanel: public Containers::LinkedListItem<CollectionPanel> {
     public:
-        CollectionPanel(const std::string& path);
+        CollectionPanel(const std::string& path, OberonResourceManager& resourceManager);
         void drawViewport();
         void newFrame();
         void addEntityNodeChild(Utility::ConfigurationGroup* entityGroup, EntityNode* parentNode);
@@ -66,6 +66,7 @@ class CollectionPanel: public Containers::LinkedListItem<CollectionPanel> {
 
     private:
         std::string _path;
+        OberonResourceManager& _resourceManager;
 
         Utility::Configuration _collectionConfig;
         EntityNode _rootNode;
@@ -81,8 +82,6 @@ class CollectionPanel: public Containers::LinkedListItem<CollectionPanel> {
         GL::Texture2D _viewportTexture;
 
         SceneGraph::DrawableGroup2D _drawables;
-        Shaders::Flat2D _shader;
-
         Scene2D _scene;
         Object2D* _cameraObject;
         SceneGraph::Camera2D* _camera;

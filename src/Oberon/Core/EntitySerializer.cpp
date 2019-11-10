@@ -24,7 +24,7 @@
 
 #include "EntitySerializer.h"
 
-Object2D* EntitySerializer::createEntityFromConfig(Utility::ConfigurationGroup* entityGroup, Object2D* parent, SceneGraph::DrawableGroup2D* drawables, Shaders::Flat2D& shader) {
+Object2D* EntitySerializer::createEntityFromConfig(Utility::ConfigurationGroup* entityGroup, Object2D* parent, SceneGraph::DrawableGroup2D* drawables, OberonResourceManager& resourceManager) {
     Object2D* object = new Object2D{parent};
 
     /* Name and Entity */
@@ -45,12 +45,12 @@ Object2D* EntitySerializer::createEntityFromConfig(Utility::ConfigurationGroup* 
     object->setScaling(scale);
 
     for(auto componentGroup: entityGroup->groups("component"))
-        addComponentFromConfig(componentGroup, object, drawables, shader);
+        addComponentFromConfig(componentGroup, object, drawables, resourceManager);
 
     return object;
 }
 
-void EntitySerializer::addComponentFromConfig(Utility::ConfigurationGroup* componentGroup, Object2D* object, SceneGraph::DrawableGroup2D* drawables, Shaders::Flat2D& shader) {
+void EntitySerializer::addComponentFromConfig(Utility::ConfigurationGroup* componentGroup, Object2D* object, SceneGraph::DrawableGroup2D* drawables, OberonResourceManager& resourceManager) {
     std::string type = componentGroup->value("type");
 
     if(type == "rectangle_shape") {
@@ -62,7 +62,21 @@ void EntitySerializer::addComponentFromConfig(Utility::ConfigurationGroup* compo
         if(!componentGroup->hasValue("color")) componentGroup->setValue<Color4>("color", {1, 1, 1, 1});
         Color4 color = componentGroup->value<Color4>("color");
 
+        /* Mesh */
+        Resource<GL::Mesh> meshResource = resourceManager.get<GL::Mesh>("square");
+        if(!meshResource) {
+            GL::Mesh mesh = MeshTools::compile(Primitives::squareSolid());
+            resourceManager.set(meshResource.key(), std::move(mesh));
+        }
+
+        /* Shader */
+        Resource<Shaders::Flat2D> shaderResource = resourceManager.get<Shaders::Flat2D>("flat2d");
+        if(!shaderResource) {
+            Shaders::Flat2D shader;
+            resourceManager.set(shaderResource.key(), std::move(shader));
+        }
+
         /* RectangleShape */
-        object->addFeature<RectangleShape>(drawables, shader, size, color);
+        object->addFeature<RectangleShape>(drawables, *meshResource, *shaderResource, size, color);
     }
 }
