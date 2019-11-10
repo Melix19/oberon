@@ -155,6 +155,8 @@ void Editor::drawEvent() {
             if(_activePanel == &panel) {
                 _outliner.setPanel(nullptr);
                 _inspector.setPanel(nullptr);
+
+                _activePanel = nullptr;
             }
 
             _collectionPanels.erase(&panel);
