@@ -29,10 +29,10 @@
 
 class EntityNode {
     public:
-        EntityNode(Object2D* entity, Utility::ConfigurationGroup* entityGroup): _entity(entity),
+        EntityNode(Object3D* entity, Utility::ConfigurationGroup* entityGroup): _entity(entity),
             _entityGroup(entityGroup), _isSelected(false) {}
 
-        Object2D* entity() const { return _entity; }
+        Object3D* entity() const { return _entity; }
 
         Utility::ConfigurationGroup* entityGroup() const { return _entityGroup; }
 
@@ -43,7 +43,7 @@ class EntityNode {
             return *this;
         }
 
-        EntityNode* addChild(Object2D* entity, Utility::ConfigurationGroup* entityGroup) {
+        EntityNode* addChild(Object3D* entity, Utility::ConfigurationGroup* entityGroup) {
             auto child = Containers::pointer<EntityNode>(entity, entityGroup);
             child->_parent = this;
 
@@ -56,7 +56,7 @@ class EntityNode {
         std::vector<Containers::Pointer<EntityNode>>& children() { return _children; }
 
     private:
-        Object2D* _entity;
+        Object3D* _entity;
         Utility::ConfigurationGroup* _entityGroup;
         bool _isSelected;
 

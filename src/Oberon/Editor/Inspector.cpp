@@ -45,8 +45,8 @@ void Inspector::newFrame() {
             ImGui::Text("Position");
             ImGui::SameLine(columnWidth);
             ImGui::SetNextItemWidth(-1);
-            Vector2 position = entityNode->entityGroup()->value<Vector2>("position");
-            ImGui::DragFloat2("##Position", position.data(), 0.5f);
+            Vector3 position = entityNode->entityGroup()->value<Vector3>("position");
+            ImGui::DragFloat3("##Position", position.data(), 0.5f);
             entityNode->entityGroup()->setValue("position", position);
             entityNode->entity()->setTranslation(position);
 
@@ -55,18 +55,20 @@ void Inspector::newFrame() {
             ImGui::Text("Rotation");
             ImGui::SameLine(columnWidth);
             ImGui::SetNextItemWidth(-1);
-            Float rotation = entityNode->entityGroup()->value<Float>("rotation");
-            ImGui::DragFloat("##Rotation", &rotation, 0.5f);
+            Vector3 rotation = entityNode->entityGroup()->value<Vector3>("rotation");
+            ImGui::DragFloat3("##Rotation", rotation.data(), 0.5f);
             entityNode->entityGroup()->setValue("rotation", rotation);
-            entityNode->entity()->setRotation(Complex::rotation(Deg(rotation)));
+            entityNode->entity()->setRotation(Quaternion::rotation(Deg(rotation.x()), Vector3::xAxis())*
+                Quaternion::rotation(Deg(rotation.y()), Vector3::yAxis())*
+                Quaternion::rotation(Deg(rotation.z()), Vector3::zAxis()));
 
             /* Scale */
             ImGui::AlignTextToFramePadding();
             ImGui::Text("Scale");
             ImGui::SameLine(columnWidth);
             ImGui::SetNextItemWidth(-1);
-            Vector2 scale = entityNode->entityGroup()->value<Vector2>("scale");
-            ImGui::DragFloat2("##Scale", scale.data(), 0.005f);
+            Vector3 scale = entityNode->entityGroup()->value<Vector3>("scale");
+            ImGui::DragFloat3("##Scale", scale.data(), 0.005f);
             entityNode->entityGroup()->setValue("scale", scale);
             entityNode->entity()->setScaling(scale);
         }

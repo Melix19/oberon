@@ -40,25 +40,25 @@ class CollectionPanel: public Containers::LinkedListItem<CollectionPanel> {
         void drawViewport();
         void newFrame();
         void addEntityNodeChild(Utility::ConfigurationGroup* entityGroup, EntityNode* parentNode);
-        void addComponentToEntity(Utility::ConfigurationGroup* entityGroup, Object2D* object);
+        void addComponentToEntity(Utility::ConfigurationGroup* entityGroup, Object3D* object);
         void save();
 
-        const std::string& path() { return _path; }
+        const std::string& path() const { return _path; }
 
         EntityNode& rootNode() { return _rootNode; }
 
         std::vector<EntityNode*>& selectedNodes() { return _selectedNodes; }
 
-        bool isOpen() { return _isOpen; }
-        bool isFocused() { return _isFocused; }
+        bool isOpen() const { return _isOpen; }
+        bool isFocused() const { return _isFocused; }
 
-        bool needsFocus() { return _needsFocus; }
+        bool needsFocus() const { return _needsFocus; }
         CollectionPanel& setNeedsFocus(bool needsFocus) {
             _needsFocus = needsFocus;
             return *this;
         }
 
-        bool needsDocking() { return _needsDocking; }
+        bool needsDocking() const { return _needsDocking; }
         CollectionPanel& setNeedsDocking(bool needsDocking) {
             _needsDocking = needsDocking;
             return *this;
@@ -81,8 +81,8 @@ class CollectionPanel: public Containers::LinkedListItem<CollectionPanel> {
         GL::Framebuffer _framebuffer{NoCreate};
         GL::Texture2D _viewportTexture;
 
-        SceneGraph::DrawableGroup2D _drawables;
-        Scene2D _scene;
-        Object2D* _cameraObject;
-        SceneGraph::Camera2D* _camera;
+        SceneGraph::DrawableGroup3D _drawables;
+        Scene3D _scene;
+        Object3D* _cameraObject;
+        SceneGraph::Camera3D* _camera;
 };

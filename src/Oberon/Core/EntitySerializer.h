@@ -32,17 +32,17 @@
 #include <Magnum/MeshTools/Compile.h>
 #include <Magnum/Primitives/Square.h>
 #include <Magnum/ResourceManager.h>
-#include <Magnum/SceneGraph/TranslationRotationScalingTransformation2D.h>
+#include <Magnum/SceneGraph/TranslationRotationScalingTransformation3D.h>
 #include <Magnum/Trade/MeshData2D.h>
 
-typedef SceneGraph::Object<SceneGraph::TranslationRotationScalingTransformation2D> Object2D;
-typedef SceneGraph::Scene<SceneGraph::TranslationRotationScalingTransformation2D> Scene2D;
+typedef SceneGraph::Object<SceneGraph::TranslationRotationScalingTransformation3D> Object3D;
+typedef SceneGraph::Scene<SceneGraph::TranslationRotationScalingTransformation3D> Scene3D;
 
-typedef ResourceManager<GL::Mesh, Shaders::Flat2D> OberonResourceManager;
+typedef ResourceManager<GL::Mesh, Shaders::Flat3D> OberonResourceManager;
 
 namespace EntitySerializer {
 
-Object2D* createEntityFromConfig(Utility::ConfigurationGroup* entityGroup, Object2D* parent, SceneGraph::DrawableGroup2D* drawables, OberonResourceManager& resourceManager);
-void addComponentFromConfig(Utility::ConfigurationGroup* componentGroup, Object2D* object, SceneGraph::DrawableGroup2D* drawables, OberonResourceManager& resourceManager);
+Object3D* createEntityFromConfig(Utility::ConfigurationGroup* entityGroup, Object3D* parent, SceneGraph::DrawableGroup3D* drawables, OberonResourceManager& resourceManager);
+void addComponentFromConfig(Utility::ConfigurationGroup* componentGroup, Object3D* object, SceneGraph::DrawableGroup3D* drawables, OberonResourceManager& resourceManager);
 
 }

@@ -32,10 +32,10 @@ CollectionPanel::CollectionPanel(const std::string& path, OberonResourceManager&
     _framebuffer = GL::Framebuffer{{{}, _viewportTexture.imageSize(0)}};
     _framebuffer.attachTexture(GL::Framebuffer::ColorAttachment{0}, _viewportTexture, 0);
 
-    _cameraObject = new Object2D{&_scene};
-    _camera = new SceneGraph::Camera2D{*_cameraObject};
+    _cameraObject = new Object3D{&_scene};
+    _camera = new SceneGraph::Camera3D{*_cameraObject};
     _camera->setAspectRatioPolicy(SceneGraph::AspectRatioPolicy::Extend)
-        .setProjectionMatrix(Matrix3::projection(Vector2{_viewportTexture.imageSize(0)}))
+        .setProjectionMatrix(Matrix4::orthographicProjection(Vector2{_viewportTexture.imageSize(0)}, -1000.0f, 1000.0f))
         .setViewport(_viewportTexture.imageSize(0));
 
     if(_collectionConfig.hasGroup("child"))
@@ -80,7 +80,7 @@ void CollectionPanel::newFrame() {
     ImGui::End();
 }
 
-void CollectionPanel::addComponentToEntity(Utility::ConfigurationGroup* entityGroup, Object2D* object) {
+void CollectionPanel::addComponentToEntity(Utility::ConfigurationGroup* entityGroup, Object3D* object) {
     EntitySerializer::addComponentFromConfig(entityGroup, object, &_drawables, _resourceManager);
 }
 
@@ -89,7 +89,7 @@ void CollectionPanel::save() {
 }
 
 void CollectionPanel::addEntityNodeChild(Utility::ConfigurationGroup* entityGroup, EntityNode* parentNode) {
-    Object2D* entity = EntitySerializer::createEntityFromConfig(entityGroup, parentNode->entity(),
+    Object3D* entity = EntitySerializer::createEntityFromConfig(entityGroup, parentNode->entity(),
         &_drawables, _resourceManager);
     EntityNode* node = parentNode->addChild(entity, entityGroup);
 

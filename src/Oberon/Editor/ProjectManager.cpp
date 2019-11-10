@@ -115,17 +115,6 @@ void ProjectManager::drawEvent() {
         }
     }
 
-    ImGui::SameLine();
-
-    if(ImGui::Button("Create")) {
-        _projectPath = pfd::select_folder("").result();
-
-        if(!_projectPath.empty()) {
-            _projectPath.pop_back();
-            exit();
-        }
-    }
-
     ImGui::End();
 
     ImGui::Begin("List");

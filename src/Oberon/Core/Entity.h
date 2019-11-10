@@ -29,9 +29,9 @@
 
 using namespace Magnum;
 
-class Entity: public SceneGraph::AbstractFeature2D {
+class Entity: public SceneGraph::AbstractFeature3D {
     public:
-        explicit Entity(SceneGraph::AbstractObject2D& object, const std::string& name): SceneGraph::AbstractFeature2D{object}, _name(name) {}
+        explicit Entity(SceneGraph::AbstractObject3D& object, const std::string& name): SceneGraph::AbstractFeature3D{object}, _name(name) {}
 
         std::string name() const { return _name; }
 

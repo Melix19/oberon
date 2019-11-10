@@ -1,6 +1,6 @@
 # Oberon
 
-A WIP cross-platform 2D game engine built with magnum.
+A WIP cross-platform 2D/3D game engine built with magnum.
 
 ## Building
 
