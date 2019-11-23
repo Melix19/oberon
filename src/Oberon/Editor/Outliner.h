@@ -26,7 +26,7 @@
 
 #include "CollectionPanel.h"
 
-#include <OberonExternal/imgui/misc/cpp/imgui_stdlib.h>
+#include <misc/cpp/imgui_stdlib.h>
 
 class Outliner {
     public:

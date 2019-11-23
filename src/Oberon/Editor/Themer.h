@@ -24,7 +24,7 @@
 
 #pragma once
 
-#include <OberonExternal/imgui/imgui.h>
+#include <imgui.h>
 
 namespace Themer {
 

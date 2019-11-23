@@ -27,8 +27,8 @@
 #include "FileNode.h"
 
 #include <Corrade/Utility/Directory.h>
-#include <OberonExternal/imgui/imgui.h>
-#include <OberonExternal/imgui/misc/cpp/imgui_stdlib.h>
+#include <imgui.h>
+#include <misc/cpp/imgui_stdlib.h>
 
 class Explorer {
     public:
