@@ -52,6 +52,13 @@ void Explorer::newFrame() {
                 _editNodeNeedsFocus = true;
             }
 
+            if(ImGui::MenuItem("Script")) {
+                _editNode = &_rootNode;
+                _editNodeMode = EditMode::FileCreation;
+                _editNodeText = ".py";
+                _editNodeNeedsFocus = true;
+            }
+
             ImGui::EndMenu();
         }
 
@@ -156,6 +163,13 @@ void Explorer::displayFileTree(FileNode* node) {
                     _editNode = node;
                     _editNodeMode = EditMode::FileCreation;
                     _editNodeText = ".col";
+                    _editNodeNeedsFocus = true;
+                }
+
+                if(ImGui::MenuItem("Script")) {
+                    _editNode = node;
+                    _editNodeMode = EditMode::FileCreation;
+                    _editNodeText = ".py";
                     _editNodeNeedsFocus = true;
                 }
 
