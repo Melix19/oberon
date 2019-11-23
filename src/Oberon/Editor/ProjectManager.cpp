@@ -120,6 +120,9 @@ void ProjectManager::drawEvent() {
     ImGui::Begin("List");
     ImGui::End();
 
+    /* Update application cursor */
+    _imgui.updateApplicationCursor(*this);
+
     /* Set appropriate states. */
     GL::Renderer::enable(GL::Renderer::Feature::Blending);
     GL::Renderer::enable(GL::Renderer::Feature::ScissorTest);

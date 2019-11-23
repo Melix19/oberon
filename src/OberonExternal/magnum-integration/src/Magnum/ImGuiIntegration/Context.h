@@ -92,9 +92,23 @@ Use @ref newFrame() to initialize a ImGui frame and finally draw it with
 @ref GL::Renderer::Feature::Blending "Blending" should be enabled and set up as
 below. The following snippet sets up all required renderer state and then
 resets it back to default values. Adapt the state changes based on what else
-you are rendering.
+you are rendering. Right before @ref drawFrame() you can call
+@ref updateApplicationCursor() if your application implementation supports
+setting cursors.
 
-@snippet ImGuiIntegration.cpp Context-usage-per-frame
+@snippet ImGuiIntegration-sdl2.cpp Context-usage-per-frame
+
+<b></b>
+
+@m_class{m-block m-info}
+
+@par Reduced renderer state setup
+    The above assumes you're drawing ImGui together with something else (a 3D
+    scene in the background, for example). If you only draw ImGui alone, it's
+    enough (and also faster) to set just the following in the constructor,
+    without doing any renderer state changes each frame:
+@par
+    @snippet ImGuiIntegration.cpp Context-usage-state-imgui-only
 
 @subsection ImGuiIntegration-Context-usage-events Event handling
 
@@ -499,6 +513,18 @@ class MAGNUM_IMGUIINTEGRATION_EXPORT Context {
          * otherwise.
          */
         template<class TextInputEvent> bool handleTextInputEvent(TextInputEvent& event);
+
+        /**
+         * @brief Update application mouse cursor
+         * @m_since_latest_{integration}
+         *
+         * Calls @cpp ImGui::SetContextCurent() @ce on @ref context() first and
+         * then queries @cpp ImGui::GetMouseCursor() @ce, propagating that to
+         * the application via @ref Platform::Sdl2Application::setCursor() "setCursor()".
+         * If the application doesn't implement a corresponding cursor, falls
+         * back to @ref Platform::Sdl2Application::Cursor::Arrow "Cursor::Arrow".
+         */
+        template<class Application> void updateApplicationCursor(Application& application);
 
     private:
         ImGuiContext* _context;
