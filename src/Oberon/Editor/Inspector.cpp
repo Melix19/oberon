@@ -25,8 +25,6 @@
 #include "Inspector.h"
 
 void Inspector::newFrame() {
-    const Int columnWidth = 100;
-
     bool isVisible = ImGui::Begin("Inspector");
 
     /* If the window is not visible, just end the method here. */
@@ -35,56 +33,62 @@ void Inspector::newFrame() {
         return;
     }
 
+    const Int columnWidth = 100;
+
     if(_panel && !_panel->selectedNodes().empty()) {
         auto& selectedNodes = _panel->selectedNodes();
         EntityNode* entityNode = selectedNodes.front();
 
         if(ImGui::CollapsingHeader("Transform", ImGuiTreeNodeFlags_DefaultOpen)) {
-            /* Position */
+            /* Translation */
             ImGui::AlignTextToFramePadding();
-            ImGui::Text("Position");
+            ImGui::Text("Translation");
             ImGui::SameLine(columnWidth);
             ImGui::SetNextItemWidth(-1);
-            Vector3 position = entityNode->entityGroup()->value<Vector3>("position");
-            ImGui::DragFloat3("##Position", position.data(), 0.5f);
-            entityNode->entityGroup()->setValue("position", position);
-            entityNode->entity()->setTranslation(position);
+            Vector3 translation = entityNode->entityGroup()->value<Matrix4>("transformation").translation();
+            if(ImGui::DragFloat3("##Translation", translation.data(), 0.5f)) {
+                entityNode->entity()->setTranslation(translation);
+                entityNode->entityGroup()->setValue("transformation", entityNode->entity()->transformation());
+            }
 
             /* Rotation */
             ImGui::AlignTextToFramePadding();
             ImGui::Text("Rotation");
             ImGui::SameLine(columnWidth);
             ImGui::SetNextItemWidth(-1);
-            Vector3 rotation = entityNode->entityGroup()->value<Vector3>("rotation");
-            ImGui::DragFloat3("##Rotation", rotation.data(), 0.5f);
-            entityNode->entityGroup()->setValue("rotation", rotation);
-            entityNode->entity()->setRotation(Quaternion::rotation(Deg(rotation.x()), Vector3::xAxis())*
-                Quaternion::rotation(Deg(rotation.y()), Vector3::yAxis())*
-                Quaternion::rotation(Deg(rotation.z()), Vector3::zAxis()));
+            Vector3 rotationDegree = entityNode->rotationDegree();
+            if(ImGui::DragFloat3("##Rotation", rotationDegree.data(), 0.5f)) {
+                entityNode->entity()->setRotation(
+                    Quaternion::rotation(Rad(Deg(rotationDegree.z())), Vector3::zAxis())*
+                    Quaternion::rotation(Rad(Deg(rotationDegree.y())), Vector3::yAxis())*
+                    Quaternion::rotation(Rad(Deg(rotationDegree.x())), Vector3::xAxis()));
+                entityNode->entityGroup()->setValue("transformation", entityNode->entity()->transformation());
+                entityNode->setRotationDegree(rotationDegree);
+            }
 
-            /* Scale */
+            /* Scaling */
             ImGui::AlignTextToFramePadding();
-            ImGui::Text("Scale");
+            ImGui::Text("Scaling");
             ImGui::SameLine(columnWidth);
             ImGui::SetNextItemWidth(-1);
-            Vector3 scale = entityNode->entityGroup()->value<Vector3>("scale");
-            ImGui::DragFloat3("##Scale", scale.data(), 0.005f);
-            entityNode->entityGroup()->setValue("scale", scale);
-            entityNode->entity()->setScaling(scale);
+            Vector3 scaling = entityNode->entityGroup()->value<Matrix4>("transformation").scaling();
+            if(ImGui::DragFloat3("##Scaling", scaling.data(), 0.005f)) {
+                entityNode->entity()->setScaling(scaling);
+                entityNode->entityGroup()->setValue("transformation", entityNode->entity()->transformation());
+            }
         }
 
         /* Components */
         for(auto componentGroup: entityNode->entityGroup()->groups("component")) {
             std::string type = componentGroup->value("type");
 
-            /* RectangleShape */
+            /* Rectangle shape */
             if(type == "rectangle_shape") {
                 auto& components = entityNode->entity()->features();
                 RectangleShape* rectangleShape = nullptr;
 
                 for(auto& component: components) {
-                    rectangleShape = dynamic_cast<RectangleShape*>(&component);
-                    if(rectangleShape)
+                    if((rectangleShape = dynamic_cast<RectangleShape*>(&component)))
                         break;
                 }
 
@@ -99,9 +103,10 @@ void Inspector::newFrame() {
                     ImGui::SameLine(columnWidth);
                     ImGui::SetNextItemWidth(-1);
                     Vector2 size = componentGroup->value<Vector2>("size");
-                    ImGui::DragFloat2("##Size", size.data(), 0.5f);
-                    componentGroup->setValue("size", size);
-                    rectangleShape->setSize(size);
+                    if(ImGui::DragFloat2("##Size", size.data(), 0.5f)) {
+                        rectangleShape->setSize(size);
+                        componentGroup->setValue("size", size);
+                    }
 
                     /* Color */
                     ImGui::AlignTextToFramePadding();
@@ -109,9 +114,10 @@ void Inspector::newFrame() {
                     ImGui::SameLine(columnWidth);
                     ImGui::SetNextItemWidth(-1);
                     Color4 color = componentGroup->value<Color4>("color");
-                    ImGui::ColorEdit4("##Color", color.data());
-                    componentGroup->setValue("color", color);
-                    rectangleShape->setColor(color);
+                    if(ImGui::ColorEdit4("##Color", color.data())) {
+                        rectangleShape->setColor(color);
+                        componentGroup->setValue("color", color);
+                    }
                 }
 
                 if(!componentIsOpen) {

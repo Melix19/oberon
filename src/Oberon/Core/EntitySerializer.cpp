@@ -24,35 +24,25 @@
 
 #include "EntitySerializer.h"
 
-Object3D* EntitySerializer::createEntityFromConfig(Utility::ConfigurationGroup* entityGroup, Object3D* parent, SceneGraph::DrawableGroup3D* drawables, OberonResourceManager& resourceManager) {
+Object3D* EntitySerializer::createEntityFromConfig(Utility::ConfigurationGroup* entityGroup, Object3D* parent, OberonResourceManager& resourceManager, SceneGraph::DrawableGroup3D* drawables) {
     Object3D* object = new Object3D{parent};
 
-    /* Name and Entity */
+    /* Name */
     std::string name = entityGroup->value("name");
     object->addFeature<Entity>(name);
 
-    /* Position */
-    Vector3 position = entityGroup->value<Vector3>("position");
-    object->setTranslation(position);
-
-    /* Rotation */
-    Vector3 rotation = entityGroup->value<Vector3>("rotation");
-    object->setRotation(Quaternion::rotation(Deg(rotation.x()), Vector3::xAxis())*
-        Quaternion::rotation(Deg(rotation.y()), Vector3::yAxis())*
-        Quaternion::rotation(Deg(rotation.z()), Vector3::zAxis()));
-
-    /* Scale */
-    if(!entityGroup->hasValue("scale")) entityGroup->setValue<Vector3>("scale", {1, 1, 1});
-    Vector3 scale = entityGroup->value<Vector3>("scale");
-    object->setScaling(scale);
+    /* Transformation */
+    if(!entityGroup->hasValue("transformation")) entityGroup->setValue<Matrix4>("transformation", Matrix4::scaling({1, 1, 1}));
+    Matrix4 transformation = entityGroup->value<Matrix4>("transformation");
+    object->setTransformation(transformation);
 
     for(auto componentGroup: entityGroup->groups("component"))
-        addComponentFromConfig(componentGroup, object, drawables, resourceManager);
+        addComponentFromConfig(componentGroup, object, resourceManager, drawables);
 
     return object;
 }
 
-void EntitySerializer::addComponentFromConfig(Utility::ConfigurationGroup* componentGroup, Object3D* object, SceneGraph::DrawableGroup3D* drawables, OberonResourceManager& resourceManager) {
+void EntitySerializer::addComponentFromConfig(Utility::ConfigurationGroup* componentGroup, Object3D* object, OberonResourceManager& resourceManager, SceneGraph::DrawableGroup3D* drawables) {
     std::string type = componentGroup->value("type");
 
     if(type == "rectangle_shape") {
@@ -78,7 +68,7 @@ void EntitySerializer::addComponentFromConfig(Utility::ConfigurationGroup* compo
             resourceManager.set(shaderResource.key(), std::move(shader));
         }
 
-        /* RectangleShape */
+        /* Rectangle shape */
         object->addFeature<RectangleShape>(drawables, *meshResource, *shaderResource, size, color);
     }
 }

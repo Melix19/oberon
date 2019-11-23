@@ -43,6 +43,13 @@ class EntityNode {
             return *this;
         }
 
+        Vector3 rotationDegree() { return _rotationDegree; }
+
+        EntityNode& setRotationDegree(const Vector3& rotationDegree) {
+            _rotationDegree = rotationDegree;
+            return *this;
+        }
+
         EntityNode* addChild(Object3D* entity, Utility::ConfigurationGroup* entityGroup) {
             auto child = Containers::pointer<EntityNode>(entity, entityGroup);
             child->_parent = this;
@@ -59,6 +66,8 @@ class EntityNode {
         Object3D* _entity;
         Utility::ConfigurationGroup* _entityGroup;
         bool _isSelected;
+
+        Vector3 _rotationDegree;
 
         EntityNode* _parent;
         std::vector<Containers::Pointer<EntityNode>> _children;

@@ -30,7 +30,7 @@ find_package(Magnum REQUIRED
 
 set_directory_properties(PROPERTIES CORRADE_USE_PEDANTIC_FLAGS ON)
 
-set(OberonCore_SOURCES
+set(OberonCore_SRCS
     EntitySerializer.cpp)
 
 set(OberonCore_HEADERS
@@ -39,7 +39,7 @@ set(OberonCore_HEADERS
     RectangleShape.h)
 
 add_library(OberonCore
-    ${OberonCore_SOURCES}
+    ${OberonCore_SRCS}
     ${OberonCore_HEADERS})
 
 target_include_directories(OberonCore PUBLIC

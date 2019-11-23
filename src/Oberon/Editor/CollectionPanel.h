@@ -82,6 +82,7 @@ class CollectionPanel: public Containers::LinkedListItem<CollectionPanel> {
         GL::Texture2D _viewportTexture;
 
         SceneGraph::DrawableGroup3D _drawables;
+
         Scene3D _scene;
         Object3D* _cameraObject;
         SceneGraph::Camera3D* _camera;

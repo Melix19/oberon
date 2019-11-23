@@ -29,7 +29,7 @@ set_directory_properties(PROPERTIES CORRADE_USE_PEDANTIC_FLAGS ON)
 
 corrade_add_resource(OberonEditor_RESOURCES resources.conf)
 
-set(OberonEditor_SOURCES
+set(OberonEditor_SRCS
     CollectionPanel.cpp
     Console.cpp
     Editor.cpp
@@ -55,7 +55,7 @@ set(OberonEditor_HEADERS
     Themer.h)
 
 add_executable(Oberon MACOSX_BUNDLE
-    ${OberonEditor_SOURCES}
+    ${OberonEditor_SRCS}
     ${OberonEditor_HEADERS})
 
 target_link_libraries(Oberon PRIVATE

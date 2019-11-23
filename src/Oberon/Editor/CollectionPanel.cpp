@@ -50,7 +50,16 @@ void CollectionPanel::drawViewport() {
     _framebuffer.clear(GL::FramebufferClear::Color)
         .bind();
 
-    _camera->draw(_drawables);
+    std::vector<std::pair<std::reference_wrapper<SceneGraph::Drawable3D>, Matrix4>>
+        drawableTransformations = _camera->drawableTransformations(_drawables);
+
+    std::sort(drawableTransformations.begin(), drawableTransformations.end(),
+        [](const std::pair<std::reference_wrapper<SceneGraph::Drawable3D>, Matrix4>& a,
+        const std::pair<std::reference_wrapper<SceneGraph::Drawable3D>, Matrix4>& b) {
+            return a.second.translation().z() < b.second.translation().z();
+        });
+
+    _camera->draw(drawableTransformations);
 }
 
 void CollectionPanel::newFrame() {
@@ -81,7 +90,7 @@ void CollectionPanel::newFrame() {
 }
 
 void CollectionPanel::addComponentToEntity(Utility::ConfigurationGroup* entityGroup, Object3D* object) {
-    EntitySerializer::addComponentFromConfig(entityGroup, object, &_drawables, _resourceManager);
+    EntitySerializer::addComponentFromConfig(entityGroup, object, _resourceManager, &_drawables);
 }
 
 void CollectionPanel::save() {
@@ -90,8 +99,13 @@ void CollectionPanel::save() {
 
 void CollectionPanel::addEntityNodeChild(Utility::ConfigurationGroup* entityGroup, EntityNode* parentNode) {
     Object3D* entity = EntitySerializer::createEntityFromConfig(entityGroup, parentNode->entity(),
-        &_drawables, _resourceManager);
+        _resourceManager, &_drawables);
     EntityNode* node = parentNode->addChild(entity, entityGroup);
+
+    Math::Vector3<Rad> rotationRadians = Quaternion::fromMatrix(entityGroup->value<Matrix4>("transformation").rotation()).toEuler();
+
+    node->setRotationDegree(Vector3{Float(Deg(rotationRadians.x())), Float(Deg(rotationRadians.y())),
+        Float(Deg(rotationRadians.z()))});
 
     for(auto childGroup : entityGroup->groups("child"))
         addEntityNodeChild(childGroup, node);
