@@ -28,15 +28,13 @@ CollectionPanel::CollectionPanel(const std::string& path, OberonResourceManager&
     _resourceManager(resourceManager), _collectionConfig{_path}, _rootNode(&_scene, &_collectionConfig),
     _isOpen(true), _isVisible(true), _isFocused(false), _needsFocus(true), _needsDocking(true)
 {
-    _viewportTexture.setStorage(1, GL::TextureFormat::RGBA8, {2560, 1440});
+    _viewportTexture.setStorage(1, GL::TextureFormat::RGBA8, {1920, 1080});
     _framebuffer = GL::Framebuffer{{{}, _viewportTexture.imageSize(0)}};
     _framebuffer.attachTexture(GL::Framebuffer::ColorAttachment{0}, _viewportTexture, 0);
 
     _cameraObject = new Object3D{&_scene};
     _camera = new SceneGraph::Camera3D{*_cameraObject};
-    _camera->setAspectRatioPolicy(SceneGraph::AspectRatioPolicy::Extend)
-        .setProjectionMatrix(Matrix4::orthographicProjection(Vector2{_viewportTexture.imageSize(0)}, -1000.0f, 1000.0f))
-        .setViewport(_viewportTexture.imageSize(0));
+    _camera->setAspectRatioPolicy(SceneGraph::AspectRatioPolicy::Extend);
 
     if(_collectionConfig.hasGroup("child"))
         addEntityNodeChild(_collectionConfig.group("child"), &_rootNode);
@@ -78,13 +76,13 @@ void CollectionPanel::newFrame() {
         return;
     }
 
-    Vector2 imageSize{_viewportTexture.imageSize(0)};
-    ImVec2 contentSize(ImGui::GetWindowContentRegionMax().x - ImGui::GetWindowContentRegionMin().x,
-        ImGui::GetWindowContentRegionMax().y - ImGui::GetWindowContentRegionMin().y);
+    Vector2 contentSize{ImGui::GetWindowContentRegionMax().x - ImGui::GetWindowContentRegionMin().x,
+        ImGui::GetWindowContentRegionMax().y - ImGui::GetWindowContentRegionMin().y};
 
-    ImGuiIntegration::image(_viewportTexture, imageSize);
-    ImGui::SetScrollX((imageSize.x() - contentSize.x)/2);
-    ImGui::SetScrollY((imageSize.y() - contentSize.y)/2);
+    _camera->setProjectionMatrix(Matrix4::orthographicProjection(contentSize, -1000.0f, 1000.0f))
+        .setViewport(Vector2i(contentSize));
+
+    ImGuiIntegration::image(_viewportTexture, contentSize);
 
     ImGui::End();
 }
@@ -102,7 +100,8 @@ void CollectionPanel::addEntityNodeChild(Utility::ConfigurationGroup* entityGrou
         _resourceManager, &_drawables);
     EntityNode* node = parentNode->addChild(entity, entityGroup);
 
-    Math::Vector3<Rad> rotationRadians = Quaternion::fromMatrix(entityGroup->value<Matrix4>("transformation").rotation()).toEuler();
+    Math::Vector3<Rad> rotationRadians = Quaternion::fromMatrix(entityGroup->value<Matrix4>("transformation").
+        rotation()).toEuler();
 
     node->setRotationDegree(Vector3{Float(Deg(rotationRadians.x())), Float(Deg(rotationRadians.y())),
         Float(Deg(rotationRadians.z()))});
