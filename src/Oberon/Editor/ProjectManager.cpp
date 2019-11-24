@@ -88,7 +88,6 @@ void ProjectManager::drawEvent() {
     ImGuiID dockSpaceId = ImGui::GetID("ProjectManager DockSpace");
 
     if(!ImGui::DockBuilderGetNode(dockSpaceId)) {
-        ImGui::DockBuilderRemoveNode(dockSpaceId);
         ImGui::DockBuilderAddNode(dockSpaceId, ImGuiDockNodeFlags_DockSpace);
         ImGui::DockBuilderSetNodeSize(dockSpaceId, viewport->Size);
 

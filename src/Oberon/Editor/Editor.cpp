@@ -74,9 +74,10 @@ void Editor::drawEvent() {
     else if(!ImGui::GetIO().WantTextInput && isTextInputActive())
         stopTextInput();
 
-    ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoTitleBar |
-        ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove |
-        ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus | ImGuiWindowFlags_NoBackground;
+    ImGuiWindowFlags windowFlags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking |
+        ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize |
+        ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBringToFrontOnFocus |
+        ImGuiWindowFlags_NoNavFocus | ImGuiWindowFlags_NoBackground;
 
     ImGuiViewport* viewport = ImGui::GetMainViewport();
     ImGui::SetNextWindowPos(viewport->Pos);
@@ -92,7 +93,6 @@ void Editor::drawEvent() {
     ImGuiID dockSpaceId = ImGui::GetID("Editor DockSpace");
 
     if(!ImGui::DockBuilderGetNode(dockSpaceId)) {
-        ImGui::DockBuilderRemoveNode(dockSpaceId);
         ImGui::DockBuilderAddNode(dockSpaceId, ImGuiDockNodeFlags_DockSpace);
         ImGui::DockBuilderSetNodeSize(dockSpaceId, viewport->Size);
 
@@ -111,6 +111,17 @@ void Editor::drawEvent() {
     }
 
     ImGui::DockSpace(dockSpaceId, ImVec2(0.0f, 0.0f), ImGuiDockNodeFlags_PassthruCentralNode);
+
+    if(ImGui::BeginMenuBar()) {
+        if(ImGui::BeginMenu("Editor")) {
+            if(ImGui::MenuItem("Reset layout")) ImGui::DockBuilderRemoveNode(dockSpaceId);
+
+            ImGui::EndMenu();
+        }
+
+        ImGui::EndMenuBar();
+    }
+
     ImGui::End();
 
     _console.newFrame();
