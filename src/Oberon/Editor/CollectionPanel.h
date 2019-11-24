@@ -24,6 +24,7 @@
 
 #pragma once
 
+#include <algorithm>
 #include <Corrade/Utility/Configuration.h>
 #include <Corrade/Utility/Directory.h>
 #include <Magnum/GL/Framebuffer.h>

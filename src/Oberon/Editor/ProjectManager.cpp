@@ -109,10 +109,8 @@ void ProjectManager::drawEvent() {
     if(ImGui::Button("Open")) {
         _projectPath = pfd::select_folder("").result();
 
-        if(!_projectPath.empty()) {
-            _projectPath.pop_back();
+        if(!_projectPath.empty())
             exit();
-        }
     }
 
     ImGui::End();
