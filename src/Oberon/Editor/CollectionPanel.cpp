@@ -24,6 +24,8 @@
 
 #include "CollectionPanel.h"
 
+#include <algorithm>
+
 #include <Corrade/Utility/Directory.h>
 #include <Magnum/GL/TextureFormat.h>
 #include <Magnum/ImGuiIntegration/Widgets.h>
