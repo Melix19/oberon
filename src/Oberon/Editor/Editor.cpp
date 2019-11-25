@@ -133,7 +133,6 @@ void Editor::drawEvent() {
 
         ImGui::EndPopup();
     }
-    }
 
     ImGui::End();
 
