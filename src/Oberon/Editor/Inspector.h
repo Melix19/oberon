@@ -26,8 +26,6 @@
 
 #include "CollectionPanel.h"
 
-#include <Corrade/Utility/Assert.h>
-
 class Inspector {
     public:
         Inspector(): _panel(nullptr) {}

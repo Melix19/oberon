@@ -24,6 +24,9 @@
 
 #include "Inspector.h"
 
+#include <Corrade/Utility/Assert.h>
+#include <imgui.h>
+
 void Inspector::newFrame() {
     bool isVisible = ImGui::Begin("Inspector");
 
@@ -82,8 +85,8 @@ void Inspector::newFrame() {
         for(auto componentGroup: entityNode->entityGroup()->groups("component")) {
             std::string type = componentGroup->value("type");
 
-            /* Rectangle shape */
             if(type == "rectangle_shape") {
+                /* Rectangle shape */
                 auto& components = entityNode->entity()->features();
                 RectangleShape* rectangleShape = nullptr;
 

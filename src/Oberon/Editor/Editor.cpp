@@ -24,6 +24,13 @@
 
 #include "Editor.h"
 
+#include <Corrade/Utility/Directory.h>
+#include <imgui_internal.h>
+#include <Magnum/GL/DefaultFramebuffer.h>
+#include <Magnum/GL/Renderer.h>
+
+#include "Themer.h"
+
 Editor::Editor(const Arguments& arguments, const std::string& projectPath): Platform::Application{arguments,
     Configuration{}.setTitle("Oberon")
                    .setWindowFlags(Configuration::WindowFlag::Maximized|Configuration::WindowFlag::Resizable)},
@@ -74,10 +81,11 @@ void Editor::drawEvent() {
     else if(!ImGui::GetIO().WantTextInput && isTextInputActive())
         stopTextInput();
 
-    ImGuiWindowFlags windowFlags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking |
-        ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize |
-        ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBringToFrontOnFocus |
-        ImGuiWindowFlags_NoNavFocus | ImGuiWindowFlags_NoBackground;
+    ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoDocking |
+        ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse |
+        ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove |
+        ImGuiWindowFlags_NoNavFocus | ImGuiWindowFlags_NoBackground |
+        ImGuiWindowFlags_NoBringToFrontOnFocus;
 
     ImGuiViewport* viewport = ImGui::GetMainViewport();
     ImGui::SetNextWindowPos(viewport->Pos);
@@ -97,11 +105,13 @@ void Editor::drawEvent() {
         ImGui::DockBuilderSetNodeSize(dockSpaceId, viewport->Size);
 
         ImGuiID dockMainId = dockSpaceId;
+        ImGuiID dockTopId = ImGui::DockBuilderSplitNode(dockMainId, ImGuiDir_Up, 0.1f, nullptr, &dockMainId);
         ImGuiID dockLeftId = ImGui::DockBuilderSplitNode(dockMainId, ImGuiDir_Left, 0.2f, nullptr, &dockMainId);
         ImGuiID dockRightId = ImGui::DockBuilderSplitNode(dockMainId, ImGuiDir_Right, 0.2f, nullptr, &dockMainId);
         ImGuiID dockBottomId = ImGui::DockBuilderSplitNode(dockMainId, ImGuiDir_Down, 0.3f, nullptr, &dockMainId);
         ImGuiID dockRightBottomId = ImGui::DockBuilderSplitNode(dockRightId, ImGuiDir_Down, 0.7f, nullptr, &dockRightId);
 
+        ImGui::DockBuilderDockWindow("Toolbar", dockTopId);
         ImGui::DockBuilderDockWindow("Explorer", dockLeftId);
         ImGui::DockBuilderDockWindow("Console", dockBottomId);
         ImGui::DockBuilderDockWindow("Outliner", dockRightId);
@@ -111,15 +121,18 @@ void Editor::drawEvent() {
     }
 
     ImGui::DockSpace(dockSpaceId, ImVec2(0.0f, 0.0f), ImGuiDockNodeFlags_PassthruCentralNode);
+    ImGui::End();
 
-    if(ImGui::BeginMenuBar()) {
-        if(ImGui::BeginMenu("Editor")) {
-            if(ImGui::MenuItem("Reset layout")) ImGui::DockBuilderRemoveNode(dockSpaceId);
+    ImGui::Begin("Toolbar");
 
-            ImGui::EndMenu();
-        }
+    if(ImGui::Button("Editor"))
+        ImGui::OpenPopup("EditorPopup");
 
-        ImGui::EndMenuBar();
+    if(ImGui::BeginPopup("EditorPopup")) {
+        if(ImGui::Selectable("Reset layout")) ImGui::DockBuilderRemoveNode(dockSpaceId);
+
+        ImGui::EndPopup();
+    }
     }
 
     ImGui::End();

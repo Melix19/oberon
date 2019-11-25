@@ -26,12 +26,8 @@
 
 #include "Themer.h"
 
-#include <imgui_internal.h>
-#include <Magnum/GL/DefaultFramebuffer.h>
-#include <Magnum/GL/Renderer.h>
 #include <Magnum/ImGuiIntegration/Context.hpp>
 #include <Magnum/Platform/Sdl2Application.h>
-#include <portable-file-dialogs.h>
 
 using namespace Magnum;
 

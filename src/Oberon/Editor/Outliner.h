@@ -26,8 +26,6 @@
 
 #include "CollectionPanel.h"
 
-#include <misc/cpp/imgui_stdlib.h>
-
 class Outliner {
     public:
         Outliner(): _panel(nullptr), _deleteSelectedNodes(false), _editNode(nullptr) {}

@@ -24,6 +24,11 @@
 
 #include "ProjectManager.h"
 
+#include <imgui_internal.h>
+#include <Magnum/GL/DefaultFramebuffer.h>
+#include <Magnum/GL/Renderer.h>
+#include <portable-file-dialogs.h>
+
 ProjectManager::ProjectManager(const Arguments& arguments): Platform::Application{arguments,
     Configuration{}.setTitle("Oberon - Project Manager")
                    .setSize({1024, 576})

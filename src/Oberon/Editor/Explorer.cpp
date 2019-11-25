@@ -24,6 +24,12 @@
 
 #include "Explorer.h"
 
+#include <Corrade/Utility/Directory.h>
+#include <imgui.h>
+#include <misc/cpp/imgui_stdlib.h>
+
+#include <algorithm>
+
 Explorer::Explorer(const std::string& rootPath): _rootNode(rootPath),
     _deleteSelectedNodes(false), _clickedNode(nullptr), _editNode(nullptr)
 {

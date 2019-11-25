@@ -24,6 +24,8 @@
 
 #include "Themer.h"
 
+#include <imgui.h>
+
 void Themer::styleColorsDark() {
     ImGuiStyle& style = ImGui::GetStyle();
 

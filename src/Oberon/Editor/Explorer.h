@@ -26,11 +26,6 @@
 
 #include "FileNode.h"
 
-#include <algorithm>
-#include <Corrade/Utility/Directory.h>
-#include <imgui.h>
-#include <misc/cpp/imgui_stdlib.h>
-
 class Explorer {
     public:
         Explorer(const std::string& rootPath);

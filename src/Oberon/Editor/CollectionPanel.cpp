@@ -24,6 +24,10 @@
 
 #include "CollectionPanel.h"
 
+#include <Corrade/Utility/Directory.h>
+#include <Magnum/GL/TextureFormat.h>
+#include <Magnum/ImGuiIntegration/Widgets.h>
+
 CollectionPanel::CollectionPanel(const std::string& path, OberonResourceManager& resourceManager): _path(path),
     _resourceManager(resourceManager), _collectionConfig{_path}, _rootNode(&_scene, &_collectionConfig),
     _isOpen(true), _isVisible(true), _isFocused(false), _needsFocus(true), _needsDocking(true)

@@ -24,8 +24,6 @@
 
 #pragma once
 
-#include <imgui.h>
-
 namespace Themer {
 
 void styleColorsDark();

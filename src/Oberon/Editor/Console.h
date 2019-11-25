@@ -24,8 +24,6 @@
 
 #pragma once
 
-#include <imgui.h>
-
 class Console {
     public:
         void newFrame();

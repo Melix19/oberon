@@ -24,6 +24,8 @@
 
 #include "Console.h"
 
+#include <imgui.h>
+
 void Console::newFrame() {
     ImGui::Begin("Console");
 
