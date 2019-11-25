@@ -24,8 +24,9 @@
 
 #pragma once
 
-#include <Magnum/SceneGraph/AbstractFeature.h>
 #include <string>
+
+#include <Magnum/SceneGraph/AbstractFeature.h>
 
 using namespace Magnum;
 

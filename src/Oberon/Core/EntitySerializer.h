@@ -29,11 +29,8 @@
 
 #include <Corrade/Utility/ConfigurationGroup.h>
 #include <Magnum/Math/ConfigurationValue.h>
-#include <Magnum/MeshTools/Compile.h>
-#include <Magnum/Primitives/Square.h>
 #include <Magnum/ResourceManager.h>
 #include <Magnum/SceneGraph/TranslationRotationScalingTransformation3D.h>
-#include <Magnum/Trade/MeshData2D.h>
 
 typedef SceneGraph::Object<SceneGraph::TranslationRotationScalingTransformation3D> Object3D;
 typedef SceneGraph::Scene<SceneGraph::TranslationRotationScalingTransformation3D> Scene3D;

@@ -24,6 +24,10 @@
 
 #include "EntitySerializer.h"
 
+#include <Magnum/MeshTools/Compile.h>
+#include <Magnum/Primitives/Square.h>
+#include <Magnum/Trade/MeshData2D.h>
+
 Object3D* EntitySerializer::createEntityFromConfig(Utility::ConfigurationGroup* entityGroup, Object3D* parent, OberonResourceManager& resourceManager, SceneGraph::DrawableGroup3D* drawables) {
     Object3D* object = new Object3D{parent};
 

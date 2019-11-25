@@ -24,10 +24,10 @@
 
 #include "Outliner.h"
 
+#include <algorithm>
+
 #include <imgui.h>
 #include <misc/cpp/imgui_stdlib.h>
-
-#include <algorithm>
 
 void Outliner::newFrame() {
     bool showTree = false;
