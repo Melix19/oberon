@@ -29,12 +29,12 @@
 
 class EntityNode {
     public:
-        EntityNode(Object3D* entity, Utility::ConfigurationGroup* entityGroup): _entity(entity),
-            _entityGroup(entityGroup), _isSelected(false) {}
+        EntityNode(Object3D* entity, Utility::ConfigurationGroup* entityConfig): _entity(entity),
+            _entityConfig(entityConfig), _isSelected(false) {}
 
         Object3D* entity() const { return _entity; }
 
-        Utility::ConfigurationGroup* entityGroup() const { return _entityGroup; }
+        Utility::ConfigurationGroup* entityConfig() const { return _entityConfig; }
 
         bool isSelected() const { return _isSelected; }
 
@@ -50,8 +50,8 @@ class EntityNode {
             return *this;
         }
 
-        EntityNode* addChild(Object3D* entity, Utility::ConfigurationGroup* entityGroup) {
-            auto child = Containers::pointer<EntityNode>(entity, entityGroup);
+        EntityNode* addChild(Object3D* entity, Utility::ConfigurationGroup* entityConfig) {
+            auto child = Containers::pointer<EntityNode>(entity, entityConfig);
             child->_parent = this;
 
             _children.push_back(std::move(child));
@@ -64,7 +64,7 @@ class EntityNode {
 
     private:
         Object3D* _entity;
-        Utility::ConfigurationGroup* _entityGroup;
+        Utility::ConfigurationGroup* _entityConfig;
         bool _isSelected;
 
         Vector3 _rotationDegree;

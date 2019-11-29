@@ -32,8 +32,9 @@
 
 #include <Magnum/ImGuiIntegration/Context.hpp>
 #include <Magnum/Platform/Sdl2Application.h>
+#include <pybind11/embed.h>
 
-using namespace Magnum;
+namespace py = pybind11;
 
 class Editor: public Platform::Application {
     public:
@@ -53,8 +54,10 @@ class Editor: public Platform::Application {
         void mouseScrollEvent(MouseScrollEvent& event) override;
         void textInputEvent(TextInputEvent& event) override;
 
+        Timeline _timeline;
         ImGuiIntegration::Context _imgui{NoCreate};
         OberonResourceManager _resourceManager;
+        py::scoped_interpreter pyInterpreter{};
 
         Console _console;
         Explorer _explorer;

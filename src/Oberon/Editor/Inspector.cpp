@@ -26,6 +26,7 @@
 
 #include <Corrade/Utility/Assert.h>
 #include <imgui.h>
+#include <misc/cpp/imgui_stdlib.h>
 
 void Inspector::newFrame() {
     bool isVisible = ImGui::Begin("Inspector");
@@ -48,10 +49,10 @@ void Inspector::newFrame() {
             ImGui::Text("Translation");
             ImGui::SameLine(columnWidth);
             ImGui::SetNextItemWidth(-1);
-            Vector3 translation = entityNode->entityGroup()->value<Matrix4>("transformation").translation();
+            Vector3 translation = entityNode->entityConfig()->value<Matrix4>("transformation").translation();
             if(ImGui::DragFloat3("##Translation", translation.data(), 0.5f)) {
                 entityNode->entity()->setTranslation(translation);
-                entityNode->entityGroup()->setValue("transformation", entityNode->entity()->transformation());
+                entityNode->entityConfig()->setValue("transformation", entityNode->entity()->transformation());
             }
 
             /* Rotation */
@@ -65,7 +66,7 @@ void Inspector::newFrame() {
                     Quaternion::rotation(Rad(Deg(rotationDegree.z())), Vector3::zAxis())*
                     Quaternion::rotation(Rad(Deg(rotationDegree.y())), Vector3::yAxis())*
                     Quaternion::rotation(Rad(Deg(rotationDegree.x())), Vector3::xAxis()));
-                entityNode->entityGroup()->setValue("transformation", entityNode->entity()->transformation());
+                entityNode->entityConfig()->setValue("transformation", entityNode->entity()->transformation());
                 entityNode->setRotationDegree(rotationDegree);
             }
 
@@ -74,16 +75,16 @@ void Inspector::newFrame() {
             ImGui::Text("Scaling");
             ImGui::SameLine(columnWidth);
             ImGui::SetNextItemWidth(-1);
-            Vector3 scaling = entityNode->entityGroup()->value<Matrix4>("transformation").scaling();
+            Vector3 scaling = entityNode->entityConfig()->value<Matrix4>("transformation").scaling();
             if(ImGui::DragFloat3("##Scaling", scaling.data(), 0.005f)) {
                 entityNode->entity()->setScaling(scaling);
-                entityNode->entityGroup()->setValue("transformation", entityNode->entity()->transformation());
+                entityNode->entityConfig()->setValue("transformation", entityNode->entity()->transformation());
             }
         }
 
         /* Components */
-        for(auto componentGroup: entityNode->entityGroup()->groups("component")) {
-            std::string type = componentGroup->value("type");
+        for(auto componentConfig: entityNode->entityConfig()->groups("component")) {
+            std::string type = componentConfig->value("type");
 
             if(type == "rectangle_shape") {
                 /* Rectangle shape */
@@ -105,10 +106,10 @@ void Inspector::newFrame() {
                     ImGui::Text("Size");
                     ImGui::SameLine(columnWidth);
                     ImGui::SetNextItemWidth(-1);
-                    Vector2 size = componentGroup->value<Vector2>("size");
+                    Vector2 size = componentConfig->value<Vector2>("size");
                     if(ImGui::DragFloat2("##Size", size.data(), 0.5f)) {
                         rectangleShape->setSize(size);
-                        componentGroup->setValue("size", size);
+                        componentConfig->setValue("size", size);
                     }
 
                     /* Color */
@@ -116,16 +117,45 @@ void Inspector::newFrame() {
                     ImGui::Text("Color");
                     ImGui::SameLine(columnWidth);
                     ImGui::SetNextItemWidth(-1);
-                    Color4 color = componentGroup->value<Color4>("color");
+                    Color4 color = componentConfig->value<Color4>("color");
                     if(ImGui::ColorEdit4("##Color", color.data())) {
                         rectangleShape->setColor(color);
-                        componentGroup->setValue("color", color);
+                        componentConfig->setValue("color", color);
                     }
                 }
 
                 if(!componentIsOpen) {
                     delete rectangleShape;
-                    entityNode->entityGroup()->removeGroup(componentGroup);
+                    entityNode->entityConfig()->removeGroup(componentConfig);
+                }
+           } else if(type == "script") {
+                /* Script */
+                auto& components = entityNode->entity()->features();
+                Script* script = nullptr;
+
+                for(auto& component: components) {
+                    if((script = dynamic_cast<Script*>(&component)))
+                        break;
+                }
+
+                CORRADE_INTERNAL_ASSERT(script != nullptr);
+
+                bool componentIsOpen = true;
+
+                if(ImGui::CollapsingHeader("Script", &componentIsOpen, ImGuiTreeNodeFlags_DefaultOpen)) {
+                    /* Size */
+                    ImGui::AlignTextToFramePadding();
+                    ImGui::Text("Script path");
+                    ImGui::SameLine(columnWidth);
+                    ImGui::SetNextItemWidth(-1);
+                    std::string scriptPath = componentConfig->value("script_path");
+                    if(ImGui::InputText("##ScriptPath", &scriptPath))
+                        componentConfig->setValue("script_path", scriptPath);
+                }
+
+                if(!componentIsOpen) {
+                    delete script;
+                    entityNode->entityConfig()->removeGroup(componentConfig);
                 }
            }
        }
@@ -135,10 +165,17 @@ void Inspector::newFrame() {
 
         if(ImGui::BeginPopup("ComponentPopup")) {
             if(ImGui::Selectable("Rectangle shape")) {
-                Utility::ConfigurationGroup* componentGroup = entityNode->entityGroup()->addGroup("component");
-                componentGroup->setValue("type", "rectangle_shape");
+                Utility::ConfigurationGroup* componentConfig = entityNode->entityConfig()->addGroup("component");
+                componentConfig->setValue("type", "rectangle_shape");
 
-                _panel->addComponentToEntity(componentGroup, entityNode->entity());
+                _panel->addComponentToEntity(componentConfig, entityNode->entity());
+            }
+
+            if(ImGui::Selectable("Script")) {
+                Utility::ConfigurationGroup* componentConfig = entityNode->entityConfig()->addGroup("component");
+                componentConfig->setValue("type", "script");
+
+                _panel->addComponentToEntity(componentConfig, entityNode->entity());
             }
 
             ImGui::EndPopup();

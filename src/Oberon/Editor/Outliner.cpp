@@ -82,10 +82,10 @@ void Outliner::newFrame() {
             for(auto& selectedNode : selectedNodes) {
                 delete selectedNode->entity();
 
-                std::string name = selectedNode->entityGroup()->value("name");
+                std::string name = selectedNode->entityConfig()->value("name");
                 EntityNode* parent =  selectedNode->parent();
 
-                parent->entityGroup()->removeGroup(selectedNode->entityGroup());
+                parent->entityConfig()->removeGroup(selectedNode->entityConfig());
 
                 auto found = std::find_if(parent->children().begin(), parent->children().end(),
                     [&](Containers::Pointer<EntityNode>& p) { return p.get() == selectedNode; });
@@ -110,7 +110,7 @@ void Outliner::displayEntityTree(EntityNode* node) {
 
     ImGuiTreeNodeFlags nodeFlags = ImGuiTreeNodeFlags_FramePadding | ImGuiTreeNodeFlags_SpanFullWidth |
         ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_OpenOnArrow;
-    std::string nodeName = node->entityGroup()->value("name");
+    std::string nodeName = node->entityConfig()->value("name");
     bool hasChildren = !node->children().empty();
 
     if(node->isSelected()) nodeFlags |= ImGuiTreeNodeFlags_Selected;
@@ -196,13 +196,13 @@ void Outliner::displayEditNode(EntityNode* node) {
         switch (_editNodeMode) {
             case EditMode::EntityCreation: {
                 /* Add the new EntityNode. */
-                Utility::ConfigurationGroup* childGroup = node->entityGroup()->addGroup("child");
+                Utility::ConfigurationGroup* childGroup = node->entityConfig()->addGroup("child");
                 childGroup->setValue("name", _editNodeText);
 
                 _panel->addEntityNodeChild(childGroup, node);
             } break;
             case EditMode::Rename: {
-                node->entityGroup()->setValue("name", _editNodeText);
+                node->entityConfig()->setValue("name", _editNodeText);
 
                 Entity* entity_cast = static_cast<Entity*>(node->entity()->features().first());
                 entity_cast->setName(_editNodeText);

@@ -34,10 +34,11 @@
 class CollectionPanel: public Containers::LinkedListItem<CollectionPanel> {
     public:
         CollectionPanel(const std::string& path, OberonResourceManager& resourceManager);
-        void drawViewport();
+        void drawViewport(Float deltaTime);
         void newFrame();
-        void addEntityNodeChild(Utility::ConfigurationGroup* entityGroup, EntityNode* parentNode);
-        void addComponentToEntity(Utility::ConfigurationGroup* entityGroup, Object3D* object);
+
+        void addEntityNodeChild(Utility::ConfigurationGroup* entityConfig, EntityNode* parentNode);
+        void addComponentToEntity(Utility::ConfigurationGroup* entityConfig, Object3D* object);
         void save();
 
         const std::string& path() const { return _path; }
@@ -61,7 +62,14 @@ class CollectionPanel: public Containers::LinkedListItem<CollectionPanel> {
             return *this;
         }
 
+        bool isSimulating() const { return _isSimulating; }
+
+        CollectionPanel& startSimulation();
+        CollectionPanel& stopSimulation();
+
     private:
+        void resetEntity(EntityNode* node);
+
         std::string _path;
         OberonResourceManager& _resourceManager;
 
@@ -74,11 +82,13 @@ class CollectionPanel: public Containers::LinkedListItem<CollectionPanel> {
         bool _isFocused;
         bool _needsFocus;
         bool _needsDocking;
+        bool _isSimulating;
 
         GL::Framebuffer _framebuffer{NoCreate};
         GL::Texture2D _viewportTexture;
 
         SceneGraph::DrawableGroup3D _drawables;
+        ScriptGroup _scripts;
 
         Scene3D _scene;
         Object3D* _cameraObject;

@@ -24,25 +24,26 @@
 
 #pragma once
 
-#include "Entity.h"
-#include "RectangleShape.h"
-#include "Script.h"
+#include <string>
 
-#include <Corrade/Utility/ConfigurationGroup.h>
-#include <Magnum/Math/ConfigurationValue.h>
-#include <Magnum/ResourceManager.h>
-#include <Magnum/SceneGraph/TranslationRotationScalingTransformation3D.h>
+#include <Magnum/SceneGraph/AbstractGroupedFeature.h>
 
-typedef SceneGraph::Object<SceneGraph::TranslationRotationScalingTransformation3D> Object3D;
-typedef SceneGraph::Scene<SceneGraph::TranslationRotationScalingTransformation3D> Scene3D;
+using namespace Magnum;
 
-typedef ResourceManager<GL::Mesh, Shaders::Flat3D> OberonResourceManager;
+class Script;
+typedef SceneGraph::FeatureGroup3D<Script> ScriptGroup;
 
-namespace EntitySerializer {
+class Script: public SceneGraph::AbstractGroupedFeature3D<Script> {
+    public:
+        explicit Script(SceneGraph::AbstractObject3D& object, ScriptGroup* scripts, const std::string& scriptPath): SceneGraph::AbstractGroupedFeature3D<Script>{object, scripts}, _scriptPath(scriptPath) {}
 
-Object3D* createEntityFromConfig(Utility::ConfigurationGroup* entityConfig, Object3D* parent, OberonResourceManager& resourceManager, SceneGraph::DrawableGroup3D* drawables, ScriptGroup* scripts);
-void addComponentFromConfig(Utility::ConfigurationGroup* componentConfig, Object3D* object, OberonResourceManager& resourceManager, SceneGraph::DrawableGroup3D* drawables, ScriptGroup* scripts);
+        std::string scriptPath() const { return _scriptPath; }
 
-void resetEntityFromConfig(Object3D* entity, Utility::ConfigurationGroup* entityConfig);
+        Script& setScriptPath(const std::string& scriptPath) {
+            _scriptPath = scriptPath;
+            return *this;
+        }
 
-}
+    private:
+        std::string _scriptPath;
+};

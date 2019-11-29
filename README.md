@@ -10,3 +10,4 @@ This project requires the following libraries and tools to be built:
 - CMake >=3.4
 - Corrade >=2019.1c
 - Magnum >=2019.1c
+- pybind11

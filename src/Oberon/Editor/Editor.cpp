@@ -28,6 +28,7 @@
 #include <imgui_internal.h>
 #include <Magnum/GL/DefaultFramebuffer.h>
 #include <Magnum/GL/Renderer.h>
+#include <Oberon/Bindings/Oberon/Python.h>
 
 #include "Themer.h"
 
@@ -64,11 +65,15 @@ Editor::Editor(const Arguments& arguments, const std::string& projectPath): Plat
         GL::Renderer::BlendFunction::OneMinusSourceAlpha);
 
     setMinimalLoopPeriod(16);
+
+    setup(projectPath);
 }
 
 void Editor::drawEvent() {
     for(auto& panel: _collectionPanels)
-        panel.drawViewport();
+        panel.drawViewport(_timeline.previousFrameDuration());
+
+    _timeline.nextFrame();
 
     GL::defaultFramebuffer.clear(GL::FramebufferClear::Color)
         .bind();
@@ -84,12 +89,33 @@ void Editor::drawEvent() {
     ImGuiID dockSpaceId = ImGui::GetID("Editor DockSpace");
     ImVec2 menuBarSize;
 
+    ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(10.0f, 10.0f));
     if(ImGui::BeginMainMenuBar()) {
+        ImGui::PopStyleVar();
+
         if(ImGui::BeginMenu("Editor")) {
             if(ImGui::MenuItem("Reset layout")) ImGui::DockBuilderRemoveNode(dockSpaceId);
 
             ImGui::EndMenu();
         }
+
+        ImVec2 size(40.0f, 0.0f);
+        ImGui::SetCursorPosX(ImGui::GetWindowWidth()/2 - size.x/2);
+        ImGui::PushStyleVar(ImGuiStyleVar_SelectableTextAlign, ImVec2(0.5f, 0.5f));
+
+        if(!_activePanel || !_activePanel->isSimulating()) {
+            if(ImGui::Selectable("Play", false, 0, size) && _activePanel) {
+                _timeline.start();
+                _activePanel->startSimulation();
+            }
+        } else {
+            if(ImGui::Selectable("Stop", false, 0, size)) {
+                _timeline.stop();
+                _activePanel->stopSimulation();
+            }
+        }
+
+        ImGui::PopStyleVar();
 
         menuBarSize = ImGui::GetWindowSize();
 

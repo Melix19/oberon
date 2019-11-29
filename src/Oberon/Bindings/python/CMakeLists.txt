@@ -22,35 +22,27 @@
 #   SOFTWARE.
 #
 
-find_package(Magnum REQUIRED
-    MeshTools
-    Primitives
-    Shaders)
+find_package(Magnum REQUIRED SceneGraph)
+find_package(pybind11 REQUIRED)
 
 set_directory_properties(PROPERTIES CORRADE_USE_PEDANTIC_FLAGS ON)
 
-set(OberonCore_SRCS
-    EntitySerializer.cpp)
+add_subdirectory(corrade)
+add_subdirectory(magnum)
+add_subdirectory(oberon)
 
-set(OberonCore_HEADERS
-    Entity.h
-    EntitySerializer.h
-    RectangleShape.h
-    Script.h)
+add_library(OberonBindings
+    ${OberonBindings_SRCS}
+    ${OberonBindings_HEADERS})
 
-add_library(OberonCore
-    ${OberonCore_SRCS}
-    ${OberonCore_HEADERS})
-
-target_include_directories(OberonCore PUBLIC
+target_include_directories(OberonBindings PRIVATE
     ${PROJECT_SOURCE_DIR}/src
-    ${PROJECT_BINARY_DIR}/src)
+    ${CMAKE_CURRENT_SOURCE_DIR}/..
+    ${CMAKE_CURRENT_SOURCE_DIR})
 
-target_link_libraries(OberonCore PRIVATE
-    Magnum::MeshTools
-    Magnum::Primitives
-    Magnum::Shaders
-    PUBLIC Oberon::Bindings)
+target_link_libraries(OberonBindings
+    PRIVATE Magnum::SceneGraph
+    PUBLIC pybind11::embed)
 
-# Oberon Core library for superprojects
-add_library(Oberon::Core ALIAS OberonCore)
+# Oberon Bindings library for superprojects
+add_library(Oberon::Bindings ALIAS OberonBindings)

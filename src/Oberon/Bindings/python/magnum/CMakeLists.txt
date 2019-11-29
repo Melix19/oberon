@@ -22,35 +22,25 @@
 #   SOFTWARE.
 #
 
-find_package(Magnum REQUIRED
-    MeshTools
-    Primitives
-    Shaders)
+set(OberonBindings_SRCS
+    ${OberonBindings_SRCS}
+    ${CMAKE_CURRENT_SOURCE_DIR}/math.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/math.matrixdouble.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/math.matrixfloat.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/math.range.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/math.vectorfloat.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/math.vectorintegral.cpp
 
-set_directory_properties(PROPERTIES CORRADE_USE_PEDANTIC_FLAGS ON)
+    PARENT_SCOPE
+)
 
-set(OberonCore_SRCS
-    EntitySerializer.cpp)
+set(OberonBindings_HEADERS
+    ${OberonBindings_HEADERS}
+    ${CMAKE_CURRENT_SOURCE_DIR}/bootstrap.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/math.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/math.matrix.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/math.vector.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/scenegraph.h
 
-set(OberonCore_HEADERS
-    Entity.h
-    EntitySerializer.h
-    RectangleShape.h
-    Script.h)
-
-add_library(OberonCore
-    ${OberonCore_SRCS}
-    ${OberonCore_HEADERS})
-
-target_include_directories(OberonCore PUBLIC
-    ${PROJECT_SOURCE_DIR}/src
-    ${PROJECT_BINARY_DIR}/src)
-
-target_link_libraries(OberonCore PRIVATE
-    Magnum::MeshTools
-    Magnum::Primitives
-    Magnum::Shaders
-    PUBLIC Oberon::Bindings)
-
-# Oberon Core library for superprojects
-add_library(Oberon::Core ALIAS OberonCore)
+    PARENT_SCOPE
+)

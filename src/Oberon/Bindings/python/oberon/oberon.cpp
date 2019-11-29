@@ -22,27 +22,23 @@
     SOFTWARE.
 */
 
-#pragma once
+#include <pybind11/embed.h>
 
-#include "Entity.h"
-#include "RectangleShape.h"
-#include "Script.h"
+#include "magnum/bootstrap.h"
+#include "oberon/bootstrap.h"
+#include "Oberon/Python.h"
 
-#include <Corrade/Utility/ConfigurationGroup.h>
-#include <Magnum/Math/ConfigurationValue.h>
-#include <Magnum/ResourceManager.h>
-#include <Magnum/SceneGraph/TranslationRotationScalingTransformation3D.h>
+namespace py = pybind11;
 
-typedef SceneGraph::Object<SceneGraph::TranslationRotationScalingTransformation3D> Object3D;
-typedef SceneGraph::Scene<SceneGraph::TranslationRotationScalingTransformation3D> Scene3D;
+void setup(const std::string& projectPath) {
+    py::module sys = py::module::import("sys");
+    sys.attr("path").attr("insert")(0, projectPath);
+}
 
-typedef ResourceManager<GL::Mesh, Shaders::Flat3D> OberonResourceManager;
+PYBIND11_EMBEDDED_MODULE(oberon, m) {
+    py::module math = m.def_submodule("math");
+    magnum::math(m, math);
 
-namespace EntitySerializer {
-
-Object3D* createEntityFromConfig(Utility::ConfigurationGroup* entityConfig, Object3D* parent, OberonResourceManager& resourceManager, SceneGraph::DrawableGroup3D* drawables, ScriptGroup* scripts);
-void addComponentFromConfig(Utility::ConfigurationGroup* componentConfig, Object3D* object, OberonResourceManager& resourceManager, SceneGraph::DrawableGroup3D* drawables, ScriptGroup* scripts);
-
-void resetEntityFromConfig(Object3D* entity, Utility::ConfigurationGroup* entityConfig);
-
+    py::module scenegraph = m.def_submodule("scenegraph");
+    oberon_::scenegraph(scenegraph);
 }

@@ -29,10 +29,13 @@
 #include <Corrade/Utility/Directory.h>
 #include <Magnum/GL/TextureFormat.h>
 #include <Magnum/ImGuiIntegration/Widgets.h>
+#include <pybind11/embed.h>
+
+namespace py = pybind11;
 
 CollectionPanel::CollectionPanel(const std::string& path, OberonResourceManager& resourceManager): _path(path),
     _resourceManager(resourceManager), _collectionConfig{_path}, _rootNode(&_scene, &_collectionConfig),
-    _isOpen(true), _isVisible(true), _isFocused(false), _needsFocus(true), _needsDocking(true)
+    _isOpen(true), _isVisible(true), _isFocused(false), _needsFocus(true), _needsDocking(true), _isSimulating(false)
 {
     _viewportTexture.setStorage(1, GL::TextureFormat::RGBA8, {1920, 1080});
     _framebuffer = GL::Framebuffer{{{}, _viewportTexture.imageSize(0)}};
@@ -46,13 +49,21 @@ CollectionPanel::CollectionPanel(const std::string& path, OberonResourceManager&
         addEntityNodeChild(_collectionConfig.group("child"), &_rootNode);
 }
 
-void CollectionPanel::drawViewport() {
+void CollectionPanel::drawViewport(Float deltaTime) {
     /* If the window is not visible, just end the method here. */
     if(!_isVisible || !_isOpen)
         return;
 
     _framebuffer.clear(GL::FramebufferClear::Color)
         .bind();
+
+    if(_isSimulating) {
+        for(std::size_t i = 0; i != _scripts.size(); ++i) {
+            Script& script = _scripts[i];
+            py::module module = py::module::import(script.scriptPath().c_str());
+            module.attr("update")(&script.object(), deltaTime);
+        }
+    }
 
     std::vector<std::pair<std::reference_wrapper<SceneGraph::Drawable3D>, Matrix4>>
         drawableTransformations = _camera->drawableTransformations(_drawables);
@@ -93,25 +104,50 @@ void CollectionPanel::newFrame() {
     ImGui::End();
 }
 
-void CollectionPanel::addComponentToEntity(Utility::ConfigurationGroup* entityGroup, Object3D* object) {
-    EntitySerializer::addComponentFromConfig(entityGroup, object, _resourceManager, &_drawables);
+void CollectionPanel::addComponentToEntity(Utility::ConfigurationGroup* entityConfig, Object3D* object) {
+    EntitySerializer::addComponentFromConfig(entityConfig, object, _resourceManager, &_drawables, &_scripts);
 }
 
 void CollectionPanel::save() {
     _collectionConfig.save();
 }
 
-void CollectionPanel::addEntityNodeChild(Utility::ConfigurationGroup* entityGroup, EntityNode* parentNode) {
-    Object3D* entity = EntitySerializer::createEntityFromConfig(entityGroup, parentNode->entity(),
-        _resourceManager, &_drawables);
-    EntityNode* node = parentNode->addChild(entity, entityGroup);
+void CollectionPanel::addEntityNodeChild(Utility::ConfigurationGroup* entityConfig, EntityNode* parentNode) {
+    Object3D* entity = EntitySerializer::createEntityFromConfig(entityConfig, parentNode->entity(),
+        _resourceManager, &_drawables, &_scripts);
+    EntityNode* node = parentNode->addChild(entity, entityConfig);
 
-    Math::Vector3<Rad> rotationRadians = Quaternion::fromMatrix(entityGroup->value<Matrix4>("transformation").
+    Math::Vector3<Rad> rotationRadians = Quaternion::fromMatrix(entityConfig->value<Matrix4>("transformation").
         rotation()).toEuler();
 
     node->setRotationDegree(Vector3{Float(Deg(rotationRadians.x())), Float(Deg(rotationRadians.y())),
         Float(Deg(rotationRadians.z()))});
 
-    for(auto childGroup : entityGroup->groups("child"))
+    for(auto childGroup : entityConfig->groups("child"))
         addEntityNodeChild(childGroup, node);
+}
+
+CollectionPanel& CollectionPanel::startSimulation() {
+    for(std::size_t i = 0; i != _scripts.size(); ++i) {
+        Script& script = _scripts[i];
+        py::module module = py::module::import(script.scriptPath().c_str());
+        module.attr("init")(&script.object());
+    }
+
+    _isSimulating = true;
+    return *this;
+}
+
+CollectionPanel& CollectionPanel::stopSimulation() {
+    resetEntity(&_rootNode);
+
+    _isSimulating = false;
+    return *this;
+}
+
+void CollectionPanel::resetEntity(EntityNode* node) {
+    EntitySerializer::resetEntityFromConfig(node->entity(), node->entityConfig());
+
+    for(auto& child : node->children())
+        resetEntity(child.get());
 }

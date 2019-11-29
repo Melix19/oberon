@@ -28,35 +28,37 @@
 #include <Magnum/Primitives/Square.h>
 #include <Magnum/Trade/MeshData2D.h>
 
-Object3D* EntitySerializer::createEntityFromConfig(Utility::ConfigurationGroup* entityGroup, Object3D* parent, OberonResourceManager& resourceManager, SceneGraph::DrawableGroup3D* drawables) {
+namespace EntitySerializer {
+
+Object3D* createEntityFromConfig(Utility::ConfigurationGroup* entityConfig, Object3D* parent, OberonResourceManager& resourceManager, SceneGraph::DrawableGroup3D* drawables, ScriptGroup* scripts) {
     Object3D* object = new Object3D{parent};
 
     /* Name */
-    std::string name = entityGroup->value("name");
+    std::string name = entityConfig->value("name");
     object->addFeature<Entity>(name);
 
     /* Transformation */
-    if(!entityGroup->hasValue("transformation")) entityGroup->setValue<Matrix4>("transformation", Matrix4::scaling({1, 1, 1}));
-    Matrix4 transformation = entityGroup->value<Matrix4>("transformation");
+    if(!entityConfig->hasValue("transformation")) entityConfig->setValue<Matrix4>("transformation", Matrix4::scaling({1, 1, 1}));
+    Matrix4 transformation = entityConfig->value<Matrix4>("transformation");
     object->setTransformation(transformation);
 
-    for(auto componentGroup: entityGroup->groups("component"))
-        addComponentFromConfig(componentGroup, object, resourceManager, drawables);
+    for(auto componentConfig: entityConfig->groups("component"))
+        addComponentFromConfig(componentConfig, object, resourceManager, drawables, scripts);
 
     return object;
 }
 
-void EntitySerializer::addComponentFromConfig(Utility::ConfigurationGroup* componentGroup, Object3D* object, OberonResourceManager& resourceManager, SceneGraph::DrawableGroup3D* drawables) {
-    std::string type = componentGroup->value("type");
+void addComponentFromConfig(Utility::ConfigurationGroup* componentConfig, Object3D* object, OberonResourceManager& resourceManager, SceneGraph::DrawableGroup3D* drawables, ScriptGroup* scripts) {
+    std::string type = componentConfig->value("type");
 
     if(type == "rectangle_shape") {
         /* Size */
-        if(!componentGroup->hasValue("size")) componentGroup->setValue<Vector2>("size", {200, 100});
-        Vector2 size = componentGroup->value<Vector2>("size");
+        if(!componentConfig->hasValue("size")) componentConfig->setValue<Vector2>("size", {200, 100});
+        Vector2 size = componentConfig->value<Vector2>("size");
 
         /* Color */
-        if(!componentGroup->hasValue("color")) componentGroup->setValue<Color4>("color", {1, 1, 1, 1});
-        Color4 color = componentGroup->value<Color4>("color");
+        if(!componentConfig->hasValue("color")) componentConfig->setValue<Color4>("color", {1, 1, 1, 1});
+        Color4 color = componentConfig->value<Color4>("color");
 
         /* Mesh */
         Resource<GL::Mesh> meshResource = resourceManager.get<GL::Mesh>("square");
@@ -74,5 +76,47 @@ void EntitySerializer::addComponentFromConfig(Utility::ConfigurationGroup* compo
 
         /* Rectangle shape */
         object->addFeature<RectangleShape>(drawables, *meshResource, *shaderResource, size, color);
+    } else if(type == "script") {
+        /* Script path */
+        std::string scriptPath = componentConfig->value("script_path");
+
+        /* Script */
+        object->addFeature<Script>(scripts, scriptPath);
     }
+}
+
+void resetEntityFromConfig(Object3D* entity, Utility::ConfigurationGroup* entityConfig) {
+    /* Transformation */
+    if(!entityConfig->hasValue("transformation")) entityConfig->setValue<Matrix4>("transformation", Matrix4::scaling({1, 1, 1}));
+    Matrix4 transformation = entityConfig->value<Matrix4>("transformation");
+    entity->setTransformation(transformation);
+
+    for(auto componentConfig: entityConfig->groups("component")) {
+        std::string type = componentConfig->value("type");
+
+        if(type == "rectangle_shape") {
+            /* Rectangle shape */
+            auto& components = entity->features();
+            RectangleShape* rectangleShape = nullptr;
+
+            for(auto& component: components) {
+                if((rectangleShape = dynamic_cast<RectangleShape*>(&component)))
+                    break;
+            }
+
+            CORRADE_INTERNAL_ASSERT(rectangleShape != nullptr);
+
+            /* Size */
+            if(!componentConfig->hasValue("size")) componentConfig->setValue<Vector2>("size", {200, 100});
+            Vector2 size = componentConfig->value<Vector2>("size");
+            rectangleShape->setSize(size);
+
+            /* Color */
+            if(!componentConfig->hasValue("color")) componentConfig->setValue<Color4>("color", {1, 1, 1, 1});
+            Color4 color = componentConfig->value<Color4>("color");
+            rectangleShape->setColor(color);
+        }
+    }
+}
+
 }

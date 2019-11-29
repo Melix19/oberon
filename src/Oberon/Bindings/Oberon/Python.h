@@ -24,25 +24,6 @@
 
 #pragma once
 
-#include "Entity.h"
-#include "RectangleShape.h"
-#include "Script.h"
+#include <string>
 
-#include <Corrade/Utility/ConfigurationGroup.h>
-#include <Magnum/Math/ConfigurationValue.h>
-#include <Magnum/ResourceManager.h>
-#include <Magnum/SceneGraph/TranslationRotationScalingTransformation3D.h>
-
-typedef SceneGraph::Object<SceneGraph::TranslationRotationScalingTransformation3D> Object3D;
-typedef SceneGraph::Scene<SceneGraph::TranslationRotationScalingTransformation3D> Scene3D;
-
-typedef ResourceManager<GL::Mesh, Shaders::Flat3D> OberonResourceManager;
-
-namespace EntitySerializer {
-
-Object3D* createEntityFromConfig(Utility::ConfigurationGroup* entityConfig, Object3D* parent, OberonResourceManager& resourceManager, SceneGraph::DrawableGroup3D* drawables, ScriptGroup* scripts);
-void addComponentFromConfig(Utility::ConfigurationGroup* componentConfig, Object3D* object, OberonResourceManager& resourceManager, SceneGraph::DrawableGroup3D* drawables, ScriptGroup* scripts);
-
-void resetEntityFromConfig(Object3D* entity, Utility::ConfigurationGroup* entityConfig);
-
-}
+void setup(const std::string& projectPath);
