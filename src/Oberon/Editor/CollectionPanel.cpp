@@ -35,7 +35,7 @@ namespace py = pybind11;
 
 CollectionPanel::CollectionPanel(const std::string& path, OberonResourceManager& resourceManager, const Vector2i& viewportTextureSize, const Vector2& dpiScaleRatio):
     _path(path), _resourceManager(resourceManager), _viewportTextureSize(viewportTextureSize), _dpiScaleRatio(dpiScaleRatio), _collectionConfig{_path},
-    _rootNode(&_scene, &_collectionConfig), _isOpen(true), _isVisible(true), _isFocused(false), _needsFocus(true), _needsDocking(true), _isSimulating(false)
+    _isOpen(true), _isVisible(true), _isFocused(false), _needsFocus(true), _needsDocking(true), _isSimulating(false)
 {
     _viewportTexture.setStorage(1, GL::TextureFormat::RGBA8, _viewportTextureSize*_dpiScaleRatio);
     _framebuffer = GL::Framebuffer{{}};
@@ -45,8 +45,15 @@ CollectionPanel::CollectionPanel(const std::string& path, OberonResourceManager&
     _camera = new SceneGraph::Camera3D{*_cameraObject};
     _camera->setAspectRatioPolicy(SceneGraph::AspectRatioPolicy::Extend);
 
-    if(_collectionConfig.hasGroup("child"))
-        addObjectNodeChild(_collectionConfig.group("child"), &_rootNode);
+    if(!_collectionConfig.hasGroup("scene")) {
+        Utility::ConfigurationGroup* sceneConfig = _collectionConfig.addGroup("scene");
+        sceneConfig->setValue("name", "root");
+    }
+
+    Object3D* rootObject = Serializer::createObjectFromConfig(_collectionConfig.group("scene"), &_scene, resourceManager, &_drawables, &_scripts);
+    _rootNode = Containers::pointer<ObjectNode>(rootObject, _collectionConfig.group("scene"));
+
+    updateObjectNodeChildren(_rootNode.get());
 }
 
 void CollectionPanel::drawViewport(Float deltaTime) {
@@ -116,19 +123,20 @@ void CollectionPanel::save() {
     _collectionConfig.save();
 }
 
-void CollectionPanel::addObjectNodeChild(Utility::ConfigurationGroup* objectConfig, ObjectNode* parentNode) {
-    Object3D* object = Serializer::createObjectFromConfig(objectConfig, parentNode->object(),
-        _resourceManager, &_drawables, &_scripts);
-    ObjectNode* node = parentNode->addChild(object, objectConfig);
+void CollectionPanel::updateObjectNodeChildren(ObjectNode* node) {
+    for(auto childConfig : node->objectConfig()->groups("child")) {
+        Object3D* child = Serializer::createObjectFromConfig(childConfig, node->object(),
+            _resourceManager, &_drawables, &_scripts);
+        ObjectNode* childNode = node->addChild(child, childConfig);
 
-    Math::Vector3<Rad> rotationRadians = Quaternion::fromMatrix(objectConfig->value<Matrix4>("transformation").
-        rotation()).toEuler();
+        Math::Vector3<Rad> rotationRadians = Quaternion::fromMatrix(childConfig->value<Matrix4>("transformation").
+            rotation()).toEuler();
 
-    node->setRotationDegree(Vector3{Float(Deg(rotationRadians.x())), Float(Deg(rotationRadians.y())),
-        Float(Deg(rotationRadians.z()))});
+        childNode->setRotationDegree(Vector3{Float(Deg(rotationRadians.x())), Float(Deg(rotationRadians.y())),
+            Float(Deg(rotationRadians.z()))});
 
-    for(auto childGroup : objectConfig->groups("child"))
-        addObjectNodeChild(childGroup, node);
+        updateObjectNodeChildren(childNode);
+    }
 }
 
 CollectionPanel& CollectionPanel::startSimulation() {
@@ -143,15 +151,15 @@ CollectionPanel& CollectionPanel::startSimulation() {
 }
 
 CollectionPanel& CollectionPanel::stopSimulation() {
-    resetObject(&_rootNode);
+    resetObjectAndChildren(_rootNode.get());
 
     _isSimulating = false;
     return *this;
 }
 
-void CollectionPanel::resetObject(ObjectNode* node) {
+void CollectionPanel::resetObjectAndChildren(ObjectNode* node) {
     Serializer::resetObjectFromConfig(node->object(), node->objectConfig());
 
     for(auto& child : node->children())
-        resetObject(child.get());
+        resetObjectAndChildren(child.get());
 }

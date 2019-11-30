@@ -32,154 +32,152 @@ void Inspector::newFrame() {
     bool isVisible = ImGui::Begin("Inspector");
 
     /* If the window is not visible, just end the method here. */
-    if(!isVisible) {
+    if(!isVisible || !_panel || _panel->selectedNodes().empty()) {
         ImGui::End();
         return;
     }
 
     const Int columnWidth = 100;
 
-    if(_panel && !_panel->selectedNodes().empty()) {
-        auto& selectedNodes = _panel->selectedNodes();
-        ObjectNode* objectNode = selectedNodes.front();
+    auto& selectedNodes = _panel->selectedNodes();
+    ObjectNode* objectNode = selectedNodes.front();
 
-        if(ImGui::CollapsingHeader("Transform", ImGuiTreeNodeFlags_DefaultOpen)) {
-            /* Translation */
-            ImGui::AlignTextToFramePadding();
-            ImGui::Text("Translation");
-            ImGui::SameLine(columnWidth);
-            ImGui::SetNextItemWidth(-1);
-            Vector3 translation = objectNode->objectConfig()->value<Matrix4>("transformation").translation();
-            if(ImGui::DragFloat3("##Translation", translation.data(), 0.5f)) {
-                objectNode->object()->setTranslation(translation);
-                objectNode->objectConfig()->setValue("transformation", objectNode->object()->transformation());
-            }
-
-            /* Rotation */
-            ImGui::AlignTextToFramePadding();
-            ImGui::Text("Rotation");
-            ImGui::SameLine(columnWidth);
-            ImGui::SetNextItemWidth(-1);
-            Vector3 rotationDegree = objectNode->rotationDegree();
-            if(ImGui::DragFloat3("##Rotation", rotationDegree.data(), 0.5f)) {
-                objectNode->object()->setRotation(
-                    Quaternion::rotation(Rad(Deg(rotationDegree.z())), Vector3::zAxis())*
-                    Quaternion::rotation(Rad(Deg(rotationDegree.y())), Vector3::yAxis())*
-                    Quaternion::rotation(Rad(Deg(rotationDegree.x())), Vector3::xAxis()));
-                objectNode->objectConfig()->setValue("transformation", objectNode->object()->transformation());
-                objectNode->setRotationDegree(rotationDegree);
-            }
-
-            /* Scaling */
-            ImGui::AlignTextToFramePadding();
-            ImGui::Text("Scaling");
-            ImGui::SameLine(columnWidth);
-            ImGui::SetNextItemWidth(-1);
-            Vector3 scaling = objectNode->objectConfig()->value<Matrix4>("transformation").scaling();
-            if(ImGui::DragFloat3("##Scaling", scaling.data(), 0.005f)) {
-                objectNode->object()->setScaling(scaling);
-                objectNode->objectConfig()->setValue("transformation", objectNode->object()->transformation());
-            }
+    if(ImGui::CollapsingHeader("Transform", ImGuiTreeNodeFlags_DefaultOpen)) {
+        /* Translation */
+        ImGui::AlignTextToFramePadding();
+        ImGui::Text("Translation");
+        ImGui::SameLine(columnWidth);
+        ImGui::SetNextItemWidth(-1);
+        Vector3 translation = objectNode->objectConfig()->value<Matrix4>("transformation").translation();
+        if(ImGui::DragFloat3("##Translation", translation.data(), 0.5f)) {
+            objectNode->object()->setTranslation(translation);
+            objectNode->objectConfig()->setValue("transformation", objectNode->object()->transformation());
         }
 
-        /* Features */
-        for(auto featureConfig: objectNode->objectConfig()->groups("feature")) {
-            std::string type = featureConfig->value("type");
-
-            if(type == "rectangle_shape") {
-                /* Rectangle shape */
-                auto& features = objectNode->object()->features();
-                RectangleShape* rectangleShape = nullptr;
-
-                for(auto& feature: features) {
-                    if((rectangleShape = dynamic_cast<RectangleShape*>(&feature)))
-                        break;
-                }
-
-                CORRADE_INTERNAL_ASSERT(rectangleShape != nullptr);
-
-                bool featureIsOpen = true;
-
-                if(ImGui::CollapsingHeader("Rectangle shape", &featureIsOpen, ImGuiTreeNodeFlags_DefaultOpen)) {
-                    /* Size */
-                    ImGui::AlignTextToFramePadding();
-                    ImGui::Text("Size");
-                    ImGui::SameLine(columnWidth);
-                    ImGui::SetNextItemWidth(-1);
-                    Vector2 size = featureConfig->value<Vector2>("size");
-                    if(ImGui::DragFloat2("##Size", size.data(), 0.5f)) {
-                        rectangleShape->setSize(size);
-                        featureConfig->setValue("size", size);
-                    }
-
-                    /* Color */
-                    ImGui::AlignTextToFramePadding();
-                    ImGui::Text("Color");
-                    ImGui::SameLine(columnWidth);
-                    ImGui::SetNextItemWidth(-1);
-                    Color4 color = featureConfig->value<Color4>("color");
-                    if(ImGui::ColorEdit4("##Color", color.data())) {
-                        rectangleShape->setColor(color);
-                        featureConfig->setValue("color", color);
-                    }
-                }
-
-                if(!featureIsOpen) {
-                    delete rectangleShape;
-                    objectNode->objectConfig()->removeGroup(featureConfig);
-                }
-           } else if(type == "script") {
-                /* Script */
-                auto& features = objectNode->object()->features();
-                Script* script = nullptr;
-
-                for(auto& feature: features) {
-                    if((script = dynamic_cast<Script*>(&feature)))
-                        break;
-                }
-
-                CORRADE_INTERNAL_ASSERT(script != nullptr);
-
-                bool featureIsOpen = true;
-
-                if(ImGui::CollapsingHeader("Script", &featureIsOpen, ImGuiTreeNodeFlags_DefaultOpen)) {
-                    /* Size */
-                    ImGui::AlignTextToFramePadding();
-                    ImGui::Text("Script path");
-                    ImGui::SameLine(columnWidth);
-                    ImGui::SetNextItemWidth(-1);
-                    std::string scriptPath = featureConfig->value("script_path");
-                    if(ImGui::InputText("##ScriptPath", &scriptPath))
-                        featureConfig->setValue("script_path", scriptPath);
-                }
-
-                if(!featureIsOpen) {
-                    delete script;
-                    objectNode->objectConfig()->removeGroup(featureConfig);
-                }
-           }
-       }
-
-        if(ImGui::Button("Add feature"))
-            ImGui::OpenPopup("FeaturePopup");
-
-        if(ImGui::BeginPopup("FeaturePopup")) {
-            if(ImGui::Selectable("Rectangle shape")) {
-                Utility::ConfigurationGroup* featureConfig = objectNode->objectConfig()->addGroup("feature");
-                featureConfig->setValue("type", "rectangle_shape");
-
-                _panel->addFeatureToObject(featureConfig, objectNode->object());
-            }
-
-            if(ImGui::Selectable("Script")) {
-                Utility::ConfigurationGroup* featureConfig = objectNode->objectConfig()->addGroup("feature");
-                featureConfig->setValue("type", "script");
-
-                _panel->addFeatureToObject(featureConfig, objectNode->object());
-            }
-
-            ImGui::EndPopup();
+        /* Rotation */
+        ImGui::AlignTextToFramePadding();
+        ImGui::Text("Rotation");
+        ImGui::SameLine(columnWidth);
+        ImGui::SetNextItemWidth(-1);
+        Vector3 rotationDegree = objectNode->rotationDegree();
+        if(ImGui::DragFloat3("##Rotation", rotationDegree.data(), 0.5f)) {
+            objectNode->object()->setRotation(
+                Quaternion::rotation(Rad(Deg(rotationDegree.z())), Vector3::zAxis())*
+                Quaternion::rotation(Rad(Deg(rotationDegree.y())), Vector3::yAxis())*
+                Quaternion::rotation(Rad(Deg(rotationDegree.x())), Vector3::xAxis()));
+            objectNode->objectConfig()->setValue("transformation", objectNode->object()->transformation());
+            objectNode->setRotationDegree(rotationDegree);
         }
+
+        /* Scaling */
+        ImGui::AlignTextToFramePadding();
+        ImGui::Text("Scaling");
+        ImGui::SameLine(columnWidth);
+        ImGui::SetNextItemWidth(-1);
+        Vector3 scaling = objectNode->objectConfig()->value<Matrix4>("transformation").scaling();
+        if(ImGui::DragFloat3("##Scaling", scaling.data(), 0.005f)) {
+            objectNode->object()->setScaling(scaling);
+            objectNode->objectConfig()->setValue("transformation", objectNode->object()->transformation());
+        }
+    }
+
+    /* Features */
+    for(auto featureConfig: objectNode->objectConfig()->groups("feature")) {
+        std::string type = featureConfig->value("type");
+
+        if(type == "rectangle_shape") {
+            /* Rectangle shape */
+            auto& features = objectNode->object()->features();
+            RectangleShape* rectangleShape = nullptr;
+
+            for(auto& feature: features) {
+                if((rectangleShape = dynamic_cast<RectangleShape*>(&feature)))
+                    break;
+            }
+
+            CORRADE_INTERNAL_ASSERT(rectangleShape != nullptr);
+
+            bool featureIsOpen = true;
+
+            if(ImGui::CollapsingHeader("Rectangle shape", &featureIsOpen, ImGuiTreeNodeFlags_DefaultOpen)) {
+                /* Size */
+                ImGui::AlignTextToFramePadding();
+                ImGui::Text("Size");
+                ImGui::SameLine(columnWidth);
+                ImGui::SetNextItemWidth(-1);
+                Vector2 size = featureConfig->value<Vector2>("size");
+                if(ImGui::DragFloat2("##Size", size.data(), 0.5f)) {
+                    rectangleShape->setSize(size);
+                    featureConfig->setValue("size", size);
+                }
+
+                /* Color */
+                ImGui::AlignTextToFramePadding();
+                ImGui::Text("Color");
+                ImGui::SameLine(columnWidth);
+                ImGui::SetNextItemWidth(-1);
+                Color4 color = featureConfig->value<Color4>("color");
+                if(ImGui::ColorEdit4("##Color", color.data())) {
+                    rectangleShape->setColor(color);
+                    featureConfig->setValue("color", color);
+                }
+            }
+
+            if(!featureIsOpen) {
+                delete rectangleShape;
+                objectNode->objectConfig()->removeGroup(featureConfig);
+            }
+        } else if(type == "script") {
+            /* Script */
+            auto& features = objectNode->object()->features();
+            Script* script = nullptr;
+
+            for(auto& feature: features) {
+                if((script = dynamic_cast<Script*>(&feature)))
+                    break;
+            }
+
+            CORRADE_INTERNAL_ASSERT(script != nullptr);
+
+            bool featureIsOpen = true;
+
+            if(ImGui::CollapsingHeader("Script", &featureIsOpen, ImGuiTreeNodeFlags_DefaultOpen)) {
+                /* Size */
+                ImGui::AlignTextToFramePadding();
+                ImGui::Text("Script path");
+                ImGui::SameLine(columnWidth);
+                ImGui::SetNextItemWidth(-1);
+                std::string scriptPath = featureConfig->value("script_path");
+                if(ImGui::InputText("##ScriptPath", &scriptPath))
+                    featureConfig->setValue("script_path", scriptPath);
+            }
+
+            if(!featureIsOpen) {
+                delete script;
+                objectNode->objectConfig()->removeGroup(featureConfig);
+            }
+        }
+    }
+
+    if(ImGui::Button("Add feature"))
+        ImGui::OpenPopup("FeaturePopup");
+
+    if(ImGui::BeginPopup("FeaturePopup")) {
+        if(ImGui::Selectable("Rectangle shape")) {
+            Utility::ConfigurationGroup* featureConfig = objectNode->objectConfig()->addGroup("feature");
+            featureConfig->setValue("type", "rectangle_shape");
+
+            _panel->addFeatureToObject(featureConfig, objectNode->object());
+        }
+
+        if(ImGui::Selectable("Script")) {
+            Utility::ConfigurationGroup* featureConfig = objectNode->objectConfig()->addGroup("feature");
+            featureConfig->setValue("type", "script");
+
+            _panel->addFeatureToObject(featureConfig, objectNode->object());
+        }
+
+        ImGui::EndPopup();
     }
 
     ImGui::End();

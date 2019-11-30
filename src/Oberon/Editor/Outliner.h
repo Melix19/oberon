@@ -38,7 +38,7 @@ class Outliner {
         }
 
     private:
-        void displayObjectTree(ObjectNode* node);
+        void displayObjectTree(ObjectNode* node, bool isRoot);
         void displayEditNode(ObjectNode* node);
 
         CollectionPanel* _panel;

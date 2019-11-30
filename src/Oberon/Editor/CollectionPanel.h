@@ -37,13 +37,13 @@ class CollectionPanel: public Containers::LinkedListItem<CollectionPanel> {
         void drawViewport(Float deltaTime);
         void newFrame();
 
-        void addObjectNodeChild(Utility::ConfigurationGroup* objectConfig, ObjectNode* parentNode);
+        void resetObjectAndChildren(ObjectNode* node);
         void addFeatureToObject(Utility::ConfigurationGroup* objectConfig, Object3D* object);
         void save();
 
         const std::string& path() const { return _path; }
 
-        ObjectNode& rootNode() { return _rootNode; }
+        ObjectNode* rootNode() { return _rootNode.get(); }
 
         std::vector<ObjectNode*>& selectedNodes() { return _selectedNodes; }
 
@@ -68,7 +68,7 @@ class CollectionPanel: public Containers::LinkedListItem<CollectionPanel> {
         CollectionPanel& stopSimulation();
 
     private:
-        void resetObject(ObjectNode* node);
+        void updateObjectNodeChildren(ObjectNode* node);
 
         std::string _path;
         OberonResourceManager& _resourceManager;
@@ -77,7 +77,7 @@ class CollectionPanel: public Containers::LinkedListItem<CollectionPanel> {
         Vector2 _dpiScaleRatio;
 
         Utility::Configuration _collectionConfig;
-        ObjectNode _rootNode;
+        Containers::Pointer<ObjectNode> _rootNode;
         std::vector<ObjectNode*> _selectedNodes;
 
         bool _isOpen;

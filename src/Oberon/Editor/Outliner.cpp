@@ -30,48 +30,19 @@
 #include <misc/cpp/imgui_stdlib.h>
 
 void Outliner::newFrame() {
-    bool showTree = false;
-
-    if(_panel) {
-        ObjectNode* rootNode = &_panel->rootNode();
-        showTree = !rootNode->children().empty() || rootNode == _editNode;
-    }
-
-    if(showTree) ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
-
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
     bool isVisible = ImGui::Begin("Outliner");
+    ImGui::PopStyleVar();
 
     /* If the window is not visible, just end the method here. */
-    if(!isVisible) {
-        if(showTree) ImGui::PopStyleVar();
+    if(!isVisible || !_panel) {
         ImGui::End();
         return;
     }
 
-    if(_panel) {
-        ObjectNode* rootNode = &_panel->rootNode();
-
-        if(showTree) {
-            ImGui::PopStyleVar();
-
-            if(rootNode == _editNode && _editNodeMode != EditMode::Rename)
-                displayEditNode(rootNode);
-            else {
-                ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0.0f, 0.0f));
-                displayObjectTree(rootNode->children().front().get());
-                ImGui::PopStyleVar();
-            }
-        } else {
-            ImGui::Text("Create root object:");
-
-            if(ImGui::Button("Object")) {
-                _editNode = rootNode;
-                _editNodeMode = EditMode::ObjectCreation;
-                _editNodeText = "";
-                _editNodeNeedsFocus = true;
-            }
-        }
-    }
+    ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0.0f, 0.0f));
+    displayObjectTree(_panel->rootNode(), true);
+    ImGui::PopStyleVar();
 
     ImGui::End();
 
@@ -102,7 +73,7 @@ void Outliner::newFrame() {
     }
 }
 
-void Outliner::displayObjectTree(ObjectNode* node) {
+void Outliner::displayObjectTree(ObjectNode* node, bool isRoot) {
     if(node == _editNode && _editNodeMode == EditMode::Rename) {
         displayEditNode(node);
         return;
@@ -168,14 +139,14 @@ void Outliner::displayObjectTree(ObjectNode* node) {
             _editNodeNeedsFocus = true;
         }
 
-        if(ImGui::MenuItem("Delete")) _deleteSelectedNodes = true;
+        if(!isRoot && ImGui::MenuItem("Delete")) _deleteSelectedNodes = true;
 
         ImGui::EndPopup();
     }
 
     if(nodeOpen) {
         for(auto& child : node->children())
-            displayObjectTree(child.get());
+            displayObjectTree(child.get(), false);
 
         if(node == _editNode && _editNodeMode != EditMode::Rename)
             displayEditNode(node);
@@ -196,10 +167,12 @@ void Outliner::displayEditNode(ObjectNode* node) {
         switch (_editNodeMode) {
             case EditMode::ObjectCreation: {
                 /* Add the new ObjectNode. */
-                Utility::ConfigurationGroup* childGroup = node->objectConfig()->addGroup("child");
-                childGroup->setValue("name", _editNodeText);
+                Utility::ConfigurationGroup* childConfig = node->objectConfig()->addGroup("child");
+                childConfig->setValue("name", _editNodeText);
 
-                _panel->addObjectNodeChild(childGroup, node);
+                Object3D* child = new Object3D{node->object()};
+                ObjectNode* childNode = node->addChild(child, childConfig);
+                _panel->resetObjectAndChildren(childNode);
             } break;
             case EditMode::Rename: {
                 node->objectConfig()->setValue("name", _editNodeText);
