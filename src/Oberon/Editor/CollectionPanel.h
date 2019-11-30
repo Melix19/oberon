@@ -38,7 +38,7 @@ class CollectionPanel: public Containers::LinkedListItem<CollectionPanel> {
         void newFrame();
 
         void addEntityNodeChild(Utility::ConfigurationGroup* entityConfig, EntityNode* parentNode);
-        void addComponentToEntity(Utility::ConfigurationGroup* entityConfig, Object3D* object);
+        void addFeatureToEntity(Utility::ConfigurationGroup* entityConfig, Object3D* object);
         void save();
 
         const std::string& path() const { return _path; }

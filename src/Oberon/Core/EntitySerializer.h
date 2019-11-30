@@ -41,7 +41,7 @@ typedef ResourceManager<GL::Mesh, Shaders::Flat3D> OberonResourceManager;
 namespace EntitySerializer {
 
 Object3D* createEntityFromConfig(Utility::ConfigurationGroup* entityConfig, Object3D* parent, OberonResourceManager& resourceManager, SceneGraph::DrawableGroup3D* drawables, ScriptGroup* scripts);
-void addComponentFromConfig(Utility::ConfigurationGroup* componentConfig, Object3D* object, OberonResourceManager& resourceManager, SceneGraph::DrawableGroup3D* drawables, ScriptGroup* scripts);
+void addFeatureFromConfig(Utility::ConfigurationGroup* featureConfig, Object3D* object, OberonResourceManager& resourceManager, SceneGraph::DrawableGroup3D* drawables, ScriptGroup* scripts);
 
 void resetEntityFromConfig(Object3D* entity, Utility::ConfigurationGroup* entityConfig);
 

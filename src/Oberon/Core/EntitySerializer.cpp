@@ -42,23 +42,23 @@ Object3D* createEntityFromConfig(Utility::ConfigurationGroup* entityConfig, Obje
     Matrix4 transformation = entityConfig->value<Matrix4>("transformation");
     object->setTransformation(transformation);
 
-    for(auto componentConfig: entityConfig->groups("component"))
-        addComponentFromConfig(componentConfig, object, resourceManager, drawables, scripts);
+    for(auto featureConfig: entityConfig->groups("feature"))
+        addFeatureFromConfig(featureConfig, object, resourceManager, drawables, scripts);
 
     return object;
 }
 
-void addComponentFromConfig(Utility::ConfigurationGroup* componentConfig, Object3D* object, OberonResourceManager& resourceManager, SceneGraph::DrawableGroup3D* drawables, ScriptGroup* scripts) {
-    std::string type = componentConfig->value("type");
+void addFeatureFromConfig(Utility::ConfigurationGroup* featureConfig, Object3D* object, OberonResourceManager& resourceManager, SceneGraph::DrawableGroup3D* drawables, ScriptGroup* scripts) {
+    std::string type = featureConfig->value("type");
 
     if(type == "rectangle_shape") {
         /* Size */
-        if(!componentConfig->hasValue("size")) componentConfig->setValue<Vector2>("size", {200, 100});
-        Vector2 size = componentConfig->value<Vector2>("size");
+        if(!featureConfig->hasValue("size")) featureConfig->setValue<Vector2>("size", {200, 100});
+        Vector2 size = featureConfig->value<Vector2>("size");
 
         /* Color */
-        if(!componentConfig->hasValue("color")) componentConfig->setValue<Color4>("color", {1, 1, 1, 1});
-        Color4 color = componentConfig->value<Color4>("color");
+        if(!featureConfig->hasValue("color")) featureConfig->setValue<Color4>("color", {1, 1, 1, 1});
+        Color4 color = featureConfig->value<Color4>("color");
 
         /* Mesh */
         Resource<GL::Mesh> meshResource = resourceManager.get<GL::Mesh>("square");
@@ -78,7 +78,7 @@ void addComponentFromConfig(Utility::ConfigurationGroup* componentConfig, Object
         object->addFeature<RectangleShape>(drawables, *meshResource, *shaderResource, size, color);
     } else if(type == "script") {
         /* Script path */
-        std::string scriptPath = componentConfig->value("script_path");
+        std::string scriptPath = featureConfig->value("script_path");
 
         /* Script */
         object->addFeature<Script>(scripts, scriptPath);
@@ -91,29 +91,29 @@ void resetEntityFromConfig(Object3D* entity, Utility::ConfigurationGroup* entity
     Matrix4 transformation = entityConfig->value<Matrix4>("transformation");
     entity->setTransformation(transformation);
 
-    for(auto componentConfig: entityConfig->groups("component")) {
-        std::string type = componentConfig->value("type");
+    for(auto featureConfig: entityConfig->groups("feature")) {
+        std::string type = featureConfig->value("type");
 
         if(type == "rectangle_shape") {
             /* Rectangle shape */
-            auto& components = entity->features();
+            auto& features = entity->features();
             RectangleShape* rectangleShape = nullptr;
 
-            for(auto& component: components) {
-                if((rectangleShape = dynamic_cast<RectangleShape*>(&component)))
+            for(auto& feature: features) {
+                if((rectangleShape = dynamic_cast<RectangleShape*>(&feature)))
                     break;
             }
 
             CORRADE_INTERNAL_ASSERT(rectangleShape != nullptr);
 
             /* Size */
-            if(!componentConfig->hasValue("size")) componentConfig->setValue<Vector2>("size", {200, 100});
-            Vector2 size = componentConfig->value<Vector2>("size");
+            if(!featureConfig->hasValue("size")) featureConfig->setValue<Vector2>("size", {200, 100});
+            Vector2 size = featureConfig->value<Vector2>("size");
             rectangleShape->setSize(size);
 
             /* Color */
-            if(!componentConfig->hasValue("color")) componentConfig->setValue<Color4>("color", {1, 1, 1, 1});
-            Color4 color = componentConfig->value<Color4>("color");
+            if(!featureConfig->hasValue("color")) featureConfig->setValue<Color4>("color", {1, 1, 1, 1});
+            Color4 color = featureConfig->value<Color4>("color");
             rectangleShape->setColor(color);
         }
     }

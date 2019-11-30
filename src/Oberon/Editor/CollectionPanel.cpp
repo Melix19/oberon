@@ -37,7 +37,7 @@ CollectionPanel::CollectionPanel(const std::string& path, OberonResourceManager&
     _path(path), _resourceManager(resourceManager), _viewportTextureSize(viewportTextureSize), _dpiScaleRatio(dpiScaleRatio), _collectionConfig{_path},
     _rootNode(&_scene, &_collectionConfig), _isOpen(true), _isVisible(true), _isFocused(false), _needsFocus(true), _needsDocking(true), _isSimulating(false)
 {
-    _viewportTexture.setStorage(1, GL::TextureFormat::RGBA8, _viewportTextureSize * _dpiScaleRatio);
+    _viewportTexture.setStorage(1, GL::TextureFormat::RGBA8, _viewportTextureSize*_dpiScaleRatio);
     _framebuffer = GL::Framebuffer{{}};
     _framebuffer.attachTexture(GL::Framebuffer::ColorAttachment{0}, _viewportTexture, 0);
 
@@ -101,15 +101,15 @@ void CollectionPanel::newFrame() {
     Vector2i windowContentSize{Int(ImGui::GetWindowContentRegionMax().x - ImGui::GetWindowContentRegionMin().x),
         Int(ImGui::GetWindowContentRegionMax().y - ImGui::GetWindowContentRegionMin().y)};
 
-    _framebuffer.setViewport({{}, windowContentSize * _dpiScaleRatio});
+    _framebuffer.setViewport({{}, windowContentSize*_dpiScaleRatio});
     _camera->setProjectionMatrix(Matrix4::orthographicProjection(Vector2{windowContentSize}, -1000.0f, 1000.0f))
         .setViewport(windowContentSize);
 
     ImGui::End();
 }
 
-void CollectionPanel::addComponentToEntity(Utility::ConfigurationGroup* entityConfig, Object3D* object) {
-    EntitySerializer::addComponentFromConfig(entityConfig, object, _resourceManager, &_drawables, &_scripts);
+void CollectionPanel::addFeatureToEntity(Utility::ConfigurationGroup* entityConfig, Object3D* object) {
+    EntitySerializer::addFeatureFromConfig(entityConfig, object, _resourceManager, &_drawables, &_scripts);
 }
 
 void CollectionPanel::save() {

@@ -82,34 +82,34 @@ void Inspector::newFrame() {
             }
         }
 
-        /* Components */
-        for(auto componentConfig: entityNode->entityConfig()->groups("component")) {
-            std::string type = componentConfig->value("type");
+        /* Features */
+        for(auto featureConfig: entityNode->entityConfig()->groups("feature")) {
+            std::string type = featureConfig->value("type");
 
             if(type == "rectangle_shape") {
                 /* Rectangle shape */
-                auto& components = entityNode->entity()->features();
+                auto& features = entityNode->entity()->features();
                 RectangleShape* rectangleShape = nullptr;
 
-                for(auto& component: components) {
-                    if((rectangleShape = dynamic_cast<RectangleShape*>(&component)))
+                for(auto& feature: features) {
+                    if((rectangleShape = dynamic_cast<RectangleShape*>(&feature)))
                         break;
                 }
 
                 CORRADE_INTERNAL_ASSERT(rectangleShape != nullptr);
 
-                bool componentIsOpen = true;
+                bool featureIsOpen = true;
 
-                if(ImGui::CollapsingHeader("Rectangle shape", &componentIsOpen, ImGuiTreeNodeFlags_DefaultOpen)) {
+                if(ImGui::CollapsingHeader("Rectangle shape", &featureIsOpen, ImGuiTreeNodeFlags_DefaultOpen)) {
                     /* Size */
                     ImGui::AlignTextToFramePadding();
                     ImGui::Text("Size");
                     ImGui::SameLine(columnWidth);
                     ImGui::SetNextItemWidth(-1);
-                    Vector2 size = componentConfig->value<Vector2>("size");
+                    Vector2 size = featureConfig->value<Vector2>("size");
                     if(ImGui::DragFloat2("##Size", size.data(), 0.5f)) {
                         rectangleShape->setSize(size);
-                        componentConfig->setValue("size", size);
+                        featureConfig->setValue("size", size);
                     }
 
                     /* Color */
@@ -117,65 +117,65 @@ void Inspector::newFrame() {
                     ImGui::Text("Color");
                     ImGui::SameLine(columnWidth);
                     ImGui::SetNextItemWidth(-1);
-                    Color4 color = componentConfig->value<Color4>("color");
+                    Color4 color = featureConfig->value<Color4>("color");
                     if(ImGui::ColorEdit4("##Color", color.data())) {
                         rectangleShape->setColor(color);
-                        componentConfig->setValue("color", color);
+                        featureConfig->setValue("color", color);
                     }
                 }
 
-                if(!componentIsOpen) {
+                if(!featureIsOpen) {
                     delete rectangleShape;
-                    entityNode->entityConfig()->removeGroup(componentConfig);
+                    entityNode->entityConfig()->removeGroup(featureConfig);
                 }
            } else if(type == "script") {
                 /* Script */
-                auto& components = entityNode->entity()->features();
+                auto& features = entityNode->entity()->features();
                 Script* script = nullptr;
 
-                for(auto& component: components) {
-                    if((script = dynamic_cast<Script*>(&component)))
+                for(auto& feature: features) {
+                    if((script = dynamic_cast<Script*>(&feature)))
                         break;
                 }
 
                 CORRADE_INTERNAL_ASSERT(script != nullptr);
 
-                bool componentIsOpen = true;
+                bool featureIsOpen = true;
 
-                if(ImGui::CollapsingHeader("Script", &componentIsOpen, ImGuiTreeNodeFlags_DefaultOpen)) {
+                if(ImGui::CollapsingHeader("Script", &featureIsOpen, ImGuiTreeNodeFlags_DefaultOpen)) {
                     /* Size */
                     ImGui::AlignTextToFramePadding();
                     ImGui::Text("Script path");
                     ImGui::SameLine(columnWidth);
                     ImGui::SetNextItemWidth(-1);
-                    std::string scriptPath = componentConfig->value("script_path");
+                    std::string scriptPath = featureConfig->value("script_path");
                     if(ImGui::InputText("##ScriptPath", &scriptPath))
-                        componentConfig->setValue("script_path", scriptPath);
+                        featureConfig->setValue("script_path", scriptPath);
                 }
 
-                if(!componentIsOpen) {
+                if(!featureIsOpen) {
                     delete script;
-                    entityNode->entityConfig()->removeGroup(componentConfig);
+                    entityNode->entityConfig()->removeGroup(featureConfig);
                 }
            }
        }
 
-        if(ImGui::Button("Add component"))
-            ImGui::OpenPopup("ComponentPopup");
+        if(ImGui::Button("Add feature"))
+            ImGui::OpenPopup("FeaturePopup");
 
-        if(ImGui::BeginPopup("ComponentPopup")) {
+        if(ImGui::BeginPopup("FeaturePopup")) {
             if(ImGui::Selectable("Rectangle shape")) {
-                Utility::ConfigurationGroup* componentConfig = entityNode->entityConfig()->addGroup("component");
-                componentConfig->setValue("type", "rectangle_shape");
+                Utility::ConfigurationGroup* featureConfig = entityNode->entityConfig()->addGroup("feature");
+                featureConfig->setValue("type", "rectangle_shape");
 
-                _panel->addComponentToEntity(componentConfig, entityNode->entity());
+                _panel->addFeatureToEntity(featureConfig, entityNode->entity());
             }
 
             if(ImGui::Selectable("Script")) {
-                Utility::ConfigurationGroup* componentConfig = entityNode->entityConfig()->addGroup("component");
-                componentConfig->setValue("type", "script");
+                Utility::ConfigurationGroup* featureConfig = entityNode->entityConfig()->addGroup("feature");
+                featureConfig->setValue("type", "script");
 
-                _panel->addComponentToEntity(componentConfig, entityNode->entity());
+                _panel->addFeatureToEntity(featureConfig, entityNode->entity());
             }
 
             ImGui::EndPopup();
