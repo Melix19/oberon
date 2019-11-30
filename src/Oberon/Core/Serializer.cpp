@@ -22,27 +22,23 @@
     SOFTWARE.
 */
 
-#include "EntitySerializer.h"
+#include "Serializer.h"
 
 #include <Magnum/MeshTools/Compile.h>
 #include <Magnum/Primitives/Square.h>
 #include <Magnum/Trade/MeshData2D.h>
 
-namespace EntitySerializer {
+namespace Serializer {
 
-Object3D* createEntityFromConfig(Utility::ConfigurationGroup* entityConfig, Object3D* parent, OberonResourceManager& resourceManager, SceneGraph::DrawableGroup3D* drawables, ScriptGroup* scripts) {
+Object3D* createObjectFromConfig(Utility::ConfigurationGroup* objectConfig, Object3D* parent, OberonResourceManager& resourceManager, SceneGraph::DrawableGroup3D* drawables, ScriptGroup* scripts) {
     Object3D* object = new Object3D{parent};
 
-    /* Name */
-    std::string name = entityConfig->value("name");
-    object->addFeature<Entity>(name);
-
     /* Transformation */
-    if(!entityConfig->hasValue("transformation")) entityConfig->setValue<Matrix4>("transformation", Matrix4::scaling({1, 1, 1}));
-    Matrix4 transformation = entityConfig->value<Matrix4>("transformation");
+    if(!objectConfig->hasValue("transformation")) objectConfig->setValue<Matrix4>("transformation", Matrix4::scaling({1, 1, 1}));
+    Matrix4 transformation = objectConfig->value<Matrix4>("transformation");
     object->setTransformation(transformation);
 
-    for(auto featureConfig: entityConfig->groups("feature"))
+    for(auto featureConfig: objectConfig->groups("feature"))
         addFeatureFromConfig(featureConfig, object, resourceManager, drawables, scripts);
 
     return object;
@@ -85,18 +81,18 @@ void addFeatureFromConfig(Utility::ConfigurationGroup* featureConfig, Object3D* 
     }
 }
 
-void resetEntityFromConfig(Object3D* entity, Utility::ConfigurationGroup* entityConfig) {
+void resetObjectFromConfig(Object3D* object, Utility::ConfigurationGroup* objectConfig) {
     /* Transformation */
-    if(!entityConfig->hasValue("transformation")) entityConfig->setValue<Matrix4>("transformation", Matrix4::scaling({1, 1, 1}));
-    Matrix4 transformation = entityConfig->value<Matrix4>("transformation");
-    entity->setTransformation(transformation);
+    if(!objectConfig->hasValue("transformation")) objectConfig->setValue<Matrix4>("transformation", Matrix4::scaling({1, 1, 1}));
+    Matrix4 transformation = objectConfig->value<Matrix4>("transformation");
+    object->setTransformation(transformation);
 
-    for(auto featureConfig: entityConfig->groups("feature")) {
+    for(auto featureConfig: objectConfig->groups("feature")) {
         std::string type = featureConfig->value("type");
 
         if(type == "rectangle_shape") {
             /* Rectangle shape */
-            auto& features = entity->features();
+            auto& features = object->features();
             RectangleShape* rectangleShape = nullptr;
 
             for(auto& feature: features) {

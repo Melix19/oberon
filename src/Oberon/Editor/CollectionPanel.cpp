@@ -46,7 +46,7 @@ CollectionPanel::CollectionPanel(const std::string& path, OberonResourceManager&
     _camera->setAspectRatioPolicy(SceneGraph::AspectRatioPolicy::Extend);
 
     if(_collectionConfig.hasGroup("child"))
-        addEntityNodeChild(_collectionConfig.group("child"), &_rootNode);
+        addObjectNodeChild(_collectionConfig.group("child"), &_rootNode);
 }
 
 void CollectionPanel::drawViewport(Float deltaTime) {
@@ -108,27 +108,27 @@ void CollectionPanel::newFrame() {
     ImGui::End();
 }
 
-void CollectionPanel::addFeatureToEntity(Utility::ConfigurationGroup* entityConfig, Object3D* object) {
-    EntitySerializer::addFeatureFromConfig(entityConfig, object, _resourceManager, &_drawables, &_scripts);
+void CollectionPanel::addFeatureToObject(Utility::ConfigurationGroup* objectConfig, Object3D* object) {
+    Serializer::addFeatureFromConfig(objectConfig, object, _resourceManager, &_drawables, &_scripts);
 }
 
 void CollectionPanel::save() {
     _collectionConfig.save();
 }
 
-void CollectionPanel::addEntityNodeChild(Utility::ConfigurationGroup* entityConfig, EntityNode* parentNode) {
-    Object3D* entity = EntitySerializer::createEntityFromConfig(entityConfig, parentNode->entity(),
+void CollectionPanel::addObjectNodeChild(Utility::ConfigurationGroup* objectConfig, ObjectNode* parentNode) {
+    Object3D* object = Serializer::createObjectFromConfig(objectConfig, parentNode->object(),
         _resourceManager, &_drawables, &_scripts);
-    EntityNode* node = parentNode->addChild(entity, entityConfig);
+    ObjectNode* node = parentNode->addChild(object, objectConfig);
 
-    Math::Vector3<Rad> rotationRadians = Quaternion::fromMatrix(entityConfig->value<Matrix4>("transformation").
+    Math::Vector3<Rad> rotationRadians = Quaternion::fromMatrix(objectConfig->value<Matrix4>("transformation").
         rotation()).toEuler();
 
     node->setRotationDegree(Vector3{Float(Deg(rotationRadians.x())), Float(Deg(rotationRadians.y())),
         Float(Deg(rotationRadians.z()))});
 
-    for(auto childGroup : entityConfig->groups("child"))
-        addEntityNodeChild(childGroup, node);
+    for(auto childGroup : objectConfig->groups("child"))
+        addObjectNodeChild(childGroup, node);
 }
 
 CollectionPanel& CollectionPanel::startSimulation() {
@@ -143,15 +143,15 @@ CollectionPanel& CollectionPanel::startSimulation() {
 }
 
 CollectionPanel& CollectionPanel::stopSimulation() {
-    resetEntity(&_rootNode);
+    resetObject(&_rootNode);
 
     _isSimulating = false;
     return *this;
 }
 
-void CollectionPanel::resetEntity(EntityNode* node) {
-    EntitySerializer::resetEntityFromConfig(node->entity(), node->entityConfig());
+void CollectionPanel::resetObject(ObjectNode* node) {
+    Serializer::resetObjectFromConfig(node->object(), node->objectConfig());
 
     for(auto& child : node->children())
-        resetEntity(child.get());
+        resetObject(child.get());
 }

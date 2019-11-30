@@ -29,7 +29,7 @@
 #include <Magnum/GL/Texture.h>
 #include <Magnum/SceneGraph/Scene.h>
 
-#include "EntityNode.h"
+#include "ObjectNode.h"
 
 class CollectionPanel: public Containers::LinkedListItem<CollectionPanel> {
     public:
@@ -37,15 +37,15 @@ class CollectionPanel: public Containers::LinkedListItem<CollectionPanel> {
         void drawViewport(Float deltaTime);
         void newFrame();
 
-        void addEntityNodeChild(Utility::ConfigurationGroup* entityConfig, EntityNode* parentNode);
-        void addFeatureToEntity(Utility::ConfigurationGroup* entityConfig, Object3D* object);
+        void addObjectNodeChild(Utility::ConfigurationGroup* objectConfig, ObjectNode* parentNode);
+        void addFeatureToObject(Utility::ConfigurationGroup* objectConfig, Object3D* object);
         void save();
 
         const std::string& path() const { return _path; }
 
-        EntityNode& rootNode() { return _rootNode; }
+        ObjectNode& rootNode() { return _rootNode; }
 
-        std::vector<EntityNode*>& selectedNodes() { return _selectedNodes; }
+        std::vector<ObjectNode*>& selectedNodes() { return _selectedNodes; }
 
         bool isOpen() const { return _isOpen; }
         bool isFocused() const { return _isFocused; }
@@ -68,7 +68,7 @@ class CollectionPanel: public Containers::LinkedListItem<CollectionPanel> {
         CollectionPanel& stopSimulation();
 
     private:
-        void resetEntity(EntityNode* node);
+        void resetObject(ObjectNode* node);
 
         std::string _path;
         OberonResourceManager& _resourceManager;
@@ -77,8 +77,8 @@ class CollectionPanel: public Containers::LinkedListItem<CollectionPanel> {
         Vector2 _dpiScaleRatio;
 
         Utility::Configuration _collectionConfig;
-        EntityNode _rootNode;
-        std::vector<EntityNode*> _selectedNodes;
+        ObjectNode _rootNode;
+        std::vector<ObjectNode*> _selectedNodes;
 
         bool _isOpen;
         bool _isVisible;

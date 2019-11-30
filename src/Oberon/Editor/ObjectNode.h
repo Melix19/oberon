@@ -25,50 +25,50 @@
 #pragma once
 
 #include <Corrade/Containers/Pointer.h>
-#include <Oberon/Core/EntitySerializer.h>
+#include <Oberon/Core/Serializer.h>
 
-class EntityNode {
+class ObjectNode {
     public:
-        EntityNode(Object3D* entity, Utility::ConfigurationGroup* entityConfig): _entity(entity),
-            _entityConfig(entityConfig), _isSelected(false) {}
+        ObjectNode(Object3D* object, Utility::ConfigurationGroup* objectConfig): _object(object),
+            _objectConfig(objectConfig), _isSelected(false) {}
 
-        Object3D* entity() const { return _entity; }
+        Object3D* object() const { return _object; }
 
-        Utility::ConfigurationGroup* entityConfig() const { return _entityConfig; }
+        Utility::ConfigurationGroup* objectConfig() const { return _objectConfig; }
 
         bool isSelected() const { return _isSelected; }
 
-        EntityNode& setSelected(bool select) {
+        ObjectNode& setSelected(bool select) {
             _isSelected = select;
             return *this;
         }
 
         Vector3 rotationDegree() { return _rotationDegree; }
 
-        EntityNode& setRotationDegree(const Vector3& rotationDegree) {
+        ObjectNode& setRotationDegree(const Vector3& rotationDegree) {
             _rotationDegree = rotationDegree;
             return *this;
         }
 
-        EntityNode* addChild(Object3D* entity, Utility::ConfigurationGroup* entityConfig) {
-            auto child = Containers::pointer<EntityNode>(entity, entityConfig);
+        ObjectNode* addChild(Object3D* object, Utility::ConfigurationGroup* objectConfig) {
+            auto child = Containers::pointer<ObjectNode>(object, objectConfig);
             child->_parent = this;
 
             _children.push_back(std::move(child));
             return _children.back().get();
         }
 
-        EntityNode* parent() const { return _parent; }
+        ObjectNode* parent() const { return _parent; }
 
-        std::vector<Containers::Pointer<EntityNode>>& children() { return _children; }
+        std::vector<Containers::Pointer<ObjectNode>>& children() { return _children; }
 
     private:
-        Object3D* _entity;
-        Utility::ConfigurationGroup* _entityConfig;
+        Object3D* _object;
+        Utility::ConfigurationGroup* _objectConfig;
         bool _isSelected;
 
         Vector3 _rotationDegree;
 
-        EntityNode* _parent;
-        std::vector<Containers::Pointer<EntityNode>> _children;
+        ObjectNode* _parent;
+        std::vector<Containers::Pointer<ObjectNode>> _children;
 };

@@ -41,7 +41,7 @@ void Inspector::newFrame() {
 
     if(_panel && !_panel->selectedNodes().empty()) {
         auto& selectedNodes = _panel->selectedNodes();
-        EntityNode* entityNode = selectedNodes.front();
+        ObjectNode* objectNode = selectedNodes.front();
 
         if(ImGui::CollapsingHeader("Transform", ImGuiTreeNodeFlags_DefaultOpen)) {
             /* Translation */
@@ -49,10 +49,10 @@ void Inspector::newFrame() {
             ImGui::Text("Translation");
             ImGui::SameLine(columnWidth);
             ImGui::SetNextItemWidth(-1);
-            Vector3 translation = entityNode->entityConfig()->value<Matrix4>("transformation").translation();
+            Vector3 translation = objectNode->objectConfig()->value<Matrix4>("transformation").translation();
             if(ImGui::DragFloat3("##Translation", translation.data(), 0.5f)) {
-                entityNode->entity()->setTranslation(translation);
-                entityNode->entityConfig()->setValue("transformation", entityNode->entity()->transformation());
+                objectNode->object()->setTranslation(translation);
+                objectNode->objectConfig()->setValue("transformation", objectNode->object()->transformation());
             }
 
             /* Rotation */
@@ -60,14 +60,14 @@ void Inspector::newFrame() {
             ImGui::Text("Rotation");
             ImGui::SameLine(columnWidth);
             ImGui::SetNextItemWidth(-1);
-            Vector3 rotationDegree = entityNode->rotationDegree();
+            Vector3 rotationDegree = objectNode->rotationDegree();
             if(ImGui::DragFloat3("##Rotation", rotationDegree.data(), 0.5f)) {
-                entityNode->entity()->setRotation(
+                objectNode->object()->setRotation(
                     Quaternion::rotation(Rad(Deg(rotationDegree.z())), Vector3::zAxis())*
                     Quaternion::rotation(Rad(Deg(rotationDegree.y())), Vector3::yAxis())*
                     Quaternion::rotation(Rad(Deg(rotationDegree.x())), Vector3::xAxis()));
-                entityNode->entityConfig()->setValue("transformation", entityNode->entity()->transformation());
-                entityNode->setRotationDegree(rotationDegree);
+                objectNode->objectConfig()->setValue("transformation", objectNode->object()->transformation());
+                objectNode->setRotationDegree(rotationDegree);
             }
 
             /* Scaling */
@@ -75,20 +75,20 @@ void Inspector::newFrame() {
             ImGui::Text("Scaling");
             ImGui::SameLine(columnWidth);
             ImGui::SetNextItemWidth(-1);
-            Vector3 scaling = entityNode->entityConfig()->value<Matrix4>("transformation").scaling();
+            Vector3 scaling = objectNode->objectConfig()->value<Matrix4>("transformation").scaling();
             if(ImGui::DragFloat3("##Scaling", scaling.data(), 0.005f)) {
-                entityNode->entity()->setScaling(scaling);
-                entityNode->entityConfig()->setValue("transformation", entityNode->entity()->transformation());
+                objectNode->object()->setScaling(scaling);
+                objectNode->objectConfig()->setValue("transformation", objectNode->object()->transformation());
             }
         }
 
         /* Features */
-        for(auto featureConfig: entityNode->entityConfig()->groups("feature")) {
+        for(auto featureConfig: objectNode->objectConfig()->groups("feature")) {
             std::string type = featureConfig->value("type");
 
             if(type == "rectangle_shape") {
                 /* Rectangle shape */
-                auto& features = entityNode->entity()->features();
+                auto& features = objectNode->object()->features();
                 RectangleShape* rectangleShape = nullptr;
 
                 for(auto& feature: features) {
@@ -126,11 +126,11 @@ void Inspector::newFrame() {
 
                 if(!featureIsOpen) {
                     delete rectangleShape;
-                    entityNode->entityConfig()->removeGroup(featureConfig);
+                    objectNode->objectConfig()->removeGroup(featureConfig);
                 }
            } else if(type == "script") {
                 /* Script */
-                auto& features = entityNode->entity()->features();
+                auto& features = objectNode->object()->features();
                 Script* script = nullptr;
 
                 for(auto& feature: features) {
@@ -155,7 +155,7 @@ void Inspector::newFrame() {
 
                 if(!featureIsOpen) {
                     delete script;
-                    entityNode->entityConfig()->removeGroup(featureConfig);
+                    objectNode->objectConfig()->removeGroup(featureConfig);
                 }
            }
        }
@@ -165,17 +165,17 @@ void Inspector::newFrame() {
 
         if(ImGui::BeginPopup("FeaturePopup")) {
             if(ImGui::Selectable("Rectangle shape")) {
-                Utility::ConfigurationGroup* featureConfig = entityNode->entityConfig()->addGroup("feature");
+                Utility::ConfigurationGroup* featureConfig = objectNode->objectConfig()->addGroup("feature");
                 featureConfig->setValue("type", "rectangle_shape");
 
-                _panel->addFeatureToEntity(featureConfig, entityNode->entity());
+                _panel->addFeatureToObject(featureConfig, objectNode->object());
             }
 
             if(ImGui::Selectable("Script")) {
-                Utility::ConfigurationGroup* featureConfig = entityNode->entityConfig()->addGroup("feature");
+                Utility::ConfigurationGroup* featureConfig = objectNode->objectConfig()->addGroup("feature");
                 featureConfig->setValue("type", "script");
 
-                _panel->addFeatureToEntity(featureConfig, entityNode->entity());
+                _panel->addFeatureToObject(featureConfig, objectNode->object());
             }
 
             ImGui::EndPopup();

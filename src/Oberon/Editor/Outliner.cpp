@@ -33,7 +33,7 @@ void Outliner::newFrame() {
     bool showTree = false;
 
     if(_panel) {
-        EntityNode* rootNode = &_panel->rootNode();
+        ObjectNode* rootNode = &_panel->rootNode();
         showTree = !rootNode->children().empty() || rootNode == _editNode;
     }
 
@@ -49,7 +49,7 @@ void Outliner::newFrame() {
     }
 
     if(_panel) {
-        EntityNode* rootNode = &_panel->rootNode();
+        ObjectNode* rootNode = &_panel->rootNode();
 
         if(showTree) {
             ImGui::PopStyleVar();
@@ -58,15 +58,15 @@ void Outliner::newFrame() {
                 displayEditNode(rootNode);
             else {
                 ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0.0f, 0.0f));
-                displayEntityTree(rootNode->children().front().get());
+                displayObjectTree(rootNode->children().front().get());
                 ImGui::PopStyleVar();
             }
         } else {
-            ImGui::Text("Create root entity:");
+            ImGui::Text("Create root object:");
 
-            if(ImGui::Button("Entity")) {
+            if(ImGui::Button("Object")) {
                 _editNode = rootNode;
-                _editNodeMode = EditMode::EntityCreation;
+                _editNodeMode = EditMode::ObjectCreation;
                 _editNodeText = "";
                 _editNodeNeedsFocus = true;
             }
@@ -80,15 +80,15 @@ void Outliner::newFrame() {
 
         if(!selectedNodes.empty()) {
             for(auto& selectedNode : selectedNodes) {
-                delete selectedNode->entity();
+                delete selectedNode->object();
 
-                std::string name = selectedNode->entityConfig()->value("name");
-                EntityNode* parent =  selectedNode->parent();
+                std::string name = selectedNode->objectConfig()->value("name");
+                ObjectNode* parent =  selectedNode->parent();
 
-                parent->entityConfig()->removeGroup(selectedNode->entityConfig());
+                parent->objectConfig()->removeGroup(selectedNode->objectConfig());
 
                 auto found = std::find_if(parent->children().begin(), parent->children().end(),
-                    [&](Containers::Pointer<EntityNode>& p) { return p.get() == selectedNode; });
+                    [&](Containers::Pointer<ObjectNode>& p) { return p.get() == selectedNode; });
 
                 CORRADE_INTERNAL_ASSERT(found != parent->children().end());
 
@@ -102,7 +102,7 @@ void Outliner::newFrame() {
     }
 }
 
-void Outliner::displayEntityTree(EntityNode* node) {
+void Outliner::displayObjectTree(ObjectNode* node) {
     if(node == _editNode && _editNodeMode == EditMode::Rename) {
         displayEditNode(node);
         return;
@@ -110,7 +110,7 @@ void Outliner::displayEntityTree(EntityNode* node) {
 
     ImGuiTreeNodeFlags nodeFlags = ImGuiTreeNodeFlags_FramePadding | ImGuiTreeNodeFlags_SpanFullWidth |
         ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_OpenOnArrow;
-    std::string nodeName = node->entityConfig()->value("name");
+    std::string nodeName = node->objectConfig()->value("name");
     bool hasChildren = !node->children().empty();
 
     if(node->isSelected()) nodeFlags |= ImGuiTreeNodeFlags_Selected;
@@ -130,7 +130,7 @@ void Outliner::displayEntityTree(EntityNode* node) {
         if(isShortcutKey && ImGui::IsItemClicked(0)) {
             if(node->isSelected()) {
                 auto found = std::find_if(selectedNodes.begin(), selectedNodes.end(),
-                    [&](EntityNode* p) { return p == node; });
+                    [&](ObjectNode* p) { return p == node; });
 
                 CORRADE_INTERNAL_ASSERT(found != selectedNodes.end());
 
@@ -156,7 +156,7 @@ void Outliner::displayEntityTree(EntityNode* node) {
     if(ImGui::BeginPopupContextItem()) {
         if(ImGui::MenuItem("Add child")) {
             _editNode = node;
-            _editNodeMode = EditMode::EntityCreation;
+            _editNodeMode = EditMode::ObjectCreation;
             _editNodeText = "";
             _editNodeNeedsFocus = true;
         }
@@ -175,7 +175,7 @@ void Outliner::displayEntityTree(EntityNode* node) {
 
     if(nodeOpen) {
         for(auto& child : node->children())
-            displayEntityTree(child.get());
+            displayObjectTree(child.get());
 
         if(node == _editNode && _editNodeMode != EditMode::Rename)
             displayEditNode(node);
@@ -184,7 +184,7 @@ void Outliner::displayEntityTree(EntityNode* node) {
     }
 }
 
-void Outliner::displayEditNode(EntityNode* node) {
+void Outliner::displayEditNode(ObjectNode* node) {
     ImGui::Indent(ImGui::GetTreeNodeToLabelSpacing());
     ImGui::SetNextItemWidth(ImGui::GetWindowContentRegionWidth() -
         ImGui::GetTreeNodeToLabelSpacing());
@@ -192,20 +192,17 @@ void Outliner::displayEditNode(EntityNode* node) {
     /* Set focus in it's first frame. */
     if(_editNodeNeedsFocus) ImGui::SetKeyboardFocusHere();
 
-    if(ImGui::InputText("##EntityName", &_editNodeText, ImGuiInputTextFlags_EnterReturnsTrue)) {
+    if(ImGui::InputText("##ObjectName", &_editNodeText, ImGuiInputTextFlags_EnterReturnsTrue)) {
         switch (_editNodeMode) {
-            case EditMode::EntityCreation: {
-                /* Add the new EntityNode. */
-                Utility::ConfigurationGroup* childGroup = node->entityConfig()->addGroup("child");
+            case EditMode::ObjectCreation: {
+                /* Add the new ObjectNode. */
+                Utility::ConfigurationGroup* childGroup = node->objectConfig()->addGroup("child");
                 childGroup->setValue("name", _editNodeText);
 
-                _panel->addEntityNodeChild(childGroup, node);
+                _panel->addObjectNodeChild(childGroup, node);
             } break;
             case EditMode::Rename: {
-                node->entityConfig()->setValue("name", _editNodeText);
-
-                Entity* entity_cast = static_cast<Entity*>(node->entity()->features().first());
-                entity_cast->setName(_editNodeText);
+                node->objectConfig()->setValue("name", _editNodeText);
             } break;
         }
     }

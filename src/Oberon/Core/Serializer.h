@@ -24,7 +24,6 @@
 
 #pragma once
 
-#include "Entity.h"
 #include "RectangleShape.h"
 #include "Script.h"
 
@@ -38,11 +37,11 @@ typedef SceneGraph::Scene<SceneGraph::TranslationRotationScalingTransformation3D
 
 typedef ResourceManager<GL::Mesh, Shaders::Flat3D> OberonResourceManager;
 
-namespace EntitySerializer {
+namespace Serializer {
 
-Object3D* createEntityFromConfig(Utility::ConfigurationGroup* entityConfig, Object3D* parent, OberonResourceManager& resourceManager, SceneGraph::DrawableGroup3D* drawables, ScriptGroup* scripts);
+Object3D* createObjectFromConfig(Utility::ConfigurationGroup* objectConfig, Object3D* parent, OberonResourceManager& resourceManager, SceneGraph::DrawableGroup3D* drawables, ScriptGroup* scripts);
 void addFeatureFromConfig(Utility::ConfigurationGroup* featureConfig, Object3D* object, OberonResourceManager& resourceManager, SceneGraph::DrawableGroup3D* drawables, ScriptGroup* scripts);
 
-void resetEntityFromConfig(Object3D* entity, Utility::ConfigurationGroup* entityConfig);
+void resetObjectFromConfig(Object3D* object, Utility::ConfigurationGroup* objectConfig);
 
 }

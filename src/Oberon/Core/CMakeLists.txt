@@ -30,11 +30,10 @@ find_package(Magnum REQUIRED
 set_directory_properties(PROPERTIES CORRADE_USE_PEDANTIC_FLAGS ON)
 
 set(OberonCore_SRCS
-    EntitySerializer.cpp)
+    Serializer.cpp)
 
 set(OberonCore_HEADERS
-    Entity.h
-    EntitySerializer.h
+    Serializer.h
     RectangleShape.h
     Script.h)
 

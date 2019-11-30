@@ -46,10 +46,10 @@ set(OberonEditor_HEADERS
     CollectionPanel.h
     Console.h
     Editor.h
-    EntityNode.h
     Explorer.h
     FileNode.h
     Inspector.h
+    ObjectNode.h
     Outliner.h
     ProjectManager.h
     Themer.h)

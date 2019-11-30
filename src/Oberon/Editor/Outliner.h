@@ -38,18 +38,18 @@ class Outliner {
         }
 
     private:
-        void displayEntityTree(EntityNode* node);
-        void displayEditNode(EntityNode* node);
+        void displayObjectTree(ObjectNode* node);
+        void displayEditNode(ObjectNode* node);
 
         CollectionPanel* _panel;
         bool _deleteSelectedNodes;
 
         enum class EditMode {
-            EntityCreation,
+            ObjectCreation,
             Rename
         };
 
-        EntityNode* _editNode;
+        ObjectNode* _editNode;
         EditMode _editNodeMode;
         std::string _editNodeText;
         bool _editNodeNeedsFocus;
