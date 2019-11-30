@@ -37,6 +37,8 @@ Editor::Editor(const Arguments& arguments, const std::string& projectPath): Plat
                    .setWindowFlags(Configuration::WindowFlag::Maximized|Configuration::WindowFlag::Resizable)},
     _explorer(projectPath), _activePanel(nullptr)
 {
+    _maximizedWindowSize = windowSize();
+
     ImGui::CreateContext();
     Themer::styleColorsDark();
 
@@ -179,7 +181,7 @@ void Editor::drawEvent() {
                 if(panel.path() == path) found = &panel;
 
             if(found) found->setNeedsFocus(true);
-            else _collectionPanels.insert(new CollectionPanel(path, _resourceManager));
+            else _collectionPanels.insert(new CollectionPanel(path, _resourceManager, _maximizedWindowSize));
         }
     }
 

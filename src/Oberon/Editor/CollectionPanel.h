@@ -33,7 +33,7 @@
 
 class CollectionPanel: public Containers::LinkedListItem<CollectionPanel> {
     public:
-        CollectionPanel(const std::string& path, OberonResourceManager& resourceManager);
+        CollectionPanel(const std::string& path, OberonResourceManager& resourceManager, const Vector2i& maxWindowSize);
         void drawViewport(Float deltaTime);
         void newFrame();
 
@@ -86,6 +86,7 @@ class CollectionPanel: public Containers::LinkedListItem<CollectionPanel> {
 
         GL::Framebuffer _framebuffer{NoCreate};
         GL::Texture2D _viewportTexture;
+        Vector2i _viewportTextureSize;
 
         SceneGraph::DrawableGroup3D _drawables;
         ScriptGroup _scripts;

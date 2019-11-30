@@ -33,12 +33,13 @@
 
 namespace py = pybind11;
 
-CollectionPanel::CollectionPanel(const std::string& path, OberonResourceManager& resourceManager): _path(path),
-    _resourceManager(resourceManager), _collectionConfig{_path}, _rootNode(&_scene, &_collectionConfig),
-    _isOpen(true), _isVisible(true), _isFocused(false), _needsFocus(true), _needsDocking(true), _isSimulating(false)
+CollectionPanel::CollectionPanel(const std::string& path, OberonResourceManager& resourceManager, const Vector2i& maxWindowSize):
+    _path(path), _resourceManager(resourceManager), _collectionConfig{_path}, _rootNode(&_scene, &_collectionConfig),
+    _isOpen(true), _isVisible(true), _isFocused(false), _needsFocus(true), _needsDocking(true), _isSimulating(false),
+    _viewportTextureSize(maxWindowSize)
 {
-    _viewportTexture.setStorage(1, GL::TextureFormat::RGBA8, {1920, 1080});
-    _framebuffer = GL::Framebuffer{{{}, _viewportTexture.imageSize(0)}};
+    _viewportTexture.setStorage(1, GL::TextureFormat::RGBA8, _viewportTextureSize);
+    _framebuffer = GL::Framebuffer{{}};
     _framebuffer.attachTexture(GL::Framebuffer::ColorAttachment{0}, _viewportTexture, 0);
 
     _cameraObject = new Object3D{&_scene};
@@ -80,6 +81,8 @@ void CollectionPanel::drawViewport(Float deltaTime) {
 void CollectionPanel::newFrame() {
     std::string filename = Utility::Directory::filename(_path);
 
+    ImGui::SetNextWindowSizeConstraints(ImVec2(), ImVec2(_viewportTextureSize.x(), _viewportTextureSize.y()));
+
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
     _isVisible = ImGui::Begin(filename.c_str(), &_isOpen, ImGuiWindowFlags_NoScrollbar |
         ImGuiWindowFlags_NoScrollWithMouse);
@@ -93,13 +96,15 @@ void CollectionPanel::newFrame() {
         return;
     }
 
-    Vector2 contentSize{ImGui::GetWindowContentRegionMax().x - ImGui::GetWindowContentRegionMin().x,
-        ImGui::GetWindowContentRegionMax().y - ImGui::GetWindowContentRegionMin().y};
+    ImGui::SetScrollY(_viewportTextureSize.y());
+    ImGuiIntegration::image(_viewportTexture, Vector2{_viewportTextureSize});
 
-    _camera->setProjectionMatrix(Matrix4::orthographicProjection(contentSize, -1000.0f, 1000.0f))
-        .setViewport(Vector2i(contentSize));
+    Vector2i windowContentSize{Int(ImGui::GetWindowContentRegionMax().x - ImGui::GetWindowContentRegionMin().x),
+        Int(ImGui::GetWindowContentRegionMax().y - ImGui::GetWindowContentRegionMin().y)};
 
-    ImGuiIntegration::image(_viewportTexture, contentSize);
+    _framebuffer.setViewport({{}, windowContentSize});
+    _camera->setProjectionMatrix(Matrix4::orthographicProjection(Vector2{windowContentSize}, -1000.0f, 1000.0f))
+        .setViewport(windowContentSize);
 
     ImGui::End();
 }

@@ -57,13 +57,14 @@ class Editor: public Platform::Application {
         Timeline _timeline;
         ImGuiIntegration::Context _imgui{NoCreate};
         OberonResourceManager _resourceManager;
-        py::scoped_interpreter pyInterpreter{};
+        py::scoped_interpreter _pyInterpreter{};
 
         Console _console;
         Explorer _explorer;
         Inspector _inspector;
         Outliner _outliner;
 
+        Vector2i _maximizedWindowSize;
         Containers::LinkedList<CollectionPanel> _collectionPanels;
         CollectionPanel* _activePanel;
 };
