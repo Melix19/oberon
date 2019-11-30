@@ -54,7 +54,10 @@ class Editor: public Platform::Application {
         void mouseScrollEvent(MouseScrollEvent& event) override;
         void textInputEvent(TextInputEvent& event) override;
 
+        Vector2i _maximizedWindowSize;
+        Vector2 _dpiScaleRatio;
         Timeline _timeline;
+
         ImGuiIntegration::Context _imgui{NoCreate};
         OberonResourceManager _resourceManager;
         py::scoped_interpreter _pyInterpreter{};
@@ -64,7 +67,6 @@ class Editor: public Platform::Application {
         Inspector _inspector;
         Outliner _outliner;
 
-        Vector2i _maximizedWindowSize;
         Containers::LinkedList<CollectionPanel> _collectionPanels;
         CollectionPanel* _activePanel;
 };
