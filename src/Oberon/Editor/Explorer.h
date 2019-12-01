@@ -34,7 +34,9 @@ class Explorer {
         FileNode* clickedNode() const { return _clickedNode; }
 
     private:
-        void displayFileTree(FileNode* node);
+        void displayTree(FileNode* node, bool isRoot);
+
+        bool displayFileNode(FileNode* node);
         void displayEditNode(FileNode* node);
 
         void updateFileNodeChildren(FileNode* node);

@@ -41,7 +41,7 @@ void Outliner::newFrame() {
     }
 
     ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0.0f, 0.0f));
-    displayObjectTree(_panel->rootNode(), true);
+    displayTree(_panel->rootNode(), true);
     ImGui::PopStyleVar();
 
     ImGui::End();
@@ -73,22 +73,41 @@ void Outliner::newFrame() {
     }
 }
 
-void Outliner::displayObjectTree(ObjectNode* node, bool isRoot) {
-    if(node == _editNode && _editNodeMode == EditMode::Rename) {
-        displayEditNode(node);
-        return;
-    }
+void Outliner::displayTree(ObjectNode* node, bool isRoot) {
+    bool isEditNode = (node == _editNode);
+    bool isOpen = true;
 
-    ImGuiTreeNodeFlags nodeFlags = ImGuiTreeNodeFlags_FramePadding | ImGuiTreeNodeFlags_SpanFullWidth |
-        ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_OpenOnArrow;
+    if(isEditNode && _editNodeMode == EditMode::Rename)
+        displayEditNode(node);
+    else
+        isOpen = displayObjectNode(node, isRoot);
+
+    if(isOpen) {
+        for(auto& child : node->children())
+            displayTree(child.get(), false);
+
+        if(isEditNode && _editNodeMode != EditMode::Rename)
+            displayEditNode(node);
+
+        if(isEditNode)
+            ImGui::Unindent(ImGui::GetTreeNodeToLabelSpacing());
+
+        if(!isEditNode || (isEditNode && _editNodeMode != EditMode::Rename))
+            ImGui::TreePop();
+    }
+}
+
+bool Outliner::displayObjectNode(ObjectNode* node, bool isRoot) {
     std::string nodeName = node->objectConfig()->value("name");
+    ImGuiTreeNodeFlags nodeFlags = ImGuiTreeNodeFlags_FramePadding |
+        ImGuiTreeNodeFlags_SpanFullWidth | ImGuiTreeNodeFlags_DefaultOpen;
     bool hasChildren = !node->children().empty();
 
     if(node->isSelected()) nodeFlags |= ImGuiTreeNodeFlags_Selected;
 
     if(!hasChildren) nodeFlags |= ImGuiTreeNodeFlags_Leaf;
 
-    bool nodeOpen = ImGui::TreeNodeEx(nodeName.c_str(), nodeFlags);
+    bool isOpen = ImGui::TreeNodeEx(nodeName.c_str(), nodeFlags);
 
     if(ImGui::IsItemClicked(0) || ImGui::IsItemClicked(1)) {
         auto& selectedNodes = _panel->selectedNodes();
@@ -109,18 +128,16 @@ void Outliner::displayObjectTree(ObjectNode* node, bool isRoot) {
             } else selectedNodes.push_back(node);
 
             node->setSelected(!node->isSelected());
-        } else {
-            if(!node->isSelected() || ImGui::IsItemClicked(0)) {
-                if(!selectedNodes.empty()) {
-                    for(auto& selectedNode : selectedNodes)
-                        selectedNode->setSelected(false);
+        } else if(!node->isSelected() || ImGui::IsItemClicked(0)) {
+            if(!selectedNodes.empty()) {
+                for(auto& selectedNode : selectedNodes)
+                    selectedNode->setSelected(false);
 
-                    selectedNodes.clear();
-                }
-
-                selectedNodes.push_back(node);
-                node->setSelected(true);
+                selectedNodes.clear();
             }
+
+            selectedNodes.push_back(node);
+            node->setSelected(true);
         }
     }
 
@@ -144,15 +161,7 @@ void Outliner::displayObjectTree(ObjectNode* node, bool isRoot) {
         ImGui::EndPopup();
     }
 
-    if(nodeOpen) {
-        for(auto& child : node->children())
-            displayObjectTree(child.get(), false);
-
-        if(node == _editNode && _editNodeMode != EditMode::Rename)
-            displayEditNode(node);
-
-        ImGui::TreePop();
-    }
+    return isOpen;
 }
 
 void Outliner::displayEditNode(ObjectNode* node) {
@@ -184,6 +193,4 @@ void Outliner::displayEditNode(ObjectNode* node) {
         otherwise it will be deleted right away. */
     if(_editNodeNeedsFocus) _editNodeNeedsFocus = false;
     else if(!ImGui::IsItemActive()) _editNode = nullptr;
-
-    ImGui::Unindent(ImGui::GetTreeNodeToLabelSpacing());
 }

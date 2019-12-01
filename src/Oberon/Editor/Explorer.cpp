@@ -79,13 +79,7 @@ void Explorer::newFrame() {
     }
 
     ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0.0f, 0.0f));
-
-    for(auto& child : _rootNode.children())
-        displayFileTree(child.get());
-
-    if(&_rootNode == _editNode && _editNodeMode != EditMode::Rename)
-        displayEditNode(&_rootNode);
-
+    displayTree(&_rootNode, true);
     ImGui::PopStyleVar();
 
     ImGui::End();
@@ -110,22 +104,43 @@ void Explorer::newFrame() {
     }
 }
 
-void Explorer::displayFileTree(FileNode* node) {
-    if(node == _editNode && _editNodeMode == EditMode::Rename) {
-        displayEditNode(node);
-        return;
+void Explorer::displayTree(FileNode* node, bool isRoot) {
+    bool isEditNode = (node == _editNode);
+    bool isOpen = true;
+
+    if(!isRoot) {
+        if(isEditNode && _editNodeMode == EditMode::Rename)
+            displayEditNode(node);
+        else
+            isOpen = displayFileNode(node);
     }
 
+    if(isOpen) {
+        for(auto& child : node->children())
+            displayTree(child.get(), false);
+
+        if(isEditNode && _editNodeMode != EditMode::Rename)
+            displayEditNode(node);
+
+        if(isEditNode)
+            ImGui::Unindent(ImGui::GetTreeNodeToLabelSpacing());
+
+        if(!isRoot && (!isEditNode || (isEditNode && _editNodeMode != EditMode::Rename)))
+            ImGui::TreePop();
+    }
+}
+
+bool Explorer::displayFileNode(FileNode* node) {
+    std::string nodeName = Utility::Directory::filename(node->path());
     ImGuiTreeNodeFlags nodeFlags = ImGuiTreeNodeFlags_FramePadding |
         ImGuiTreeNodeFlags_SpanFullWidth;
-    std::string nodeName = Utility::Directory::filename(node->path());
     bool isDirectory = Utility::Directory::isDirectory(node->path());
 
     if(node->isSelected()) nodeFlags |= ImGuiTreeNodeFlags_Selected;
 
     if(!isDirectory) nodeFlags |= ImGuiTreeNodeFlags_Leaf;
 
-    bool nodeOpen = ImGui::TreeNodeEx(nodeName.c_str(), nodeFlags);
+    bool isOpen = ImGui::TreeNodeEx(nodeName.c_str(), nodeFlags);
 
     if(ImGui::IsItemClicked(0) || ImGui::IsItemClicked(1)) {
         ImGuiIO& io = ImGui::GetIO();
@@ -145,18 +160,16 @@ void Explorer::displayFileTree(FileNode* node) {
             } else _selectedNodes.push_back(node);
 
             node->setSelected(!node->isSelected());
-        } else {
-            if(!node->isSelected() || ImGui::IsItemClicked(0)) {
-                if(!_selectedNodes.empty()) {
-                    for(auto& selectedNode : _selectedNodes)
-                        selectedNode->setSelected(false);
+        } else if(!node->isSelected() || ImGui::IsItemClicked(0)) {
+            if(!_selectedNodes.empty()) {
+                for(auto& selectedNode : _selectedNodes)
+                    selectedNode->setSelected(false);
 
-                    _selectedNodes.clear();
-                }
-
-                _selectedNodes.push_back(node);
-                node->setSelected(true);
+                _selectedNodes.clear();
             }
+
+            _selectedNodes.push_back(node);
+            node->setSelected(true);
 
             if(ImGui::IsItemClicked(0)) _clickedNode = node;
         }
@@ -202,22 +215,13 @@ void Explorer::displayFileTree(FileNode* node) {
         ImGui::EndPopup();
     }
 
-    if(nodeOpen) {
-        for(auto& child : node->children())
-            displayFileTree(child.get());
-
-        if(node == _editNode && _editNodeMode != EditMode::Rename)
-            displayEditNode(node);
-
-        ImGui::TreePop();
-    }
+    return isOpen;
 }
 
 void Explorer::displayEditNode(FileNode* node) {
     ImGui::Indent(ImGui::GetTreeNodeToLabelSpacing());
     ImGui::SetNextItemWidth(ImGui::GetWindowContentRegionWidth() -
         ImGui::GetTreeNodeToLabelSpacing());
-    bool success = false;
 
     /* Set focus in it's first frame. */
     if(_editNodeNeedsFocus) ImGui::SetKeyboardFocusHere();
@@ -226,7 +230,7 @@ void Explorer::displayEditNode(FileNode* node) {
         switch (_editNodeMode) {
             case EditMode::FileCreation: {
                 std::string newPath = Utility::Directory::join(node->path(), _editNodeText);
-                success = Utility::Directory::writeString(newPath, "");
+                bool success = Utility::Directory::writeString(newPath, "");
 
                 if(success) {
                     node->addChild(newPath);
@@ -236,7 +240,7 @@ void Explorer::displayEditNode(FileNode* node) {
             } break;
             case EditMode::FolderCreation: {
                 std::string newPath = Utility::Directory::join(node->path(), _editNodeText);
-                success = Utility::Directory::mkpath(newPath);
+                bool success = Utility::Directory::mkpath(newPath);
 
                 if(success) {
                     node->addChild(newPath);
@@ -247,7 +251,7 @@ void Explorer::displayEditNode(FileNode* node) {
             case EditMode::Rename: {
                 std::string newPath = Utility::Directory::join(node->parent()->path(),
                     _editNodeText);
-                success = Utility::Directory::move(node->path(), newPath);
+                bool success = Utility::Directory::move(node->path(), newPath);
 
                 if(success) {
                     node->setPath(newPath);
@@ -261,17 +265,7 @@ void Explorer::displayEditNode(FileNode* node) {
     /* In the first frame, delay the focus check on the next frame
         otherwise it will be deleted right away. */
     if(_editNodeNeedsFocus) _editNodeNeedsFocus = false;
-    else if(!ImGui::IsItemActive()) {
-        if(!success && _editNodeMode != EditMode::Rename) {
-            /* The EditNode is always the last in creation mode. */
-            auto& parentChildren = node->parent()->children();
-            parentChildren.erase(parentChildren.end() - 1);
-        }
-
-        _editNode = nullptr;
-    }
-
-    ImGui::Unindent(ImGui::GetTreeNodeToLabelSpacing());
+    else if(!ImGui::IsItemActive()) _editNode = nullptr;
 }
 
 void Explorer::updateFileNodeChildren(FileNode* node) {
