@@ -37,6 +37,8 @@ CollectionPanel::CollectionPanel(const std::string& path, OberonResourceManager&
     _path(path), _resourceManager(resourceManager), _viewportTextureSize(viewportTextureSize), _dpiScaleRatio(dpiScaleRatio), _collectionConfig{_path},
     _isOpen(true), _isVisible(true), _isFocused(false), _needsFocus(true), _needsDocking(true), _isSimulating(false)
 {
+    _name = Utility::Directory::filename(_path);
+
     _viewportTexture.setStorage(1, GL::TextureFormat::RGBA8, _viewportTextureSize*_dpiScaleRatio);
     _framebuffer = GL::Framebuffer{{}};
     _framebuffer.attachTexture(GL::Framebuffer::ColorAttachment{0}, _viewportTexture, 0);
@@ -85,12 +87,10 @@ void CollectionPanel::drawViewport(Float deltaTime) {
 }
 
 void CollectionPanel::newFrame() {
-    std::string filename = Utility::Directory::filename(_path);
-
     ImGui::SetNextWindowSizeConstraints(ImVec2(), ImVec2(_viewportTextureSize.x(), _viewportTextureSize.y()));
 
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
-    _isVisible = ImGui::Begin(filename.c_str(), &_isOpen, ImGuiWindowFlags_NoScrollbar |
+    _isVisible = ImGui::Begin(_name.c_str(), &_isOpen, ImGuiWindowFlags_NoScrollbar |
         ImGuiWindowFlags_NoScrollWithMouse);
     ImGui::PopStyleVar();
 

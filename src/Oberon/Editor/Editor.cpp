@@ -162,6 +162,9 @@ void Editor::drawEvent() {
         ImGui::DockBuilderDockWindow("Outliner", dockRightId);
         ImGui::DockBuilderDockWindow("Inspector", dockRightBottomId);
 
+        for(auto& panel: _collectionPanels)
+            ImGui::DockBuilderDockWindow(panel.name().c_str(), dockMainId);
+
         ImGui::DockBuilderFinish(dockSpaceId);
     }
 

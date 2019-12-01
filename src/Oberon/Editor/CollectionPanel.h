@@ -42,6 +42,7 @@ class CollectionPanel: public Containers::LinkedListItem<CollectionPanel> {
         void save();
 
         const std::string& path() const { return _path; }
+        const std::string& name() const { return _name; }
 
         ObjectNode* rootNode() { return _rootNode.get(); }
 
@@ -76,6 +77,7 @@ class CollectionPanel: public Containers::LinkedListItem<CollectionPanel> {
         Vector2i _viewportTextureSize;
         Vector2 _dpiScaleRatio;
 
+        std::string _name;
         Utility::Configuration _collectionConfig;
         Containers::Pointer<ObjectNode> _rootNode;
         std::vector<ObjectNode*> _selectedNodes;
