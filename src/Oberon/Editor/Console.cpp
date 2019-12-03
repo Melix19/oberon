@@ -29,5 +29,12 @@
 void Console::newFrame() {
     ImGui::Begin("Console");
 
+    for(auto& s: _strings)
+        ImGui::Text("%s", s.c_str());
+
     ImGui::End();
+}
+
+void Console::addString(const std::string& s) {
+    _strings.push_back(s);
 }

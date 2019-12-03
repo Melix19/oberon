@@ -22,4 +22,4 @@
 #   SOFTWARE.
 #
 
-add_custom_target(OberonPython SOURCES Python.h)
+add_custom_target(OberonPython SOURCES PyStdErrOutStreamRedirect.h Python.h)

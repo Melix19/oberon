@@ -171,6 +171,14 @@ void Editor::drawEvent() {
     ImGui::DockSpace(dockSpaceId, ImVec2(0.0f, 0.0f), ImGuiDockNodeFlags_PassthruCentralNode);
     ImGui::End();
 
+    std::string pyOut = _pyOutputRedirect.stdoutString();
+    if(!pyOut.empty())
+        _console.addString(pyOut);
+
+    std::string pyErr = _pyOutputRedirect.stderrString();
+    if(!pyErr.empty())
+        _console.addString(pyErr);
+
     _console.newFrame();
     _explorer.newFrame();
 

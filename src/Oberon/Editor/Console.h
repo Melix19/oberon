@@ -24,7 +24,14 @@
 
 #pragma once
 
+#include <string>
+#include <vector>
+
 class Console {
     public:
         void newFrame();
+        void addString(const std::string& s);
+
+    private:
+        std::vector<std::string> _strings;
 };
