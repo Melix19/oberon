@@ -27,7 +27,7 @@
 #include "Themer.h"
 
 #include <Magnum/ImGuiIntegration/Context.hpp>
-#include <Magnum/Platform/Sdl2Application.h>
+#include <Magnum/Platform/GlfwApplication.h>
 
 using namespace Magnum;
 

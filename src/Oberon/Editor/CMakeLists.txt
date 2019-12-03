@@ -23,7 +23,7 @@
 #
 
 find_package(ImGui REQUIRED SourcesMiscCpp)
-find_package(Magnum REQUIRED GL Sdl2Application)
+find_package(Magnum REQUIRED GL GlfwApplication)
 
 set_directory_properties(PROPERTIES CORRADE_USE_PEDANTIC_FLAGS ON)
 

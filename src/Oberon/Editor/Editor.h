@@ -31,7 +31,7 @@
 #include "Outliner.h"
 
 #include <Magnum/ImGuiIntegration/Context.hpp>
-#include <Magnum/Platform/Sdl2Application.h>
+#include <Magnum/Platform/GlfwApplication.h>
 #include <Oberon/Bindings/Oberon/PyStdErrOutStreamRedirect.h>
 
 class Editor: public Platform::Application {

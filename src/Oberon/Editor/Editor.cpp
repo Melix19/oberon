@@ -67,7 +67,7 @@ Editor::Editor(const Arguments& arguments, const std::string& projectPath): Plat
     GL::Renderer::setBlendFunction(GL::Renderer::BlendFunction::SourceAlpha,
         GL::Renderer::BlendFunction::OneMinusSourceAlpha);
 
-    setMinimalLoopPeriod(16);
+    setSwapInterval(1);
 
     setup(projectPath);
 }

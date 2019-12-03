@@ -61,7 +61,7 @@ ProjectManager::ProjectManager(const Arguments& arguments): Platform::Applicatio
     GL::Renderer::setBlendFunction(GL::Renderer::BlendFunction::SourceAlpha,
         GL::Renderer::BlendFunction::OneMinusSourceAlpha);
 
-    setMinimalLoopPeriod(16);
+    setSwapInterval(1);
 }
 
 void ProjectManager::drawEvent() {
@@ -77,7 +77,8 @@ void ProjectManager::drawEvent() {
 
     ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoTitleBar |
         ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove |
-        ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus | ImGuiWindowFlags_NoBackground;
+        ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus |
+        ImGuiWindowFlags_NoBackground;
 
     ImGuiViewport* viewport = ImGui::GetMainViewport();
     ImGui::SetNextWindowPos(viewport->Pos);
@@ -102,7 +103,7 @@ void ProjectManager::drawEvent() {
         ImGui::DockBuilderDockWindow("Main", dockMainId);
         ImGui::DockBuilderDockWindow("List", dockRightId);
 
-        ImGui::DockBuilderFinish(dockSpaceId);
+        ImGui::DockBuilderFinish(dockMainId);
     }
 
     ImGui::DockSpace(dockSpaceId, ImVec2(0.0f, 0.0f), ImGuiDockNodeFlags_PassthruCentralNode);
