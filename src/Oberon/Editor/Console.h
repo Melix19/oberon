@@ -31,6 +31,7 @@ class Console {
     public:
         void newFrame();
         void addString(const std::string& s);
+        void resetStrings();
 
     private:
         std::vector<std::string> _strings;

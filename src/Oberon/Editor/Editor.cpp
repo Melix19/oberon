@@ -108,6 +108,7 @@ void Editor::drawEvent() {
 
         if(!_activePanel || !_activePanel->isSimulating()) {
             if(ImGui::Selectable("Play", false, 0, size) && _activePanel) {
+                _console.resetStrings();
                 _timeline.start();
                 _activePanel->startSimulation();
             }

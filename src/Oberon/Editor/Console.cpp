@@ -32,9 +32,15 @@ void Console::newFrame() {
     for(auto& s: _strings)
         ImGui::Text("%s", s.c_str());
 
+    ImGui::SetScrollHereY();
+
     ImGui::End();
 }
 
 void Console::addString(const std::string& s) {
     _strings.push_back(s);
+}
+
+void Console::resetStrings() {
+    _strings.clear();
 }
