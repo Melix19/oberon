@@ -29,9 +29,6 @@
 #include <Corrade/Utility/Directory.h>
 #include <Magnum/GL/TextureFormat.h>
 #include <Magnum/ImGuiIntegration/Widgets.h>
-#include <pybind11/embed.h>
-
-namespace py = pybind11;
 
 CollectionPanel::CollectionPanel(const std::string& path, OberonResourceManager& resourceManager, const Vector2i& viewportTextureSize, const Vector2& dpiScaleRatio):
     _path(path), _resourceManager(resourceManager), _viewportTextureSize(viewportTextureSize), _dpiScaleRatio(dpiScaleRatio), _collectionConfig{_path},
@@ -69,8 +66,7 @@ void CollectionPanel::drawViewport(Float deltaTime) {
     if(_isSimulating) {
         for(std::size_t i = 0; i != _scripts.size(); ++i) {
             Script& script = _scripts[i];
-            py::module module = py::module::import(script.scriptPath().c_str());
-            module.attr("update")(&script.object(), deltaTime);
+            script.pyModule().attr("update")(&script.object(), deltaTime);
         }
     }
 
@@ -140,13 +136,23 @@ void CollectionPanel::updateObjectNodeChildren(ObjectNode* node) {
 }
 
 CollectionPanel& CollectionPanel::startSimulation() {
-    for(std::size_t i = 0; i != _scripts.size(); ++i) {
-        Script& script = _scripts[i];
-        py::module module = py::module::import(script.scriptPath().c_str());
-        module.attr("init")(&script.object());
-    }
+    try {
+        for(std::size_t i = 0; i != _scripts.size(); ++i) {
+            Script& script = _scripts[i];
 
-    _isSimulating = true;
+            if(script.pyModule())
+                script.pyModule().reload();
+            else
+                script.pyModule() = py::module::import(script.scriptPath().c_str());
+
+            script.pyModule().attr("init")(&script.object());
+        }
+
+        _isSimulating = true;
+    } catch (py::error_already_set const &pythonErr)
+        py::print(pythonErr.what());
+
+
     return *this;
 }
 

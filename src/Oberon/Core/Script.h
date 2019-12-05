@@ -27,8 +27,10 @@
 #include <string>
 
 #include <Magnum/SceneGraph/AbstractGroupedFeature.h>
+#include <pybind11/pybind11.h>
 
 using namespace Magnum;
+namespace py = pybind11;
 
 class Script;
 typedef SceneGraph::FeatureGroup3D<Script> ScriptGroup;
@@ -44,6 +46,9 @@ class Script: public SceneGraph::AbstractGroupedFeature3D<Script> {
             return *this;
         }
 
+        py::module& pyModule() { return _pyModule; }
+
     private:
         std::string _scriptPath;
+        py::module _pyModule;
 };
