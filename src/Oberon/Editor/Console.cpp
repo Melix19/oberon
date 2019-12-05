@@ -32,7 +32,8 @@ void Console::newFrame() {
     for(auto& s: _strings)
         ImGui::Text("%s", s.c_str());
 
-    ImGui::SetScrollHereY();
+    if(ImGui::GetScrollY() == ImGui::GetScrollMaxY())
+        ImGui::SetScrollHereY();
 
     ImGui::End();
 }
