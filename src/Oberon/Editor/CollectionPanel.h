@@ -83,11 +83,14 @@ class CollectionPanel: public Containers::LinkedListItem<CollectionPanel> {
         std::vector<ObjectNode*> _selectedNodes;
 
         bool _isOpen;
-        bool _isVisible;
         bool _isFocused;
+        bool _isSimulating;
+
+        bool _isVisible;
+        bool _isDragging;
+
         bool _needsFocus;
         bool _needsDocking;
-        bool _isSimulating;
 
         GL::Framebuffer _framebuffer{NoCreate};
         GL::Texture2D _viewportTexture;

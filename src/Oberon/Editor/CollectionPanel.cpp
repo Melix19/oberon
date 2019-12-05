@@ -32,7 +32,7 @@
 
 CollectionPanel::CollectionPanel(const std::string& path, OberonResourceManager& resourceManager, const Vector2i& viewportTextureSize, const Vector2& dpiScaleRatio):
     _path(path), _resourceManager(resourceManager), _viewportTextureSize(viewportTextureSize), _dpiScaleRatio(dpiScaleRatio), _collectionConfig{_path},
-    _isOpen(true), _isVisible(true), _isFocused(false), _needsFocus(true), _needsDocking(true), _isSimulating(false)
+    _isOpen(true), _isFocused(false), _isSimulating(false), _isVisible(true), _isDragging(false), _needsFocus(true), _needsDocking(true)
 {
     _name = Utility::Directory::filename(_path);
 
@@ -107,6 +107,16 @@ void CollectionPanel::newFrame() {
     _framebuffer.setViewport({{}, windowContentSize*_dpiScaleRatio});
     _camera->setProjectionMatrix(Matrix4::orthographicProjection(Vector2{windowContentSize}, -1000.0f, 1000.0f))
         .setViewport(windowContentSize);
+
+    if(ImGui::IsWindowHovered() && ImGui::IsMouseClicked(2))
+        _isDragging = true;
+    else if(ImGui::IsMouseReleased(2))
+        _isDragging = false;
+
+    if(_isDragging) {
+        ImGuiIO& io = ImGui::GetIO();
+        _cameraObject->translate({-io.MouseDelta.x, io.MouseDelta.y, 0.0f});
+    }
 
     ImGui::End();
 }
