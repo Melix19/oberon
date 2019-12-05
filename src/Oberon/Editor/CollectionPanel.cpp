@@ -149,8 +149,9 @@ CollectionPanel& CollectionPanel::startSimulation() {
         }
 
         _isSimulating = true;
-    } catch (py::error_already_set const &pythonErr)
+    } catch (py::error_already_set const &pythonErr) {
         py::print(pythonErr.what());
+    }
 
 
     return *this;
