@@ -163,18 +163,28 @@ void Inspector::newFrame() {
         ImGui::OpenPopup("FeaturePopup");
 
     if(ImGui::BeginPopup("FeaturePopup")) {
-        if(ImGui::Selectable("Rectangle shape")) {
-            Utility::ConfigurationGroup* featureConfig = objectNode->objectConfig()->addGroup("feature");
-            featureConfig->setValue("type", "rectangle_shape");
+        std::string newFeatureType;
 
-            _panel->addFeatureToObject(featureConfig, objectNode->object());
-        }
+        if(ImGui::Selectable("Rectangle shape"))
+            newFeatureType = "rectangle_shape";
 
-        if(ImGui::Selectable("Script")) {
-            Utility::ConfigurationGroup* featureConfig = objectNode->objectConfig()->addGroup("feature");
-            featureConfig->setValue("type", "script");
+        if(ImGui::Selectable("Script"))
+            newFeatureType = "script";
 
-            _panel->addFeatureToObject(featureConfig, objectNode->object());
+        if(!newFeatureType.empty()) {
+            bool featureAlreadyPresent = false;
+
+            for(auto featureConfig: objectNode->objectConfig()->groups("feature")) {
+                std::string type = featureConfig->value("type");
+                if(type == newFeatureType) featureAlreadyPresent = true;
+            }
+
+            if(!featureAlreadyPresent) {
+                Utility::ConfigurationGroup* featureConfig = objectNode->objectConfig()->addGroup("feature");
+                featureConfig->setValue("type", newFeatureType);
+
+                _panel->addFeatureToObject(featureConfig, objectNode->object());
+            }
         }
 
         ImGui::EndPopup();
