@@ -24,7 +24,7 @@
 
 #pragma once
 
-#include "RectangleShape.h"
+#include "Mesh.h"
 #include "Script.h"
 
 #include <Corrade/Utility/ConfigurationGroup.h>

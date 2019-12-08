@@ -43,7 +43,7 @@ Object3D* createObjectFromConfig(Utility::ConfigurationGroup* objectConfig, Obje
 void addFeatureFromConfig(Utility::ConfigurationGroup* featureConfig, Object3D* object, OberonResourceManager& resourceManager, SceneGraph::DrawableGroup3D* drawables, ScriptGroup* scripts, UnsignedByte objectId) {
     std::string type = featureConfig->value("type");
 
-    if(type == "rectangle_shape") {
+    if(type == "mesh") {
         /* Size */
         if(!featureConfig->hasValue("size")) featureConfig->setValue<Vector2>("size", {200, 100});
         Vector2 size = featureConfig->value<Vector2>("size");
@@ -60,11 +60,11 @@ void addFeatureFromConfig(Utility::ConfigurationGroup* featureConfig, Object3D* 
         Resource<Shaders::Flat3D> shaderResource = resourceManager.get<Shaders::Flat3D>("flat3d");
         CORRADE_INTERNAL_ASSERT(shaderResource);
 
-        /* Rectangle shape */
-        RectangleShape& rect = object->addFeature<RectangleShape>(drawables, *meshResource, *shaderResource, size, color);
+        /* Mesh */
+        Mesh& mesh = object->addFeature<Mesh>(drawables, *meshResource, *shaderResource, size, color);
 
         if(objectId > 0)
-            rect.setObjectId(objectId);
+            mesh.setObjectId(objectId);
     } else if(type == "script") {
         /* Script path */
         std::string scriptPath = featureConfig->value("script_path");
@@ -83,27 +83,27 @@ void resetObjectFromConfig(Object3D* object, Utility::ConfigurationGroup* object
     for(auto featureConfig: objectConfig->groups("feature")) {
         std::string type = featureConfig->value("type");
 
-        if(type == "rectangle_shape") {
-            /* Rectangle shape */
+        if(type == "mesh") {
+            /* Mesh */
             auto& features = object->features();
-            RectangleShape* rectangleShape = nullptr;
+            Mesh* mesh = nullptr;
 
             for(auto& feature: features) {
-                if((rectangleShape = dynamic_cast<RectangleShape*>(&feature)))
+                if((mesh = dynamic_cast<Mesh*>(&feature)))
                     break;
             }
 
-            CORRADE_INTERNAL_ASSERT(rectangleShape != nullptr);
+            CORRADE_INTERNAL_ASSERT(mesh != nullptr);
 
             /* Size */
             if(!featureConfig->hasValue("size")) featureConfig->setValue<Vector2>("size", {200, 100});
             Vector2 size = featureConfig->value<Vector2>("size");
-            rectangleShape->setSize(size);
+            mesh->setSize(size);
 
             /* Color */
             if(!featureConfig->hasValue("color")) featureConfig->setValue<Color4>("color", {1, 1, 1, 1});
             Color4 color = featureConfig->value<Color4>("color");
-            rectangleShape->setColor(color);
+            mesh->setColor(color);
         }
     }
 }

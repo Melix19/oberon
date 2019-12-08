@@ -33,9 +33,9 @@ set(OberonCore_SRCS
     Serializer.cpp)
 
 set(OberonCore_HEADERS
-    Serializer.h
-    RectangleShape.h
-    Script.h)
+    Mesh.h
+    Script.h
+    Serializer.h)
 
 add_library(OberonCore
     ${OberonCore_SRCS}

@@ -85,21 +85,21 @@ void Inspector::newFrame() {
     for(auto featureConfig: objectNode->objectConfig()->groups("feature")) {
         std::string type = featureConfig->value("type");
 
-        if(type == "rectangle_shape") {
-            /* Rectangle shape */
+        if(type == "mesh") {
+            /* Mesh */
             auto& features = objectNode->object()->features();
-            RectangleShape* rectangleShape = nullptr;
+            Mesh* mesh = nullptr;
 
             for(auto& feature: features) {
-                if((rectangleShape = dynamic_cast<RectangleShape*>(&feature)))
+                if((mesh = dynamic_cast<Mesh*>(&feature)))
                     break;
             }
 
-            CORRADE_INTERNAL_ASSERT(rectangleShape != nullptr);
+            CORRADE_INTERNAL_ASSERT(mesh != nullptr);
 
             bool featureIsOpen = true;
 
-            if(ImGui::CollapsingHeader("Rectangle shape", &featureIsOpen, ImGuiTreeNodeFlags_DefaultOpen)) {
+            if(ImGui::CollapsingHeader("Mesh", &featureIsOpen, ImGuiTreeNodeFlags_DefaultOpen)) {
                 /* Size */
                 ImGui::AlignTextToFramePadding();
                 ImGui::Text("Size");
@@ -107,7 +107,7 @@ void Inspector::newFrame() {
                 ImGui::SetNextItemWidth(-1);
                 Vector2 size = featureConfig->value<Vector2>("size");
                 if(ImGui::DragFloat2("##Size", size.data(), 0.5f)) {
-                    rectangleShape->setSize(size);
+                    mesh->setSize(size);
                     featureConfig->setValue("size", size);
                 }
 
@@ -118,13 +118,13 @@ void Inspector::newFrame() {
                 ImGui::SetNextItemWidth(-1);
                 Color4 color = featureConfig->value<Color4>("color");
                 if(ImGui::ColorEdit4("##Color", color.data())) {
-                    rectangleShape->setColor(color);
+                    mesh->setColor(color);
                     featureConfig->setValue("color", color);
                 }
             }
 
             if(!featureIsOpen) {
-                delete rectangleShape;
+                delete mesh;
                 objectNode->objectConfig()->removeGroup(featureConfig);
             }
         } else if(type == "script") {
@@ -165,8 +165,8 @@ void Inspector::newFrame() {
     if(ImGui::BeginPopup("FeaturePopup")) {
         std::string newFeatureType;
 
-        if(ImGui::Selectable("Rectangle shape"))
-            newFeatureType = "rectangle_shape";
+        if(ImGui::Selectable("Mesh"))
+            newFeatureType = "mesh";
 
         if(ImGui::Selectable("Script"))
             newFeatureType = "script";

@@ -32,25 +32,25 @@
 
 using namespace Magnum;
 
-class RectangleShape: public SceneGraph::Drawable3D {
+class Mesh: public SceneGraph::Drawable3D {
     public:
-        explicit RectangleShape(SceneGraph::AbstractObject3D& object, SceneGraph::DrawableGroup3D* drawables, GL::Mesh& mesh, Shaders::Flat3D& shader, const Vector2& size, const Color4& color): SceneGraph::Drawable3D{object, drawables}, _mesh(mesh), _shader(shader), _size{size}, _color{color} {}
+        explicit Mesh(SceneGraph::AbstractObject3D& object, SceneGraph::DrawableGroup3D* drawables, GL::Mesh& mesh, Shaders::Flat3D& shader, const Vector2& size, const Color4& color): SceneGraph::Drawable3D{object, drawables}, _mesh(mesh), _shader(shader), _size{size}, _color{color} {}
 
         Vector2 size() const { return _size; }
 
-        RectangleShape& setSize(const Vector2& size) {
+        Mesh& setSize(const Vector2& size) {
             _size = size;
             return *this;
         }
 
         Color4 color() const { return _color; }
 
-        RectangleShape& setColor(const Color4& color) {
+        Mesh& setColor(const Color4& color) {
             _color = color;
             return *this;
         }
 
-        RectangleShape& setObjectId(UnsignedByte id) {
+        Mesh& setObjectId(UnsignedByte id) {
             _id = id;
             return *this;
         }
