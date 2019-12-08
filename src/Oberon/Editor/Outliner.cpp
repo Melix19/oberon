@@ -100,7 +100,8 @@ void Outliner::displayTree(ObjectNode* node, bool isRoot) {
 bool Outliner::displayObjectNode(ObjectNode* node, bool isRoot) {
     std::string nodeName = node->objectConfig()->value("name");
     ImGuiTreeNodeFlags nodeFlags = ImGuiTreeNodeFlags_FramePadding |
-        ImGuiTreeNodeFlags_SpanFullWidth | ImGuiTreeNodeFlags_DefaultOpen;
+        ImGuiTreeNodeFlags_SpanFullWidth | ImGuiTreeNodeFlags_DefaultOpen |
+        ImGuiTreeNodeFlags_OpenOnArrow;
     bool hasChildren = !node->children().empty();
 
     if(node->isSelected()) nodeFlags |= ImGuiTreeNodeFlags_Selected;
