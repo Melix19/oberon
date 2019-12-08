@@ -73,8 +73,12 @@ Editor::Editor(const Arguments& arguments, const std::string& projectPath): Plat
 }
 
 void Editor::drawEvent() {
+    GL::Renderer::enable(GL::Renderer::Feature::DepthTest);
+
     for(auto& panel: _collectionPanels)
         panel.drawViewport(_timeline.previousFrameDuration());
+
+    GL::Renderer::disable(GL::Renderer::Feature::DepthTest);
 
     _timeline.nextFrame();
 

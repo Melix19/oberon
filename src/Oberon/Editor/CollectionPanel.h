@@ -28,6 +28,7 @@
 #include <Magnum/GL/Framebuffer.h>
 #include <Magnum/GL/Texture.h>
 #include <Magnum/SceneGraph/Scene.h>
+#include <Magnum/GL/Renderbuffer.h>
 
 #include "ObjectNode.h"
 
@@ -94,6 +95,7 @@ class CollectionPanel: public Containers::LinkedListItem<CollectionPanel> {
 
         GL::Framebuffer _framebuffer{NoCreate};
         GL::Texture2D _viewportTexture;
+        GL::Renderbuffer _depth;
 
         SceneGraph::DrawableGroup3D _drawables;
         ScriptGroup _scripts;

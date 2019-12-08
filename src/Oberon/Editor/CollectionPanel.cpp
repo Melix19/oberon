@@ -24,11 +24,10 @@
 
 #include "CollectionPanel.h"
 
-#include <algorithm>
-
 #include <Corrade/Utility/Directory.h>
+#include <Magnum/GL/RenderbufferFormat.h>
 #include <Magnum/GL/TextureFormat.h>
-#include <Magnum/ImGuiIntegration/Widgets.h>
+#include <Magnum/ImGuiIntegration/Integration.h>
 
 CollectionPanel::CollectionPanel(const std::string& path, OberonResourceManager& resourceManager, const Vector2i& viewportTextureSize, const Vector2& dpiScaleRatio):
     _path(path), _resourceManager(resourceManager), _viewportTextureSize(viewportTextureSize), _dpiScaleRatio(dpiScaleRatio), _collectionConfig{_path},
@@ -37,8 +36,10 @@ CollectionPanel::CollectionPanel(const std::string& path, OberonResourceManager&
     _name = Utility::Directory::filename(_path);
 
     _viewportTexture.setStorage(1, GL::TextureFormat::RGBA8, _viewportTextureSize*_dpiScaleRatio);
+    _depth.setStorage(GL::RenderbufferFormat::Depth24Stencil8, _viewportTextureSize*_dpiScaleRatio);
     _framebuffer = GL::Framebuffer{{}};
-    _framebuffer.attachTexture(GL::Framebuffer::ColorAttachment{0}, _viewportTexture, 0);
+    _framebuffer.attachTexture(GL::Framebuffer::ColorAttachment{0}, _viewportTexture, 0)
+        .attachRenderbuffer(GL::Framebuffer::BufferAttachment::Depth, _depth);
 
     _cameraObject = new Object3D{&_scene};
     _camera = new SceneGraph::Camera3D{*_cameraObject};
@@ -60,7 +61,7 @@ void CollectionPanel::drawViewport(Float deltaTime) {
     if(!_isVisible || !_isOpen)
         return;
 
-    _framebuffer.clear(GL::FramebufferClear::Color)
+    _framebuffer.clear(GL::FramebufferClear::Color|GL::FramebufferClear::Depth)
         .bind();
 
     if(_isSimulating) {
@@ -70,16 +71,7 @@ void CollectionPanel::drawViewport(Float deltaTime) {
         }
     }
 
-    std::vector<std::pair<std::reference_wrapper<SceneGraph::Drawable3D>, Matrix4>>
-        drawableTransformations = _camera->drawableTransformations(_drawables);
-
-    std::sort(drawableTransformations.begin(), drawableTransformations.end(),
-        [](const std::pair<std::reference_wrapper<SceneGraph::Drawable3D>, Matrix4>& a,
-        const std::pair<std::reference_wrapper<SceneGraph::Drawable3D>, Matrix4>& b) {
-            return a.second.translation().z() < b.second.translation().z();
-        });
-
-    _camera->draw(drawableTransformations);
+    _camera->draw(_drawables);
 }
 
 void CollectionPanel::newFrame() {
@@ -98,8 +90,11 @@ void CollectionPanel::newFrame() {
         return;
     }
 
-    ImGui::SetScrollY(_viewportTextureSize.y());
-    ImGuiIntegration::image(_viewportTexture, Vector2{_viewportTextureSize});
+    const ImVec2 windowPos = ImGui::GetWindowPos();
+    const ImVec2 windowSize = ImGui::GetWindowSize();
+
+    ImVec2 viewportPos(windowPos.x, windowPos.y - (_viewportTextureSize.y() - windowSize.y));
+    ImGui::GetWindowDrawList()->AddImage(static_cast<ImTextureID>(&_viewportTexture), viewportPos, ImVec2(Vector2{viewportPos} + Vector2{_viewportTextureSize}), ImVec2(0, 1), ImVec2(1, 0));
 
     Vector2i windowContentSize{Int(ImGui::GetWindowContentRegionMax().x - ImGui::GetWindowContentRegionMin().x),
         Int(ImGui::GetWindowContentRegionMax().y - ImGui::GetWindowContentRegionMin().y)};
