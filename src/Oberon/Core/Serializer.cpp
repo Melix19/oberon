@@ -24,13 +24,9 @@
 
 #include "Serializer.h"
 
-#include <Magnum/MeshTools/Compile.h>
-#include <Magnum/Primitives/Square.h>
-#include <Magnum/Trade/MeshData2D.h>
-
 namespace Serializer {
 
-Object3D* createObjectFromConfig(Utility::ConfigurationGroup* objectConfig, Object3D* parent, OberonResourceManager& resourceManager, SceneGraph::DrawableGroup3D* drawables, ScriptGroup* scripts) {
+Object3D* createObjectFromConfig(Utility::ConfigurationGroup* objectConfig, Object3D* parent, OberonResourceManager& resourceManager, SceneGraph::DrawableGroup3D* drawables, ScriptGroup* scripts, UnsignedByte objectId) {
     Object3D* object = new Object3D{parent};
 
     /* Transformation */
@@ -39,12 +35,12 @@ Object3D* createObjectFromConfig(Utility::ConfigurationGroup* objectConfig, Obje
     object->setTransformation(transformation);
 
     for(auto featureConfig: objectConfig->groups("feature"))
-        addFeatureFromConfig(featureConfig, object, resourceManager, drawables, scripts);
+        addFeatureFromConfig(featureConfig, object, resourceManager, drawables, scripts, objectId);
 
     return object;
 }
 
-void addFeatureFromConfig(Utility::ConfigurationGroup* featureConfig, Object3D* object, OberonResourceManager& resourceManager, SceneGraph::DrawableGroup3D* drawables, ScriptGroup* scripts) {
+void addFeatureFromConfig(Utility::ConfigurationGroup* featureConfig, Object3D* object, OberonResourceManager& resourceManager, SceneGraph::DrawableGroup3D* drawables, ScriptGroup* scripts, UnsignedByte objectId) {
     std::string type = featureConfig->value("type");
 
     if(type == "rectangle_shape") {
@@ -58,20 +54,17 @@ void addFeatureFromConfig(Utility::ConfigurationGroup* featureConfig, Object3D* 
 
         /* Mesh */
         Resource<GL::Mesh> meshResource = resourceManager.get<GL::Mesh>("square");
-        if(!meshResource) {
-            GL::Mesh mesh = MeshTools::compile(Primitives::squareSolid());
-            resourceManager.set(meshResource.key(), std::move(mesh));
-        }
+        CORRADE_INTERNAL_ASSERT(meshResource);
 
         /* Shader */
         Resource<Shaders::Flat3D> shaderResource = resourceManager.get<Shaders::Flat3D>("flat3d");
-        if(!shaderResource) {
-            Shaders::Flat3D shader;
-            resourceManager.set(shaderResource.key(), std::move(shader));
-        }
+        CORRADE_INTERNAL_ASSERT(shaderResource);
 
         /* Rectangle shape */
-        object->addFeature<RectangleShape>(drawables, *meshResource, *shaderResource, size, color);
+        RectangleShape& rect = object->addFeature<RectangleShape>(drawables, *meshResource, *shaderResource, size, color);
+
+        if(objectId > 0)
+            rect.setObjectId(objectId);
     } else if(type == "script") {
         /* Script path */
         std::string scriptPath = featureConfig->value("script_path");

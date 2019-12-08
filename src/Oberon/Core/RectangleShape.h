@@ -50,16 +50,23 @@ class RectangleShape: public SceneGraph::Drawable3D {
             return *this;
         }
 
+        RectangleShape& setObjectId(UnsignedByte id) {
+            _id = id;
+            return *this;
+        }
+
     private:
         void draw(const Matrix4& transformation, SceneGraph::Camera3D& camera) override {
             _shader.setTransformationProjectionMatrix(camera.projectionMatrix()*transformation*Matrix4::scaling({_size/2, 0}))
-                .setColor(_color);
+                .setColor(_color)
+                .setObjectId(_id);
             _mesh.draw(_shader);
         }
 
         GL::Mesh& _mesh;
         Shaders::Flat3D& _shader;
 
+        UnsignedByte _id;
         Vector2 _size;
         Color4 _color;
 };

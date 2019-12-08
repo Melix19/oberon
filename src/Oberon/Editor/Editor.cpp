@@ -28,6 +28,9 @@
 #include <imgui_internal.h>
 #include <Magnum/GL/DefaultFramebuffer.h>
 #include <Magnum/GL/Renderer.h>
+#include <Magnum/MeshTools/Compile.h>
+#include <Magnum/Primitives/Square.h>
+#include <Magnum/Trade/MeshData2D.h>
 #include <Oberon/Bindings/Oberon/Python.h>
 
 #include "Themer.h"
@@ -70,6 +73,21 @@ Editor::Editor(const Arguments& arguments, const std::string& projectPath): Plat
     setSwapInterval(1);
 
     setup(projectPath);
+    initResourceManager();
+}
+
+void Editor::initResourceManager() {
+    Resource<Shaders::Flat3D> shaderResource = _resourceManager.get<Shaders::Flat3D>("flat3d");
+    if(!shaderResource) {
+        Shaders::Flat3D shader{Shaders::Flat3D::Flag::ObjectId};
+        _resourceManager.set(shaderResource.key(), std::move(shader));
+    }
+
+    Resource<GL::Mesh> meshResource = _resourceManager.get<GL::Mesh>("square");
+    if(!meshResource) {
+        GL::Mesh mesh = MeshTools::compile(Primitives::squareSolid());
+        _resourceManager.set(meshResource.key(), std::move(mesh));
+    }
 }
 
 void Editor::drawEvent() {

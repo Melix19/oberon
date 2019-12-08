@@ -96,8 +96,10 @@ class CollectionPanel: public Containers::LinkedListItem<CollectionPanel> {
         GL::Framebuffer _framebuffer{NoCreate};
         GL::Texture2D _viewportTexture;
         GL::Renderbuffer _depth;
+        GL::Renderbuffer _objectId;
 
         SceneGraph::DrawableGroup3D _drawables;
+        std::vector<ObjectNode*> _drawablesNodes;
         ScriptGroup _scripts;
 
         Scene3D _scene;
