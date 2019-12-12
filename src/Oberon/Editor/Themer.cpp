@@ -26,10 +26,13 @@
 
 #include <imgui.h>
 
-void Themer::styleColorsDark() {
+namespace Themer {
+
+void styleColorsDark() {
     ImGuiStyle& style = ImGui::GetStyle();
 
     ImVec4 windowColor(0.12f, 0.12f, 0.12f, 1.0f);
+    style.Colors[ImGuiCol_MenuBarBg] = windowColor;
     style.Colors[ImGuiCol_WindowBg] = windowColor;
 
     ImVec4 titlebarColor(0.16f, 0.16f, 0.16f, 1.0f);
@@ -68,10 +71,11 @@ void Themer::styleColorsDark() {
     style.Colors[ImGuiCol_Text] = textColor;
 }
 
-void Themer::styleColorsLight() {
+void styleColorsLight() {
     ImGuiStyle& style = ImGui::GetStyle();
 
     ImVec4 windowColor(1.0f, 1.0f, 1.0f, 1.0f);
+    style.Colors[ImGuiCol_MenuBarBg] = windowColor;
     style.Colors[ImGuiCol_WindowBg] = windowColor;
 
     ImVec4 titlebarColor(0.96f, 0.96f, 0.96f, 1.0f);
@@ -108,4 +112,6 @@ void Themer::styleColorsLight() {
 
     ImVec4 textColor(0.0f, 0.0f, 0.0f, 1.0f);
     style.Colors[ImGuiCol_Text] = textColor;
+}
+
 }
