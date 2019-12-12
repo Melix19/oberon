@@ -39,7 +39,7 @@ CollectionPanel::CollectionPanel(const std::string& path, OberonResourceManager&
 
     _viewportTexture.setStorage(1, GL::TextureFormat::RGBA8, _viewportTextureSize*_dpiScaleRatio);
     _depth.setStorage(GL::RenderbufferFormat::Depth24Stencil8, _viewportTextureSize*_dpiScaleRatio);
-    _objectId.setStorage(GL::RenderbufferFormat::R8UI, _viewportTextureSize*_dpiScaleRatio);
+    _objectId.setStorage(GL::RenderbufferFormat::R32UI, _viewportTextureSize*_dpiScaleRatio);
 
     _framebuffer = GL::Framebuffer{{}};
     _framebuffer.attachTexture(GL::Framebuffer::ColorAttachment{0}, _viewportTexture, 0)
