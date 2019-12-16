@@ -77,11 +77,9 @@ Editor::Editor(const Arguments& arguments, const std::string& projectPath): Plat
 }
 
 void Editor::initResourceManager() {
-    Resource<Shaders::Flat3D> shaderResource = _resourceManager.get<Shaders::Flat3D>("flat3d");
-    if(!shaderResource) {
-        Shaders::Flat3D shader{Shaders::Flat3D::Flag::ObjectId};
-        _resourceManager.set(shaderResource.key(), std::move(shader));
-    }
+    Resource<GL::AbstractShaderProgram, Shaders::Flat3D> shaderResource = _resourceManager.get<GL::AbstractShaderProgram, Shaders::Flat3D>("flat3d");
+    if(!shaderResource)
+        _resourceManager.set<GL::AbstractShaderProgram>(shaderResource.key(), new Shaders::Flat3D{Shaders::Flat3D::Flag::ObjectId});
 
     Resource<GL::Mesh> meshResource = _resourceManager.get<GL::Mesh>("square");
     if(!meshResource) {

@@ -57,11 +57,11 @@ void addFeatureFromConfig(Utility::ConfigurationGroup* featureConfig, Object3D* 
         CORRADE_INTERNAL_ASSERT(meshResource);
 
         /* Shader */
-        Resource<Shaders::Flat3D> shaderResource = resourceManager.get<Shaders::Flat3D>("flat3d");
+        Resource<GL::AbstractShaderProgram, Shaders::Flat3D> shaderResource = resourceManager.get<GL::AbstractShaderProgram, Shaders::Flat3D>("flat3d");
         CORRADE_INTERNAL_ASSERT(shaderResource);
 
         /* Mesh */
-        Mesh& mesh = object->addFeature<Mesh>(drawables, *meshResource, *shaderResource, size, color);
+        Mesh& mesh = object->addFeature<Mesh>(drawables, meshResource, shaderResource, size, color);
 
         if(objectId > 0)
             mesh.setObjectId(objectId);

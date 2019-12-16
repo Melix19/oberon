@@ -26,6 +26,7 @@
 
 #include <Magnum/GL/Mesh.h>
 #include <Magnum/Math/Color.h>
+#include <Magnum/Resource.h>
 #include <Magnum/SceneGraph/Camera.h>
 #include <Magnum/SceneGraph/Drawable.h>
 #include <Magnum/Shaders/Flat.h>
@@ -34,7 +35,7 @@ using namespace Magnum;
 
 class Mesh: public SceneGraph::Drawable3D {
     public:
-        explicit Mesh(SceneGraph::AbstractObject3D& object, SceneGraph::DrawableGroup3D* drawables, GL::Mesh& mesh, Shaders::Flat3D& shader, const Vector2& size, const Color4& color): SceneGraph::Drawable3D{object, drawables}, _mesh(mesh), _shader(shader), _size{size}, _color{color} {}
+        explicit Mesh(SceneGraph::AbstractObject3D& object, SceneGraph::DrawableGroup3D* drawables, Resource<GL::Mesh>& mesh, Resource<GL::AbstractShaderProgram, Shaders::Flat3D>& shader, const Vector2& size, const Color4& color): SceneGraph::Drawable3D{object, drawables}, _mesh(mesh), _shader(shader), _size{size}, _color{color} {}
 
         Vector2 size() const { return _size; }
 
@@ -57,14 +58,14 @@ class Mesh: public SceneGraph::Drawable3D {
 
     private:
         void draw(const Matrix4& transformation, SceneGraph::Camera3D& camera) override {
-            _shader.setTransformationProjectionMatrix(camera.projectionMatrix()*transformation*Matrix4::scaling({_size/2, 0}))
+            _shader->setTransformationProjectionMatrix(camera.projectionMatrix()*transformation*Matrix4::scaling({_size/2, 0}))
                 .setColor(_color)
                 .setObjectId(_id);
-            _mesh.draw(_shader);
+            _mesh->draw(*_shader);
         }
 
-        GL::Mesh& _mesh;
-        Shaders::Flat3D& _shader;
+        Resource<GL::Mesh> _mesh;
+        Resource<GL::AbstractShaderProgram, Shaders::Flat3D> _shader;
 
         UnsignedByte _id;
         Vector2 _size;

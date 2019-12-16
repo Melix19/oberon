@@ -35,7 +35,7 @@
 typedef SceneGraph::Object<SceneGraph::TranslationRotationScalingTransformation3D> Object3D;
 typedef SceneGraph::Scene<SceneGraph::TranslationRotationScalingTransformation3D> Scene3D;
 
-typedef ResourceManager<GL::Mesh, Shaders::Flat3D> OberonResourceManager;
+typedef ResourceManager<GL::Mesh, GL::AbstractShaderProgram> OberonResourceManager;
 
 namespace Serializer {
 
