@@ -68,14 +68,14 @@ void scenegraph(py::module& m) {
         magnum::abstractObject(abstractObject);
     }
 
+    py::class_<SceneGraph::Scene<SceneGraph::TranslationRotationScalingTransformation3D>> scene_{m, "Scene", "Three-dimensional scene"};
+    magnum::scene(scene_);
+
     py::class_<SceneGraph::Object<SceneGraph::TranslationRotationScalingTransformation3D>, SceneGraph::PyObject<SceneGraph::Object<SceneGraph::TranslationRotationScalingTransformation3D>>, SceneGraph::AbstractObject3D, SceneGraph::PyObjectHolder<SceneGraph::Object<SceneGraph::TranslationRotationScalingTransformation3D>>> object_{m, "Object", "Three-dimensional object"};
     magnum::object(object_);
     magnum::object3D(object_);
     magnum::objectScale(object_);
     magnum::objectTrs(object_);
-
-    py::class_<SceneGraph::Scene<SceneGraph::TranslationRotationScalingTransformation3D>> scene_{m, "Scene", "Three-dimensional scene", object_};
-    magnum::scene(scene_);
 }
 
 }
