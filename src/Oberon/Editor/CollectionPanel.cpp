@@ -31,6 +31,8 @@
 #include <Magnum/PixelFormat.h>
 #include <Magnum/Image.h>
 
+#include <algorithm>
+
 CollectionPanel::CollectionPanel(const std::string& path, OberonResourceManager& resourceManager, const Vector2i& viewportTextureSize, const Vector2& dpiScaleRatio):
     _path(path), _resourceManager(resourceManager), _viewportTextureSize(viewportTextureSize), _dpiScaleRatio(dpiScaleRatio), _collectionConfig{_path},
     _isOpen(true), _isFocused(false), _isSimulating(false), _isVisible(true), _isDragging(false), _needsFocus(true), _needsDocking(true)
