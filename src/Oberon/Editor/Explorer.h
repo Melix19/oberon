@@ -26,6 +26,10 @@
 
 #include "FileNode.h"
 
+#include <Magnum/Magnum.h>
+
+using namespace Magnum;
+
 class Explorer {
     public:
         Explorer(const std::string& rootPath);
@@ -49,7 +53,7 @@ class Explorer {
         bool _deleteSelectedNodes;
         FileNode* _clickedNode;
 
-        enum class EditMode {
+        enum class EditMode: UnsignedByte {
             FileCreation,
             FolderCreation,
             Rename

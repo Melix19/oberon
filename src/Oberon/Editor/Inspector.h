@@ -28,7 +28,7 @@
 
 class Inspector {
     public:
-        Inspector(): _panel(nullptr) {}
+        Inspector(OberonResourceManager& resourceManager): _resourceManager(resourceManager), _panel(nullptr) {}
         void newFrame();
 
         Inspector& setPanel(CollectionPanel* panel) {
@@ -37,5 +37,8 @@ class Inspector {
         }
 
     private:
+        void setNextItemRightAlign(const char* label, Float spacing = 130.0f);
+
+        OberonResourceManager& _resourceManager;
         CollectionPanel* _panel;
 };

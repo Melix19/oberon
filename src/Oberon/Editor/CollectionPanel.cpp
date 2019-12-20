@@ -27,9 +27,10 @@
 #include <Corrade/Utility/Directory.h>
 #include <Magnum/GL/RenderbufferFormat.h>
 #include <Magnum/GL/TextureFormat.h>
-#include <Magnum/ImGuiIntegration/Integration.h>
-#include <Magnum/PixelFormat.h>
 #include <Magnum/Image.h>
+#include <Magnum/ImGuiIntegration/Integration.h>
+#include <Magnum/Math/ConfigurationValue.h>
+#include <Magnum/PixelFormat.h>
 
 #include <algorithm>
 
@@ -141,7 +142,7 @@ void CollectionPanel::newFrame() {
 
         Image2D data = _framebuffer.read(
             Range2Di::fromSize({mousePos.x(), _viewportTextureSize.y()*Int(_dpiScaleRatio.y()) - mousePos.y() - 1}, {1, 1}),
-            {PixelFormat::R8UI});
+            {PixelFormat::R32UI});
 
         UnsignedByte id = Containers::arrayCast<UnsignedByte>(data.data())[0];
 
@@ -177,7 +178,8 @@ void CollectionPanel::newFrame() {
 }
 
 void CollectionPanel::addFeatureToObject(Utility::ConfigurationGroup* objectConfig, Object3D* object) {
-    Serializer::addFeatureFromConfig(objectConfig, object, _resourceManager, &_drawables, &_scripts);
+    Serializer::addFeatureFromConfig(objectConfig, object, _resourceManager, &_drawables, &_scripts,
+        _drawablesNodes.size() + 1);
 }
 
 void CollectionPanel::save() {

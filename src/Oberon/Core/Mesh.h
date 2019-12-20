@@ -35,19 +35,11 @@ using namespace Magnum;
 
 class Mesh: public SceneGraph::Drawable3D {
     public:
-        explicit Mesh(SceneGraph::AbstractObject3D& object, SceneGraph::DrawableGroup3D* drawables, Resource<GL::Mesh>& mesh, Resource<GL::AbstractShaderProgram, Shaders::Flat3D>& shader, const Vector2& size, const Color4& color): SceneGraph::Drawable3D{object, drawables}, _mesh(mesh), _shader(shader), _size{size}, _color{color} {}
+        explicit Mesh(SceneGraph::AbstractObject3D& object, SceneGraph::DrawableGroup3D* drawables, Resource<GL::AbstractShaderProgram, Shaders::Flat3D>& shader):
+            SceneGraph::Drawable3D{object, drawables}, _shader(shader) {}
 
-        Vector2 size() const { return _size; }
-
-        Mesh& setSize(const Vector2& size) {
-            _size = size;
-            return *this;
-        }
-
-        Color4 color() const { return _color; }
-
-        Mesh& setColor(const Color4& color) {
-            _color = color;
+        Mesh& setMesh(Resource<GL::Mesh>& mesh) {
+            _mesh = mesh;
             return *this;
         }
 
@@ -56,10 +48,18 @@ class Mesh: public SceneGraph::Drawable3D {
             return *this;
         }
 
+        Vector3 size() const { return _size; }
+        Mesh& setSize(const Vector3& size) {
+            _size = size;
+            return *this;
+        }
+
     private:
         void draw(const Matrix4& transformation, SceneGraph::Camera3D& camera) override {
-            _shader->setTransformationProjectionMatrix(camera.projectionMatrix()*transformation*Matrix4::scaling({_size/2, 0}))
-                .setColor(_color)
+            if(!_mesh)
+                return;
+
+            _shader->setTransformationProjectionMatrix(camera.projectionMatrix()*transformation*Matrix4::scaling(_size/2))
                 .setObjectId(_id);
             _mesh->draw(*_shader);
         }
@@ -68,6 +68,5 @@ class Mesh: public SceneGraph::Drawable3D {
         Resource<GL::AbstractShaderProgram, Shaders::Flat3D> _shader;
 
         UnsignedByte _id;
-        Vector2 _size;
-        Color4 _color;
+        Vector3 _size;
 };

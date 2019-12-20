@@ -28,9 +28,6 @@
 #include <imgui_internal.h>
 #include <Magnum/GL/DefaultFramebuffer.h>
 #include <Magnum/GL/Renderer.h>
-#include <Magnum/MeshTools/Compile.h>
-#include <Magnum/Primitives/Square.h>
-#include <Magnum/Trade/MeshData2D.h>
 #include <Oberon/Bindings/Oberon/Python.h>
 
 #include "Themer.h"
@@ -38,7 +35,7 @@
 Editor::Editor(const Arguments& arguments, const std::string& projectPath): Platform::Application{arguments,
     Configuration{}.setTitle("Oberon")
                    .setWindowFlags(Configuration::WindowFlag::Maximized|Configuration::WindowFlag::Resizable)},
-    _explorer(projectPath), _activePanel(nullptr)
+    _explorer(projectPath), _inspector(_resourceManager), _activePanel(nullptr)
 {
     _maximizedWindowSize = windowSize();
     _dpiScaleRatio = Vector2{framebufferSize()}/(Vector2{windowSize()}/dpiScaling());
@@ -80,12 +77,6 @@ void Editor::initResourceManager() {
     Resource<GL::AbstractShaderProgram, Shaders::Flat3D> shaderResource = _resourceManager.get<GL::AbstractShaderProgram, Shaders::Flat3D>("flat3d");
     if(!shaderResource)
         _resourceManager.set<GL::AbstractShaderProgram>(shaderResource.key(), new Shaders::Flat3D{Shaders::Flat3D::Flag::ObjectId});
-
-    Resource<GL::Mesh> meshResource = _resourceManager.get<GL::Mesh>("square");
-    if(!meshResource) {
-        GL::Mesh mesh = MeshTools::compile(Primitives::squareSolid());
-        _resourceManager.set(meshResource.key(), std::move(mesh));
-    }
 }
 
 void Editor::drawEvent() {

@@ -24,6 +24,16 @@
 
 #include "Serializer.h"
 
+#include <Magnum/Math/ConfigurationValue.h>
+#include <Magnum/MeshTools/Compile.h>
+#include <Magnum/Primitives/Circle.h>
+#include <Magnum/Primitives/Cube.h>
+#include <Magnum/Primitives/Plane.h>
+#include <Magnum/Primitives/Square.h>
+#include <Magnum/Primitives/UVSphere.h>
+#include <Magnum/Trade/MeshData2D.h>
+#include <Magnum/Trade/MeshData3D.h>
+
 namespace Serializer {
 
 Object3D* createObjectFromConfig(Utility::ConfigurationGroup* objectConfig, Object3D* parent, OberonResourceManager& resourceManager, SceneGraph::DrawableGroup3D* drawables, ScriptGroup* scripts, UnsignedByte objectId) {
@@ -44,24 +54,18 @@ void addFeatureFromConfig(Utility::ConfigurationGroup* featureConfig, Object3D* 
     std::string type = featureConfig->value("type");
 
     if(type == "mesh") {
-        /* Size */
-        if(!featureConfig->hasValue("size")) featureConfig->setValue<Vector2>("size", {200, 100});
-        Vector2 size = featureConfig->value<Vector2>("size");
-
-        /* Color */
-        if(!featureConfig->hasValue("color")) featureConfig->setValue<Color4>("color", {1, 1, 1, 1});
-        Color4 color = featureConfig->value<Color4>("color");
-
-        /* Mesh */
-        Resource<GL::Mesh> meshResource = resourceManager.get<GL::Mesh>("square");
-        CORRADE_INTERNAL_ASSERT(meshResource);
-
         /* Shader */
         Resource<GL::AbstractShaderProgram, Shaders::Flat3D> shaderResource = resourceManager.get<GL::AbstractShaderProgram, Shaders::Flat3D>("flat3d");
         CORRADE_INTERNAL_ASSERT(shaderResource);
 
         /* Mesh */
-        Mesh& mesh = object->addFeature<Mesh>(drawables, meshResource, shaderResource, size, color);
+        Mesh& mesh = object->addFeature<Mesh>(drawables, shaderResource);
+
+        /* Primitive */
+        if(featureConfig->hasGroup("primitive")) {
+            Utility::ConfigurationGroup* primitiveConfig = featureConfig->group("primitive");
+            setMeshFromConfig(mesh, primitiveConfig, resourceManager);
+        }
 
         if(objectId > 0)
             mesh.setObjectId(objectId);
@@ -96,16 +100,54 @@ void resetObjectFromConfig(Object3D* object, Utility::ConfigurationGroup* object
             CORRADE_INTERNAL_ASSERT(mesh != nullptr);
 
             /* Size */
-            if(!featureConfig->hasValue("size")) featureConfig->setValue<Vector2>("size", {200, 100});
-            Vector2 size = featureConfig->value<Vector2>("size");
+            if(!featureConfig->hasValue("size")) featureConfig->setValue<Vector3>("size", {100, 100, 100});
+            Vector3 size = featureConfig->value<Vector3>("size");
             mesh->setSize(size);
-
-            /* Color */
-            if(!featureConfig->hasValue("color")) featureConfig->setValue<Color4>("color", {1, 1, 1, 1});
-            Color4 color = featureConfig->value<Color4>("color");
-            mesh->setColor(color);
         }
     }
+}
+
+void setMeshFromConfig(Mesh& mesh, Utility::ConfigurationGroup* primitiveConfig, OberonResourceManager& resourceManager) {
+    std::string primitiveType = primitiveConfig->value("type");
+    std::string meshKey = primitiveType;
+
+    if(primitiveConfig->hasValue("rings"))
+        meshKey += std::to_string(primitiveConfig->value<UnsignedInt>("rings"));
+
+    if(primitiveConfig->hasValue("segments"))
+        meshKey += std::to_string(primitiveConfig->value<UnsignedInt>("segments"));
+
+    Resource<GL::Mesh> meshResource = resourceManager.get<GL::Mesh>(meshKey);
+
+    if(!primitiveConfig->hasValue("size")) primitiveConfig->setValue<Vector3>("size", {100, 100, 100});
+    Vector3 size = primitiveConfig->value<Vector3>("size");
+
+    if(!meshResource) {
+        if(primitiveType == "sphere" && !primitiveConfig->hasValue("rings"))
+            primitiveConfig->setValue<UnsignedInt>("rings", 10);
+
+        if((primitiveType == "circle" || primitiveType == "sphere") &&
+            !primitiveConfig->hasValue("segments")) {
+            primitiveConfig->setValue<UnsignedInt>("segments", 10);
+        }
+
+        UnsignedInt segments = primitiveConfig->value<UnsignedInt>("segments");
+        UnsignedInt rings = primitiveConfig->value<UnsignedInt>("rings");
+        GL::Mesh glMesh{NoCreate};
+
+        if(primitiveType == "circle") glMesh = MeshTools::compile(Primitives::circle3DSolid(segments));
+        if(primitiveType == "cube") glMesh = MeshTools::compile(Primitives::cubeSolid());
+        if(primitiveType == "plane") glMesh = MeshTools::compile(Primitives::planeSolid());
+        if(primitiveType == "sphere") glMesh = MeshTools::compile(Primitives::uvSphereSolid(rings, segments));
+        if(primitiveType == "square") glMesh = MeshTools::compile(Primitives::squareSolid());
+
+        resourceManager.set(meshResource.key(), std::move(glMesh), ResourceDataState::Final, ResourcePolicy::ReferenceCounted);
+    }
+
+    CORRADE_INTERNAL_ASSERT(meshResource);
+
+    mesh.setMesh(meshResource);
+    mesh.setSize(size);
 }
 
 }

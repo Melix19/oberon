@@ -25,6 +25,7 @@
 #include "Inspector.h"
 
 #include <Corrade/Utility/Assert.h>
+#include <Magnum/Math/ConfigurationValue.h>
 #include <imgui.h>
 #include <misc/cpp/imgui_stdlib.h>
 
@@ -37,17 +38,12 @@ void Inspector::newFrame() {
         return;
     }
 
-    const Int columnWidth = 100;
-
     auto& selectedNodes = _panel->selectedNodes();
     ObjectNode* objectNode = selectedNodes.front();
 
     if(ImGui::CollapsingHeader("Transform", ImGuiTreeNodeFlags_DefaultOpen)) {
         /* Translation */
-        ImGui::AlignTextToFramePadding();
-        ImGui::Text("Translation");
-        ImGui::SameLine(columnWidth);
-        ImGui::SetNextItemWidth(-1);
+        setNextItemRightAlign("Translation");
         Vector3 translation = objectNode->objectConfig()->value<Matrix4>("transformation").translation();
         if(ImGui::DragFloat3("##Translation", translation.data(), 0.5f)) {
             objectNode->object()->setTranslation(translation);
@@ -55,10 +51,7 @@ void Inspector::newFrame() {
         }
 
         /* Rotation */
-        ImGui::AlignTextToFramePadding();
-        ImGui::Text("Rotation");
-        ImGui::SameLine(columnWidth);
-        ImGui::SetNextItemWidth(-1);
+        setNextItemRightAlign("Rotation");
         Vector3 rotationDegree = objectNode->rotationDegree();
         if(ImGui::DragFloat3("##Rotation", rotationDegree.data(), 0.5f)) {
             objectNode->object()->setRotation(
@@ -70,10 +63,7 @@ void Inspector::newFrame() {
         }
 
         /* Scaling */
-        ImGui::AlignTextToFramePadding();
-        ImGui::Text("Scaling");
-        ImGui::SameLine(columnWidth);
-        ImGui::SetNextItemWidth(-1);
+        setNextItemRightAlign("Scaling");
         Vector3 scaling = objectNode->objectConfig()->value<Matrix4>("transformation").scaling();
         if(ImGui::DragFloat3("##Scaling", scaling.data(), 0.005f)) {
             objectNode->object()->setScaling(scaling);
@@ -100,27 +90,67 @@ void Inspector::newFrame() {
             bool featureIsOpen = true;
 
             if(ImGui::CollapsingHeader("Mesh", &featureIsOpen, ImGuiTreeNodeFlags_DefaultOpen)) {
-                /* Size */
-                ImGui::AlignTextToFramePadding();
-                ImGui::Text("Size");
-                ImGui::SameLine(columnWidth);
-                ImGui::SetNextItemWidth(-1);
-                Vector2 size = featureConfig->value<Vector2>("size");
-                if(ImGui::DragFloat2("##Size", size.data(), 0.5f)) {
-                    mesh->setSize(size);
-                    featureConfig->setValue("size", size);
+                Utility::ConfigurationGroup* primitiveConfig = featureConfig->group("primitive");
+                std::string primitiveType = "none";
+
+                if(primitiveConfig && primitiveConfig->hasValue("type"))
+                    primitiveType = primitiveConfig->value("type");
+
+                const char* primitives[] = {"Circle", "Cube", "Plane", "Sphere", "Square"};
+                std::string primitiveString = primitiveType;
+                primitiveString[0] = toupper(primitiveString[0]);
+                bool updateMesh = false;
+
+                setNextItemRightAlign("Primitive type");
+                if(ImGui::BeginCombo("##PrimitiveType", primitiveString.c_str())) {
+                    for(auto& type: primitives) {
+                        bool isSelected = (primitiveString.c_str() == type);
+
+                        if(ImGui::Selectable(type, isSelected)) {
+                            primitiveType = type;
+                            primitiveType[0] = tolower(primitiveType[0]);
+
+                            featureConfig->removeGroup("primitive");
+                            primitiveConfig = featureConfig->addGroup("primitive");
+                            primitiveConfig->setValue("type", primitiveType);
+
+                            updateMesh = true;
+                        }
+                    }
+
+                    ImGui::EndCombo();
                 }
 
-                /* Color */
-                ImGui::AlignTextToFramePadding();
-                ImGui::Text("Color");
-                ImGui::SameLine(columnWidth);
-                ImGui::SetNextItemWidth(-1);
-                Color4 color = featureConfig->value<Color4>("color");
-                if(ImGui::ColorEdit4("##Color", color.data())) {
-                    mesh->setColor(color);
-                    featureConfig->setValue("color", color);
+                /* Size */
+                if(primitiveConfig) {
+                    setNextItemRightAlign("Size");
+                    Vector3 size = primitiveConfig->value<Vector3>("size");
+                    if(ImGui::DragFloat3("##Size", size.data(), 0.5f)) {
+                        mesh->setSize(size);
+                        primitiveConfig->setValue("size", size);
+                    }
                 }
+
+                if(primitiveType == "sphere") {
+                    setNextItemRightAlign("Rings");
+                    Int rings = primitiveConfig->value<Int>("rings");
+                    if(ImGui::DragInt("##Rings", &rings, 1.0f, 2, INT_MAX)) {
+                        primitiveConfig->setValue("rings", rings);
+                        updateMesh = true;
+                    }
+                }
+
+                if(primitiveType == "circle" || primitiveType == "sphere") {
+                    setNextItemRightAlign("Segments");
+                    Int segments = primitiveConfig->value<Int>("segments");
+                    if(ImGui::DragInt("##Segments", &segments, 1.0f, 3, INT_MAX)) {
+                        primitiveConfig->setValue("segments", segments);
+                        updateMesh = true;
+                    }
+                }
+
+                if(updateMesh)
+                    Serializer::setMeshFromConfig(*mesh, primitiveConfig, _resourceManager);
             }
 
             if(!featureIsOpen) {
@@ -143,10 +173,7 @@ void Inspector::newFrame() {
 
             if(ImGui::CollapsingHeader("Script", &featureIsOpen, ImGuiTreeNodeFlags_DefaultOpen)) {
                 /* Size */
-                ImGui::AlignTextToFramePadding();
-                ImGui::Text("Script path");
-                ImGui::SameLine(columnWidth);
-                ImGui::SetNextItemWidth(-1);
+                setNextItemRightAlign("Script path");
                 std::string scriptPath = featureConfig->value("script_path");
                 if(ImGui::InputText("##ScriptPath", &scriptPath))
                     featureConfig->setValue("script_path", scriptPath);
@@ -159,8 +186,18 @@ void Inspector::newFrame() {
         }
     }
 
-    if(ImGui::Button("Add feature"))
+    ImGui::Dummy(ImVec2(0.0f, 10.0f));
+    ImGui::Separator();
+    ImGui::Dummy(ImVec2(0.0f, 10.0f));
+
+    ImVec2 featureButtonsize(100.0f, 0.0f);
+    ImGui::SetCursorPosX(ImGui::GetWindowWidth()/2 - featureButtonsize.x/2);
+    ImGui::PushStyleVar(ImGuiStyleVar_SelectableTextAlign, ImVec2(0.5f, 0.5f));
+
+    if(ImGui::Button("Add feature", featureButtonsize))
         ImGui::OpenPopup("FeaturePopup");
+
+    ImGui::PopStyleVar();
 
     if(ImGui::BeginPopup("FeaturePopup")) {
         std::string newFeatureType;
@@ -191,4 +228,11 @@ void Inspector::newFrame() {
     }
 
     ImGui::End();
+}
+
+void Inspector::setNextItemRightAlign(const char* label, Float spacing) {
+    ImGui::AlignTextToFramePadding();
+    ImGui::Text("%s", label);
+    ImGui::SameLine(spacing);
+    ImGui::SetNextItemWidth(-1);
 }

@@ -28,7 +28,6 @@
 #include "Script.h"
 
 #include <Corrade/Utility/ConfigurationGroup.h>
-#include <Magnum/Math/ConfigurationValue.h>
 #include <Magnum/ResourceManager.h>
 #include <Magnum/SceneGraph/TranslationRotationScalingTransformation3D.h>
 
@@ -41,7 +40,8 @@ namespace Serializer {
 
 Object3D* createObjectFromConfig(Utility::ConfigurationGroup* objectConfig, Object3D* parent, OberonResourceManager& resourceManager, SceneGraph::DrawableGroup3D* drawables, ScriptGroup* scripts, UnsignedByte objectId = 0);
 void addFeatureFromConfig(Utility::ConfigurationGroup* featureConfig, Object3D* object, OberonResourceManager& resourceManager, SceneGraph::DrawableGroup3D* drawables, ScriptGroup* scripts, UnsignedByte objectId = 0);
-
 void resetObjectFromConfig(Object3D* object, Utility::ConfigurationGroup* objectConfig);
+
+void setMeshFromConfig(Mesh& mesh, Utility::ConfigurationGroup* primitiveConfig, OberonResourceManager& resourceManager);
 
 }

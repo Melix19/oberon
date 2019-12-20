@@ -46,7 +46,7 @@ class Outliner {
         CollectionPanel* _panel;
         bool _deleteSelectedNodes;
 
-        enum class EditMode {
+        enum class EditMode: UnsignedByte {
             ObjectCreation,
             Rename
         };
