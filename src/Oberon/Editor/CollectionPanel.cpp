@@ -102,6 +102,7 @@ void CollectionPanel::newFrame() {
     ImGui::PopStyleVar();
 
     _isFocused = ImGui::IsWindowFocused();
+    _isHovered = ImGui::IsWindowHovered();
 
     /* If the window is not visible, just end the method here. */
     if(!_isVisible || !_isOpen) {
@@ -116,22 +117,12 @@ void CollectionPanel::newFrame() {
     ImGui::GetWindowDrawList()->AddImage(static_cast<ImTextureID>(&_viewportTexture), viewportPos,
         ImVec2(Vector2{viewportPos} + Vector2{_viewportTextureSize}), ImVec2(0, 1), ImVec2(1, 0));
 
-    Vector2i windowContentSize{Int(ImGui::GetWindowContentRegionMax().x - ImGui::GetWindowContentRegionMin().x),
-        Int(ImGui::GetWindowContentRegionMax().y - ImGui::GetWindowContentRegionMin().y)};
+    _viewportSize = {ImGui::GetWindowContentRegionMax().x - ImGui::GetWindowContentRegionMin().x,
+        ImGui::GetWindowContentRegionMax().y - ImGui::GetWindowContentRegionMin().y};
 
-    _framebuffer.setViewport({{}, windowContentSize*_dpiScaleRatio});
-    _camera->setProjectionMatrix(Matrix4::orthographicProjection(Vector2{windowContentSize}, -1000.0f, 1000.0f))
-        .setViewport(windowContentSize);
-
-    if(ImGui::IsWindowHovered() && ImGui::IsMouseClicked(2))
-        _isDragging = true;
-    else if(ImGui::IsMouseReleased(2))
-        _isDragging = false;
-
-    if(_isDragging) {
-        ImGuiIO& io = ImGui::GetIO();
-        _cameraObject->translate({-io.MouseDelta.x, io.MouseDelta.y, 0.0f});
-    }
+    _framebuffer.setViewport({{}, Vector2i{_viewportSize*_dpiScaleRatio}});
+    _camera->setProjectionMatrix(Matrix4::orthographicProjection(_viewportSize, -1000.0f, 1000.0f))
+        .setViewport(Vector2i{_viewportSize});
 
     if(ImGui::IsWindowHovered() && ImGui::IsMouseReleased(0)) {
         ImGuiIO& io = ImGui::GetIO();

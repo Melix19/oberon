@@ -286,14 +286,20 @@ void Editor::keyReleaseEvent(KeyEvent& event) {
 }
 
 void Editor::mousePressEvent(MouseEvent& event) {
+    for(auto& panel: _collectionPanels) panel.handleMousePressEvent(event);
+
     if(_imgui.handleMousePressEvent(event)) return;
 }
 
 void Editor::mouseReleaseEvent(MouseEvent& event) {
+    for(auto& panel: _collectionPanels) panel.handleMouseReleaseEvent(event);
+
     if(_imgui.handleMouseReleaseEvent(event)) return;
 }
 
 void Editor::mouseMoveEvent(MouseMoveEvent& event) {
+    for(auto& panel: _collectionPanels) panel.handleMouseMoveEvent(event);
+
     if(_imgui.handleMouseMoveEvent(event)) return;
 }
 

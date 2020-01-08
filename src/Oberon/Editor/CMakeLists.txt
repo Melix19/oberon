@@ -44,6 +44,7 @@ set(OberonEditor_SRCS
 
 set(OberonEditor_HEADERS
     CollectionPanel.h
+    CollectionPanel.hpp
     Console.h
     Editor.h
     Explorer.h

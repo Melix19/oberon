@@ -24,7 +24,7 @@
 
 #pragma once
 
-#include "CollectionPanel.h"
+#include "CollectionPanel.hpp"
 #include "Console.h"
 #include "Explorer.h"
 #include "Inspector.h"

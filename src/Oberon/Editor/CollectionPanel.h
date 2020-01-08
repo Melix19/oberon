@@ -38,6 +38,15 @@ class CollectionPanel: public Containers::LinkedListItem<CollectionPanel> {
         void drawViewport(Float deltaTime);
         void newFrame();
 
+    public:
+        template<class MouseEvent> void handleMousePressEvent(MouseEvent& event);
+        template<class MouseEvent> void handleMouseReleaseEvent(MouseEvent& event);
+        template<class MouseMoveEvent> void handleMouseMoveEvent(MouseMoveEvent& event);
+
+    private:
+        Vector2i _previousMousePosition;
+
+    public:
         void resetObjectAndChildren(ObjectNode* node);
         void addFeatureToObject(Utility::ConfigurationGroup* objectConfig, Object3D* object);
         void save();
@@ -76,6 +85,7 @@ class CollectionPanel: public Containers::LinkedListItem<CollectionPanel> {
         OberonResourceManager& _resourceManager;
 
         Vector2i _viewportTextureSize;
+        Vector2 _viewportSize;
         Vector2 _dpiScaleRatio;
 
         std::string _name;
@@ -85,6 +95,7 @@ class CollectionPanel: public Containers::LinkedListItem<CollectionPanel> {
 
         bool _isOpen;
         bool _isFocused;
+        bool _isHovered;
         bool _isSimulating;
 
         bool _isVisible;
