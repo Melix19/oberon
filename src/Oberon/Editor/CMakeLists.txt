@@ -1,7 +1,7 @@
 #
-#   MIT License
+#   This file is part of Oberon.
 #
-#   Copyright (c) 2019 Marco Melorio
+#   Copyright (c) 2019-2020 Marco Melorio
 #
 #   Permission is hereby granted, free of charge, to any person obtaining a copy
 #   of this software and associated documentation files (the "Software"), to deal
