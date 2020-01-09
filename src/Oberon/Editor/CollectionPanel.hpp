@@ -27,14 +27,14 @@
 #include "CollectionPanel.h"
 
 template<class MouseEvent> void CollectionPanel::handleMousePressEvent(MouseEvent& event) {
-    if(event.button() == MouseEvent::Button::Middle && _isHovered) {
+    if(event.button() == MouseEvent::Button::Right && _isHovered) {
         _previousMousePosition = event.position();
         _isDragging = true;
     }
 }
 
 template<class MouseEvent> void CollectionPanel::handleMouseReleaseEvent(MouseEvent& event) {
-    if(event.button() == MouseEvent::Button::Middle)
+    if(event.button() == MouseEvent::Button::Right)
         _isDragging = false;
 }
 
