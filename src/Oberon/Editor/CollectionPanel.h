@@ -34,9 +34,18 @@
 
 class CollectionPanel: public Containers::LinkedListItem<CollectionPanel> {
     public:
-        CollectionPanel(const std::string& path, OberonResourceManager& resourceManager, const Vector2i& viewportTextureSize, const Vector2& dpiScaleRatio);
+        CollectionPanel(const std::string& collectionPath, OberonResourceManager& resourceManager, const Vector2i& viewportTextureSize, const Vector2& dpiScaleRatio);
         void drawViewport(Float deltaTime);
         void newFrame();
+
+    private:
+        std::string _collectionPath;
+        std::string _name;
+
+        OberonResourceManager& _resourceManager;
+
+        Vector2i _viewportTextureSize;
+        Vector2 _dpiScaleRatio;
 
     public:
         template<class MouseEvent> void handleMousePressEvent(MouseEvent& event);
@@ -46,12 +55,15 @@ class CollectionPanel: public Containers::LinkedListItem<CollectionPanel> {
     private:
         Vector2i _previousMousePosition;
 
+        bool _isOrthographicCamera; /* Otherwise it's perspective. */
+        Matrix4 _prevCameraTransformation;
+
     public:
         void resetObjectAndChildren(ObjectNode* node);
         void addFeatureToObject(Utility::ConfigurationGroup* objectConfig, Object3D* object);
         void save();
 
-        const std::string& path() const { return _path; }
+        const std::string& collectionPath() const { return _collectionPath; }
         const std::string& name() const { return _name; }
 
         ObjectNode* rootNode() { return _rootNode.get(); }
@@ -81,14 +93,8 @@ class CollectionPanel: public Containers::LinkedListItem<CollectionPanel> {
     private:
         void updateObjectNodeChildren(ObjectNode* node);
 
-        std::string _path;
-        OberonResourceManager& _resourceManager;
-
-        Vector2i _viewportTextureSize;
         Vector2 _viewportSize;
-        Vector2 _dpiScaleRatio;
 
-        std::string _name;
         Utility::Configuration _collectionConfig;
         Containers::Pointer<ObjectNode> _rootNode;
         std::vector<ObjectNode*> _selectedNodes;

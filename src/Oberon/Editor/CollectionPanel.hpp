@@ -34,14 +34,20 @@ template<class MouseEvent> void CollectionPanel::handleMousePressEvent(MouseEven
 }
 
 template<class MouseEvent> void CollectionPanel::handleMouseReleaseEvent(MouseEvent& event) {
-    if(event.button() == MouseEvent::Button::Right)
-        _isDragging = false;
+    if(event.button() == MouseEvent::Button::Right) _isDragging = false;
 }
 
 template<class MouseMoveEvent> void CollectionPanel::handleMouseMoveEvent(MouseMoveEvent& event) {
     if(_isDragging) {
-        const Vector2 delta{event.position() - _previousMousePosition};
-        _cameraObject->translate({-delta.x(), delta.y(), 0});
+        if(_isOrthographicCamera) {
+            const Vector2 delta{event.position() - _previousMousePosition};
+            _cameraObject->translate({-delta.x(), delta.y(), 0});
+        } else {
+            const Vector2 delta = 3.0f*
+                Vector2{event.position() - _previousMousePosition}/_viewportSize;
+            _cameraObject->rotate(Rad{-delta.y()}, _cameraObject->transformation().right().normalized())
+                .rotateY(Rad{-delta.x()});
+        }
 
         _previousMousePosition = event.position();
     }

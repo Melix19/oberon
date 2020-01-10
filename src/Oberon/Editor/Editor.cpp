@@ -202,7 +202,7 @@ void Editor::drawEvent() {
             CollectionPanel* found = nullptr;
 
             for(auto& panel: _collectionPanels)
-                if(panel.path() == path) found = &panel;
+                if(panel.collectionPath() == path) found = &panel;
 
             if(found) found->setNeedsFocus(true);
             else _collectionPanels.insert(new CollectionPanel(path, _resourceManager, _maximizedWindowSize, _dpiScaleRatio));

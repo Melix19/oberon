@@ -34,11 +34,11 @@
 
 #include <algorithm>
 
-CollectionPanel::CollectionPanel(const std::string& path, OberonResourceManager& resourceManager, const Vector2i& viewportTextureSize, const Vector2& dpiScaleRatio):
-    _path(path), _resourceManager(resourceManager), _viewportTextureSize(viewportTextureSize), _dpiScaleRatio(dpiScaleRatio), _collectionConfig{_path},
-    _isOpen(true), _isFocused(false), _isSimulating(false), _isVisible(true), _isDragging(false), _needsFocus(true), _needsDocking(true)
+CollectionPanel::CollectionPanel(const std::string& collectionPath, OberonResourceManager& resourceManager, const Vector2i& viewportTextureSize, const Vector2& dpiScaleRatio):
+    _collectionPath(collectionPath), _resourceManager(resourceManager), _viewportTextureSize(viewportTextureSize), _dpiScaleRatio(dpiScaleRatio), _isOrthographicCamera(true),
+    _collectionConfig{_collectionPath}, _isOpen(true), _isFocused(false), _isSimulating(false), _isVisible(true), _isDragging(false), _needsFocus(true), _needsDocking(true)
 {
-    _name = Utility::Directory::filename(_path);
+    _name = Utility::Directory::filename(_collectionPath);
 
     _viewportTexture.setStorage(1, GL::TextureFormat::RGBA8, _viewportTextureSize*_dpiScaleRatio);
     _depth.setStorage(GL::RenderbufferFormat::Depth24Stencil8, _viewportTextureSize*_dpiScaleRatio);
@@ -98,7 +98,7 @@ void CollectionPanel::newFrame() {
 
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
     _isVisible = ImGui::Begin(_name.c_str(), &_isOpen, ImGuiWindowFlags_NoScrollbar |
-        ImGuiWindowFlags_NoScrollWithMouse);
+        ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_MenuBar);
     ImGui::PopStyleVar();
 
     _isFocused = ImGui::IsWindowFocused();
@@ -108,6 +108,24 @@ void CollectionPanel::newFrame() {
     if(!_isVisible || !_isOpen) {
         ImGui::End();
         return;
+    }
+
+    if(ImGui::BeginMenuBar()) {
+        std::string buttonStr;
+        if(_isOrthographicCamera)
+            buttonStr = "Perspective";
+        else
+            buttonStr = "Orthographic";
+
+        if(ImGui::Button(buttonStr.c_str())) {
+            _isOrthographicCamera = !_isOrthographicCamera;
+
+            Matrix4 currentCameraTransformation = _cameraObject->transformation();
+            _cameraObject->setTransformation(_prevCameraTransformation);
+            _prevCameraTransformation = currentCameraTransformation;
+        }
+
+        ImGui::EndMenuBar();
     }
 
     const ImVec2 windowPos = ImGui::GetWindowPos();
@@ -121,19 +139,25 @@ void CollectionPanel::newFrame() {
         ImGui::GetWindowContentRegionMax().y - ImGui::GetWindowContentRegionMin().y};
 
     _framebuffer.setViewport({{}, Vector2i{_viewportSize*_dpiScaleRatio}});
-    _camera->setProjectionMatrix(Matrix4::orthographicProjection(_viewportSize, -1000.0f, 1000.0f))
-        .setViewport(Vector2i{_viewportSize});
+
+    if(_isOrthographicCamera)
+        _camera->setProjectionMatrix(Matrix4::orthographicProjection(_viewportSize, -1000.0f, 1000.0f));
+    else
+        _camera->setProjectionMatrix(Matrix4::perspectiveProjection(Deg{70.0f}, _viewportSize.x()/
+            _viewportSize.y(), 0.05, 500.0f));
+
+    _camera->setViewport(Vector2i{_viewportSize});
 
     if(ImGui::IsWindowHovered() && ImGui::IsMouseReleased(0)) {
         ImGuiIO& io = ImGui::GetIO();
-        Vector2i mousePos{Int((io.MousePos.x - viewportPos.x)*_dpiScaleRatio.x()), Int((io.MousePos.y - viewportPos.y)*
-            _dpiScaleRatio.y())};
+        Vector2i mousePos{Int((io.MousePos.x - viewportPos.x)*_dpiScaleRatio.x()), Int((io.MousePos.y -
+            viewportPos.y)*_dpiScaleRatio.y())};
 
         _framebuffer.mapForRead(GL::Framebuffer::ColorAttachment{1});
 
         Image2D data = _framebuffer.read(
-            Range2Di::fromSize({mousePos.x(), _viewportTextureSize.y()*Int(_dpiScaleRatio.y()) - mousePos.y() - 1}, {1, 1}),
-            {PixelFormat::R32UI});
+            Range2Di::fromSize({mousePos.x(), _viewportTextureSize.y()*Int(_dpiScaleRatio.y()) -
+            mousePos.y() - 1}, {1, 1}), {PixelFormat::R32UI});
 
         UnsignedByte id = Containers::arrayCast<UnsignedByte>(data.data())[0];
 
@@ -189,8 +213,8 @@ void CollectionPanel::updateObjectNodeChildren(ObjectNode* node) {
         Math::Vector3<Rad> rotationRadians = Quaternion::fromMatrix(childConfig->value<Matrix4>("transformation").
             rotation()).toEuler();
 
-        childNode->setRotationDegree(Vector3{Float(Deg(rotationRadians.x())), Float(Deg(rotationRadians.y())),
-            Float(Deg(rotationRadians.z()))});
+        childNode->setRotationDegree(Vector3{Float(Deg{rotationRadians.x()}), Float(Deg{rotationRadians.y()}),
+            Float(Deg{rotationRadians.z()})});
 
         updateObjectNodeChildren(childNode);
     }
