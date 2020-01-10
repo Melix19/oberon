@@ -36,11 +36,13 @@ template<class KeyEvent> void CollectionPanel::handleKeyPressEvent(KeyEvent& eve
         if(event.key() == KeyEvent::Key::S)
             _cameraObject->translate(_cameraObject->transformation().backward()*0.1f);
         if(event.key() == KeyEvent::Key::A)
-            _cameraObject->translate(Math::cross(_cameraObject->transformation().backward(),
-                {0.0f, 1.0f, 0.0})*0.1f);
+            _cameraObject->translate(-_cameraObject->transformation().right()*0.1f);
         if(event.key() == KeyEvent::Key::D)
-            _cameraObject->translate(-Math::cross(_cameraObject->transformation().backward(),
-                {0.0f, 1.0f, 0.0})*0.1f);
+            _cameraObject->translate(_cameraObject->transformation().right()*0.1f);
+        if(event.key() == KeyEvent::Key::Q)
+            _cameraObject->translate(-_cameraObject->transformation().up()*0.1f);
+        if(event.key() == KeyEvent::Key::E)
+            _cameraObject->translate(_cameraObject->transformation().up()*0.1f);
     }
 }
 
