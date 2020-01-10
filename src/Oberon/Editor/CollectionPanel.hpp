@@ -54,7 +54,7 @@ template<class MouseEvent> void CollectionPanel::handleMousePressEvent(MouseEven
 template<class MouseEvent> void CollectionPanel::handleMouseReleaseEvent(MouseEvent& event) {
     if(event.button() == MouseEvent::Button::Right) {
         _isDragging = false;
-    } else if(!_isHovered && event.button() == MouseEvent::Button::Left) {
+    } else if(_isHovered && event.button() == MouseEvent::Button::Left) {
         const Vector2i mouseViewportPos = (event.position() - Vector2i{_viewportPos})*_dpiScaleRatio;
         const Vector2i fbMouseViewportPos{mouseViewportPos.x(), _viewportTextureSize.y()*
             Int(_dpiScaleRatio.y()) - mouseViewportPos.y() - 1};
