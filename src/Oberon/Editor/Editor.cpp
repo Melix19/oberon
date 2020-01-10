@@ -71,6 +71,8 @@ Editor::Editor(const Arguments& arguments, const std::string& projectPath): Plat
 
     setup(projectPath);
     initResourceManager();
+
+    _timeline.start();
 }
 
 void Editor::initResourceManager() {
@@ -86,8 +88,6 @@ void Editor::drawEvent() {
         panel.drawViewport(_timeline.previousFrameDuration());
 
     GL::Renderer::disable(GL::Renderer::Feature::DepthTest);
-
-    _timeline.nextFrame();
 
     GL::defaultFramebuffer.clear(GL::FramebufferClear::Color)
         .bind();
@@ -120,12 +120,10 @@ void Editor::drawEvent() {
         if(!_activePanel || !_activePanel->isSimulating()) {
             if(ImGui::Selectable("Play", false, 0, size) && _activePanel) {
                 _console.resetStrings();
-                _timeline.start();
                 _activePanel->startSimulation();
             }
         } else {
             if(ImGui::Selectable("Stop", false, 0, size)) {
-                _timeline.stop();
                 _activePanel->stopSimulation();
             }
         }
@@ -259,6 +257,8 @@ void Editor::drawEvent() {
 
     swapBuffers();
     redraw();
+
+    _timeline.nextFrame();
 }
 
 void Editor::viewportEvent(ViewportEvent& event) {
