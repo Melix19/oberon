@@ -45,7 +45,7 @@ void Inspector::newFrame() {
         /* Translation */
         setNextItemRightAlign("Translation");
         Vector3 translation = objectNode->objectConfig()->value<Matrix4>("transformation").translation();
-        if(ImGui::DragFloat3("##Translation", translation.data(), 0.5f)) {
+        if(ImGui::DragFloat3("##Translation", translation.data(), 0.002f)) {
             objectNode->object()->setTranslation(translation);
             objectNode->objectConfig()->setValue("transformation", objectNode->object()->transformation());
         }
@@ -53,11 +53,11 @@ void Inspector::newFrame() {
         /* Rotation */
         setNextItemRightAlign("Rotation");
         Vector3 rotationDegree = objectNode->rotationDegree();
-        if(ImGui::DragFloat3("##Rotation", rotationDegree.data(), 0.5f)) {
+        if(ImGui::DragFloat3("##Rotation", rotationDegree.data(), 0.1f)) {
             objectNode->object()->setRotation(
-                Quaternion::rotation(Rad(Deg(rotationDegree.z())), Vector3::zAxis())*
-                Quaternion::rotation(Rad(Deg(rotationDegree.y())), Vector3::yAxis())*
-                Quaternion::rotation(Rad(Deg(rotationDegree.x())), Vector3::xAxis()));
+                Quaternion::rotation(Rad{Deg{rotationDegree.z()}}, Vector3::zAxis())*
+                Quaternion::rotation(Rad{Deg{rotationDegree.y()}}, Vector3::yAxis())*
+                Quaternion::rotation(Rad{Deg{rotationDegree.x()}}, Vector3::xAxis()));
             objectNode->objectConfig()->setValue("transformation", objectNode->object()->transformation());
             objectNode->setRotationDegree(rotationDegree);
         }
@@ -65,7 +65,7 @@ void Inspector::newFrame() {
         /* Scaling */
         setNextItemRightAlign("Scaling");
         Vector3 scaling = objectNode->objectConfig()->value<Matrix4>("transformation").scaling();
-        if(ImGui::DragFloat3("##Scaling", scaling.data(), 0.005f)) {
+        if(ImGui::DragFloat3("##Scaling", scaling.data(), 0.001f)) {
             objectNode->object()->setScaling(scaling);
             objectNode->objectConfig()->setValue("transformation", objectNode->object()->transformation());
         }
@@ -125,7 +125,7 @@ void Inspector::newFrame() {
                 if(primitiveConfig) {
                     setNextItemRightAlign("Size");
                     Vector3 size = primitiveConfig->value<Vector3>("size");
-                    if(ImGui::DragFloat3("##Size", size.data(), 0.5f)) {
+                    if(ImGui::DragFloat3("##Size", size.data(), 0.002f)) {
                         mesh->setSize(size);
                         primitiveConfig->setValue("size", size);
                     }
