@@ -285,6 +285,8 @@ void Editor::keyPressEvent(KeyEvent& event) {
         if(isShortcutKey && event.key() == KeyEvent::Key::S) _activePanel->save();
     }
 
+    for(auto& panel: _collectionPanels) panel.handleKeyPressEvent(event);
+
     if(_imgui.handleKeyPressEvent(event)) return;
 }
 

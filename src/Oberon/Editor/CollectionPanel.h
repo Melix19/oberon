@@ -48,6 +48,7 @@ class CollectionPanel: public Containers::LinkedListItem<CollectionPanel> {
         Vector2 _dpiScaleRatio;
 
     public:
+        template<class KeyEvent> void handleKeyPressEvent(KeyEvent& event);
         template<class MouseEvent> void handleMousePressEvent(MouseEvent& event);
         template<class MouseEvent> void handleMouseReleaseEvent(MouseEvent& event);
         template<class MouseMoveEvent> void handleMouseMoveEvent(MouseMoveEvent& event);
