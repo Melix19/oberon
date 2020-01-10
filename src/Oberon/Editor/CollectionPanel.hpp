@@ -37,6 +37,8 @@ template<class MouseEvent> void CollectionPanel::handleMousePressEvent(MouseEven
 }
 
 template<class MouseEvent> void CollectionPanel::handleMouseReleaseEvent(MouseEvent& event) {
+    if(!_isHovered) return;
+
     switch(event.button()) {
         case MouseEvent::Button::Left: {
             const Vector2i mouseViewportPos = (event.position() - Vector2i{_viewportPos})*_dpiScaleRatio;
