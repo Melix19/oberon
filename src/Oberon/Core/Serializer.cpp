@@ -119,7 +119,7 @@ void setMeshFromConfig(Mesh& mesh, Utility::ConfigurationGroup* primitiveConfig,
 
     Resource<GL::Mesh> meshResource = resourceManager.get<GL::Mesh>(meshKey);
 
-    if(!primitiveConfig->hasValue("size")) primitiveConfig->setValue<Vector3>("size", {100, 100, 100});
+    if(!primitiveConfig->hasValue("size")) primitiveConfig->setValue<Vector3>("size", {2, 2, 2});
     Vector3 size = primitiveConfig->value<Vector3>("size");
 
     if(!meshResource) {
