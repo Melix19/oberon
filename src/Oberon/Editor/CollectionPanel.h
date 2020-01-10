@@ -55,7 +55,7 @@ class CollectionPanel: public Containers::LinkedListItem<CollectionPanel> {
     private:
         Vector2i _previousMousePosition;
 
-        bool _isOrthographicCamera; /* Otherwise it's perspective. */
+        bool _isOrthographicCamera; /* Otherwise it's perspective */
         Matrix4 _prevCameraTransformation;
 
     public:
@@ -93,6 +93,7 @@ class CollectionPanel: public Containers::LinkedListItem<CollectionPanel> {
     private:
         void updateObjectNodeChildren(ObjectNode* node);
 
+        Vector2 _viewportPos;
         Vector2 _viewportSize;
 
         Utility::Configuration _collectionConfig;

@@ -27,10 +27,8 @@
 #include <Corrade/Utility/Directory.h>
 #include <Magnum/GL/RenderbufferFormat.h>
 #include <Magnum/GL/TextureFormat.h>
-#include <Magnum/Image.h>
 #include <Magnum/ImGuiIntegration/Integration.h>
 #include <Magnum/Math/ConfigurationValue.h>
-#include <Magnum/PixelFormat.h>
 
 #include <algorithm>
 
@@ -131,9 +129,9 @@ void CollectionPanel::newFrame() {
     const ImVec2 windowPos = ImGui::GetWindowPos();
     const ImVec2 windowSize = ImGui::GetWindowSize();
 
-    ImVec2 viewportPos(windowPos.x, windowPos.y - (_viewportTextureSize.y() - windowSize.y));
-    ImGui::GetWindowDrawList()->AddImage(static_cast<ImTextureID>(&_viewportTexture), viewportPos,
-        ImVec2(Vector2{viewportPos} + Vector2{_viewportTextureSize}), ImVec2(0, 1), ImVec2(1, 0));
+    _viewportPos = Vector2{windowPos.x, windowPos.y - (_viewportTextureSize.y() - windowSize.y)};
+    ImGui::GetWindowDrawList()->AddImage(static_cast<ImTextureID>(&_viewportTexture), ImVec2(_viewportPos),
+        ImVec2(_viewportPos + Vector2{_viewportTextureSize}), ImVec2(0, 1), ImVec2(1, 0));
 
     _viewportSize = {ImGui::GetWindowContentRegionMax().x - ImGui::GetWindowContentRegionMin().x,
         ImGui::GetWindowContentRegionMax().y - ImGui::GetWindowContentRegionMin().y};
@@ -147,47 +145,6 @@ void CollectionPanel::newFrame() {
             _viewportSize.y(), 0.05, 500.0f));
 
     _camera->setViewport(Vector2i{_viewportSize});
-
-    if(ImGui::IsWindowHovered() && ImGui::IsMouseReleased(0)) {
-        ImGuiIO& io = ImGui::GetIO();
-        Vector2i mousePos{Int((io.MousePos.x - viewportPos.x)*_dpiScaleRatio.x()), Int((io.MousePos.y -
-            viewportPos.y)*_dpiScaleRatio.y())};
-
-        _framebuffer.mapForRead(GL::Framebuffer::ColorAttachment{1});
-
-        Image2D data = _framebuffer.read(
-            Range2Di::fromSize({mousePos.x(), _viewportTextureSize.y()*Int(_dpiScaleRatio.y()) -
-            mousePos.y() - 1}, {1, 1}), {PixelFormat::R32UI});
-
-        UnsignedByte id = Containers::arrayCast<UnsignedByte>(data.data())[0];
-
-        /* Use the macOS style shortcuts (Cmd/Super instead of Ctrl) for macOS. */
-        const bool isShortcutKey = (io.ConfigMacOSXBehaviors ? (io.KeySuper && !io.KeyCtrl) :
-            (io.KeyCtrl && !io.KeySuper)) && !io.KeyAlt && !io.KeyShift;
-
-        if(!isShortcutKey) {
-            for(auto& selectedNode: _selectedNodes)
-                selectedNode->setSelected(false);
-            _selectedNodes.clear();
-        }
-
-        if(id > 0 && id < _drawablesNodes.size() + 1) {
-            ObjectNode* pickedNode = _drawablesNodes[id - 1];
-
-            if(isShortcutKey && pickedNode->isSelected()) {
-                auto found = std::find_if(_selectedNodes.begin(), _selectedNodes.end(),
-                    [&](ObjectNode* p) { return p == pickedNode; });
-
-                CORRADE_INTERNAL_ASSERT(found != _selectedNodes.end());
-
-                _selectedNodes.erase(found);
-                pickedNode->setSelected(false);
-            } else {
-                _selectedNodes.push_back(pickedNode);
-                pickedNode->setSelected(true);
-            }
-        }
-    }
 
     ImGui::End();
 }

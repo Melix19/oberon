@@ -26,6 +26,9 @@
 
 #include "CollectionPanel.h"
 
+#include <Magnum/Image.h>
+#include <Magnum/PixelFormat.h>
+
 template<class MouseEvent> void CollectionPanel::handleMousePressEvent(MouseEvent& event) {
     if(event.button() == MouseEvent::Button::Right && _isHovered) {
         _previousMousePosition = event.position();
@@ -34,7 +37,60 @@ template<class MouseEvent> void CollectionPanel::handleMousePressEvent(MouseEven
 }
 
 template<class MouseEvent> void CollectionPanel::handleMouseReleaseEvent(MouseEvent& event) {
-    if(event.button() == MouseEvent::Button::Right) _isDragging = false;
+    switch(event.button()) {
+        case MouseEvent::Button::Left: {
+            const Vector2i mouseViewportPos = (event.position() - Vector2i{_viewportPos})*_dpiScaleRatio;
+            const Vector2i fbMouseViewportPos{mouseViewportPos.x(), _viewportTextureSize.y()*
+                Int(_dpiScaleRatio.y()) - mouseViewportPos.y() - 1};
+
+            /* Read object ID at given click position */
+            _framebuffer.mapForRead(GL::Framebuffer::ColorAttachment{1});
+            Image2D data = _framebuffer.read(Range2Di::fromSize(fbMouseViewportPos, {1, 1}),
+                {PixelFormat::R32UI});
+
+            UnsignedByte id = Containers::arrayCast<UnsignedByte>(data.data())[0];
+
+            const bool altPressed = event.modifiers() >= MouseEvent::Modifier::Alt;
+            const bool ctrlPressed = event.modifiers() >= MouseEvent::Modifier::Ctrl;
+            const bool shiftPressed = event.modifiers() >= MouseEvent::Modifier::Shift;
+            const bool superPressed = event.modifiers() >= MouseEvent::Modifier::Super;
+
+            /* Use the macOS style shortcuts (Cmd/Super instead of Ctrl) for macOS. */
+            #ifdef CORRADE_TARGET_APPLE
+            const bool isShortcutKey = superPressed && !ctrlPressed && !altPressed && !shiftPressed;
+            #else
+            const bool isShortcutKey = !superPressed && ctrlPressed && !altPressed && !shiftPressed;
+            #endif
+
+            if(!isShortcutKey) {
+                for(auto& selectedNode: _selectedNodes)
+                    selectedNode->setSelected(false);
+                _selectedNodes.clear();
+            }
+
+            if(id > 0 && id < _drawablesNodes.size() + 1) {
+                ObjectNode* pickedNode = _drawablesNodes[id - 1];
+
+                if(isShortcutKey && pickedNode->isSelected()) {
+                    auto found = std::find_if(_selectedNodes.begin(), _selectedNodes.end(),
+                        [&](ObjectNode* p) { return p == pickedNode; });
+
+                    CORRADE_INTERNAL_ASSERT(found != _selectedNodes.end());
+
+                    _selectedNodes.erase(found);
+                    pickedNode->setSelected(false);
+                } else {
+                    _selectedNodes.push_back(pickedNode);
+                    pickedNode->setSelected(true);
+                }
+            }
+        } break;
+        case MouseEvent::Button::Right: {
+            _isDragging = false;
+        } break;
+        default:
+            break;
+    }
 }
 
 template<class MouseMoveEvent> void CollectionPanel::handleMouseMoveEvent(MouseMoveEvent& event) {
