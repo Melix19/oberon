@@ -270,10 +270,17 @@ void Editor::viewportEvent(ViewportEvent& event) {
 
 void Editor::keyPressEvent(KeyEvent& event) {
     if(_activePanel) {
+        const bool altPressed = event.modifiers() >= KeyEvent::Modifier::Alt;
+        const bool ctrlPressed = event.modifiers() >= KeyEvent::Modifier::Ctrl;
+        const bool shiftPressed = event.modifiers() >= KeyEvent::Modifier::Shift;
+        const bool superPressed = event.modifiers() >= KeyEvent::Modifier::Super;
+
         /* Use the macOS style shortcuts (Cmd/Super instead of Ctrl) for macOS. */
-        ImGuiIO& io = ImGui::GetIO();
-        const bool isShortcutKey = (io.ConfigMacOSXBehaviors ? (io.KeySuper && !io.KeyCtrl) :
-            (io.KeyCtrl && !io.KeySuper)) && !io.KeyAlt && !io.KeyShift;
+        #ifdef CORRADE_TARGET_APPLE
+        const bool isShortcutKey = superPressed && !ctrlPressed && !altPressed && !shiftPressed;
+        #else
+        const bool isShortcutKey = !superPressed && ctrlPressed && !altPressed && !shiftPressed;
+        #endif
 
         if(isShortcutKey && event.key() == KeyEvent::Key::S) _activePanel->save();
     }
