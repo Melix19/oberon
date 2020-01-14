@@ -30,8 +30,6 @@
 #include <Magnum/ImGuiIntegration/Integration.h>
 #include <Magnum/Math/ConfigurationValue.h>
 
-#include <algorithm>
-
 CollectionPanel::CollectionPanel(const std::string& collectionPath, OberonResourceManager& resourceManager, const Vector2i& viewportTextureSize, const Vector2& dpiScaleRatio):
     _collectionPath(collectionPath), _resourceManager(resourceManager), _viewportTextureSize(viewportTextureSize), _dpiScaleRatio(dpiScaleRatio), _isOrthographicCamera(true),
     _collectionConfig{_collectionPath}, _isOpen(true), _isFocused(false), _isSimulating(false), _isVisible(true), _isDragging(false), _needsFocus(true), _needsDocking(true)

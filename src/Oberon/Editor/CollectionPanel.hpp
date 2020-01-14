@@ -29,6 +29,8 @@
 #include <Magnum/Image.h>
 #include <Magnum/PixelFormat.h>
 
+#include <algorithm>
+
 template<class KeyEvent> void CollectionPanel::handleKeyPressEvent(KeyEvent& event) {
     if(_isDragging && !_isOrthographicCamera) {
         if(event.key() == KeyEvent::Key::W)
