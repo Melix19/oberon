@@ -83,10 +83,12 @@ void Editor::initResourceManager() {
 
 void Editor::drawEvent() {
     GL::Renderer::enable(GL::Renderer::Feature::DepthTest);
+    GL::Renderer::enable(GL::Renderer::Feature::FaceCulling);
 
     for(auto& panel: _collectionPanels)
         panel.drawViewport(_timeline.previousFrameDuration());
 
+    GL::Renderer::disable(GL::Renderer::Feature::FaceCulling);
     GL::Renderer::disable(GL::Renderer::Feature::DepthTest);
 
     GL::defaultFramebuffer.clear(GL::FramebufferClear::Color)
