@@ -31,6 +31,10 @@ add_subdirectory(corrade)
 add_subdirectory(magnum)
 add_subdirectory(oberon)
 
+if(CORRADE_TARGET_MSVC)
+    add_compile_options(-bigobj)
+endif()
+
 add_library(OberonBindings
     ${OberonBindings_SRCS}
     ${OberonBindings_HEADERS})

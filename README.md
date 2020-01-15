@@ -1,8 +1,11 @@
-# Oberon
+Oberon
+======
+[![Build Status](https://github.com/Melix19/oberon/workflows/build/badge.svg)](https://github.com/Melix19/oberon/actions?workflow=build)
 
 A WIP cross-platform 2D/3D game engine built with magnum.
 
-## Building
+Building
+========
 
 This project requires the following libraries and tools to be built:
 
