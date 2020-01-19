@@ -13,7 +13,7 @@ jobs:
 
     - name: Install dependencies
       run: |
-        sudo apt-get install -y libglfw3-dev python3-dev
+        sudo apt-get install -y libglfw3-dev
 
         cd ..
         curl -L https://github.com/pybind/pybind11/archive/v2.4.3.tar.gz --output pybind11.tar.gz && tar -xzf pybind11.tar.gz
