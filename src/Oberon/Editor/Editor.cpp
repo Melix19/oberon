@@ -34,7 +34,8 @@
 
 Editor::Editor(const Arguments& arguments, const std::string& projectPath): Platform::Application{arguments,
     Configuration{}.setTitle("Oberon")
-                   .setWindowFlags(Configuration::WindowFlag::Maximized|Configuration::WindowFlag::Resizable)},
+                   .setWindowFlags(Configuration::WindowFlag::Maximized|Configuration::WindowFlag::Resizable),
+    GLConfiguration{}.setColorBufferSize({8, 8, 8, 8})},
     _explorer(projectPath), _inspector(_resourceManager), _activePanel(nullptr)
 {
     _maximizedWindowSize = windowSize();
