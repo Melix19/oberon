@@ -83,28 +83,6 @@ void resetObjectFromConfig(Object3D* object, Utility::ConfigurationGroup* object
     if(!objectConfig->hasValue("transformation")) objectConfig->setValue<Matrix4>("transformation", Matrix4::scaling({1, 1, 1}));
     Matrix4 transformation = objectConfig->value<Matrix4>("transformation");
     object->setTransformation(transformation);
-
-    for(auto featureConfig: objectConfig->groups("feature")) {
-        std::string type = featureConfig->value("type");
-
-        if(type == "mesh") {
-            /* Mesh */
-            auto& features = object->features();
-            Mesh* mesh = nullptr;
-
-            for(auto& feature: features) {
-                if((mesh = dynamic_cast<Mesh*>(&feature)))
-                    break;
-            }
-
-            CORRADE_INTERNAL_ASSERT(mesh != nullptr);
-
-            /* Size */
-            if(!featureConfig->hasValue("size")) featureConfig->setValue<Vector3>("size", {100, 100, 100});
-            Vector3 size = featureConfig->value<Vector3>("size");
-            mesh->setSize(size);
-        }
-    }
 }
 
 void setMeshFromConfig(Mesh& mesh, Utility::ConfigurationGroup* primitiveConfig, OberonResourceManager& resourceManager) {
