@@ -29,13 +29,19 @@ find_package(Magnum REQUIRED
 
 set_directory_properties(PROPERTIES CORRADE_USE_PEDANTIC_FLAGS ON)
 
+corrade_add_resource(OberonCore_RCS resources.conf)
+
 set(OberonCore_SRCS
-    Serializer.cpp)
+    Serializer.cpp
+    Shader.cpp
+
+    ${OberonCore_RCS})
 
 set(OberonCore_HEADERS
     Mesh.h
     Script.h
-    Serializer.h)
+    Serializer.h
+    Shader.h)
 
 add_library(OberonCore
     ${OberonCore_SRCS}

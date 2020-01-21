@@ -55,7 +55,7 @@ void addFeatureFromConfig(Utility::ConfigurationGroup* featureConfig, Object3D* 
 
     if(type == "mesh") {
         /* Shader */
-        Resource<GL::AbstractShaderProgram, Shaders::Flat3D> shaderResource = resourceManager.get<GL::AbstractShaderProgram, Shaders::Flat3D>("flat3d");
+        Resource<GL::AbstractShaderProgram, Oberon::Shader> shaderResource = resourceManager.get<GL::AbstractShaderProgram, Oberon::Shader>("shader");
         CORRADE_INTERNAL_ASSERT(shaderResource);
 
         /* Mesh */
@@ -113,11 +113,11 @@ void setMeshFromConfig(Mesh& mesh, Utility::ConfigurationGroup* primitiveConfig,
         UnsignedInt rings = primitiveConfig->value<UnsignedInt>("rings");
         GL::Mesh glMesh{NoCreate};
 
-        if(primitiveType == "circle") glMesh = MeshTools::compile(Primitives::circle3DSolid(segments));
-        if(primitiveType == "cube") glMesh = MeshTools::compile(Primitives::cubeSolid());
-        if(primitiveType == "plane") glMesh = MeshTools::compile(Primitives::planeSolid());
-        if(primitiveType == "sphere") glMesh = MeshTools::compile(Primitives::uvSphereSolid(rings, segments));
-        if(primitiveType == "square") glMesh = MeshTools::compile(Primitives::squareSolid());
+        if(primitiveType == "circle")       glMesh = MeshTools::compile(Primitives::circle3DSolid(segments));
+        else if(primitiveType == "cube")    glMesh = MeshTools::compile(Primitives::cubeSolid());
+        else if(primitiveType == "plane")   glMesh = MeshTools::compile(Primitives::planeSolid());
+        else if(primitiveType == "sphere")  glMesh = MeshTools::compile(Primitives::uvSphereSolid(rings, segments));
+        else if(primitiveType == "square")  glMesh = MeshTools::compile(Primitives::squareSolid());
 
         resourceManager.set(meshResource.key(), std::move(glMesh), ResourceDataState::Final, ResourcePolicy::ReferenceCounted);
     }

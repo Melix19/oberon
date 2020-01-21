@@ -45,8 +45,8 @@ CollectionPanel::CollectionPanel(const std::string& collectionPath, OberonResour
         .attachRenderbuffer(GL::Framebuffer::ColorAttachment{1}, _objectId)
         .attachRenderbuffer(GL::Framebuffer::BufferAttachment::Depth, _depth)
         .mapForDraw({
-            {Shaders::Flat3D::ColorOutput, GL::Framebuffer::ColorAttachment{0}},
-            {Shaders::Flat3D::ObjectIdOutput, GL::Framebuffer::ColorAttachment{1}}});
+            {Oberon::Shader::ColorOutput, GL::Framebuffer::ColorAttachment{0}},
+            {Oberon::Shader::ObjectIdOutput, GL::Framebuffer::ColorAttachment{1}}});
 
     _cameraObject = new Object3D{&_scene};
     _camera = new SceneGraph::Camera3D{*_cameraObject};

@@ -27,7 +27,7 @@ find_package(Magnum REQUIRED GL GlfwApplication)
 
 set_directory_properties(PROPERTIES CORRADE_USE_PEDANTIC_FLAGS ON)
 
-corrade_add_resource(OberonEditor_RESOURCES resources.conf)
+corrade_add_resource(OberonEditor_RCS resources.conf)
 
 set(OberonEditor_SRCS
     CollectionPanel.cpp
@@ -40,7 +40,7 @@ set(OberonEditor_SRCS
     ProjectManager.cpp
     Themer.cpp
 
-    ${OberonEditor_RESOURCES})
+    ${OberonEditor_RCS})
 
 set(OberonEditor_HEADERS
     CollectionPanel.h

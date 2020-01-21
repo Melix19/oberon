@@ -29,13 +29,14 @@
 #include <Magnum/Resource.h>
 #include <Magnum/SceneGraph/Camera.h>
 #include <Magnum/SceneGraph/Drawable.h>
-#include <Magnum/Shaders/Flat.h>
+
+#include "Shader.h"
 
 using namespace Magnum;
 
 class Mesh: public SceneGraph::Drawable3D {
     public:
-        explicit Mesh(SceneGraph::AbstractObject3D& object, SceneGraph::DrawableGroup3D* drawables, Resource<GL::AbstractShaderProgram, Shaders::Flat3D>& shader):
+        explicit Mesh(SceneGraph::AbstractObject3D& object, SceneGraph::DrawableGroup3D* drawables, Resource<GL::AbstractShaderProgram, Oberon::Shader>& shader):
             SceneGraph::Drawable3D{object, drawables}, _shader(shader) {}
 
         Mesh& setMesh(Resource<GL::Mesh>& mesh) {
@@ -59,13 +60,15 @@ class Mesh: public SceneGraph::Drawable3D {
             if(!_mesh)
                 return;
 
-            _shader->setTransformationProjectionMatrix(camera.projectionMatrix()*transformation*Matrix4::scaling(_size/2))
+            _shader->setTransformationMatrix(transformation*Matrix4::scaling(_size/2))
+                .setNormalMatrix(transformation.normalMatrix())
+                .setProjectionMatrix(camera.projectionMatrix())
                 .setObjectId(_id);
             _mesh->draw(*_shader);
         }
 
         Resource<GL::Mesh> _mesh;
-        Resource<GL::AbstractShaderProgram, Shaders::Flat3D> _shader;
+        Resource<GL::AbstractShaderProgram, Oberon::Shader> _shader;
 
         UnsignedByte _id;
         Vector3 _size;
