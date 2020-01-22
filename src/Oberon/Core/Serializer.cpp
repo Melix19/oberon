@@ -67,8 +67,24 @@ void addFeatureFromConfig(Utility::ConfigurationGroup* featureConfig, Object3D* 
             setMeshFromConfig(mesh, primitiveConfig, resourceManager);
         }
 
-        if(objectId > 0)
-            mesh.setObjectId(objectId);
+        /* Material */
+        if(featureConfig->hasGroup("material")) {
+            Utility::ConfigurationGroup* materialConfig = featureConfig->group("material");
+
+            Color3 ambient = materialConfig->value<Color3>("ambient");
+            mesh.setAmbientColor(ambient);
+
+            Color3 diffuse = materialConfig->value<Color3>("diffuse");
+            mesh.setDiffuseColor(diffuse);
+
+            Color3 specular = materialConfig->value<Color3>("specular");
+            mesh.setSpecularColor(specular);
+
+            Float shininess = materialConfig->value<Float>("shininess");
+            mesh.setShininess(shininess);
+        }
+
+        if(objectId > 0) mesh.setObjectId(objectId);
     } else if(type == "script") {
         /* Script path */
         std::string scriptPath = featureConfig->value("script_path");
@@ -102,11 +118,11 @@ void setMeshFromConfig(Mesh& mesh, Utility::ConfigurationGroup* primitiveConfig,
 
     if(!meshResource) {
         if(primitiveType == "sphere" && !primitiveConfig->hasValue("rings"))
-            primitiveConfig->setValue<UnsignedInt>("rings", 10);
+            primitiveConfig->setValue<UnsignedInt>("rings", 20);
 
         if((primitiveType == "circle" || primitiveType == "sphere") &&
             !primitiveConfig->hasValue("segments")) {
-            primitiveConfig->setValue<UnsignedInt>("segments", 10);
+            primitiveConfig->setValue<UnsignedInt>("segments", 20);
         }
 
         UnsignedInt segments = primitiveConfig->value<UnsignedInt>("segments");

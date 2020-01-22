@@ -65,28 +65,31 @@ Shader::Shader(const UnsignedInt lightCount): _lightCount{lightCount} {
     _objectIdUniform = uniformLocation("objectId");
     if(lightCount) {
         _normalMatrixUniform = uniformLocation("normalMatrix");
+        _diffuseColorUniform = uniformLocation("diffuseColor");
+        _specularColorUniform = uniformLocation("specularColor");
+        _shininessUniform = uniformLocation("shininess");
         _lightPositionsUniform = uniformLocation("lightPositions");
         _lightColorsUniform = uniformLocation("lightColors");
     }
 }
 
-Shader& Shader::setTransformationMatrix(const Matrix4& matrix) {
-    setUniform(_transformationMatrixUniform, matrix);
-    return *this;
-}
-
-Shader& Shader::setProjectionMatrix(const Matrix4& matrix) {
-    setUniform(_projectionMatrixUniform, matrix);
-    return *this;
-}
-
-Shader& Shader::setNormalMatrix(const Matrix3x3& matrix) {
-    if(_lightCount) setUniform(_normalMatrixUniform, matrix);
-    return *this;
-}
-
 Shader& Shader::setAmbientColor(const Color3& color) {
     setUniform(_ambientColorUniform, color);
+    return *this;
+}
+
+Shader& Shader::setDiffuseColor(const Color3& color) {
+    if(_lightCount) setUniform(_diffuseColorUniform, color);
+    return *this;
+}
+
+Shader& Shader::setSpecularColor(const Color3& color) {
+    if(_lightCount) setUniform(_specularColorUniform, color);
+    return *this;
+}
+
+Shader& Shader::setShininess(Float shininess) {
+    if(_lightCount) setUniform(_shininessUniform, shininess);
     return *this;
 }
 
@@ -95,15 +98,30 @@ Shader& Shader::setObjectId(UnsignedInt id) {
     return *this;
 }
 
-Shader& Shader::setLightPositions(const Containers::ArrayView<const Vector3> positions) {
-    CORRADE_INTERNAL_ASSERT(_lightCount == positions.size());
-    if(_lightCount) setUniform(_lightPositionsUniform, positions);
+Shader& Shader::setTransformationMatrix(const Matrix4& matrix) {
+    setUniform(_transformationMatrixUniform, matrix);
     return *this;
 }
 
-Shader& Shader::setLightColors(const Containers::ArrayView<const Magnum::Color4> colors) {
-    CORRADE_INTERNAL_ASSERT(_lightCount == colors.size());
-    if(_lightCount) setUniform(_lightColorsUniform, colors);
+Shader& Shader::setNormalMatrix(const Matrix3x3& matrix) {
+    if(_lightCount) setUniform(_normalMatrixUniform, matrix);
+    return *this;
+}
+
+Shader& Shader::setProjectionMatrix(const Matrix4& matrix) {
+    setUniform(_projectionMatrixUniform, matrix);
+    return *this;
+}
+
+Shader& Shader::setLightPosition(UnsignedInt id, const Vector3& position) {
+    CORRADE_INTERNAL_ASSERT(id < _lightCount);
+    setUniform(_lightPositionsUniform + id, position);
+    return *this;
+}
+
+Shader& Shader::setLightColor(UnsignedInt id, const Color3& color) {
+    CORRADE_INTERNAL_ASSERT(id < _lightCount);
+    setUniform(_lightColorsUniform + id, color);
     return *this;
 }
 

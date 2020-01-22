@@ -40,15 +40,19 @@ class Shader: public GL::AbstractShaderProgram {
 
         explicit Shader(const UnsignedInt lightCount);
 
-        Shader& setTransformationMatrix(const Matrix4& matrix);
-        Shader& setProjectionMatrix(const Matrix4& matrix);
-        Shader& setNormalMatrix(const Matrix3x3& matrix);
-
         Shader& setAmbientColor(const Color3& color);
+        Shader& setDiffuseColor(const Color3& color);
+        Shader& setSpecularColor(const Color3& color);
+        Shader& setShininess(Float shininess);
+
         Shader& setObjectId(UnsignedInt id);
 
-        Shader& setLightPositions(Containers::ArrayView<const Vector3> lights);
-        Shader& setLightColors(Containers::ArrayView<const Magnum::Color4> colors);
+        Shader& setTransformationMatrix(const Matrix4& matrix);
+        Shader& setNormalMatrix(const Matrix3x3& matrix);
+        Shader& setProjectionMatrix(const Matrix4& matrix);
+
+        Shader& setLightPosition(UnsignedInt id, const Vector3& position);
+        Shader& setLightColor(UnsignedInt id, const Color3& color);
 
     private:
         UnsignedInt _lightCount;
@@ -56,6 +60,9 @@ class Shader: public GL::AbstractShaderProgram {
             _projectionMatrixUniform,
             _normalMatrixUniform,
             _ambientColorUniform,
+            _diffuseColorUniform,
+            _specularColorUniform,
+            _shininessUniform,
             _objectIdUniform,
             _lightPositionsUniform,
             _lightColorsUniform;

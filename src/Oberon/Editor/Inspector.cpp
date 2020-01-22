@@ -91,66 +91,109 @@ void Inspector::newFrame() {
 
             if(ImGui::CollapsingHeader("Mesh", &featureIsOpen, ImGuiTreeNodeFlags_DefaultOpen)) {
                 Utility::ConfigurationGroup* primitiveConfig = featureConfig->group("primitive");
-                std::string primitiveType = "none";
+                Utility::ConfigurationGroup* materialConfig = featureConfig->group("material");
+                ImGuiTreeNodeFlags nodeFlags = ImGuiTreeNodeFlags_FramePadding |
+                    ImGuiTreeNodeFlags_SpanFullWidth;
 
-                if(primitiveConfig && primitiveConfig->hasValue("type"))
-                    primitiveType = primitiveConfig->value("type");
+                if(ImGui::TreeNodeEx("Primitive", nodeFlags)) {
+                    std::string primitiveType = "none";
+                    bool updateMesh = false;
 
-                const char* primitives[] = {"Circle", "Cube", "Plane", "Sphere", "Square"};
-                std::string primitiveString = primitiveType;
-                primitiveString[0] = toupper(primitiveString[0]);
-                bool updateMesh = false;
+                    if(primitiveConfig && primitiveConfig->hasValue("type"))
+                        primitiveType = primitiveConfig->value("type");
 
-                setNextItemRightAlign("Primitive type");
-                if(ImGui::BeginCombo("##PrimitiveType", primitiveString.c_str())) {
-                    for(auto& type: primitives) {
-                        bool isSelected = (primitiveString.c_str() == type);
+                    std::string primitiveString = primitiveType;
+                    primitiveString[0] = toupper(primitiveString[0]);
 
-                        if(ImGui::Selectable(type, isSelected)) {
-                            primitiveType = type;
-                            primitiveType[0] = tolower(primitiveType[0]);
+                    setNextItemRightAlign("Type");
+                    if(ImGui::BeginCombo("##PrimitiveType", primitiveString.c_str())) {
+                        const char* primitives[] = {"Circle", "Cube", "Plane", "Sphere", "Square"};
 
-                            featureConfig->removeGroup("primitive");
-                            primitiveConfig = featureConfig->addGroup("primitive");
-                            primitiveConfig->setValue("type", primitiveType);
+                        for(auto& type: primitives) {
+                            bool isSelected = (primitiveString.c_str() == type);
 
-                            updateMesh = true;
+                            if(ImGui::Selectable(type, isSelected)) {
+                                primitiveType = type;
+                                primitiveType[0] = tolower(primitiveType[0]);
+
+                                featureConfig->removeGroup("primitive");
+                                primitiveConfig = featureConfig->addGroup("primitive");
+                                primitiveConfig->setValue("type", primitiveType);
+
+                                if(!materialConfig)
+                                    materialConfig = featureConfig->addGroup("material");
+
+                                updateMesh = true;
+                            }
+                        }
+
+                        ImGui::EndCombo();
+                    }
+
+                    if(primitiveConfig) {
+                        setNextItemRightAlign("Size");
+                        Vector3 size = primitiveConfig->value<Vector3>("size");
+                        if(ImGui::DragFloat3("##Size", size.data(), 0.002f)) {
+                            mesh->setSize(size);
+                            primitiveConfig->setValue("size", size);
+                        }
+
+                        if(primitiveType == "sphere") {
+                            setNextItemRightAlign("Rings");
+                            Int rings = primitiveConfig->value<Int>("rings");
+                            if(ImGui::DragInt("##Rings", &rings, 1.0f, 2, INT_MAX)) {
+                                primitiveConfig->setValue("rings", rings);
+                                updateMesh = true;
+                            }
+                        }
+
+                        if(primitiveType == "circle" || primitiveType == "sphere") {
+                            setNextItemRightAlign("Segments");
+                            Int segments = primitiveConfig->value<Int>("segments");
+                            if(ImGui::DragInt("##Segments", &segments, 1.0f, 3, INT_MAX)) {
+                                primitiveConfig->setValue("segments", segments);
+                                updateMesh = true;
+                            }
                         }
                     }
 
-                    ImGui::EndCombo();
+                    if(updateMesh)
+                        Serializer::setMeshFromConfig(*mesh, primitiveConfig, _resourceManager);
+
+                    ImGui::TreePop();
                 }
 
-                /* Size */
-                if(primitiveConfig) {
-                    setNextItemRightAlign("Size");
-                    Vector3 size = primitiveConfig->value<Vector3>("size");
-                    if(ImGui::DragFloat3("##Size", size.data(), 0.002f)) {
-                        mesh->setSize(size);
-                        primitiveConfig->setValue("size", size);
+                if(materialConfig && ImGui::TreeNodeEx("Material", nodeFlags)) {
+                    setNextItemRightAlign("Ambient color");
+                    Color3 ambient = materialConfig->value<Color3>("ambient");
+                    if(ImGui::ColorEdit3("##Ambient", ambient.data())) {
+                        materialConfig->setValue("ambient", ambient);
+                        mesh->setAmbientColor(ambient);
                     }
-                }
 
-                if(primitiveType == "sphere") {
-                    setNextItemRightAlign("Rings");
-                    Int rings = primitiveConfig->value<Int>("rings");
-                    if(ImGui::DragInt("##Rings", &rings, 1.0f, 2, INT_MAX)) {
-                        primitiveConfig->setValue("rings", rings);
-                        updateMesh = true;
+                    setNextItemRightAlign("Diffuse color");
+                    Color3 diffuse = materialConfig->value<Color3>("diffuse");
+                    if(ImGui::ColorEdit3("##Diffuse", diffuse.data())) {
+                        materialConfig->setValue("diffuse", diffuse);
+                        mesh->setDiffuseColor(diffuse);
                     }
-                }
 
-                if(primitiveType == "circle" || primitiveType == "sphere") {
-                    setNextItemRightAlign("Segments");
-                    Int segments = primitiveConfig->value<Int>("segments");
-                    if(ImGui::DragInt("##Segments", &segments, 1.0f, 3, INT_MAX)) {
-                        primitiveConfig->setValue("segments", segments);
-                        updateMesh = true;
+                    setNextItemRightAlign("Specular color");
+                    Color3 specular = materialConfig->value<Color3>("specular");
+                    if(ImGui::ColorEdit3("##Specular", specular.data())) {
+                        materialConfig->setValue("specular", specular);
+                        mesh->setSpecularColor(specular);
                     }
-                }
 
-                if(updateMesh)
-                    Serializer::setMeshFromConfig(*mesh, primitiveConfig, _resourceManager);
+                    setNextItemRightAlign("Shininess");
+                    Float shininess = materialConfig->value<Float>("shininess");
+                    if(ImGui::DragFloat("##Shininess", &shininess, 0.1f, 1.0f, FLT_MAX)) {
+                        materialConfig->setValue("shininess", shininess);
+                        mesh->setShininess(shininess);
+                    }
+
+                    ImGui::TreePop();
+                }
             }
 
             if(!featureIsOpen) {

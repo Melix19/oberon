@@ -55,14 +55,37 @@ class Mesh: public SceneGraph::Drawable3D {
             return *this;
         }
 
+        Mesh& setAmbientColor(const Color3& color) {
+            _ambientColor = color;
+            return *this;
+        }
+
+        Mesh& setDiffuseColor(const Color3& color) {
+            _diffuseColor = color;
+            return *this;
+        }
+
+        Mesh& setSpecularColor(const Color3& color) {
+            _specularColor = color;
+            return *this;
+        }
+
+        Mesh& setShininess(Float shininess) {
+            _shininess = shininess;
+            return *this;
+        }
+
     private:
         void draw(const Matrix4& transformation, SceneGraph::Camera3D& camera) override {
-            if(!_mesh)
-                return;
+            if(!_mesh) return;
 
             _shader->setTransformationMatrix(transformation*Matrix4::scaling(_size/2))
                 .setNormalMatrix(transformation.normalMatrix())
                 .setProjectionMatrix(camera.projectionMatrix())
+                .setAmbientColor(_ambientColor)
+                .setDiffuseColor(_diffuseColor)
+                .setSpecularColor(_specularColor)
+                .setShininess(_shininess)
                 .setObjectId(_id);
             _mesh->draw(*_shader);
         }
@@ -72,4 +95,9 @@ class Mesh: public SceneGraph::Drawable3D {
 
         UnsignedByte _id;
         Vector3 _size;
+
+        Color3 _ambientColor;
+        Color3 _diffuseColor;
+        Color3 _specularColor;
+        Float _shininess;
 };

@@ -23,8 +23,11 @@
 */
 
 uniform lowp vec3 ambientColor;
-uniform lowp uint objectId;
+uniform highp uint objectId;
 #if LIGHT_COUNT
+uniform lowp vec3 diffuseColor;
+uniform lowp vec3 specularColor;
+uniform mediump float shininess;
 uniform lowp vec3 lightColors[LIGHT_COUNT];
 #endif
 
@@ -35,7 +38,7 @@ in highp vec3 cameraDirection;
 #endif
 
 layout(location = 0) out lowp vec4 fragmentColor;
-layout(location = 1) out lowp uint fragmentObjectId;
+layout(location = 1) out highp uint fragmentObjectId;
 
 void main() {
     fragmentColor.rgb = ambientColor;
@@ -46,12 +49,12 @@ void main() {
     for(int i = 0; i < LIGHT_COUNT; ++i) {
         highp vec3 normalizedLightDirection = normalize(lightDirections[i]);
         lowp float intensity = max(0.0, dot(normalizedTransformedNormal, normalizedLightDirection));
-        fragmentColor.rgb += lightColors[i]*intensity;
+        fragmentColor.rgb += diffuseColor*lightColors[i]*intensity;
 
         if(intensity > 0.001) {
             highp vec3 reflection = reflect(-normalizedLightDirection, normalizedTransformedNormal);
-            mediump float specularity = pow(max(0.0, dot(normalize(cameraDirection), reflection)), 80.0);
-            fragmentColor.rgb += vec3(1.0)*specularity;
+            mediump float specularity = pow(max(0.0, dot(normalize(cameraDirection), reflection)), shininess);
+            fragmentColor.rgb += specularColor*specularity;
         }
     }
     #endif
