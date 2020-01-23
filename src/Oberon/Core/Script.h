@@ -37,18 +37,18 @@ typedef SceneGraph::FeatureGroup3D<Script> ScriptGroup;
 
 class Script: public SceneGraph::AbstractGroupedFeature3D<Script> {
     public:
-        explicit Script(SceneGraph::AbstractObject3D& object, ScriptGroup* scripts, const std::string& scriptPath): SceneGraph::AbstractGroupedFeature3D<Script>{object, scripts}, _scriptPath(scriptPath) {}
+        explicit Script(SceneGraph::AbstractObject3D& object, ScriptGroup* scripts, const std::string& path): SceneGraph::AbstractGroupedFeature3D<Script>{object, scripts}, _path(path) {}
 
-        std::string scriptPath() const { return _scriptPath; }
+        std::string path() const { return _path; }
 
-        Script& setScriptPath(const std::string& scriptPath) {
-            _scriptPath = scriptPath;
+        Script& setPath(const std::string& path) {
+            _path = path;
             return *this;
         }
 
         py::module& pyModule() { return _pyModule; }
 
     private:
-        std::string _scriptPath;
+        std::string _path;
         py::module _pyModule;
 };

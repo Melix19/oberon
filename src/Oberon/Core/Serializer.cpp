@@ -86,11 +86,11 @@ void addFeatureFromConfig(Utility::ConfigurationGroup* featureConfig, Object3D* 
 
         if(objectId > 0) mesh.setObjectId(objectId);
     } else if(type == "script") {
-        /* Script path */
-        std::string scriptPath = featureConfig->value("script_path");
+        /* Path */
+        std::string path = featureConfig->value("path");
 
         /* Script */
-        object->addFeature<Script>(scripts, scriptPath);
+        object->addFeature<Script>(scripts, path);
     }
 }
 

@@ -183,7 +183,7 @@ CollectionPanel& CollectionPanel::startSimulation() {
             if(script.pyModule())
                 script.pyModule().reload();
             else
-                script.pyModule() = py::module::import(script.scriptPath().c_str());
+                script.pyModule() = py::module::import(script.path().c_str());
 
             script.pyModule().attr("init")(&script.object());
         }

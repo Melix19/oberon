@@ -216,10 +216,12 @@ void Inspector::newFrame() {
 
             if(ImGui::CollapsingHeader("Script", &featureIsOpen, ImGuiTreeNodeFlags_DefaultOpen)) {
                 /* Size */
-                setNextItemRightAlign("Script path");
-                std::string scriptPath = featureConfig->value("script_path");
-                if(ImGui::InputText("##ScriptPath", &scriptPath))
-                    featureConfig->setValue("script_path", scriptPath);
+                setNextItemRightAlign("Path");
+                std::string path = featureConfig->value("path");
+                if(ImGui::InputText("##ScriptPath", &path)) {
+                    script->setPath(path);
+                    featureConfig->setValue("path", path);
+                }
             }
 
             if(!featureIsOpen) {
