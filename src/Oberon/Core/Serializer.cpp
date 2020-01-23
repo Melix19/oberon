@@ -36,7 +36,7 @@
 
 namespace Serializer {
 
-Object3D* createObjectFromConfig(Utility::ConfigurationGroup* objectConfig, Object3D* parent, OberonResourceManager& resourceManager, SceneGraph::DrawableGroup3D* drawables, ScriptGroup* scripts, UnsignedByte objectId) {
+Object3D* createObjectFromConfig(Utility::ConfigurationGroup* objectConfig, Object3D* parent, OberonResourceManager& resourceManager, SceneGraph::DrawableGroup3D* drawables, ScriptGroup* scripts, LightGroup* lights, UnsignedByte objectId) {
     Object3D* object = new Object3D{parent};
 
     /* Transformation */
@@ -45,18 +45,19 @@ Object3D* createObjectFromConfig(Utility::ConfigurationGroup* objectConfig, Obje
     object->setTransformation(transformation);
 
     for(auto featureConfig: objectConfig->groups("feature"))
-        addFeatureFromConfig(featureConfig, object, resourceManager, drawables, scripts, objectId);
+        addFeatureFromConfig(featureConfig, object, resourceManager, drawables, scripts, lights, objectId);
 
     return object;
 }
 
-void addFeatureFromConfig(Utility::ConfigurationGroup* featureConfig, Object3D* object, OberonResourceManager& resourceManager, SceneGraph::DrawableGroup3D* drawables, ScriptGroup* scripts, UnsignedByte objectId) {
+void addFeatureFromConfig(Utility::ConfigurationGroup* featureConfig, Object3D* object, OberonResourceManager& resourceManager, SceneGraph::DrawableGroup3D* drawables, ScriptGroup* scripts, LightGroup* lights, UnsignedByte objectId) {
     std::string type = featureConfig->value("type");
 
     if(type == "mesh") {
         /* Shader */
         Resource<GL::AbstractShaderProgram, Oberon::Shader> shaderResource = resourceManager.get<GL::AbstractShaderProgram, Oberon::Shader>("shader");
-        CORRADE_INTERNAL_ASSERT(shaderResource);
+        if(!shaderResource)
+            resourceManager.set<GL::AbstractShaderProgram>(shaderResource.key(), new Oberon::Shader{0}, ResourceDataState::Mutable, ResourcePolicy::Resident);
 
         /* Mesh */
         Mesh& mesh = object->addFeature<Mesh>(drawables, shaderResource);
@@ -85,6 +86,16 @@ void addFeatureFromConfig(Utility::ConfigurationGroup* featureConfig, Object3D* 
         }
 
         if(objectId > 0) mesh.setObjectId(objectId);
+    } else if(type == "light") {
+        /* Shader */
+        Resource<GL::AbstractShaderProgram, Oberon::Shader> shaderResource = resourceManager.get<GL::AbstractShaderProgram, Oberon::Shader>("shader");
+        resourceManager.set<GL::AbstractShaderProgram>(shaderResource.key(), new Oberon::Shader{UnsignedInt(lights->size() + 1)}, ResourceDataState::Mutable, ResourcePolicy::Resident);
+
+        /* Color */
+        Color3 color = featureConfig->value<Color3>("color");
+
+        /* Light */
+        object->addFeature<Light>(lights, shaderResource, color);
     } else if(type == "script") {
         /* Path */
         std::string path = featureConfig->value("path");

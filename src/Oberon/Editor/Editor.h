@@ -39,7 +39,6 @@ class Editor: public Platform::Application {
         explicit Editor(const Arguments& arguments, const std::string& projectPath);
 
     private:
-        void initResourceManager();
         void drawEvent() override;
 
         void viewportEvent(ViewportEvent& event) override;

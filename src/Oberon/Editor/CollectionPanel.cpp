@@ -32,7 +32,7 @@
 
 CollectionPanel::CollectionPanel(const std::string& collectionPath, OberonResourceManager& resourceManager, const Vector2i& viewportTextureSize, const Vector2& dpiScaleRatio):
     _collectionPath(collectionPath), _resourceManager(resourceManager), _viewportTextureSize(viewportTextureSize), _dpiScaleRatio(dpiScaleRatio), _isOrthographicCamera(true),
-    _collectionConfig{_collectionPath}, _isOpen(true), _isFocused(false), _isSimulating(false), _isVisible(true), _isDragging(false), _needsFocus(true), _needsDocking(true)
+    _collectionConfig{_collectionPath}, _isOpen(true), _isFocused(false), _isVisible(true), _isDragging(false), _needsFocus(true), _needsDocking(true), _isSimulating(false)
 {
     _name = Utility::Directory::filename(_collectionPath);
 
@@ -58,7 +58,7 @@ CollectionPanel::CollectionPanel(const std::string& collectionPath, OberonResour
     }
 
     Object3D* rootObject = Serializer::createObjectFromConfig(_collectionConfig.group("scene"),
-        &_scene, resourceManager, &_drawables, &_scripts, _drawablesNodes.size() + 1);
+        &_scene, resourceManager, &_drawables, &_scripts, &_lights, _drawablesNodes.size() + 1);
     _rootNode = Containers::pointer<ObjectNode>(rootObject, _collectionConfig.group("scene"));
 
     if(!_drawables.isEmpty() && rootObject == &_drawables[_drawables.size() - 1].object())
@@ -84,6 +84,9 @@ void CollectionPanel::drawViewport(Float deltaTime) {
             script.pyModule().attr("update")(&script.object(), deltaTime);
         }
     }
+
+    for(std::size_t i = 0; i != _lights.size(); ++i)
+        _lights[i].applyShader();
 
     _camera->draw(_drawables);
 }
@@ -148,7 +151,7 @@ void CollectionPanel::newFrame() {
 }
 
 void CollectionPanel::addFeatureToObject(Utility::ConfigurationGroup* objectConfig, Object3D* object) {
-    Serializer::addFeatureFromConfig(objectConfig, object, _resourceManager, &_drawables, &_scripts,
+    Serializer::addFeatureFromConfig(objectConfig, object, _resourceManager, &_drawables, &_scripts, &_lights,
         _drawablesNodes.size() + 1);
 }
 
@@ -159,7 +162,7 @@ void CollectionPanel::save() {
 void CollectionPanel::updateObjectNodeChildren(ObjectNode* node) {
     for(auto childConfig : node->objectConfig()->groups("child")) {
         Object3D* child = Serializer::createObjectFromConfig(childConfig, node->object(),
-            _resourceManager, &_drawables, &_scripts, _drawablesNodes.size() + 1);
+            _resourceManager, &_drawables, &_scripts, &_lights, _drawablesNodes.size() + 1);
         ObjectNode* childNode = node->addChild(child, childConfig);
 
         if(!_drawables.isEmpty() && child == &_drawables[_drawables.size() - 1].object())
@@ -209,4 +212,12 @@ void CollectionPanel::resetObjectAndChildren(ObjectNode* node) {
 
     for(auto& child : node->children())
         resetObjectAndChildren(child.get());
+}
+
+void CollectionPanel::updateShader() {
+    Resource<GL::AbstractShaderProgram, Oberon::Shader> shaderResource = _resourceManager.get<GL::AbstractShaderProgram, Oberon::Shader>("shader");
+    _resourceManager.set<GL::AbstractShaderProgram>(shaderResource.key(), new Oberon::Shader{UnsignedInt(_lights.size())}, ResourceDataState::Mutable, ResourcePolicy::Resident);
+
+    for(std::size_t i = 0; i != _lights.size(); ++i)
+        _lights[i].setId(i);
 }

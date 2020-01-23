@@ -86,10 +86,7 @@ class CollectionPanel: public Containers::LinkedListItem<CollectionPanel> {
             return *this;
         }
 
-        bool isSimulating() const { return _isSimulating; }
-
-        CollectionPanel& startSimulation();
-        CollectionPanel& stopSimulation();
+        void updateShader();
 
     private:
         void updateObjectNodeChildren(ObjectNode* node);
@@ -104,7 +101,6 @@ class CollectionPanel: public Containers::LinkedListItem<CollectionPanel> {
         bool _isOpen;
         bool _isFocused;
         bool _isHovered;
-        bool _isSimulating;
 
         bool _isVisible;
         bool _isDragging;
@@ -120,8 +116,18 @@ class CollectionPanel: public Containers::LinkedListItem<CollectionPanel> {
         SceneGraph::DrawableGroup3D _drawables;
         std::vector<ObjectNode*> _drawablesNodes;
         ScriptGroup _scripts;
+        LightGroup _lights;
 
         Scene3D _scene;
         Object3D* _cameraObject;
         SceneGraph::Camera3D* _camera;
+
+    public:
+        bool isSimulating() const { return _isSimulating; }
+
+        CollectionPanel& startSimulation();
+        CollectionPanel& stopSimulation();
+
+    private:
+        bool _isSimulating;
 };

@@ -38,6 +38,7 @@ set(OberonCore_SRCS
     ${OberonCore_RCS})
 
 set(OberonCore_HEADERS
+    Light.h
     Mesh.h
     Script.h
     Serializer.h

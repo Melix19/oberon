@@ -106,7 +106,7 @@ void Inspector::newFrame() {
                     primitiveString[0] = toupper(primitiveString[0]);
 
                     setNextItemRightAlign("Type");
-                    if(ImGui::BeginCombo("##PrimitiveType", primitiveString.c_str())) {
+                    if(ImGui::BeginCombo("##MeshPrimitiveType", primitiveString.c_str())) {
                         const char* primitives[] = {"Circle", "Cube", "Plane", "Sphere", "Square"};
 
                         for(auto& type: primitives) {
@@ -133,7 +133,7 @@ void Inspector::newFrame() {
                     if(primitiveConfig) {
                         setNextItemRightAlign("Size");
                         Vector3 size = primitiveConfig->value<Vector3>("size");
-                        if(ImGui::DragFloat3("##Size", size.data(), 0.002f)) {
+                        if(ImGui::DragFloat3("##MeshPrimitiveSize", size.data(), 0.002f)) {
                             mesh->setSize(size);
                             primitiveConfig->setValue("size", size);
                         }
@@ -141,7 +141,7 @@ void Inspector::newFrame() {
                         if(primitiveType == "sphere") {
                             setNextItemRightAlign("Rings");
                             Int rings = primitiveConfig->value<Int>("rings");
-                            if(ImGui::DragInt("##Rings", &rings, 1.0f, 2, INT_MAX)) {
+                            if(ImGui::DragInt("##MeshPrimitiveRings", &rings, 1.0f, 2, INT_MAX)) {
                                 primitiveConfig->setValue("rings", rings);
                                 updateMesh = true;
                             }
@@ -150,7 +150,7 @@ void Inspector::newFrame() {
                         if(primitiveType == "circle" || primitiveType == "sphere") {
                             setNextItemRightAlign("Segments");
                             Int segments = primitiveConfig->value<Int>("segments");
-                            if(ImGui::DragInt("##Segments", &segments, 1.0f, 3, INT_MAX)) {
+                            if(ImGui::DragInt("##MeshPrimitiveSegments", &segments, 1.0f, 3, INT_MAX)) {
                                 primitiveConfig->setValue("segments", segments);
                                 updateMesh = true;
                             }
@@ -166,28 +166,28 @@ void Inspector::newFrame() {
                 if(materialConfig && ImGui::TreeNodeEx("Material", nodeFlags)) {
                     setNextItemRightAlign("Ambient color");
                     Color3 ambient = materialConfig->value<Color3>("ambient");
-                    if(ImGui::ColorEdit3("##Ambient", ambient.data())) {
+                    if(ImGui::ColorEdit3("##MeshMaterialAmbient", ambient.data())) {
                         materialConfig->setValue("ambient", ambient);
                         mesh->setAmbientColor(ambient);
                     }
 
                     setNextItemRightAlign("Diffuse color");
                     Color3 diffuse = materialConfig->value<Color3>("diffuse");
-                    if(ImGui::ColorEdit3("##Diffuse", diffuse.data())) {
+                    if(ImGui::ColorEdit3("##MeshMaterialDiffuse", diffuse.data())) {
                         materialConfig->setValue("diffuse", diffuse);
                         mesh->setDiffuseColor(diffuse);
                     }
 
                     setNextItemRightAlign("Specular color");
                     Color3 specular = materialConfig->value<Color3>("specular");
-                    if(ImGui::ColorEdit3("##Specular", specular.data())) {
+                    if(ImGui::ColorEdit3("##MeshMaterialSpecular", specular.data())) {
                         materialConfig->setValue("specular", specular);
                         mesh->setSpecularColor(specular);
                     }
 
                     setNextItemRightAlign("Shininess");
                     Float shininess = materialConfig->value<Float>("shininess");
-                    if(ImGui::DragFloat("##Shininess", &shininess, 0.1f, 1.0f, FLT_MAX)) {
+                    if(ImGui::DragFloat("##MeshMaterialShininess", &shininess, 0.1f, 1.0f, FLT_MAX)) {
                         materialConfig->setValue("shininess", shininess);
                         mesh->setShininess(shininess);
                     }
@@ -199,6 +199,36 @@ void Inspector::newFrame() {
             if(!featureIsOpen) {
                 delete mesh;
                 objectNode->objectConfig()->removeGroup(featureConfig);
+            }
+        } else if(type == "light") {
+            /* Light */
+            auto& features = objectNode->object()->features();
+            Light* light = nullptr;
+
+            for(auto& feature: features) {
+                if((light = dynamic_cast<Light*>(&feature)))
+                    break;
+            }
+
+            CORRADE_INTERNAL_ASSERT(light != nullptr);
+
+            bool featureIsOpen = true;
+
+            if(ImGui::CollapsingHeader("Light", &featureIsOpen, ImGuiTreeNodeFlags_DefaultOpen)) {
+                /* Color */
+                setNextItemRightAlign("Color");
+                Color3 color = featureConfig->value<Color3>("color");
+                if(ImGui::ColorEdit3("##LightColor", color.data())) {
+                    light->setColor(color);
+                    featureConfig->setValue("color", color);
+                }
+            }
+
+            if(!featureIsOpen) {
+                delete light;
+                objectNode->objectConfig()->removeGroup(featureConfig);
+
+                _panel->updateShader();
             }
         } else if(type == "script") {
             /* Script */
@@ -247,11 +277,9 @@ void Inspector::newFrame() {
     if(ImGui::BeginPopup("FeaturePopup")) {
         std::string newFeatureType;
 
-        if(ImGui::Selectable("Mesh"))
-            newFeatureType = "mesh";
-
-        if(ImGui::Selectable("Script"))
-            newFeatureType = "script";
+        if(ImGui::Selectable("Mesh"))   newFeatureType = "mesh";
+        if(ImGui::Selectable("Light"))  newFeatureType = "light";
+        if(ImGui::Selectable("Script")) newFeatureType = "script";
 
         if(!newFeatureType.empty()) {
             bool featureAlreadyPresent = false;

@@ -71,15 +71,7 @@ Editor::Editor(const Arguments& arguments, const std::string& projectPath): Plat
     setSwapInterval(1);
 
     setup(projectPath);
-    initResourceManager();
-
     _timeline.start();
-}
-
-void Editor::initResourceManager() {
-    Resource<GL::AbstractShaderProgram, Oberon::Shader> shaderResource = _resourceManager.get<GL::AbstractShaderProgram, Oberon::Shader>("shader");
-    if(!shaderResource)
-        _resourceManager.set<GL::AbstractShaderProgram>(shaderResource.key(), new Oberon::Shader{0});
 }
 
 void Editor::drawEvent() {
@@ -111,7 +103,8 @@ void Editor::drawEvent() {
         ImGui::PopStyleVar();
 
         if(ImGui::BeginMenu("Editor")) {
-            if(ImGui::MenuItem("Reset layout")) ImGui::DockBuilderRemoveNode(dockSpaceId);
+            if(ImGui::MenuItem("Reset layout"))
+                ImGui::DockBuilderRemoveNode(dockSpaceId);
 
             ImGui::EndMenu();
         }
