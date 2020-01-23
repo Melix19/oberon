@@ -40,7 +40,6 @@ class CollectionPanel: public Containers::LinkedListItem<CollectionPanel> {
 
     private:
         std::string _collectionPath;
-        std::string _name;
 
         OberonResourceManager& _resourceManager;
 
@@ -65,26 +64,10 @@ class CollectionPanel: public Containers::LinkedListItem<CollectionPanel> {
         void save();
 
         const std::string& collectionPath() const { return _collectionPath; }
-        const std::string& name() const { return _name; }
 
         ObjectNode* rootNode() { return _rootNode.get(); }
 
         std::vector<ObjectNode*>& selectedNodes() { return _selectedNodes; }
-
-        bool isOpen() const { return _isOpen; }
-        bool isFocused() const { return _isFocused; }
-
-        bool needsFocus() const { return _needsFocus; }
-        CollectionPanel& setNeedsFocus(bool needsFocus) {
-            _needsFocus = needsFocus;
-            return *this;
-        }
-
-        bool needsDocking() const { return _needsDocking; }
-        CollectionPanel& setNeedsDocking(bool needsDocking) {
-            _needsDocking = needsDocking;
-            return *this;
-        }
 
         void updateShader();
 
@@ -98,15 +81,7 @@ class CollectionPanel: public Containers::LinkedListItem<CollectionPanel> {
         Containers::Pointer<ObjectNode> _rootNode;
         std::vector<ObjectNode*> _selectedNodes;
 
-        bool _isOpen;
-        bool _isFocused;
-        bool _isHovered;
-
-        bool _isVisible;
-        bool _isDragging;
-
-        bool _needsFocus;
-        bool _needsDocking;
+        bool _isDragging{false};
 
         GL::Framebuffer _framebuffer{NoCreate};
         GL::Texture2D _viewportTexture;
@@ -123,11 +98,40 @@ class CollectionPanel: public Containers::LinkedListItem<CollectionPanel> {
         SceneGraph::Camera3D* _camera;
 
     public:
+        const std::string& name() const { return _name; }
+
+        bool isOpen() const { return _isOpen; }
+        bool isFocused() const { return _isFocused; }
+
+        bool needsFocus() const { return _needsFocus; }
+        CollectionPanel& setNeedsFocus(bool needsFocus) {
+            _needsFocus = needsFocus;
+            return *this;
+        }
+
+        bool needsDocking() const { return _needsDocking; }
+        CollectionPanel& setNeedsDocking(bool needsDocking) {
+            _needsDocking = needsDocking;
+            return *this;
+        }
+
+    private:
+        std::string _name;
+
+        bool _isOpen{true};
+        bool _isVisible{false};
+        bool _isFocused{false};
+        bool _isHovered{false};
+
+        bool _needsFocus{true};
+        bool _needsDocking{true};
+
+    public:
         bool isSimulating() const { return _isSimulating; }
 
         CollectionPanel& startSimulation();
         CollectionPanel& stopSimulation();
 
     private:
-        bool _isSimulating;
+        bool _isSimulating{false};
 };
