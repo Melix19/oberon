@@ -216,7 +216,7 @@ void CollectionPanel::resetObjectAndChildren(ObjectNode* node) {
 
 void CollectionPanel::updateShader() {
     Resource<GL::AbstractShaderProgram, Oberon::Shader> shaderResource = _resourceManager.get<GL::AbstractShaderProgram, Oberon::Shader>("shader");
-    _resourceManager.set<GL::AbstractShaderProgram>(shaderResource.key(), new Oberon::Shader{UnsignedInt(_lights.size())}, ResourceDataState::Mutable, ResourcePolicy::Resident);
+    _resourceManager.set<GL::AbstractShaderProgram>(shaderResource.key(), new Oberon::Shader{UnsignedInt(_lights.size())}, ResourceDataState::Mutable, ResourcePolicy::ReferenceCounted);
 
     for(std::size_t i = 0; i != _lights.size(); ++i)
         _lights[i].setId(i);

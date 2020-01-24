@@ -57,7 +57,7 @@ void addFeatureFromConfig(Utility::ConfigurationGroup* featureConfig, Object3D* 
         /* Shader */
         Resource<GL::AbstractShaderProgram, Oberon::Shader> shaderResource = resourceManager.get<GL::AbstractShaderProgram, Oberon::Shader>("shader");
         if(!shaderResource)
-            resourceManager.set<GL::AbstractShaderProgram>(shaderResource.key(), new Oberon::Shader{0}, ResourceDataState::Mutable, ResourcePolicy::Resident);
+            resourceManager.set<GL::AbstractShaderProgram>(shaderResource.key(), new Oberon::Shader{0}, ResourceDataState::Mutable, ResourcePolicy::ReferenceCounted);
 
         /* Mesh */
         Mesh& mesh = object->addFeature<Mesh>(drawables, shaderResource);
@@ -89,7 +89,7 @@ void addFeatureFromConfig(Utility::ConfigurationGroup* featureConfig, Object3D* 
     } else if(type == "light") {
         /* Shader */
         Resource<GL::AbstractShaderProgram, Oberon::Shader> shaderResource = resourceManager.get<GL::AbstractShaderProgram, Oberon::Shader>("shader");
-        resourceManager.set<GL::AbstractShaderProgram>(shaderResource.key(), new Oberon::Shader{UnsignedInt(lights->size() + 1)}, ResourceDataState::Mutable, ResourcePolicy::Resident);
+        resourceManager.set<GL::AbstractShaderProgram>(shaderResource.key(), new Oberon::Shader{UnsignedInt(lights->size() + 1)}, ResourceDataState::Mutable, ResourcePolicy::ReferenceCounted);
 
         /* Color */
         Color3 color = featureConfig->value<Color3>("color");
