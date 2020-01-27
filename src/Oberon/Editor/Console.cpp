@@ -39,9 +39,9 @@ void Console::newFrame() {
 }
 
 void Console::addString(const std::string& s) {
-    _strings.push_back(s);
+    Containers::arrayAppend(_strings, s);
 }
 
 void Console::resetStrings() {
-    _strings.clear();
+    _strings.release();
 }

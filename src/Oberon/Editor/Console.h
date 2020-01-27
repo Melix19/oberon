@@ -24,8 +24,11 @@
 
 #pragma once
 
+#include <Corrade/Containers/GrowableArray.h>
+
 #include <string>
-#include <vector>
+
+using namespace Corrade;
 
 class Console {
     public:
@@ -34,5 +37,5 @@ class Console {
         void resetStrings();
 
     private:
-        std::vector<std::string> _strings;
+        Containers::Array<std::string> _strings;
 };
