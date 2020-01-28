@@ -32,14 +32,17 @@
 void Inspector::newFrame() {
     bool isVisible = ImGui::Begin("Inspector");
 
+    auto& selectedNodes = _panel->selectedNodes();
+    ObjectNode* objectNode;
+
+    if(_panel && !selectedNodes.empty())
+        objectNode = selectedNodes.front();
+
     /* If the window is not visible, just end the method here. */
-    if(!isVisible || !_panel || _panel->selectedNodes().empty()) {
+    if(!isVisible || !_panel || selectedNodes.empty() || (objectNode == _panel->rootNode())) {
         ImGui::End();
         return;
     }
-
-    auto& selectedNodes = _panel->selectedNodes();
-    ObjectNode* objectNode = selectedNodes.front();
 
     if(ImGui::CollapsingHeader("Transform", ImGuiTreeNodeFlags_DefaultOpen)) {
         /* Translation */

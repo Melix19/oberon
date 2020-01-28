@@ -41,7 +41,7 @@ void Outliner::newFrame() {
     }
 
     ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0.0f, 0.0f));
-    displayTree(_panel->rootNode(), true);
+    displayTree(_panel->rootNode());
     ImGui::PopStyleVar();
 
     ImGui::End();
@@ -73,18 +73,18 @@ void Outliner::newFrame() {
     }
 }
 
-void Outliner::displayTree(ObjectNode* node, bool isRoot) {
+void Outliner::displayTree(ObjectNode* node) {
     bool isEditNode = (node == _editNode);
     bool isOpen = true;
 
     if(isEditNode && _editNodeMode == EditMode::Rename)
         displayEditNode(node);
     else
-        isOpen = displayObjectNode(node, isRoot);
+        isOpen = displayObjectNode(node);
 
     if(isOpen) {
         for(auto& child : node->children())
-            displayTree(child.get(), false);
+            displayTree(child.get());
 
         if(isEditNode && _editNodeMode != EditMode::Rename)
             displayEditNode(node);
@@ -97,16 +97,21 @@ void Outliner::displayTree(ObjectNode* node, bool isRoot) {
     }
 }
 
-bool Outliner::displayObjectNode(ObjectNode* node, bool isRoot) {
-    std::string nodeName = node->objectConfig()->value("name");
+bool Outliner::displayObjectNode(ObjectNode* node) {
     ImGuiTreeNodeFlags nodeFlags = ImGuiTreeNodeFlags_FramePadding |
         ImGuiTreeNodeFlags_SpanFullWidth | ImGuiTreeNodeFlags_DefaultOpen |
         ImGuiTreeNodeFlags_OpenOnArrow;
     bool hasChildren = !node->children().empty();
+    std::string nodeName;
 
     if(node->isSelected()) nodeFlags |= ImGuiTreeNodeFlags_Selected;
 
     if(!hasChildren) nodeFlags |= ImGuiTreeNodeFlags_Leaf;
+
+    if(node == _panel->rootNode())
+        nodeName = "scene";
+    else
+        nodeName = node->objectConfig()->value("name");
 
     bool isOpen = ImGui::TreeNodeEx(nodeName.c_str(), nodeFlags);
 
@@ -150,14 +155,17 @@ bool Outliner::displayObjectNode(ObjectNode* node, bool isRoot) {
             _editNodeNeedsFocus = true;
         }
 
-        if(ImGui::MenuItem("Rename")) {
-            _editNode = node;
-            _editNodeMode = EditMode::Rename;
-            _editNodeText = nodeName;
-            _editNodeNeedsFocus = true;
-        }
+        if(node != _panel->rootNode()) {
+            if(ImGui::MenuItem("Rename")) {
+                _editNode = node;
+                _editNodeMode = EditMode::Rename;
+                _editNodeText = nodeName;
+                _editNodeNeedsFocus = true;
+            }
 
-        if(!isRoot && ImGui::MenuItem("Delete")) _deleteSelectedNodes = true;
+            if(ImGui::MenuItem("Delete"))
+                _deleteSelectedNodes = true;
+        }
 
         ImGui::EndPopup();
     }

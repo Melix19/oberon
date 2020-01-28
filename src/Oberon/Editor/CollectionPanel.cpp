@@ -33,7 +33,7 @@
 #include <algorithm>
 
 CollectionPanel::CollectionPanel(const std::string& collectionPath, OberonResourceManager& resourceManager, const Vector2i& viewportTextureSize, const Vector2& dpiScaleRatio):
-    _collectionPath(collectionPath), _resourceManager(resourceManager), _viewportTextureSize(viewportTextureSize), _dpiScaleRatio(dpiScaleRatio),
+    _collectionPath{collectionPath}, _resourceManager{resourceManager}, _viewportTextureSize{viewportTextureSize}, _dpiScaleRatio{dpiScaleRatio},
     _collectionConfig{_collectionPath}
 {
     _name = Utility::Directory::filename(_collectionPath);
@@ -54,20 +54,12 @@ CollectionPanel::CollectionPanel(const std::string& collectionPath, OberonResour
     _camera = new SceneGraph::Camera3D{*_cameraObject};
     _camera->setAspectRatioPolicy(SceneGraph::AspectRatioPolicy::Extend);
 
-    if(!_collectionConfig.hasGroup("scene")) {
-        Utility::ConfigurationGroup* sceneConfig = _collectionConfig.addGroup("scene");
-        sceneConfig->setValue("name", "root");
-    }
+    if(!_collectionConfig.hasGroup("scene"))
+        _collectionConfig.addGroup("scene");
 
-    Object3D* rootObject = Serializer::createObjectFromConfig(_collectionConfig.group("scene"),
-        &_scene, resourceManager, &_drawables, &_scripts, &_lights);
-    _rootNode = Containers::pointer<ObjectNode>(rootObject, _collectionConfig.group("scene"));
-
-    if(!_drawables.isEmpty() && rootObject == &_drawables[_drawables.size() - 1].object())
-        _drawablesNodes.push_back(_rootNode.get());
+    _rootNode = Containers::pointer<ObjectNode>(&_scene, _collectionConfig.group("scene"));
 
     updateObjectNodeChildren(_rootNode.get());
-
     updateDrawablesId();
 }
 
