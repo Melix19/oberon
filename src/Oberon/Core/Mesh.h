@@ -37,7 +37,7 @@ using namespace Magnum;
 class Mesh: public SceneGraph::Drawable3D {
     public:
         explicit Mesh(SceneGraph::AbstractObject3D& object, SceneGraph::DrawableGroup3D* drawables, Resource<GL::AbstractShaderProgram, Oberon::Shader>& shader):
-            SceneGraph::Drawable3D{object, drawables}, _shader(shader) {}
+            SceneGraph::Drawable3D{object, drawables}, _shader{shader}, _id{0} {}
 
         Mesh& setMesh(Resource<GL::Mesh>& mesh) {
             _mesh = mesh;
@@ -93,7 +93,7 @@ class Mesh: public SceneGraph::Drawable3D {
         Resource<GL::Mesh> _mesh;
         Resource<GL::AbstractShaderProgram, Oberon::Shader> _shader;
 
-        UnsignedByte _id = 0;
+        UnsignedByte _id;
         Vector3 _size;
 
         Color3 _ambientColor;
