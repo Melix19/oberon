@@ -199,6 +199,8 @@ void Inspector::newFrame() {
             if(!featureIsOpen) {
                 delete mesh;
                 objectNode->objectConfig()->removeGroup(featureConfig);
+
+                _panel->removeDrawableNode(objectNode);
             }
         } else if(type == "light") {
             /* Light */
@@ -293,7 +295,7 @@ void Inspector::newFrame() {
                 Utility::ConfigurationGroup* featureConfig = objectNode->objectConfig()->addGroup("feature");
                 featureConfig->setValue("type", newFeatureType);
 
-                _panel->addFeatureToObject(featureConfig, objectNode->object());
+                _panel->addFeatureToObject(objectNode, featureConfig);
             }
         }
 

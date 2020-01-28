@@ -39,8 +39,8 @@ typedef ResourceManager<GL::Mesh, GL::AbstractShaderProgram> OberonResourceManag
 
 namespace Serializer {
 
-Object3D* createObjectFromConfig(Utility::ConfigurationGroup* objectConfig, Object3D* parent, OberonResourceManager& resourceManager, SceneGraph::DrawableGroup3D* drawables, ScriptGroup* scripts, LightGroup* lights, UnsignedByte objectId = 0);
-void addFeatureFromConfig(Utility::ConfigurationGroup* featureConfig, Object3D* object, OberonResourceManager& resourceManager, SceneGraph::DrawableGroup3D* drawables, ScriptGroup* scripts, LightGroup* lights, UnsignedByte objectId = 0);
+Object3D* createObjectFromConfig(Utility::ConfigurationGroup* objectConfig, Object3D* parent, OberonResourceManager& resourceManager, SceneGraph::DrawableGroup3D* drawables, ScriptGroup* scripts, LightGroup* lights);
+void addFeatureFromConfig(Utility::ConfigurationGroup* featureConfig, Object3D* object, OberonResourceManager& resourceManager, SceneGraph::DrawableGroup3D* drawables, ScriptGroup* scripts, LightGroup* lights);
 void resetObjectFromConfig(Object3D* object, Utility::ConfigurationGroup* objectConfig);
 
 void setMeshFromConfig(Mesh& mesh, Utility::ConfigurationGroup* primitiveConfig, OberonResourceManager& resourceManager);

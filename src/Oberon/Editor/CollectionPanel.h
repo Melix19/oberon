@@ -60,7 +60,6 @@ class CollectionPanel: public Containers::LinkedListItem<CollectionPanel> {
 
     public:
         void resetObjectAndChildren(ObjectNode* node);
-        void addFeatureToObject(Utility::ConfigurationGroup* objectConfig, Object3D* object);
         void save();
 
         const std::string& collectionPath() const { return _collectionPath; }
@@ -70,6 +69,10 @@ class CollectionPanel: public Containers::LinkedListItem<CollectionPanel> {
         std::vector<ObjectNode*>& selectedNodes() { return _selectedNodes; }
 
         void updateShader();
+
+        CollectionPanel& addFeatureToObject(ObjectNode* objectNode, Utility::ConfigurationGroup* featureConfig);
+        CollectionPanel& removeDrawableNode(ObjectNode* objectNode);
+        CollectionPanel& updateDrawablesId();
 
     private:
         void updateObjectNodeChildren(ObjectNode* node);

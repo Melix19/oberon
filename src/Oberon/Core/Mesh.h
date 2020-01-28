@@ -93,7 +93,7 @@ class Mesh: public SceneGraph::Drawable3D {
         Resource<GL::Mesh> _mesh;
         Resource<GL::AbstractShaderProgram, Oberon::Shader> _shader;
 
-        UnsignedByte _id;
+        UnsignedByte _id = 0;
         Vector3 _size;
 
         Color3 _ambientColor;

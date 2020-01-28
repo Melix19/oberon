@@ -58,13 +58,15 @@ CollectionPanel::CollectionPanel(const std::string& collectionPath, OberonResour
     }
 
     Object3D* rootObject = Serializer::createObjectFromConfig(_collectionConfig.group("scene"),
-        &_scene, resourceManager, &_drawables, &_scripts, &_lights, _drawablesNodes.size() + 1);
+        &_scene, resourceManager, &_drawables, &_scripts, &_lights);
     _rootNode = Containers::pointer<ObjectNode>(rootObject, _collectionConfig.group("scene"));
 
     if(!_drawables.isEmpty() && rootObject == &_drawables[_drawables.size() - 1].object())
         _drawablesNodes.push_back(_rootNode.get());
 
     updateObjectNodeChildren(_rootNode.get());
+
+    updateDrawablesId();
 }
 
 void CollectionPanel::drawViewport(Float deltaTime) {
@@ -150,11 +152,6 @@ void CollectionPanel::newFrame() {
     ImGui::End();
 }
 
-void CollectionPanel::addFeatureToObject(Utility::ConfigurationGroup* objectConfig, Object3D* object) {
-    Serializer::addFeatureFromConfig(objectConfig, object, _resourceManager, &_drawables, &_scripts, &_lights,
-        _drawablesNodes.size() + 1);
-}
-
 void CollectionPanel::save() {
     _collectionConfig.save();
 }
@@ -162,7 +159,7 @@ void CollectionPanel::save() {
 void CollectionPanel::updateObjectNodeChildren(ObjectNode* node) {
     for(auto childConfig : node->objectConfig()->groups("child")) {
         Object3D* child = Serializer::createObjectFromConfig(childConfig, node->object(),
-            _resourceManager, &_drawables, &_scripts, &_lights, _drawablesNodes.size() + 1);
+            _resourceManager, &_drawables, &_scripts, &_lights);
         ObjectNode* childNode = node->addChild(child, childConfig);
 
         if(!_drawables.isEmpty() && child == &_drawables[_drawables.size() - 1].object())
@@ -176,6 +173,56 @@ void CollectionPanel::updateObjectNodeChildren(ObjectNode* node) {
 
         updateObjectNodeChildren(childNode);
     }
+}
+
+void CollectionPanel::resetObjectAndChildren(ObjectNode* node) {
+    Serializer::resetObjectFromConfig(node->object(), node->objectConfig());
+
+    for(auto& child : node->children())
+        resetObjectAndChildren(child.get());
+}
+
+void CollectionPanel::updateShader() {
+    Resource<GL::AbstractShaderProgram, Oberon::Shader> shaderResource = _resourceManager.get<GL::AbstractShaderProgram, Oberon::Shader>("shader");
+    _resourceManager.set<GL::AbstractShaderProgram>(shaderResource.key(), new Oberon::Shader{UnsignedInt(_lights.size())}, ResourceDataState::Mutable, ResourcePolicy::ReferenceCounted);
+
+    for(std::size_t i = 0; i != _lights.size(); ++i)
+        _lights[i].setId(i);
+}
+
+CollectionPanel& CollectionPanel::addFeatureToObject(ObjectNode* objectNode, Utility::ConfigurationGroup* featureConfig) {
+    size_t drawablesNum = _drawables.size();
+
+    Serializer::addFeatureFromConfig(featureConfig, objectNode->object(), _resourceManager, &_drawables, &_scripts, &_lights);
+
+    if(drawablesNum < _drawables.size()) {
+        _drawablesNodes.push_back(objectNode);
+        updateDrawablesId();
+    }
+
+    return *this;
+}
+
+CollectionPanel& CollectionPanel::removeDrawableNode(ObjectNode* objectNode) {
+    auto found = std::find_if(_drawablesNodes.begin(), _drawablesNodes.end(),
+        [&](ObjectNode* p) { return p == objectNode; });
+
+    CORRADE_INTERNAL_ASSERT(found != _drawablesNodes.end());
+
+    _drawablesNodes.erase(found);
+
+    updateDrawablesId();
+
+    return *this;
+}
+
+CollectionPanel& CollectionPanel::updateDrawablesId() {
+    for(std::size_t i = 0; i != _drawables.size(); ++i) {
+        Mesh* mesh = dynamic_cast<Mesh*>(&_drawables[i]);
+        if(mesh) mesh->setObjectId(i + 1);
+    }
+
+    return *this;
 }
 
 CollectionPanel& CollectionPanel::startSimulation() {
@@ -205,19 +252,4 @@ CollectionPanel& CollectionPanel::stopSimulation() {
 
     _isSimulating = false;
     return *this;
-}
-
-void CollectionPanel::resetObjectAndChildren(ObjectNode* node) {
-    Serializer::resetObjectFromConfig(node->object(), node->objectConfig());
-
-    for(auto& child : node->children())
-        resetObjectAndChildren(child.get());
-}
-
-void CollectionPanel::updateShader() {
-    Resource<GL::AbstractShaderProgram, Oberon::Shader> shaderResource = _resourceManager.get<GL::AbstractShaderProgram, Oberon::Shader>("shader");
-    _resourceManager.set<GL::AbstractShaderProgram>(shaderResource.key(), new Oberon::Shader{UnsignedInt(_lights.size())}, ResourceDataState::Mutable, ResourcePolicy::ReferenceCounted);
-
-    for(std::size_t i = 0; i != _lights.size(); ++i)
-        _lights[i].setId(i);
 }
