@@ -36,7 +36,7 @@
 
 namespace Serializer {
 
-Object3D* createObjectFromConfig(Utility::ConfigurationGroup* objectConfig, Object3D* parent, OberonResourceManager& resourceManager, SceneGraph::DrawableGroup3D* drawables, ScriptGroup* scripts, LightGroup* lights) {
+Object3D* loadObject(Utility::ConfigurationGroup* objectConfig, Object3D* parent, OberonResourceManager& resourceManager, SceneGraph::DrawableGroup3D* drawables, ScriptGroup* scripts, LightGroup* lights) {
     Object3D* object = new Object3D{parent};
 
     /* Transformation */
@@ -45,12 +45,23 @@ Object3D* createObjectFromConfig(Utility::ConfigurationGroup* objectConfig, Obje
     object->setTransformation(transformation);
 
     for(auto featureConfig: objectConfig->groups("feature"))
-        addFeatureFromConfig(featureConfig, object, resourceManager, drawables, scripts, lights);
+        addFeatureToObject(featureConfig, object, resourceManager, drawables, scripts, lights);
 
     return object;
 }
 
-void addFeatureFromConfig(Utility::ConfigurationGroup* featureConfig, Object3D* object, OberonResourceManager& resourceManager, SceneGraph::DrawableGroup3D* drawables, ScriptGroup* scripts, LightGroup* lights) {
+Object3D* loadChildrenObject(Utility::ConfigurationGroup* parentConfig, Object3D* parent, OberonResourceManager& resourceManager, SceneGraph::DrawableGroup3D* drawables, ScriptGroup* scripts, LightGroup* lights) {
+    for(auto childConfig: parentConfig->groups("child")) {
+        Object3D* child = loadObject(childConfig, parent, resourceManager, drawables, scripts, lights);
+
+        if(childConfig->hasGroup("child"))
+            loadChildrenObject(childConfig, child, resourceManager, drawables, scripts, lights);
+    }
+
+    return parent;
+}
+
+void addFeatureToObject(Utility::ConfigurationGroup* featureConfig, Object3D* object, OberonResourceManager& resourceManager, SceneGraph::DrawableGroup3D* drawables, ScriptGroup* scripts, LightGroup* lights) {
     std::string type = featureConfig->value("type");
 
     if(type == "mesh") {
@@ -65,7 +76,7 @@ void addFeatureFromConfig(Utility::ConfigurationGroup* featureConfig, Object3D* 
         /* Primitive */
         if(featureConfig->hasGroup("primitive")) {
             Utility::ConfigurationGroup* primitiveConfig = featureConfig->group("primitive");
-            setMeshFromConfig(mesh, primitiveConfig, resourceManager);
+            loadMeshFeature(mesh, primitiveConfig, resourceManager);
         }
 
         /* Material */
@@ -103,14 +114,14 @@ void addFeatureFromConfig(Utility::ConfigurationGroup* featureConfig, Object3D* 
     }
 }
 
-void resetObjectFromConfig(Object3D* object, Utility::ConfigurationGroup* objectConfig) {
+void resetObject(Object3D* object, Utility::ConfigurationGroup* objectConfig) {
     /* Transformation */
     if(!objectConfig->hasValue("transformation")) objectConfig->setValue<Matrix4>("transformation", Matrix4::scaling({1, 1, 1}));
     Matrix4 transformation = objectConfig->value<Matrix4>("transformation");
     object->setTransformation(transformation);
 }
 
-void setMeshFromConfig(Mesh& mesh, Utility::ConfigurationGroup* primitiveConfig, OberonResourceManager& resourceManager) {
+void loadMeshFeature(Mesh& mesh, Utility::ConfigurationGroup* primitiveConfig, OberonResourceManager& resourceManager) {
     std::string primitiveType = primitiveConfig->value("type");
     std::string meshKey = primitiveType;
 

@@ -152,7 +152,7 @@ void CollectionPanel::save() {
 
 void CollectionPanel::updateObjectNodeChildren(ObjectNode* node) {
     for(auto childConfig: node->objectConfig()->groups("child")) {
-        Object3D* child = Serializer::createObjectFromConfig(childConfig, node->object(),
+        Object3D* child = Serializer::loadObject(childConfig, node->object(),
             _resourceManager, &_drawables, &_scripts, &_lights);
         ObjectNode* childNode = node->addChild(child, childConfig);
 
@@ -170,7 +170,7 @@ void CollectionPanel::updateObjectNodeChildren(ObjectNode* node) {
 }
 
 void CollectionPanel::resetObjectAndChildren(ObjectNode* node) {
-    Serializer::resetObjectFromConfig(node->object(), node->objectConfig());
+    Serializer::resetObject(node->object(), node->objectConfig());
 
     for(auto& child: node->children())
         resetObjectAndChildren(child.get());
@@ -190,7 +190,7 @@ CollectionPanel& CollectionPanel::updateShader() {
 
 CollectionPanel& CollectionPanel::addFeatureToObject(ObjectNode* objectNode, Utility::ConfigurationGroup* featureConfig) {
     size_t drawablesNum = _drawables.size();
-    Serializer::addFeatureFromConfig(featureConfig, objectNode->object(), _resourceManager, &_drawables, &_scripts, &_lights);
+    Serializer::addFeatureToObject(featureConfig, objectNode->object(), _resourceManager, &_drawables, &_scripts, &_lights);
 
     if(drawablesNum < _drawables.size()) {
         _drawablesNodes.push_back(objectNode);
