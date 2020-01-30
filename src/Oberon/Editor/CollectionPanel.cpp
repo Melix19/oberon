@@ -29,6 +29,9 @@
 #include <Magnum/GL/TextureFormat.h>
 #include <Magnum/ImGuiIntegration/Integration.h>
 #include <Magnum/Math/ConfigurationValue.h>
+#include <Magnum/MeshTools/Compile.h>
+#include <Magnum/Primitives/Grid.h>
+#include <Magnum/Trade/MeshData3D.h>
 
 #include <algorithm>
 
@@ -53,6 +56,8 @@ CollectionPanel::CollectionPanel(const std::string& collectionPath, OberonResour
     _cameraObject = new Object3D{&_scene};
     _camera = new SceneGraph::Camera3D{*_cameraObject};
     _camera->setAspectRatioPolicy(SceneGraph::AspectRatioPolicy::Extend);
+
+    createGrid();
 
     if(!_collectionConfig.hasGroup("scene"))
         _collectionConfig.addGroup("scene");
@@ -167,6 +172,27 @@ void CollectionPanel::updateObjectNodeChildren(ObjectNode* node) {
 
         updateObjectNodeChildren(childNode);
     }
+}
+
+void CollectionPanel::createGrid() {
+    const Int size = 20;
+    _gridObject = new Object3D{&_scene};
+    _gridObject->rotateX({Deg{90}});
+
+    Resource<GL::AbstractShaderProgram, Oberon::Shader> shaderResource = _resourceManager.get<GL::AbstractShaderProgram, Oberon::Shader>("shader");
+    if(!shaderResource)
+        _resourceManager.set<GL::AbstractShaderProgram>(shaderResource.key(), new Oberon::Shader{0}, ResourceDataState::Mutable, ResourcePolicy::ReferenceCounted);
+
+    Resource<GL::Mesh> meshResource = _resourceManager.get<GL::Mesh>("grid");
+    if(!meshResource) {
+        GL::Mesh glMesh = MeshTools::compile(Primitives::grid3DWireframe({size - 1, size - 1}));
+        _resourceManager.set(meshResource.key(), std::move(glMesh), ResourceDataState::Final, ResourcePolicy::ReferenceCounted);
+    }
+
+    Mesh& mesh = _gridObject->addFeature<Mesh>(&_drawables, shaderResource);
+    mesh.setMesh(meshResource);
+    mesh.setSize({size, size, size});
+    mesh.setAmbientColor(Color3{0.3f});
 }
 
 void CollectionPanel::resetObjectAndChildren(ObjectNode* node) {

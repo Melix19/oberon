@@ -76,6 +76,7 @@ class CollectionPanel: public Containers::LinkedListItem<CollectionPanel> {
 
     private:
         void updateObjectNodeChildren(ObjectNode* node);
+        void createGrid();
 
         Vector2 _viewportPos;
         Vector2 _viewportSize;
@@ -98,6 +99,7 @@ class CollectionPanel: public Containers::LinkedListItem<CollectionPanel> {
 
         Scene3D _scene;
         Object3D* _cameraObject;
+        Object3D* _gridObject;
         SceneGraph::Camera3D* _camera;
 
     public:
