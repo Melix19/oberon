@@ -82,7 +82,7 @@ void CollectionPanel::drawViewport(Float deltaTime) {
     }
 
     for(std::size_t i = 0; i != _lights.size(); ++i)
-        _lights[i].applyShader();
+        _lights[i].updateShader();
 
     _camera->draw(_drawables);
 }
@@ -151,7 +151,7 @@ void CollectionPanel::save() {
 }
 
 void CollectionPanel::updateObjectNodeChildren(ObjectNode* node) {
-    for(auto childConfig : node->objectConfig()->groups("child")) {
+    for(auto childConfig: node->objectConfig()->groups("child")) {
         Object3D* child = Serializer::createObjectFromConfig(childConfig, node->object(),
             _resourceManager, &_drawables, &_scripts, &_lights);
         ObjectNode* childNode = node->addChild(child, childConfig);
@@ -172,21 +172,24 @@ void CollectionPanel::updateObjectNodeChildren(ObjectNode* node) {
 void CollectionPanel::resetObjectAndChildren(ObjectNode* node) {
     Serializer::resetObjectFromConfig(node->object(), node->objectConfig());
 
-    for(auto& child : node->children())
+    for(auto& child: node->children())
         resetObjectAndChildren(child.get());
 }
 
-void CollectionPanel::updateShader() {
-    Resource<GL::AbstractShaderProgram, Oberon::Shader> shaderResource = _resourceManager.get<GL::AbstractShaderProgram, Oberon::Shader>("shader");
-    _resourceManager.set<GL::AbstractShaderProgram>(shaderResource.key(), new Oberon::Shader{UnsignedInt(_lights.size())}, ResourceDataState::Mutable, ResourcePolicy::ReferenceCounted);
+CollectionPanel& CollectionPanel::updateShader() {
+    Resource<GL::AbstractShaderProgram, Oberon::Shader> shaderResource = _resourceManager.get<GL::AbstractShaderProgram,
+        Oberon::Shader>("shader");
+    _resourceManager.set<GL::AbstractShaderProgram>(shaderResource.key(), new Oberon::Shader{UnsignedInt(_lights.size())},
+        ResourceDataState::Mutable, ResourcePolicy::ReferenceCounted);
 
     for(std::size_t i = 0; i != _lights.size(); ++i)
         _lights[i].setId(i);
+
+    return *this;
 }
 
 CollectionPanel& CollectionPanel::addFeatureToObject(ObjectNode* objectNode, Utility::ConfigurationGroup* featureConfig) {
     size_t drawablesNum = _drawables.size();
-
     Serializer::addFeatureFromConfig(featureConfig, objectNode->object(), _resourceManager, &_drawables, &_scripts, &_lights);
 
     if(drawablesNum < _drawables.size()) {
@@ -202,11 +205,9 @@ CollectionPanel& CollectionPanel::removeDrawableNode(ObjectNode* objectNode) {
         [&](ObjectNode* p) { return p == objectNode; });
 
     CORRADE_INTERNAL_ASSERT(found != _drawablesNodes.end());
-
     _drawablesNodes.erase(found);
 
     updateDrawablesId();
-
     return *this;
 }
 
@@ -236,7 +237,6 @@ CollectionPanel& CollectionPanel::startSimulation() {
     } catch (py::error_already_set const &pythonErr) {
         py::print(pythonErr.what());
     }
-
 
     return *this;
 }

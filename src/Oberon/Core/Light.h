@@ -51,7 +51,7 @@ class Light: public SceneGraph::AbstractGroupedFeature3D<Light> {
             return *this;
         }
 
-        void applyShader() {
+        void updateShader() {
             _shader->setLightPosition(_id, SceneGraph::AbstractGroupedFeature3D<Light>::object().transformationMatrix().translation());
             _shader->setLightColor(_id, _color);
         }

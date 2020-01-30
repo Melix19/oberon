@@ -50,7 +50,7 @@ void Outliner::newFrame() {
         auto& selectedNodes = _panel->selectedNodes();
 
         if(!selectedNodes.empty()) {
-            for(auto& selectedNode : selectedNodes) {
+            for(auto& selectedNode: selectedNodes) {
                 delete selectedNode->object();
 
                 std::string name = selectedNode->objectConfig()->value("name");
@@ -83,7 +83,7 @@ void Outliner::displayTree(ObjectNode* node) {
         isOpen = displayObjectNode(node);
 
     if(isOpen) {
-        for(auto& child : node->children())
+        for(auto& child: node->children())
             displayTree(child.get());
 
         if(isEditNode && _editNodeMode != EditMode::Rename)
@@ -136,7 +136,7 @@ bool Outliner::displayObjectNode(ObjectNode* node) {
             node->setSelected(!node->isSelected());
         } else if(!node->isSelected() || ImGui::IsItemClicked(0)) {
             if(!selectedNodes.empty()) {
-                for(auto& selectedNode : selectedNodes)
+                for(auto& selectedNode: selectedNodes)
                     selectedNode->setSelected(false);
 
                 selectedNodes.clear();

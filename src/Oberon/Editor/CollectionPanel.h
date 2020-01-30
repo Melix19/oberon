@@ -68,7 +68,7 @@ class CollectionPanel: public Containers::LinkedListItem<CollectionPanel> {
 
         std::vector<ObjectNode*>& selectedNodes() { return _selectedNodes; }
 
-        void updateShader();
+        CollectionPanel& updateShader();
 
         CollectionPanel& addFeatureToObject(ObjectNode* objectNode, Utility::ConfigurationGroup* featureConfig);
         CollectionPanel& removeDrawableNode(ObjectNode* objectNode);

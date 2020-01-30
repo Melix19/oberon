@@ -86,7 +86,7 @@ void Explorer::newFrame() {
 
     if(_deleteSelectedNodes) {
         if(!_selectedNodes.empty()) {
-            for(auto& selectedNode : _selectedNodes) {
+            for(auto& selectedNode: _selectedNodes) {
                 auto& parentChildren = selectedNode->parent()->children();
                 auto found = std::find_if(parentChildren.begin(), parentChildren.end(),
                     [&](Containers::Pointer<FileNode>& p) { return p.get() == selectedNode; });
@@ -116,7 +116,7 @@ void Explorer::displayTree(FileNode* node, bool isRoot) {
     }
 
     if(isOpen) {
-        for(auto& child : node->children())
+        for(auto& child: node->children())
             displayTree(child.get(), false);
 
         if(isEditNode && _editNodeMode != EditMode::Rename)
@@ -162,7 +162,7 @@ bool Explorer::displayFileNode(FileNode* node) {
             node->setSelected(!node->isSelected());
         } else if(!node->isSelected() || ImGui::IsItemClicked(0)) {
             if(!_selectedNodes.empty()) {
-                for(auto& selectedNode : _selectedNodes)
+                for(auto& selectedNode: _selectedNodes)
                     selectedNode->setSelected(false);
 
                 _selectedNodes.clear();
@@ -271,7 +271,7 @@ void Explorer::displayEditNode(FileNode* node) {
 void Explorer::updateFileNodeChildren(FileNode* node) {
     auto directoryList = Utility::Directory::list(node->path(), Utility::Directory::Flag::SkipDotAndDotDot);
 
-    for(auto& filename : directoryList) {
+    for(auto& filename: directoryList) {
         std::string childPath = Utility::Directory::join(node->path(), filename);
         FileNode* childNode = node->addChild(childPath);
 
@@ -284,7 +284,7 @@ void Explorer::updateFileNodeChildren(FileNode* node) {
 void Explorer::removeEntireFile(const std::string& path) {
     auto directoryList = Utility::Directory::list(path, Utility::Directory::Flag::SkipDotAndDotDot);
 
-    for(auto& filename : directoryList)
+    for(auto& filename: directoryList)
         removeEntireFile(Utility::Directory::join(path, filename));
 
     Utility::Directory::rm(path);
