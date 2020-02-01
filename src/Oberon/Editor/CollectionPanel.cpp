@@ -143,8 +143,8 @@ void CollectionPanel::newFrame() {
     if(_isOrthographicCamera)
         _camera->setProjectionMatrix(Matrix4::orthographicProjection(_viewportSize, -1000.0f, 1000.0f));
     else
-        _camera->setProjectionMatrix(Matrix4::perspectiveProjection(Deg{70.0f}, _viewportSize.x()/
-            _viewportSize.y(), 0.05, 500.0f));
+        _camera->setProjectionMatrix(Matrix4::perspectiveProjection(Deg{70.0f}, _viewportSize.aspectRatio(),
+            0.05, 500.0f));
 
     _camera->setViewport(Vector2i{_viewportSize});
 

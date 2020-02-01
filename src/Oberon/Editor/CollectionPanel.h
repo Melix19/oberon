@@ -26,13 +26,15 @@
 
 #include <Corrade/Utility/Configuration.h>
 #include <Magnum/GL/Framebuffer.h>
+#include <Magnum/GL/Renderbuffer.h>
 #include <Magnum/GL/Texture.h>
 #include <Magnum/SceneGraph/Scene.h>
-#include <Magnum/GL/Renderbuffer.h>
+#include <Oberon/Core/Serializer.h>
 
+#include "AbstractPanel.h"
 #include "ObjectNode.h"
 
-class CollectionPanel: public Containers::LinkedListItem<CollectionPanel> {
+class CollectionPanel: public AbstractPanel {
     public:
         CollectionPanel(const std::string& collectionPath, OberonResourceManager& resourceManager, const Vector2i& viewportTextureSize, const Vector2& dpiScaleRatio);
         void drawViewport(Float deltaTime);
@@ -102,34 +104,8 @@ class CollectionPanel: public Containers::LinkedListItem<CollectionPanel> {
         Object3D* _gridObject;
         SceneGraph::Camera3D* _camera;
 
-    public:
-        const std::string& name() const { return _name; }
-
-        bool isOpen() const { return _isOpen; }
-        bool isFocused() const { return _isFocused; }
-
-        bool needsFocus() const { return _needsFocus; }
-        CollectionPanel& setNeedsFocus(bool needsFocus) {
-            _needsFocus = needsFocus;
-            return *this;
-        }
-
-        bool needsDocking() const { return _needsDocking; }
-        CollectionPanel& setNeedsDocking(bool needsDocking) {
-            _needsDocking = needsDocking;
-            return *this;
-        }
-
     private:
-        std::string _name;
-
-        bool _isOpen{true};
-        bool _isVisible{false};
-        bool _isFocused{false};
         bool _isHovered{false};
-
-        bool _needsFocus{true};
-        bool _needsDocking{true};
 
     public:
         bool isSimulating() const { return _isSimulating; }

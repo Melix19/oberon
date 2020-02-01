@@ -78,8 +78,8 @@ void Editor::drawEvent() {
     GL::Renderer::enable(GL::Renderer::Feature::DepthTest);
     GL::Renderer::enable(GL::Renderer::Feature::FaceCulling);
 
-    for(auto& panel: _collectionPanels)
-        panel.drawViewport(_timeline.previousFrameDuration());
+    for(auto& collectionPanel: _collectionPanels)
+        collectionPanel->drawViewport(_timeline.previousFrameDuration());
 
     GL::Renderer::disable(GL::Renderer::Feature::FaceCulling);
     GL::Renderer::disable(GL::Renderer::Feature::DepthTest);
@@ -113,14 +113,18 @@ void Editor::drawEvent() {
         ImGui::SetCursorPosX(ImGui::GetWindowWidth()/2 - size.x/2);
         ImGui::PushStyleVar(ImGuiStyleVar_SelectableTextAlign, ImVec2(0.5f, 0.5f));
 
-        if(!_activePanel || !_activePanel->isSimulating()) {
-            if(ImGui::Selectable("Play", false, 0, size) && _activePanel) {
-                _console.resetStrings();
-                _activePanel->startSimulation();
-            }
-        } else {
-            if(ImGui::Selectable("Stop", false, 0, size)) {
-                _activePanel->stopSimulation();
+        if(_activePanel) {
+            CollectionPanel* collectionPanel = dynamic_cast<CollectionPanel*>(_activePanel);
+
+            if(collectionPanel && collectionPanel->isSimulating()) {
+                if(ImGui::Selectable("Stop", false, 0, size)) {
+                    collectionPanel->stopSimulation();
+                }
+            } else if(collectionPanel && !collectionPanel->isSimulating()) {
+                if(ImGui::Selectable("Play", false, 0, size)) {
+                    _console.resetStrings();
+                    collectionPanel->startSimulation();
+                }
             }
         }
 
@@ -168,8 +172,8 @@ void Editor::drawEvent() {
         ImGui::DockBuilderDockWindow("Outliner", dockRightId);
         ImGui::DockBuilderDockWindow("Inspector", dockRightBottomId);
 
-        for(auto& panel: _collectionPanels)
-            ImGui::DockBuilderDockWindow(panel.name().c_str(), dockMainId);
+        for(auto& panel: _panels)
+            ImGui::DockBuilderDockWindow(panel->name().c_str(), dockMainId);
 
         ImGui::DockBuilderFinish(dockSpaceId);
     }
@@ -190,50 +194,10 @@ void Editor::drawEvent() {
 
     if(_explorer.clickedNode()) {
         std::string path = _explorer.clickedNode()->path();
-        std::string extension = Utility::Directory::splitExtension(path).second;
-
-        if(extension == ".col") {
-            CollectionPanel* found = nullptr;
-
-            for(auto& panel: _collectionPanels)
-                if(panel.collectionPath() == path) found = &panel;
-
-            if(found) found->setNeedsFocus(true);
-            else _collectionPanels.insert(new CollectionPanel(path, _resourceManager, _maximizedWindowSize, _dpiScaleRatio));
-        }
+        openFile(path);
     }
 
-    for(auto& panel: _collectionPanels) {
-        if(panel.needsFocus()) {
-            ImGui::SetNextWindowFocus();
-            panel.setNeedsFocus(false);
-        }
-
-        if(panel.needsDocking()) {
-            ImGui::SetNextWindowDockID(dockSpaceId);
-            panel.setNeedsDocking(false);
-        }
-
-        panel.newFrame();
-
-        if(panel.isOpen()) {
-            if(panel.isFocused() && _activePanel != &panel) {
-                _activePanel = &panel;
-
-                _outliner.setPanel(&panel);
-                _inspector.setPanel(&panel);
-            }
-        } else {
-            if(_activePanel == &panel) {
-                _outliner.setPanel(nullptr);
-                _inspector.setPanel(nullptr);
-
-                _activePanel = nullptr;
-            }
-
-            _collectionPanels.erase(&panel);
-        }
-    }
+    showPanels(dockSpaceId);
 
     _outliner.newFrame();
     _inspector.newFrame();
@@ -257,6 +221,85 @@ void Editor::drawEvent() {
     _timeline.nextFrame();
 }
 
+void Editor::showPanels(ImGuiID dockSpaceId) {
+    for(auto it = _panels.begin(); it != _panels.end();) {
+        Containers::Pointer<AbstractPanel>& panel = *it;
+
+        if(panel->needsDocking()) {
+            ImGui::SetNextWindowDockID(dockSpaceId);
+            panel->setNeedsDocking(false);
+        }
+
+        panel->newFrame();
+
+        if(panel->isOpen()) {
+            ++it;
+
+            if(panel->isFocused() && _activePanel != panel.get()) {
+                _activePanel = panel.get();
+
+                /* If the focused panel is the collection panel, update the outline and the inspector
+                   (otherwise set them to nullptr) */
+                CollectionPanel* collectionPanel = dynamic_cast<CollectionPanel*>(panel.get());
+                _outliner.setPanel(collectionPanel);
+                _inspector.setPanel(collectionPanel);
+            }
+        } else {
+            it = _panels.erase(it);
+
+            CollectionPanel* collectionPanel = dynamic_cast<CollectionPanel*>(panel.get());
+
+            if(_activePanel == panel.get()) {
+                _activePanel = nullptr;
+
+                if(collectionPanel) {
+                    _outliner.setPanel(nullptr);
+                    _inspector.setPanel(nullptr);
+                }
+            }
+
+            if(collectionPanel) {
+                /* Remove panel from collection panels' vector */
+                auto found = std::find_if(_collectionPanels.begin(), _collectionPanels.end(),
+                    [&](CollectionPanel* p) { return p == panel.get(); });
+                if(found != _collectionPanels.end())
+                    _collectionPanels.erase(found);
+            }
+        }
+    }
+}
+
+void Editor::openFile(const std::string& path) {
+    /* Check if the file is already open in a panel */
+    auto found = std::find_if(_panels.begin(), _panels.end(),
+        [&](Containers::Pointer<AbstractPanel>& p) {
+            CollectionPanel* collectionPanel = dynamic_cast<CollectionPanel*>(p.get());
+            if(collectionPanel && collectionPanel->collectionPath() == path)
+                return true;
+
+            CodePanel* codePanel = dynamic_cast<CodePanel*>(p.get());
+            if(codePanel && codePanel->filePath() == path)
+                return true;
+
+            return false;
+        }
+    );
+
+    if(found != _panels.end()) { /* If the file is already open in a panel, focus it */
+        ImGui::SetWindowFocus((*found)->name().c_str());
+    } else { /* Open the file with the appropriate panel */
+        std::string extension = Utility::Directory::splitExtension(path).second;
+
+        if(extension == ".col") {
+            _panels.push_back(Containers::pointer<CollectionPanel>(path,
+                _resourceManager, _maximizedWindowSize, _dpiScaleRatio));
+            _collectionPanels.push_back(static_cast<CollectionPanel*>(_panels.back().get()));
+        } else {
+            _panels.push_back(Containers::pointer<CodePanel>(path));
+        }
+    }
+}
+
 void Editor::viewportEvent(ViewportEvent& event) {
     GL::defaultFramebuffer.setViewport({{}, event.framebufferSize()});
 
@@ -278,34 +321,41 @@ void Editor::keyPressEvent(KeyEvent& event) {
         const bool isShortcutKey = !superPressed && ctrlPressed && !altPressed && !shiftPressed;
         #endif
 
-        if(isShortcutKey && event.key() == KeyEvent::Key::S) _activePanel->save();
+        if(isShortcutKey && event.key() == KeyEvent::Key::S) {
+            CollectionPanel* collectionPanel = dynamic_cast<CollectionPanel*>(_activePanel);
+            if(collectionPanel) collectionPanel->save();
+        }
     }
 
-    for(auto& panel: _collectionPanels) panel.handleKeyPressEvent(event);
+    for(auto& collectionPanel: _collectionPanels)
+        collectionPanel->handleKeyPressEvent(event);
 
-    if(_imgui.handleKeyPressEvent(event)) return;
+    _imgui.handleKeyPressEvent(event);
 }
 
 void Editor::keyReleaseEvent(KeyEvent& event) {
-    if(_imgui.handleKeyReleaseEvent(event)) return;
+    _imgui.handleKeyReleaseEvent(event);
 }
 
 void Editor::mousePressEvent(MouseEvent& event) {
-    for(auto& panel: _collectionPanels) panel.handleMousePressEvent(event);
+    for(auto& collectionPanel: _collectionPanels)
+        collectionPanel->handleMousePressEvent(event);
 
-    if(_imgui.handleMousePressEvent(event)) return;
+    _imgui.handleMousePressEvent(event);
 }
 
 void Editor::mouseReleaseEvent(MouseEvent& event) {
-    for(auto& panel: _collectionPanels) panel.handleMouseReleaseEvent(event);
+    for(auto& collectionPanel: _collectionPanels)
+        collectionPanel->handleMouseReleaseEvent(event);
 
-    if(_imgui.handleMouseReleaseEvent(event)) return;
+    _imgui.handleMouseReleaseEvent(event);
 }
 
 void Editor::mouseMoveEvent(MouseMoveEvent& event) {
-    for(auto& panel: _collectionPanels) panel.handleMouseMoveEvent(event);
+    for(auto& collectionPanel: _collectionPanels)
+        collectionPanel->handleMouseMoveEvent(event);
 
-    if(_imgui.handleMouseMoveEvent(event)) return;
+    _imgui.handleMouseMoveEvent(event);
 }
 
 void Editor::mouseScrollEvent(MouseScrollEvent& event) {
@@ -317,5 +367,5 @@ void Editor::mouseScrollEvent(MouseScrollEvent& event) {
 }
 
 void Editor::textInputEvent(TextInputEvent& event) {
-    if(_imgui.handleTextInputEvent(event)) return;
+    _imgui.handleTextInputEvent(event);
 }

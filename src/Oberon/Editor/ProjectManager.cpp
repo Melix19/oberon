@@ -149,23 +149,23 @@ void ProjectManager::viewportEvent(ViewportEvent& event) {
 }
 
 void ProjectManager::keyPressEvent(KeyEvent& event) {
-    if(_imgui.handleKeyPressEvent(event)) return;
+    _imgui.handleKeyPressEvent(event);
 }
 
 void ProjectManager::keyReleaseEvent(KeyEvent& event) {
-    if(_imgui.handleKeyReleaseEvent(event)) return;
+    _imgui.handleKeyReleaseEvent(event);
 }
 
 void ProjectManager::mousePressEvent(MouseEvent& event) {
-    if(_imgui.handleMousePressEvent(event)) return;
+    _imgui.handleMousePressEvent(event);
 }
 
 void ProjectManager::mouseReleaseEvent(MouseEvent& event) {
-    if(_imgui.handleMouseReleaseEvent(event)) return;
+    _imgui.handleMouseReleaseEvent(event);
 }
 
 void ProjectManager::mouseMoveEvent(MouseMoveEvent& event) {
-    if(_imgui.handleMouseMoveEvent(event)) return;
+    _imgui.handleMouseMoveEvent(event);
 }
 
 void ProjectManager::mouseScrollEvent(MouseScrollEvent& event) {
@@ -177,5 +177,5 @@ void ProjectManager::mouseScrollEvent(MouseScrollEvent& event) {
 }
 
 void ProjectManager::textInputEvent(TextInputEvent& event) {
-    if(_imgui.handleTextInputEvent(event)) return;
+    _imgui.handleTextInputEvent(event);
 }

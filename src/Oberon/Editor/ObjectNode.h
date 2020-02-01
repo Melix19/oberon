@@ -25,7 +25,11 @@
 #pragma once
 
 #include <Corrade/Containers/Pointer.h>
-#include <Oberon/Core/Serializer.h>
+#include <Magnum/SceneGraph/TranslationRotationScalingTransformation3D.h>
+
+using namespace Magnum;
+
+typedef SceneGraph::Object<SceneGraph::TranslationRotationScalingTransformation3D> Object3D;
 
 class ObjectNode {
     public:

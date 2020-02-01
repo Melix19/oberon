@@ -24,6 +24,7 @@
 
 #pragma once
 
+#include "CodePanel.h"
 #include "CollectionPanel.hpp"
 #include "Console.h"
 #include "Explorer.h"
@@ -40,6 +41,9 @@ class Editor: public Platform::Application {
 
     private:
         void drawEvent() override;
+
+        void showPanels(ImGuiID dockSpaceId);
+        void openFile(const std::string& path);
 
         void viewportEvent(ViewportEvent& event) override;
 
@@ -66,6 +70,7 @@ class Editor: public Platform::Application {
         Inspector _inspector;
         Outliner _outliner;
 
-        Containers::LinkedList<CollectionPanel> _collectionPanels;
-        CollectionPanel* _activePanel;
+        std::vector<Containers::Pointer<AbstractPanel>> _panels;
+        std::vector<CollectionPanel*> _collectionPanels;
+        AbstractPanel* _activePanel;
 };

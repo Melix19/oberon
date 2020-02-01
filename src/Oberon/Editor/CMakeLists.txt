@@ -30,6 +30,7 @@ set_directory_properties(PROPERTIES CORRADE_USE_PEDANTIC_FLAGS ON)
 corrade_add_resource(OberonEditor_RCS resources.conf)
 
 set(OberonEditor_SRCS
+    CodePanel.cpp
     CollectionPanel.cpp
     Console.cpp
     Editor.cpp
@@ -43,6 +44,8 @@ set(OberonEditor_SRCS
     ${OberonEditor_RCS})
 
 set(OberonEditor_HEADERS
+    AbstractPanel.h
+    CodePanel.h
     CollectionPanel.h
     CollectionPanel.hpp
     Console.h
