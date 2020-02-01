@@ -61,6 +61,7 @@ void CodePanel::newFrame() {
     ImVec2 lineStartPos = ImGui::GetCursorScreenPos();
     ImDrawList* drawList = ImGui::GetWindowDrawList();
 
+    ImGui::PushFont(ImGui::GetIO().Fonts->Fonts[1]);
     for(size_t lineIndex = 0; lineIndex < _lines.size(); ++lineIndex) {
         /* Draw line number */
         const char* lineNumText = std::to_string(lineIndex + 1).c_str();
@@ -81,6 +82,7 @@ void CodePanel::newFrame() {
 
         lineStartPos.y += ImGui::GetTextLineHeightWithSpacing();
     }
+    ImGui::PopFont();
 
     ImGui::End();
 }

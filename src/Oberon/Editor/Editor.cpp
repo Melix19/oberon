@@ -49,14 +49,18 @@ Editor::Editor(const Arguments& arguments, const std::string& projectPath): Plat
     {
         ImFontConfig fontConfig;
         fontConfig.FontDataOwnedByAtlas = false;
-
-        const Containers::ArrayView<const char> font =
-            Utility::Resource{"OberonEditor"}.getRaw("NotoSans-Regular.ttf");
-
         ImGuiIO& io = ImGui::GetIO();
         io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
-        io.Fonts->AddFontFromMemoryTTF(const_cast<char*>(font.data()), font.size(),
+
+        const Containers::ArrayView<const char> font1 =
+            Utility::Resource{"OberonEditor"}.getRaw("NotoSans-Regular.ttf");
+        io.Fonts->AddFontFromMemoryTTF(const_cast<char*>(font1.data()), font1.size(),
             18.0f*framebufferSize().x()/size.x(), &fontConfig);
+
+        const Containers::ArrayView<const char> font2 =
+            Utility::Resource{"OberonEditor"}.getRaw("JetBrainsMono-Regular.ttf");
+        io.Fonts->AddFontFromMemoryTTF(const_cast<char*>(font2.data()), font2.size(),
+            15.0f*framebufferSize().x()/size.x(), &fontConfig);
     }
 
     _imgui = ImGuiIntegration::Context(*ImGui::GetCurrentContext(), size, windowSize(),
