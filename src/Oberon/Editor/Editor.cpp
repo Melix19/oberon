@@ -237,8 +237,6 @@ void Editor::showPanels(ImGuiID dockSpaceId) {
         panel->newFrame();
 
         if(panel->isOpen()) {
-            ++it;
-
             if(panel->isFocused() && _activePanel != panel.get()) {
                 _activePanel = panel.get();
 
@@ -248,9 +246,9 @@ void Editor::showPanels(ImGuiID dockSpaceId) {
                 _outliner.setPanel(collectionPanel);
                 _inspector.setPanel(collectionPanel);
             }
-        } else {
-            it = _panels.erase(it);
 
+            ++it;
+        } else {
             CollectionPanel* collectionPanel = dynamic_cast<CollectionPanel*>(panel.get());
 
             if(_activePanel == panel.get()) {
@@ -269,6 +267,8 @@ void Editor::showPanels(ImGuiID dockSpaceId) {
                 if(found != _collectionPanels.end())
                     _collectionPanels.erase(found);
             }
+
+            it = _panels.erase(it);
         }
     }
 }
