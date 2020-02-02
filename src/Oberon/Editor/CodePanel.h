@@ -27,8 +27,10 @@
 #include "AbstractPanel.h"
 
 #include <Corrade/Containers/GrowableArray.h>
+#include <Magnum/Magnum.h>
+#include <imgui.h>
 
-using namespace Corrade;
+using namespace Magnum;
 
 class CodePanel: public AbstractPanel {
     public:
@@ -42,10 +44,12 @@ class CodePanel: public AbstractPanel {
         std::string _filePath;
 
     private:
-        enum class PaletteIndex {
+        enum class PaletteIndex: UnsignedInt {
             Default,
-            Comment
+            LineNumber
         };
+
+        ImU32 getColorFromIndex(PaletteIndex index);
 
         struct Glyph {
             char _character;

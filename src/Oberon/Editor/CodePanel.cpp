@@ -25,10 +25,6 @@
 #include "CodePanel.h"
 
 #include <Corrade/Utility/Directory.h>
-#include <imgui.h>
-#include <Magnum/Magnum.h>
-
-using namespace Magnum;
 
 CodePanel::CodePanel(const std::string& filePath): _filePath{filePath} {
     _name = Utility::Directory::filename(_filePath);
@@ -66,7 +62,7 @@ void CodePanel::newFrame() {
         /* Draw line number */
         const char* lineNumText = std::to_string(lineIndex + 1).c_str();
         Float lineNumWidth = ImGui::CalcTextSize(lineNumText).x;
-        drawList->AddText(ImVec2(lineStartPos.x + maxLineNumWidth - lineNumWidth, lineStartPos.y), IM_COL32(255, 255, 255, 255), lineNumText);
+        drawList->AddText(ImVec2(lineStartPos.x + maxLineNumWidth - lineNumWidth, lineStartPos.y), getColorFromIndex(PaletteIndex::LineNumber), lineNumText);
 
         /* Draw text */
         ImVec2 textStartPos(lineStartPos.x + maxLineNumWidth + textSpacing, lineStartPos.y);
@@ -74,7 +70,7 @@ void CodePanel::newFrame() {
         Float glyphOffset = 0.0f;
         for(size_t i = 0; i < line.size(); ++i) {
             const char* glyphText = &line[i]._character;
-            drawList->AddText(ImVec2(textStartPos.x + glyphOffset, textStartPos.y), IM_COL32(255, 255, 255, 255), glyphText);
+            drawList->AddText(ImVec2(textStartPos.x + glyphOffset, textStartPos.y), getColorFromIndex(PaletteIndex::Default), glyphText);
 
             Float glyphWidth = ImGui::CalcTextSize(glyphText).x;
             glyphOffset += glyphWidth;
@@ -85,4 +81,13 @@ void CodePanel::newFrame() {
     ImGui::PopFont();
 
     ImGui::End();
+}
+
+ImU32 CodePanel::getColorFromIndex(PaletteIndex index) {
+    constexpr ImU32 ColorMap[] {
+        0xffe6e6e6,   /* Default */
+        0xff999999    /* LineNumber */
+    };
+
+    return ColorMap[UnsignedInt(index)];
 }
