@@ -33,18 +33,22 @@
 
 template<class KeyEvent> void CollectionPanel::handleKeyPressEvent(KeyEvent& event) {
     if(_isDragging && !_isOrthographicCamera) {
+        Float speed = 0.1f;
+        if(event.modifiers() & KeyEvent::Modifier::Shift)
+            speed *= 2;
+
         if(event.key() == KeyEvent::Key::W)
-            _cameraObject->translate(-_cameraObject->transformation().backward()*0.1f);
+            _cameraObject->translate(-_cameraObject->transformation().backward()*speed);
         if(event.key() == KeyEvent::Key::S)
-            _cameraObject->translate(_cameraObject->transformation().backward()*0.1f);
+            _cameraObject->translate(_cameraObject->transformation().backward()*speed);
         if(event.key() == KeyEvent::Key::A)
-            _cameraObject->translate(-_cameraObject->transformation().right()*0.1f);
+            _cameraObject->translate(-_cameraObject->transformation().right()*speed);
         if(event.key() == KeyEvent::Key::D)
-            _cameraObject->translate(_cameraObject->transformation().right()*0.1f);
+            _cameraObject->translate(_cameraObject->transformation().right()*speed);
         if(event.key() == KeyEvent::Key::Q)
-            _cameraObject->translate(-_cameraObject->transformation().up()*0.1f);
+            _cameraObject->translate(-_cameraObject->transformation().up()*speed);
         if(event.key() == KeyEvent::Key::E)
-            _cameraObject->translate(_cameraObject->transformation().up()*0.1f);
+            _cameraObject->translate(_cameraObject->transformation().up()*speed);
     }
 }
 
