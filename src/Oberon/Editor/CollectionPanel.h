@@ -95,6 +95,7 @@ class CollectionPanel: public AbstractPanel {
         GL::Renderbuffer _objectId;
 
         SceneGraph::DrawableGroup3D _drawables;
+        SceneGraph::DrawableGroup3D _editorDrawables;
         std::vector<ObjectNode*> _drawablesNodes;
         ScriptGroup _scripts;
         LightGroup _lights;

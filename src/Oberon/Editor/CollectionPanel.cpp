@@ -90,6 +90,7 @@ void CollectionPanel::drawViewport(Float deltaTime) {
         _lights[i].updateShader();
 
     _camera->draw(_drawables);
+    _camera->draw(_editorDrawables);
 }
 
 void CollectionPanel::newFrame() {
@@ -189,7 +190,7 @@ void CollectionPanel::createGrid() {
         _resourceManager.set(meshResource.key(), std::move(glMesh), ResourceDataState::Final, ResourcePolicy::ReferenceCounted);
     }
 
-    Mesh& mesh = _gridObject->addFeature<Mesh>(&_drawables, shaderResource);
+    Mesh& mesh = _gridObject->addFeature<Mesh>(&_editorDrawables, shaderResource);
     mesh.setMesh(meshResource);
     mesh.setSize({size, size, size});
     mesh.setAmbientColor(Color3{0.3f});
