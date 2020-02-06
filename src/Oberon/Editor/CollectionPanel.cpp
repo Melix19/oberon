@@ -112,13 +112,12 @@ void CollectionPanel::newFrame() {
     }
 
     if(ImGui::BeginMenuBar()) {
-        std::string buttonStr;
+        std::string label = "Orthographic";
         if(_isOrthographicCamera)
-            buttonStr = "Perspective";
-        else
-            buttonStr = "Orthographic";
+            label = "Perspective";
 
-        if(ImGui::Button(buttonStr.c_str())) {
+        ImVec2 size = ImGui::CalcTextSize(label.c_str());
+        if(ImGui::Selectable(label.c_str(), false, ImGuiSelectableFlags_None, size)) {
             _isOrthographicCamera = !_isOrthographicCamera;
 
             Matrix4 currentCameraTransformation = _cameraObject->transformation();

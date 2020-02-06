@@ -113,26 +113,25 @@ void Editor::drawEvent() {
             ImGui::EndMenu();
         }
 
-        ImVec2 size(40.0f, 0.0f);
-        ImGui::SetCursorPosX(ImGui::GetWindowWidth()/2 - size.x/2);
-        ImGui::PushStyleVar(ImGuiStyleVar_SelectableTextAlign, ImVec2(0.5f, 0.5f));
-
         if(_activePanel) {
             CollectionPanel* collectionPanel = dynamic_cast<CollectionPanel*>(_activePanel);
+            if(collectionPanel) {
+                std::string label = "Play";
+                if(collectionPanel->isSimulating())
+                    label = "Stop";
 
-            if(collectionPanel && collectionPanel->isSimulating()) {
-                if(ImGui::Selectable("Stop", false, 0, size)) {
-                    collectionPanel->stopSimulation();
-                }
-            } else if(collectionPanel && !collectionPanel->isSimulating()) {
-                if(ImGui::Selectable("Play", false, 0, size)) {
-                    _console.resetStrings();
-                    collectionPanel->startSimulation();
+                ImVec2 size = ImGui::CalcTextSize(label.c_str());
+                ImGui::SetCursorPosX(ImGui::GetWindowWidth()/2 - size.x/2);
+                if(ImGui::Selectable(label.c_str(), false, ImGuiSelectableFlags_None, size)) {
+                    if(collectionPanel->isSimulating())
+                        collectionPanel->stopSimulation();
+                    else {
+                        _console.resetStrings();
+                        collectionPanel->startSimulation();
+                    }
                 }
             }
         }
-
-        ImGui::PopStyleVar();
 
         menuBarSize = ImGui::GetWindowSize();
 
