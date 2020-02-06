@@ -26,10 +26,11 @@
 
 #include <Corrade/Utility/Directory.h>
 
-CodePanel::CodePanel(const std::string& filePath): _filePath{filePath} {
-    _name = Utility::Directory::filename(_filePath);
+CodePanel::CodePanel(FileNode* fileNode) {
+    _fileNode = fileNode;
+    _name = Utility::Directory::filename(_fileNode->path());
 
-    std::string codeText = Utility::Directory::readString(_filePath);
+    std::string codeText = Utility::Directory::readString(_fileNode->path());
     Containers::arrayAppend(_lines, Line{});
 
     for(char& chr : codeText) {

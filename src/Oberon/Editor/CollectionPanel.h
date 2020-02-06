@@ -36,13 +36,11 @@
 
 class CollectionPanel: public AbstractPanel {
     public:
-        CollectionPanel(const std::string& collectionPath, OberonResourceManager& resourceManager, const Vector2i& viewportTextureSize, const Vector2& dpiScaleRatio);
+        CollectionPanel(FileNode* fileNode, OberonResourceManager& resourceManager, const Vector2i& viewportTextureSize, const Vector2& dpiScaleRatio);
         void drawViewport(Float deltaTime);
         void newFrame();
 
     private:
-        std::string _collectionPath;
-
         OberonResourceManager& _resourceManager;
 
         Vector2i _viewportTextureSize;
@@ -64,8 +62,6 @@ class CollectionPanel: public AbstractPanel {
         void resetObjectAndChildren(ObjectNode* node);
         void save();
 
-        const std::string& collectionPath() const { return _collectionPath; }
-
         ObjectNode* rootNode() { return _rootNode.get(); }
 
         std::vector<ObjectNode*>& selectedNodes() { return _selectedNodes; }
@@ -83,7 +79,7 @@ class CollectionPanel: public AbstractPanel {
         Vector2 _viewportPos;
         Vector2 _viewportSize;
 
-        Utility::Configuration _collectionConfig;
+        Containers::Pointer<Utility::Configuration> _collectionConfig;
         Containers::Pointer<ObjectNode> _rootNode;
         std::vector<ObjectNode*> _selectedNodes;
 

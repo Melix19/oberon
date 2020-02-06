@@ -35,11 +35,11 @@
 
 #include <algorithm>
 
-CollectionPanel::CollectionPanel(const std::string& collectionPath, OberonResourceManager& resourceManager, const Vector2i& viewportTextureSize, const Vector2& dpiScaleRatio):
-    _collectionPath{collectionPath}, _resourceManager{resourceManager}, _viewportTextureSize{viewportTextureSize}, _dpiScaleRatio{dpiScaleRatio},
-    _collectionConfig{_collectionPath}
+CollectionPanel::CollectionPanel(FileNode* fileNode, OberonResourceManager& resourceManager, const Vector2i& viewportTextureSize, const Vector2& dpiScaleRatio):
+    _resourceManager{resourceManager}, _viewportTextureSize{viewportTextureSize}, _dpiScaleRatio{dpiScaleRatio}
 {
-    _name = Utility::Directory::filename(_collectionPath);
+    _fileNode = fileNode;
+    _name = Utility::Directory::filename(_fileNode->path());
 
     _viewportTexture.setStorage(1, GL::TextureFormat::RGBA8, _viewportTextureSize*_dpiScaleRatio);
     _depth.setStorage(GL::RenderbufferFormat::Depth24Stencil8, _viewportTextureSize*_dpiScaleRatio);
@@ -59,17 +59,18 @@ CollectionPanel::CollectionPanel(const std::string& collectionPath, OberonResour
 
     createGrid();
 
-    if(!_collectionConfig.hasGroup("scene"))
-        _collectionConfig.addGroup("scene");
+    _collectionConfig = Containers::pointer<Utility::Configuration>(_fileNode->path());
+    if(!_collectionConfig->hasGroup("scene"))
+        _collectionConfig->addGroup("scene");
 
-    _rootNode = Containers::pointer<ObjectNode>(&_scene, _collectionConfig.group("scene"));
+    _rootNode = Containers::pointer<ObjectNode>(&_scene, _collectionConfig->group("scene"));
 
     updateObjectNodeChildren(_rootNode.get());
     updateDrawablesId();
 }
 
 void CollectionPanel::drawViewport(Float deltaTime) {
-    /* If the window is not visible, just end the method here. */
+    /* If the window is not visible, end the method here. */
     if(!_isVisible || !_isOpen)
         return;
 
@@ -105,7 +106,7 @@ void CollectionPanel::newFrame() {
     _isFocused = ImGui::IsWindowFocused();
     _isHovered = ImGui::IsWindowHovered();
 
-    /* If the window is not visible, just end the method here. */
+    /* If the window is not visible, end the method here. */
     if(!_isVisible || !_isOpen) {
         ImGui::End();
         return;
@@ -152,7 +153,7 @@ void CollectionPanel::newFrame() {
 }
 
 void CollectionPanel::save() {
-    _collectionConfig.save();
+    _collectionConfig->save();
 }
 
 void CollectionPanel::updateObjectNodeChildren(ObjectNode* node) {

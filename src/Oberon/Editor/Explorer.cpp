@@ -43,7 +43,7 @@ void Explorer::newFrame() {
     bool isVisible = ImGui::Begin("Explorer");
     ImGui::PopStyleVar();
 
-    /* If the window is not visible, just end the method here. */
+    /* If the window is not visible, end the method here. */
     if(!isVisible) {
         ImGui::End();
         return;
@@ -104,6 +104,17 @@ void Explorer::newFrame() {
     }
 }
 
+void Explorer::selectNode(FileNode* node) {
+    _selectedNodes.push_back(node);
+    node->setSelected(true);
+}
+
+void Explorer::deselectAllNodes() {
+    for(auto& selectedNode: _selectedNodes)
+        selectedNode->setSelected(false);
+    _selectedNodes.clear();
+}
+
 void Explorer::displayTree(FileNode* node, bool isRoot) {
     bool isEditNode = (node == _editNode);
     bool isOpen = true;
@@ -161,15 +172,10 @@ bool Explorer::displayFileNode(FileNode* node) {
 
             node->setSelected(!node->isSelected());
         } else if(!node->isSelected() || ImGui::IsItemClicked(0)) {
-            if(!_selectedNodes.empty()) {
-                for(auto& selectedNode: _selectedNodes)
-                    selectedNode->setSelected(false);
+            if(!_selectedNodes.empty())
+                deselectAllNodes();
 
-                _selectedNodes.clear();
-            }
-
-            _selectedNodes.push_back(node);
-            node->setSelected(true);
+            selectNode(node);
 
             if(ImGui::IsItemClicked(0)) _clickedNode = node;
         }

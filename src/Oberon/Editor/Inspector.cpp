@@ -38,7 +38,7 @@ void Inspector::newFrame() {
     if(_panel && !selectedNodes.empty())
         objectNode = selectedNodes.front();
 
-    /* If the window is not visible, just end the method here. */
+    /* If the window is not visible, end the method here. */
     if(!isVisible || !_panel || selectedNodes.empty() || (objectNode == _panel->rootNode())) {
         ImGui::End();
         return;

@@ -34,7 +34,7 @@ void Outliner::newFrame() {
     bool isVisible = ImGui::Begin("Outliner");
     ImGui::PopStyleVar();
 
-    /* If the window is not visible, just end the method here. */
+    /* If the window is not visible, end the method here. */
     if(!isVisible || !_panel) {
         ImGui::End();
         return;

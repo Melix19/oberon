@@ -196,8 +196,9 @@ void Editor::drawEvent() {
     _explorer.newFrame();
 
     if(_explorer.clickedNode()) {
-        std::string path = _explorer.clickedNode()->path();
-        openFile(path);
+        bool isDirectory = Utility::Directory::isDirectory(_explorer.clickedNode()->path());
+        if(!isDirectory)
+            openFile(_explorer.clickedNode());
     }
 
     showPanels(dockSpaceId);
@@ -233,7 +234,13 @@ void Editor::showPanels(ImGuiID dockSpaceId) {
             panel->setNeedsDocking(false);
         }
 
+        bool wasFocused = panel->isFocused();
         panel->newFrame();
+
+        if(!wasFocused && panel->isFocused()) {
+            _explorer.deselectAllNodes();
+            _explorer.selectNode(panel->fileNode());
+        }
 
         if(panel->isOpen()) {
             if(panel->isFocused() && _activePanel != panel.get()) {
@@ -272,16 +279,16 @@ void Editor::showPanels(ImGuiID dockSpaceId) {
     }
 }
 
-void Editor::openFile(const std::string& path) {
+void Editor::openFile(FileNode* fileNode) {
     /* Check if the file is already open in a panel */
     auto found = std::find_if(_panels.begin(), _panels.end(),
         [&](Containers::Pointer<AbstractPanel>& p) {
             CollectionPanel* collectionPanel = dynamic_cast<CollectionPanel*>(p.get());
-            if(collectionPanel && collectionPanel->collectionPath() == path)
+            if(collectionPanel && collectionPanel->fileNode() == fileNode)
                 return true;
 
             CodePanel* codePanel = dynamic_cast<CodePanel*>(p.get());
-            if(codePanel && codePanel->filePath() == path)
+            if(codePanel && codePanel->fileNode() == fileNode)
                 return true;
 
             return false;
@@ -291,14 +298,14 @@ void Editor::openFile(const std::string& path) {
     if(found != _panels.end()) { /* If the file is already open in a panel, focus it */
         ImGui::SetWindowFocus((*found)->name().c_str());
     } else { /* Open the file with the appropriate panel */
-        std::string extension = Utility::Directory::splitExtension(path).second;
+        std::string extension = Utility::Directory::splitExtension(fileNode->path()).second;
 
         if(extension == ".col") {
-            _panels.push_back(Containers::pointer<CollectionPanel>(path,
+            _panels.push_back(Containers::pointer<CollectionPanel>(fileNode,
                 _resourceManager, _maximizedWindowSize, _dpiScaleRatio));
             _collectionPanels.push_back(static_cast<CollectionPanel*>(_panels.back().get()));
         } else {
-            _panels.push_back(Containers::pointer<CodePanel>(path));
+            _panels.push_back(Containers::pointer<CodePanel>(fileNode));
         }
     }
 }

@@ -34,14 +34,9 @@ using namespace Magnum;
 
 class CodePanel: public AbstractPanel {
     public:
-        CodePanel(const std::string& filePath);
+        CodePanel(FileNode* fileNode);
 
         void newFrame() override;
-
-        const std::string& filePath() { return _filePath; }
-
-    private:
-        std::string _filePath;
 
     private:
         enum class PaletteIndex: UnsignedInt {

@@ -43,7 +43,7 @@ class Editor: public Platform::Application {
         void drawEvent() override;
 
         void showPanels(ImGuiID dockSpaceId);
-        void openFile(const std::string& path);
+        void openFile(FileNode* fileNode);
 
         void viewportEvent(ViewportEvent& event) override;
 

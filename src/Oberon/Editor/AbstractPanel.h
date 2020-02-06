@@ -24,13 +24,15 @@
 
 #pragma once
 
-#include <string>
+#include "FileNode.h"
 
 class AbstractPanel {
     public:
         virtual ~AbstractPanel() = default;
 
         virtual void newFrame() = 0;
+
+        FileNode* fileNode() const { return _fileNode; }
 
         const std::string& name() const { return _name; }
         bool isOpen() const { return _isOpen; }
@@ -44,6 +46,8 @@ class AbstractPanel {
 
     protected:
         std::string _name;
+
+        FileNode* _fileNode;
 
         bool _isOpen{true};
         bool _isVisible{false};

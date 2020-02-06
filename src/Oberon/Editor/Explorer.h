@@ -35,6 +35,9 @@ class Explorer {
         Explorer(const std::string& rootPath);
         void newFrame();
 
+        void selectNode(FileNode* node);
+        void deselectAllNodes();
+
         FileNode* clickedNode() const { return _clickedNode; }
 
     private:
