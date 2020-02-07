@@ -24,10 +24,10 @@
 
 #include "Outliner.h"
 
-#include <algorithm>
-
 #include <imgui.h>
 #include <misc/cpp/imgui_stdlib.h>
+
+#include <algorithm>
 
 void Outliner::newFrame() {
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
@@ -58,12 +58,8 @@ void Outliner::newFrame() {
 
                 parent->objectConfig()->removeGroup(selectedNode->objectConfig());
 
-                auto found = std::find_if(parent->children().begin(), parent->children().end(),
-                    [&](Containers::Pointer<ObjectNode>& p) { return p.get() == selectedNode; });
-
-                CORRADE_INTERNAL_ASSERT(found != parent->children().end());
-
-                parent->children().erase(found);
+                parent->children().erase(std::find_if(parent->children().begin(), parent->children().end(),
+                    [&selectedNode](Containers::Pointer<ObjectNode>& n) { return n.get() == selectedNode; }));
             }
 
             selectedNodes.clear();
@@ -125,12 +121,8 @@ bool Outliner::displayObjectNode(ObjectNode* node) {
 
         if(isShortcutKey && ImGui::IsItemClicked(0)) {
             if(node->isSelected()) {
-                auto found = std::find_if(selectedNodes.begin(), selectedNodes.end(),
-                    [&](ObjectNode* p) { return p == node; });
-
-                CORRADE_INTERNAL_ASSERT(found != selectedNodes.end());
-
-                selectedNodes.erase(found);
+                selectedNodes.erase(std::find_if(selectedNodes.begin(), selectedNodes.end(),
+                    [&node](ObjectNode* n) { return n == node; }));
             } else selectedNodes.push_back(node);
 
             node->setSelected(!node->isSelected());

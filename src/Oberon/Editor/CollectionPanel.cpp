@@ -228,11 +228,8 @@ CollectionPanel& CollectionPanel::addFeatureToObject(ObjectNode* objectNode, Uti
 }
 
 CollectionPanel& CollectionPanel::removeDrawableNode(ObjectNode* objectNode) {
-    auto found = std::find_if(_drawablesNodes.begin(), _drawablesNodes.end(),
-        [&](ObjectNode* p) { return p == objectNode; });
-
-    CORRADE_INTERNAL_ASSERT(found != _drawablesNodes.end());
-    _drawablesNodes.erase(found);
+    _drawablesNodes.erase(std::find_if(_drawablesNodes.begin(), _drawablesNodes.end(),
+        [&objectNode](ObjectNode* n) { return n == objectNode; }));
 
     updateDrawablesId();
     return *this;

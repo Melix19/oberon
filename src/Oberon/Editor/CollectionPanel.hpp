@@ -96,12 +96,9 @@ template<class MouseEvent> void CollectionPanel::handleMouseReleaseEvent(MouseEv
             ObjectNode* pickedNode = _drawablesNodes[id - 1];
 
             if(isShortcutKey && pickedNode->isSelected()) {
-                auto found = std::find_if(_selectedNodes.begin(), _selectedNodes.end(),
-                    [&](ObjectNode* p) { return p == pickedNode; });
+                _selectedNodes.erase(std::find_if(_selectedNodes.begin(), _selectedNodes.end(),
+                    [&pickedNode](ObjectNode* n) { return n == pickedNode; }));
 
-                CORRADE_INTERNAL_ASSERT(found != _selectedNodes.end());
-
-                _selectedNodes.erase(found);
                 pickedNode->setSelected(false);
             } else {
                 _selectedNodes.push_back(pickedNode);

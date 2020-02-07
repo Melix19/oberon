@@ -24,20 +24,22 @@
 
 #include "Explorer.h"
 
-#include <algorithm>
-
 #include <Corrade/Utility/Directory.h>
 #include <imgui.h>
 #include <misc/cpp/imgui_stdlib.h>
 
-Explorer::Explorer(const std::string& rootPath): _rootNode(rootPath),
-    _deleteSelectedNodes(false), _clickedNode(nullptr), _editNode(nullptr)
+#include <algorithm>
+
+Explorer::Explorer(const std::string& rootPath): _rootNode{rootPath},
+    watcher{rootPath}
 {
     updateFileNodeChildren(&_rootNode);
 }
 
 void Explorer::newFrame() {
     _clickedNode = nullptr;
+
+    if(watcher.hasChanged()) updateFileNodeChildren(&_rootNode);
 
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
     bool isVisible = ImGui::Begin("Explorer");
@@ -89,7 +91,7 @@ void Explorer::newFrame() {
             for(auto& selectedNode: _selectedNodes) {
                 auto& parentChildren = selectedNode->parent()->children();
                 auto found = std::find_if(parentChildren.begin(), parentChildren.end(),
-                    [&](Containers::Pointer<FileNode>& p) { return p.get() == selectedNode; });
+                    [&selectedNode](Containers::Pointer<FileNode>& n) { return n.get() == selectedNode; });
 
                 CORRADE_INTERNAL_ASSERT(found != parentChildren.end());
 
@@ -162,12 +164,8 @@ bool Explorer::displayFileNode(FileNode* node) {
 
         if(isShortcutKey && ImGui::IsItemClicked(0)) {
             if(node->isSelected()) {
-                auto found = std::find_if(_selectedNodes.begin(), _selectedNodes.end(),
-                    [&](FileNode* p) { return p == node; });
-
-                CORRADE_INTERNAL_ASSERT(found != _selectedNodes.end());
-
-                _selectedNodes.erase(found);
+                _selectedNodes.erase(std::find_if(_selectedNodes.begin(), _selectedNodes.end(),
+                    [&node](FileNode* n) { return n == node; }));
             } else _selectedNodes.push_back(node);
 
             node->setSelected(!node->isSelected());
@@ -236,34 +234,16 @@ void Explorer::displayEditNode(FileNode* node) {
         switch (_editNodeMode) {
             case EditMode::FileCreation: {
                 std::string newPath = Utility::Directory::join(node->path(), _editNodeText);
-                bool success = Utility::Directory::writeString(newPath, "");
-
-                if(success) {
-                    node->addChild(newPath);
-                    auto& children = node->children();
-                    std::sort(children.begin(), children.end(), sortFileNodes);
-                }
+                Utility::Directory::writeString(newPath, "");
             } break;
             case EditMode::FolderCreation: {
                 std::string newPath = Utility::Directory::join(node->path(), _editNodeText);
-                bool success = Utility::Directory::mkpath(newPath);
-
-                if(success) {
-                    node->addChild(newPath);
-                    auto& children = node->children();
-                    std::sort(children.begin(), children.end(), sortFileNodes);
-                }
+                Utility::Directory::mkpath(newPath);
             } break;
             case EditMode::Rename: {
                 std::string newPath = Utility::Directory::join(node->parent()->path(),
                     _editNodeText);
-                bool success = Utility::Directory::move(node->path(), newPath);
-
-                if(success) {
-                    node->setPath(newPath);
-                    auto& parentChildren = node->parent()->children();
-                    std::sort(parentChildren.begin(), parentChildren.end(), sortFileNodes);
-                }
+                Utility::Directory::move(node->path(), newPath);
             } break;
         }
     }
@@ -275,6 +255,8 @@ void Explorer::displayEditNode(FileNode* node) {
 }
 
 void Explorer::updateFileNodeChildren(FileNode* node) {
+    node->children().clear();
+
     auto directoryList = Utility::Directory::list(node->path(), Utility::Directory::Flag::SkipDotAndDotDot);
 
     for(auto& filename: directoryList) {

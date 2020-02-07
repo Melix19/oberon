@@ -26,6 +26,7 @@
 
 #include "FileNode.h"
 
+#include <Corrade/Utility/FileWatcher.h>
 #include <Magnum/Magnum.h>
 
 using namespace Magnum;
@@ -52,17 +53,21 @@ class Explorer {
         static bool sortFileNodes(const Containers::Pointer<FileNode>& a, const Containers::Pointer<FileNode>& b);
 
         FileNode _rootNode;
-        std::vector<FileNode*> _selectedNodes;
-        bool _deleteSelectedNodes;
-        FileNode* _clickedNode;
+        Utility::FileWatcher watcher;
 
+        std::vector<FileNode*> _selectedNodes;
+        FileNode* _clickedNode{nullptr};
+
+        bool _deleteSelectedNodes{false};
+
+    private:
         enum class EditMode: UnsignedByte {
             FileCreation,
             FolderCreation,
             Rename
         };
 
-        FileNode* _editNode;
+        FileNode* _editNode{nullptr};
         EditMode _editNodeMode;
         std::string _editNodeText;
         bool _editNodeNeedsFocus;

@@ -268,10 +268,8 @@ void Editor::showPanels(ImGuiID dockSpaceId) {
 
             if(collectionPanel) {
                 /* Remove panel from collection panels' vector */
-                auto found = std::find_if(_collectionPanels.begin(), _collectionPanels.end(),
-                    [&](CollectionPanel* p) { return p == panel.get(); });
-                if(found != _collectionPanels.end())
-                    _collectionPanels.erase(found);
+                _collectionPanels.erase(std::find_if(_collectionPanels.begin(), _collectionPanels.end(),
+                    [&panel](CollectionPanel* p) { return p == panel.get(); }));
             }
 
             it = _panels.erase(it);
