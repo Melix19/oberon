@@ -52,10 +52,11 @@ class CodePanel: public AbstractPanel {
 
             Glyph(char character, PaletteIndex colorIndex):
                 _character(character), _colorIndex(colorIndex) {}
-    };
+        };
 
-    typedef Containers::Array<Glyph> Line;
-    typedef Containers::Array<Line> Lines;
+        typedef Containers::Array<Glyph> Line;
+        typedef Containers::Array<Line> Lines;
 
-    Lines _lines;
+        Lines _lines;
+        std::string _textBuffer;
 };

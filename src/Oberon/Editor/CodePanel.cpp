@@ -61,19 +61,19 @@ void CodePanel::newFrame() {
     ImGui::PushFont(ImGui::GetIO().Fonts->Fonts[1]);
     for(size_t lineIndex = 0; lineIndex < _lines.size(); ++lineIndex) {
         /* Draw line number */
-        const char* lineNumText = std::to_string(lineIndex + 1).c_str();
-        Float lineNumWidth = ImGui::CalcTextSize(lineNumText).x;
-        drawList->AddText(ImVec2(lineStartPos.x + maxLineNumWidth - lineNumWidth, lineStartPos.y), getColorFromIndex(PaletteIndex::LineNumber), lineNumText);
+        _textBuffer = std::to_string(lineIndex + 1);
+        Float lineNumWidth = ImGui::CalcTextSize(_textBuffer.c_str()).x;
+        drawList->AddText(ImVec2(lineStartPos.x + maxLineNumWidth - lineNumWidth, lineStartPos.y), getColorFromIndex(PaletteIndex::LineNumber), _textBuffer.c_str());
 
         /* Draw text */
         ImVec2 textStartPos(lineStartPos.x + maxLineNumWidth + textSpacing, lineStartPos.y);
         Line& line = _lines[lineIndex];
         Float glyphOffset = 0.0f;
         for(size_t i = 0; i < line.size(); ++i) {
-            const char* glyphText = &line[i]._character;
-            drawList->AddText(ImVec2(textStartPos.x + glyphOffset, textStartPos.y), getColorFromIndex(PaletteIndex::Default), glyphText);
+            _textBuffer = std::string(1, line[i]._character);
+            drawList->AddText(ImVec2(textStartPos.x + glyphOffset, textStartPos.y), getColorFromIndex(PaletteIndex::Default), _textBuffer.c_str());
 
-            Float glyphWidth = ImGui::CalcTextSize(glyphText).x;
+            Float glyphWidth = ImGui::CalcTextSize(_textBuffer.c_str()).x;
             glyphOffset += glyphWidth;
         }
 
