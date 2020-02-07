@@ -22,7 +22,7 @@
     SOFTWARE.
 */
 
-#include "Serializer.h"
+#include "Importer.h"
 
 #include <Magnum/Math/ConfigurationValue.h>
 #include <Magnum/MeshTools/Compile.h>
@@ -34,7 +34,7 @@
 #include <Magnum/Trade/MeshData2D.h>
 #include <Magnum/Trade/MeshData3D.h>
 
-namespace Serializer {
+namespace Importer {
 
 Object3D* loadObject(Utility::ConfigurationGroup* objectConfig, Object3D* parent, OberonResourceManager& resourceManager, SceneGraph::DrawableGroup3D* drawables, ScriptGroup* scripts, LightGroup* lights) {
     Object3D* object = new Object3D{parent};
@@ -45,7 +45,7 @@ Object3D* loadObject(Utility::ConfigurationGroup* objectConfig, Object3D* parent
     object->setTransformation(transformation);
 
     for(auto featureConfig: objectConfig->groups("feature"))
-        addFeatureToObject(featureConfig, object, resourceManager, drawables, scripts, lights);
+        loadFeature(featureConfig, object, resourceManager, drawables, scripts, lights);
 
     return object;
 }
@@ -61,7 +61,7 @@ Object3D* loadChildrenObject(Utility::ConfigurationGroup* parentConfig, Object3D
     return parent;
 }
 
-void addFeatureToObject(Utility::ConfigurationGroup* featureConfig, Object3D* object, OberonResourceManager& resourceManager, SceneGraph::DrawableGroup3D* drawables, ScriptGroup* scripts, LightGroup* lights) {
+void loadFeature(Utility::ConfigurationGroup* featureConfig, Object3D* object, OberonResourceManager& resourceManager, SceneGraph::DrawableGroup3D* drawables, ScriptGroup* scripts, LightGroup* lights) {
     std::string type = featureConfig->value("type");
 
     if(type == "mesh") {

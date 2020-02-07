@@ -161,7 +161,7 @@ void Inspector::newFrame() {
                     }
 
                     if(updateMesh)
-                        Serializer::loadMeshFeature(*mesh, primitiveConfig, _resourceManager);
+                        Importer::loadMeshFeature(*mesh, primitiveConfig, _resourceManager);
 
                     ImGui::TreePop();
                 }

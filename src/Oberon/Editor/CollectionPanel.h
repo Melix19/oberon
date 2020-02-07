@@ -29,7 +29,7 @@
 #include <Magnum/GL/Renderbuffer.h>
 #include <Magnum/GL/Texture.h>
 #include <Magnum/SceneGraph/Scene.h>
-#include <Oberon/Core/Serializer.h>
+#include <Oberon/Core/Importer.h>
 
 #include "AbstractPanel.h"
 #include "ObjectNode.h"

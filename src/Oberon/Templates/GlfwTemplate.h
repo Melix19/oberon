@@ -5,7 +5,7 @@
 #include <Magnum/SceneGraph/Scene.h>
 #include <Magnum/Timeline.h>
 
-#include <Oberon/Core/Serializer.h>
+#include <Oberon/Core/Importer.h>
 
 #include <pybind11/embed.h>
 

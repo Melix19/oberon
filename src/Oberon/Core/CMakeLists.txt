@@ -32,16 +32,16 @@ set_directory_properties(PROPERTIES CORRADE_USE_PEDANTIC_FLAGS ON)
 corrade_add_resource(OberonCore_RCS resources.conf)
 
 set(OberonCore_SRCS
-    Serializer.cpp
+    Importer.cpp
     Shader.cpp
 
     ${OberonCore_RCS})
 
 set(OberonCore_HEADERS
+    Importer.h
     Light.h
     Mesh.h
     Script.h
-    Serializer.h
     Shader.h)
 
 add_library(OberonCore
