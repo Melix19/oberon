@@ -24,8 +24,6 @@
 
 #pragma once
 
-#include "Themer.h"
-
 #include <Magnum/ImGuiIntegration/Context.hpp>
 #include <Magnum/Platform/GlfwApplication.h>
 
@@ -38,6 +36,8 @@ class ProjectManager: public Platform::Application {
         std::string projectPath() const { return _projectPath; }
 
     private:
+        void createProject(const std::string& path);
+
         void drawEvent() override;
 
         void viewportEvent(ViewportEvent& event) override;

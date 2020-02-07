@@ -24,10 +24,13 @@
 
 #include "ProjectManager.h"
 
-#include <imgui_internal.h>
+#include <Corrade/Utility/Directory.h>
 #include <Magnum/GL/DefaultFramebuffer.h>
 #include <Magnum/GL/Renderer.h>
+#include <imgui_internal.h>
 #include <portable-file-dialogs.h>
+
+#include "Themer.h"
 
 ProjectManager::ProjectManager(const Arguments& arguments): Platform::Application{arguments,
     Configuration{}.setTitle("Oberon - Project Manager")
@@ -119,6 +122,17 @@ void ProjectManager::drawEvent() {
             exit();
     }
 
+    ImGui::SameLine();
+
+    if(ImGui::Button("Create")) {
+        _projectPath = pfd::select_folder("").result();
+
+        if(!_projectPath.empty()) {
+            createProject(_projectPath);
+            exit();
+        }
+    }
+
     ImGui::End();
 
     ImGui::Begin("List");
@@ -139,6 +153,11 @@ void ProjectManager::drawEvent() {
 
     swapBuffers();
     redraw();
+}
+
+void ProjectManager::createProject(const std::string& path) {
+    std::string settingsPath = Utility::Directory::join(path, "project.oberon");
+    Utility::Directory::writeString(settingsPath, "");
 }
 
 void ProjectManager::viewportEvent(ViewportEvent& event) {
