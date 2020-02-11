@@ -24,6 +24,10 @@
 
 #include "Importer.h"
 
+#include <Corrade/Containers/Optional.h>
+#include <Corrade/Utility/Directory.h>
+#include <Magnum/GL/TextureFormat.h>
+#include <Magnum/ImageView.h>
 #include <Magnum/Math/ConfigurationValue.h>
 #include <Magnum/MeshTools/Compile.h>
 #include <Magnum/Primitives/Circle.h>
@@ -31,6 +35,7 @@
 #include <Magnum/Primitives/Plane.h>
 #include <Magnum/Primitives/Square.h>
 #include <Magnum/Primitives/UVSphere.h>
+#include <Magnum/Trade/ImageData.h>
 #include <Magnum/Trade/MeshData2D.h>
 #include <Magnum/Trade/MeshData3D.h>
 
@@ -64,7 +69,7 @@ void Importer::loadFeature(Utility::ConfigurationGroup* featureConfig, Object3D*
 
     if(type == "mesh") {
         /* Shader */
-        Resource<GL::AbstractShaderProgram, Oberon::Shader> shaderResource = resourceManager.get<GL::AbstractShaderProgram, Oberon::Shader>("shader");
+        Resource<GL::AbstractShaderProgram, Oberon::Shader> shaderResource = resourceManager.get<GL::AbstractShaderProgram, Oberon::Shader>("phong");
         if(!shaderResource)
             resourceManager.set<GL::AbstractShaderProgram>(shaderResource.key(), new Oberon::Shader{0}, ResourceDataState::Mutable, ResourcePolicy::ReferenceCounted);
 
@@ -95,7 +100,7 @@ void Importer::loadFeature(Utility::ConfigurationGroup* featureConfig, Object3D*
         }
     } else if(type == "light") {
         /* Shader */
-        Resource<GL::AbstractShaderProgram, Oberon::Shader> shaderResource = resourceManager.get<GL::AbstractShaderProgram, Oberon::Shader>("shader");
+        Resource<GL::AbstractShaderProgram, Oberon::Shader> shaderResource = resourceManager.get<GL::AbstractShaderProgram, Oberon::Shader>("phong");
         resourceManager.set<GL::AbstractShaderProgram>(shaderResource.key(), new Oberon::Shader{UnsignedInt(lights->size() + 1)}, ResourceDataState::Mutable, ResourcePolicy::ReferenceCounted);
 
         /* Color */
@@ -109,6 +114,52 @@ void Importer::loadFeature(Utility::ConfigurationGroup* featureConfig, Object3D*
 
         /* Script */
         object->addFeature<Script>(scripts, path);
+    } else if(type == "sprite") {
+        /* Mesh */
+        Resource<GL::Mesh> meshResource = resourceManager.get<GL::Mesh>("square_texture_coords");
+        if(!meshResource) {
+            GL::Mesh glMesh = MeshTools::compile(Primitives::squareSolid(Primitives::SquareTextureCoords::Generate));
+            resourceManager.set<GL::Mesh>(meshResource.key(), std::move(glMesh), ResourceDataState::Final, ResourcePolicy::ReferenceCounted);
+        }
+
+        /* Shader */
+        Resource<GL::AbstractShaderProgram, Shaders::Flat3D> shaderResource = resourceManager.get<GL::AbstractShaderProgram, Shaders::Flat3D>("flat");
+        if(!shaderResource)
+            resourceManager.set<GL::AbstractShaderProgram>(shaderResource.key(), new Shaders::Flat3D{Shaders::Flat3D::Flag::ObjectId | Shaders::Flat3D::Flag::Textured}, ResourceDataState::Final, ResourcePolicy::ReferenceCounted);
+
+        /* Pixel size */
+        if(!featureConfig->hasValue("pixel_size"))
+            featureConfig->setValue<Float>("pixel_size", 0.01f);
+        Float pixelSize = featureConfig->value<Float>("pixel_size");
+
+        /* Sprite */
+        Sprite& sprite = object->addFeature<Sprite>(drawables, meshResource, shaderResource, pixelSize);
+
+        /* Texture */
+        if(featureConfig->hasValue("path")) {
+            std::string path = featureConfig->value("path");
+
+            Resource<GL::Texture2D> textureResource = resourceManager.get<GL::Texture2D>(path);
+            if(!textureResource) {
+                if(!pngImporter)
+                    pngImporter = pluginManager.loadAndInstantiate("PngImporter");
+
+                pngImporter->openData(Utility::Directory::read(Utility::Directory::join(_projectPath, path)));
+                Containers::Optional<Trade::ImageData2D> image = pngImporter->image2D(0);
+                CORRADE_INTERNAL_ASSERT(image);
+
+                GL::Texture2D texture;
+                texture.setWrapping(GL::SamplerWrapping::ClampToEdge)
+                    .setMagnificationFilter(GL::SamplerFilter::Linear)
+                    .setMinificationFilter(GL::SamplerFilter::Linear)
+                    .setStorage(1, GL::textureFormat(image->format()), image->size())
+                    .setSubImage(0, {}, *image);
+
+                resourceManager.set(textureResource.key(), std::move(texture), ResourceDataState::Final, ResourcePolicy::ReferenceCounted);
+            }
+
+            sprite.setTexture(textureResource);
+        }
     }
 }
 

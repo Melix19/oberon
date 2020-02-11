@@ -27,18 +27,22 @@
 #include "Light.h"
 #include "Mesh.h"
 #include "Script.h"
+#include "Sprite.h"
 
 #include <Corrade/Utility/ConfigurationGroup.h>
 #include <Magnum/ResourceManager.h>
 #include <Magnum/SceneGraph/TranslationRotationScalingTransformation3D.h>
+#include <Magnum/Trade/AbstractImporter.h>
 
 typedef SceneGraph::Object<SceneGraph::TranslationRotationScalingTransformation3D> Object3D;
 typedef SceneGraph::Scene<SceneGraph::TranslationRotationScalingTransformation3D> Scene3D;
 
-typedef ResourceManager<GL::Mesh, GL::AbstractShaderProgram> OberonResourceManager;
+typedef ResourceManager<GL::AbstractShaderProgram, GL::Mesh, GL::Texture2D> OberonResourceManager;
 
 class Importer {
     public:
+        Importer(const std::string& projectPath): _projectPath{projectPath} {}
+
         Object3D* loadObject(Utility::ConfigurationGroup* objectConfig, Object3D* parent, OberonResourceManager& resourceManager, SceneGraph::DrawableGroup3D* drawables, ScriptGroup* scripts, LightGroup* lights);
         Object3D* loadChildrenObject(Utility::ConfigurationGroup* parentConfig, Object3D* parent, OberonResourceManager& resourceManager, SceneGraph::DrawableGroup3D* drawables, ScriptGroup* scripts, LightGroup* lights);
 
@@ -46,4 +50,10 @@ class Importer {
         void resetObject(Object3D* object, Utility::ConfigurationGroup* objectConfig);
 
         void loadMeshFeature(Mesh& mesh, Utility::ConfigurationGroup* primitiveConfig, OberonResourceManager& resourceManager);
+
+    private:
+        std::string _projectPath;
+
+        PluginManager::Manager<Trade::AbstractImporter> pluginManager;
+        Containers::Pointer<Trade::AbstractImporter> pngImporter;
 };

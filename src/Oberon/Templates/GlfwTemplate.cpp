@@ -25,7 +25,7 @@ GlfwTemplate::GlfwTemplate(const Arguments& arguments): Platform::Application{ar
     Utility::Configuration collectionConfig{Utility::Directory::join(projectPath, "")};
     Utility::ConfigurationGroup* sceneConfig = collectionConfig.group("scene");
 
-    Importer importer;
+    Importer importer{Utility::Directory::executableLocation()};
     importer.loadChildrenObject(sceneConfig, &_scene, _resourceManager, &_drawables, &_scripts, &_lights);
 
     setup(projectPath);

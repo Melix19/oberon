@@ -249,7 +249,7 @@ void Inspector::newFrame() {
             bool featureIsOpen = true;
 
             if(ImGui::CollapsingHeader("Script", &featureIsOpen, ImGuiTreeNodeFlags_DefaultOpen)) {
-                /* Size */
+                /* Path */
                 setNextItemRightAlign("Path");
                 std::string path = featureConfig->value("path");
                 if(ImGui::InputText("##ScriptPath", &path)) {
@@ -260,6 +260,42 @@ void Inspector::newFrame() {
 
             if(!featureIsOpen) {
                 delete script;
+                objectNode->objectConfig()->removeGroup(featureConfig);
+            }
+        } else if(type == "sprite") {
+            /* Sprite */
+            auto& features = objectNode->object()->features();
+            Sprite* sprite = nullptr;
+
+            for(auto& feature: features) {
+                if((sprite = dynamic_cast<Sprite*>(&feature)))
+                    break;
+            }
+
+            CORRADE_INTERNAL_ASSERT(sprite != nullptr);
+
+            bool featureIsOpen = true;
+
+            if(ImGui::CollapsingHeader("Sprite", &featureIsOpen, ImGuiTreeNodeFlags_DefaultOpen)) {
+                /* Path */
+                setNextItemRightAlign("Path");
+                std::string path = featureConfig->value("path");
+                if(ImGui::InputText("##SpritePath", &path)) {
+                    //script->setPath(path);
+                    featureConfig->setValue("path", path);
+                }
+
+                /* Pixel size */
+                setNextItemRightAlign("Pixel size");
+                Float pixelSize = featureConfig->value<Float>("pixel_size");
+                if(ImGui::DragFloat("##SpritePixelSize", &pixelSize, 0.001f)) {
+                    sprite->setPixelSize(pixelSize);
+                    featureConfig->setValue("pixel_size", pixelSize);
+                }
+            }
+
+            if(!featureIsOpen) {
+                delete sprite;
                 objectNode->objectConfig()->removeGroup(featureConfig);
             }
         }
@@ -284,6 +320,7 @@ void Inspector::newFrame() {
         if(ImGui::Selectable("Mesh"))   newFeatureType = "mesh";
         if(ImGui::Selectable("Light"))  newFeatureType = "light";
         if(ImGui::Selectable("Script")) newFeatureType = "script";
+        if(ImGui::Selectable("Sprite")) newFeatureType = "sprite";
 
         if(!newFeatureType.empty()) {
             bool featureAlreadyPresent = false;

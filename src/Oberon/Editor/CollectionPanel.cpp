@@ -242,7 +242,10 @@ CollectionPanel& CollectionPanel::removeDrawableNode(ObjectNode* objectNode) {
 CollectionPanel& CollectionPanel::updateDrawablesId() {
     for(std::size_t i = 0; i != _drawables.size(); ++i) {
         Mesh* mesh = dynamic_cast<Mesh*>(&_drawables[i]);
-        if(mesh) mesh->setObjectId(i + 1);
+        if(mesh) { mesh->setObjectId(i + 1); continue; }
+
+        Sprite* sprite = dynamic_cast<Sprite*>(&_drawables[i]);
+        if(sprite) { sprite->setObjectId(i + 1); continue; }
     }
 
     return *this;
