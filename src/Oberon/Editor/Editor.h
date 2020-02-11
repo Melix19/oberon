@@ -62,6 +62,7 @@ class Editor: public Platform::Application {
 
         ImGuiIntegration::Context _imgui{NoCreate};
         OberonResourceManager _resourceManager;
+        Importer _importer;
         py::scoped_interpreter _pyInterpreter{};
         PyStdErrOutStreamRedirect _pyOutputRedirect{};
 
@@ -72,5 +73,5 @@ class Editor: public Platform::Application {
 
         std::vector<Containers::Pointer<AbstractPanel>> _panels;
         std::vector<CollectionPanel*> _collectionPanels;
-        AbstractPanel* _activePanel;
+        AbstractPanel* _activePanel{nullptr};
 };

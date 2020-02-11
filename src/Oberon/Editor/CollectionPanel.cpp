@@ -35,8 +35,8 @@
 
 #include <algorithm>
 
-CollectionPanel::CollectionPanel(FileNode* fileNode, OberonResourceManager& resourceManager, const Vector2i& viewportTextureSize, const Vector2& dpiScaleRatio):
-    _resourceManager{resourceManager}, _viewportTextureSize{viewportTextureSize}, _dpiScaleRatio{dpiScaleRatio}
+CollectionPanel::CollectionPanel(FileNode* fileNode, OberonResourceManager& resourceManager, Importer& importer, const Vector2i& viewportTextureSize, const Vector2& dpiScaleRatio):
+    _resourceManager{resourceManager}, _importer{importer}, _viewportTextureSize{viewportTextureSize}, _dpiScaleRatio{dpiScaleRatio}
 {
     _fileNode = fileNode;
     _name = Utility::Directory::filename(_fileNode->path());
@@ -158,7 +158,7 @@ void CollectionPanel::save() {
 
 void CollectionPanel::updateObjectNodeChildren(ObjectNode* node) {
     for(auto childConfig: node->objectConfig()->groups("child")) {
-        Object3D* child = Importer::loadObject(childConfig, node->object(),
+        Object3D* child = _importer.loadObject(childConfig, node->object(),
             _resourceManager, &_drawables, &_scripts, &_lights);
         ObjectNode* childNode = node->addChild(child, childConfig);
 
@@ -197,10 +197,14 @@ void CollectionPanel::createGrid() {
 }
 
 void CollectionPanel::resetObjectAndChildren(ObjectNode* node) {
-    Importer::resetObject(node->object(), node->objectConfig());
+    _importer.resetObject(node->object(), node->objectConfig());
 
     for(auto& child: node->children())
         resetObjectAndChildren(child.get());
+}
+
+void CollectionPanel::loadMeshFeature(Mesh& mesh, Utility::ConfigurationGroup* primitiveConfig) {
+    _importer.loadMeshFeature(mesh, primitiveConfig, _resourceManager);
 }
 
 CollectionPanel& CollectionPanel::updateShader() {
@@ -217,7 +221,7 @@ CollectionPanel& CollectionPanel::updateShader() {
 
 CollectionPanel& CollectionPanel::addFeatureToObject(ObjectNode* objectNode, Utility::ConfigurationGroup* featureConfig) {
     size_t drawablesNum = _drawables.size();
-    Importer::loadFeature(featureConfig, objectNode->object(), _resourceManager, &_drawables, &_scripts, &_lights);
+    _importer.loadFeature(featureConfig, objectNode->object(), _resourceManager, &_drawables, &_scripts, &_lights);
 
     if(drawablesNum < _drawables.size()) {
         _drawablesNodes.push_back(objectNode);

@@ -34,9 +34,7 @@
 #include <Magnum/Trade/MeshData2D.h>
 #include <Magnum/Trade/MeshData3D.h>
 
-namespace Importer {
-
-Object3D* loadObject(Utility::ConfigurationGroup* objectConfig, Object3D* parent, OberonResourceManager& resourceManager, SceneGraph::DrawableGroup3D* drawables, ScriptGroup* scripts, LightGroup* lights) {
+Object3D* Importer::loadObject(Utility::ConfigurationGroup* objectConfig, Object3D* parent, OberonResourceManager& resourceManager, SceneGraph::DrawableGroup3D* drawables, ScriptGroup* scripts, LightGroup* lights) {
     Object3D* object = new Object3D{parent};
 
     /* Transformation */
@@ -50,7 +48,7 @@ Object3D* loadObject(Utility::ConfigurationGroup* objectConfig, Object3D* parent
     return object;
 }
 
-Object3D* loadChildrenObject(Utility::ConfigurationGroup* parentConfig, Object3D* parent, OberonResourceManager& resourceManager, SceneGraph::DrawableGroup3D* drawables, ScriptGroup* scripts, LightGroup* lights) {
+Object3D* Importer::loadChildrenObject(Utility::ConfigurationGroup* parentConfig, Object3D* parent, OberonResourceManager& resourceManager, SceneGraph::DrawableGroup3D* drawables, ScriptGroup* scripts, LightGroup* lights) {
     for(auto childConfig: parentConfig->groups("child")) {
         Object3D* child = loadObject(childConfig, parent, resourceManager, drawables, scripts, lights);
 
@@ -61,7 +59,7 @@ Object3D* loadChildrenObject(Utility::ConfigurationGroup* parentConfig, Object3D
     return parent;
 }
 
-void loadFeature(Utility::ConfigurationGroup* featureConfig, Object3D* object, OberonResourceManager& resourceManager, SceneGraph::DrawableGroup3D* drawables, ScriptGroup* scripts, LightGroup* lights) {
+void Importer::loadFeature(Utility::ConfigurationGroup* featureConfig, Object3D* object, OberonResourceManager& resourceManager, SceneGraph::DrawableGroup3D* drawables, ScriptGroup* scripts, LightGroup* lights) {
     std::string type = featureConfig->value("type");
 
     if(type == "mesh") {
@@ -114,14 +112,14 @@ void loadFeature(Utility::ConfigurationGroup* featureConfig, Object3D* object, O
     }
 }
 
-void resetObject(Object3D* object, Utility::ConfigurationGroup* objectConfig) {
+void Importer::resetObject(Object3D* object, Utility::ConfigurationGroup* objectConfig) {
     /* Transformation */
     if(!objectConfig->hasValue("transformation")) objectConfig->setValue<Matrix4>("transformation", Matrix4::scaling({1, 1, 1}));
     Matrix4 transformation = objectConfig->value<Matrix4>("transformation");
     object->setTransformation(transformation);
 }
 
-void loadMeshFeature(Mesh& mesh, Utility::ConfigurationGroup* primitiveConfig, OberonResourceManager& resourceManager) {
+void Importer::loadMeshFeature(Mesh& mesh, Utility::ConfigurationGroup* primitiveConfig, OberonResourceManager& resourceManager) {
     std::string primitiveType = primitiveConfig->value("type");
     std::string meshKey = primitiveType;
 
@@ -162,6 +160,4 @@ void loadMeshFeature(Mesh& mesh, Utility::ConfigurationGroup* primitiveConfig, O
 
     mesh.setMesh(meshResource);
     mesh.setSize(size);
-}
-
 }

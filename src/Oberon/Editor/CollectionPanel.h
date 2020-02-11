@@ -36,12 +36,13 @@
 
 class CollectionPanel: public AbstractPanel {
     public:
-        CollectionPanel(FileNode* fileNode, OberonResourceManager& resourceManager, const Vector2i& viewportTextureSize, const Vector2& dpiScaleRatio);
+        CollectionPanel(FileNode* fileNode, OberonResourceManager& resourceManager, Importer& importer, const Vector2i& viewportTextureSize, const Vector2& dpiScaleRatio);
         void drawViewport(Float deltaTime);
         void newFrame();
 
     private:
         OberonResourceManager& _resourceManager;
+        Importer& _importer;
 
         Vector2i _viewportTextureSize;
         Vector2 _dpiScaleRatio;
@@ -65,6 +66,8 @@ class CollectionPanel: public AbstractPanel {
         ObjectNode* rootNode() { return _rootNode.get(); }
 
         std::vector<ObjectNode*>& selectedNodes() { return _selectedNodes; }
+
+        void loadMeshFeature(Mesh& mesh, Utility::ConfigurationGroup* primitiveConfig);
 
         CollectionPanel& updateShader();
 

@@ -160,8 +160,7 @@ void Inspector::newFrame() {
                         }
                     }
 
-                    if(updateMesh)
-                        Importer::loadMeshFeature(*mesh, primitiveConfig, _resourceManager);
+                    if(updateMesh) _panel->loadMeshFeature(*mesh, primitiveConfig);
 
                     ImGui::TreePop();
                 }

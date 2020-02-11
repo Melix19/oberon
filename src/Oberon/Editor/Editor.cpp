@@ -35,8 +35,7 @@
 Editor::Editor(const Arguments& arguments, const std::string& projectPath): Platform::Application{arguments,
     Configuration{}.setTitle("Oberon")
                    .setWindowFlags(Configuration::WindowFlag::Maximized|Configuration::WindowFlag::Resizable),
-    GLConfiguration{}.setColorBufferSize({8, 8, 8, 8})},
-    _explorer(projectPath), _inspector(_resourceManager), _activePanel(nullptr)
+    GLConfiguration{}.setColorBufferSize({8, 8, 8, 8})}, _explorer(projectPath)
 {
     _maximizedWindowSize = windowSize();
     _dpiScaleRatio = Vector2{framebufferSize()}/(Vector2{windowSize()}/dpiScaling());
@@ -300,7 +299,7 @@ void Editor::openFile(FileNode* fileNode) {
 
         if(extension == ".col") {
             _panels.push_back(Containers::pointer<CollectionPanel>(fileNode,
-                _resourceManager, _maximizedWindowSize, _dpiScaleRatio));
+                _resourceManager, _importer, _maximizedWindowSize, _dpiScaleRatio));
             _collectionPanels.push_back(static_cast<CollectionPanel*>(_panels.back().get()));
         } else {
             _panels.push_back(Containers::pointer<CodePanel>(fileNode));
