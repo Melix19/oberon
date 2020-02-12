@@ -29,6 +29,15 @@
 #include <imgui.h>
 #include <misc/cpp/imgui_stdlib.h>
 
+namespace {
+    void setNextItemRightAlign(const char* label) {
+        ImGui::AlignTextToFramePadding();
+        ImGui::Text("%s", label);
+        ImGui::SameLine(130.0f);
+        ImGui::SetNextItemWidth(-1);
+    }
+}
+
 void Inspector::newFrame() {
     bool isVisible = ImGui::Begin("Inspector");
 
@@ -342,11 +351,4 @@ void Inspector::newFrame() {
     }
 
     ImGui::End();
-}
-
-void Inspector::setNextItemRightAlign(const char* label, Float spacing) {
-    ImGui::AlignTextToFramePadding();
-    ImGui::Text("%s", label);
-    ImGui::SameLine(spacing);
-    ImGui::SetNextItemWidth(-1);
 }

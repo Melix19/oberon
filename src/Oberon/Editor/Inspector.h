@@ -36,7 +36,5 @@ class Inspector {
         }
 
     private:
-        void setNextItemRightAlign(const char* label, Float spacing = 130.0f);
-
         CollectionPanel* _panel{nullptr};
 };
