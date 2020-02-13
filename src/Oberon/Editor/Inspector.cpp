@@ -29,6 +29,8 @@
 #include <imgui.h>
 #include <misc/cpp/imgui_stdlib.h>
 
+#include <climits>
+
 namespace {
     void setNextItemRightAlign(const char* label) {
         ImGui::AlignTextToFramePadding();

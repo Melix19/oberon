@@ -25,9 +25,9 @@
 #include "Editor.h"
 
 #include <Corrade/Utility/Directory.h>
-#include <imgui_internal.h>
 #include <Magnum/GL/DefaultFramebuffer.h>
 #include <Magnum/GL/Renderer.h>
+#include <imgui_internal.h>
 
 #include "Themer.h"
 
