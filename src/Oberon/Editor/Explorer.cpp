@@ -63,7 +63,7 @@ void Explorer::newFrame() {
             if(ImGui::MenuItem("Script")) {
                 _editNode = &_rootNode;
                 _editNodeMode = EditMode::FileCreation;
-                _editNodeText = ".py";
+                _editNodeText = "";
                 _editNodeNeedsFocus = true;
             }
 
@@ -192,7 +192,7 @@ bool Explorer::displayFileNode(FileNode* node) {
                 if(ImGui::MenuItem("Script")) {
                     _editNode = node;
                     _editNodeMode = EditMode::FileCreation;
-                    _editNodeText = ".py";
+                    _editNodeText = "";
                     _editNodeNeedsFocus = true;
                 }
 
