@@ -245,6 +245,7 @@ CollectionPanel& CollectionPanel::updateDrawablesId() {
 }
 
 CollectionPanel& CollectionPanel::startSimulation() {
+    _isSimulating = true;
     return *this;
 }
 
