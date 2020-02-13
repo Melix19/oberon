@@ -20,8 +20,7 @@ jobs:
         git clone --depth 1 https://github.com/mosra/corrade.git
         cd corrade && mkdir build && cd build
         cmake .. \
-          -DCMAKE_INSTALL_PREFIX=$HOME/deps \
-          -DCMAKE_INSTALL_RPATH=$HOME/deps/lib \
+          -DCMAKE_INSTALL_PREFIX=$GITHUB_WORKSPACE/deps \
           -DCMAKE_BUILD_TYPE=Release \
           -DWITH_TESTSUITE=OFF
         cmake --build .
@@ -31,7 +30,7 @@ jobs:
         git clone --depth 1 https://github.com/mosra/magnum.git
         cd magnum && mkdir build && cd build
         cmake .. \
-          -DCMAKE_INSTALL_PREFIX=$HOME/deps \
+          -DCMAKE_INSTALL_PREFIX=$GITHUB_WORKSPACE/deps \
           -DCMAKE_BUILD_TYPE=Release \
           -DWITH_GLFWAPPLICATION=ON
         cmake --build .
@@ -41,7 +40,7 @@ jobs:
       run: |
         mkdir build && cd build
         cmake .. \
-          -DCMAKE_PREFIX_PATH=$HOME/deps \
+          -DCMAKE_PREFIX_PATH=$GITHUB_WORKSPACE/deps \
           -DCMAKE_BUILD_TYPE=Release
 
     - name: Build
@@ -59,12 +58,13 @@ jobs:
 
     - name: Install dependencies
       run: |
+        brew install glfw3
+
         cd $GITHUB_WORKSPACE
         git clone --depth 1 https://github.com/mosra/corrade.git
         cd corrade && mkdir build && cd build
         cmake .. \
-          -DCMAKE_INSTALL_PREFIX=$HOME/deps \
-          -DCMAKE_INSTALL_RPATH=$HOME/deps/lib \
+          -DCMAKE_INSTALL_PREFIX=$GITHUB_WORKSPACE/deps \
           -DCMAKE_BUILD_TYPE=Release \
           -DWITH_TESTSUITE=OFF
         cmake --build .
@@ -74,7 +74,7 @@ jobs:
         git clone --depth 1 https://github.com/mosra/magnum.git
         cd magnum && mkdir build && cd build
         cmake .. \
-          -DCMAKE_INSTALL_PREFIX=$HOME/deps \
+          -DCMAKE_INSTALL_PREFIX=$GITHUB_WORKSPACE/deps \
           -DCMAKE_BUILD_TYPE=Release \
           -DWITH_GLFWAPPLICATION=ON
         cmake --build .
@@ -84,7 +84,7 @@ jobs:
       run: |
         mkdir build && cd build
         cmake .. \
-          -DCMAKE_PREFIX_PATH=$HOME/deps \
+          -DCMAKE_PREFIX_PATH=$GITHUB_WORKSPACE/deps \
           -DCMAKE_BUILD_TYPE=Release
 
     - name: Build
@@ -104,11 +104,16 @@ jobs:
       shell: bash
       run: |
         cd $GITHUB_WORKSPACE
+        curl -L https://github.com/glfw/glfw/releases/download/3.3.1/glfw-3.3.1.bin.WIN64.zip --output glfw.zip
+        7z x glfw.zip && mv glfw-3.3.1.bin.WIN64 glfw
+        mkdir deps && mkdir deps/lib && mkdir deps/bin && mkdir deps/include
+        cp -a glfw/include/. deps/include/ && cp -a glfw/lib-vc2019/. deps/lib/
+
+        cd $GITHUB_WORKSPACE
         git clone --depth 1 https://github.com/mosra/corrade.git
         cd corrade && mkdir build && cd build
         cmake .. \
-          -DCMAKE_INSTALL_PREFIX=$HOME/deps \
-          -DCMAKE_INSTALL_RPATH=$HOME/deps/lib \
+          -DCMAKE_INSTALL_PREFIX=$GITHUB_WORKSPACE/deps \
           -DCMAKE_BUILD_TYPE=Release \
           -DWITH_TESTSUITE=OFF
         cmake --build .
@@ -118,7 +123,7 @@ jobs:
         git clone --depth 1 https://github.com/mosra/magnum.git
         cd magnum && mkdir build && cd build
         cmake .. \
-          -DCMAKE_INSTALL_PREFIX=$HOME/deps \
+          -DCMAKE_INSTALL_PREFIX=$GITHUB_WORKSPACE/deps \
           -DCMAKE_BUILD_TYPE=Release \
           -DWITH_GLFWAPPLICATION=ON
         cmake --build .
@@ -129,7 +134,7 @@ jobs:
       run: |
         mkdir build && cd build
         cmake .. \
-          -DCMAKE_PREFIX_PATH=$HOME/deps \
+          -DCMAKE_PREFIX_PATH=$GITHUB_WORKSPACE/deps \
           -DCMAKE_BUILD_TYPE=Release
 
     - name: Build
