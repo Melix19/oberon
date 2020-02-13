@@ -3,7 +3,6 @@
 #include <Corrade/Utility/Configuration.h>
 #include <Corrade/Utility/Directory.h>
 #include <Magnum/GL/Renderer.h>
-#include <Oberon/Bindings/Oberon/Python.h>
 
 GlfwTemplate::GlfwTemplate(const Arguments& arguments): Platform::Application{arguments,
     Configuration{}, GLConfiguration{}.setColorBufferSize({8, 8, 8, 8})}
@@ -28,29 +27,11 @@ GlfwTemplate::GlfwTemplate(const Arguments& arguments): Platform::Application{ar
     Importer importer{Utility::Directory::executableLocation()};
     importer.loadChildrenObject(sceneConfig, &_scene, _resourceManager, &_drawables, &_scripts, &_lights);
 
-    setup(projectPath);
-
-    try {
-        for(std::size_t i = 0; i != _scripts.size(); ++i) {
-            Script& script = _scripts[i];
-
-            script.pyModule() = py::module::import(script.path().c_str());
-            script.pyModule().attr("init")(&script.object());
-        }
-    } catch (py::error_already_set const &pythonErr) {
-        py::print(pythonErr.what());
-    }
-
     _timeline.start();
 }
 
 void GlfwTemplate::drawEvent() {
     GL::defaultFramebuffer.clear(GL::FramebufferClear::Color|GL::FramebufferClear::Depth);
-
-    for(std::size_t i = 0; i != _scripts.size(); ++i) {
-        Script& script = _scripts[i];
-        script.pyModule().attr("update")(&script.object(), _timeline.previousFrameDuration());
-    }
 
     for(std::size_t i = 0; i != _lights.size(); ++i)
         _lights[i].updateShader();

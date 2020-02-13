@@ -33,7 +33,6 @@
 
 #include <Magnum/ImGuiIntegration/Context.hpp>
 #include <Magnum/Platform/GlfwApplication.h>
-#include <Oberon/Bindings/Oberon/PyStdErrOutStreamRedirect.h>
 
 class Editor: public Platform::Application {
     public:
@@ -63,8 +62,6 @@ class Editor: public Platform::Application {
         ImGuiIntegration::Context _imgui{NoCreate};
         OberonResourceManager _resourceManager;
         Importer _importer;
-        py::scoped_interpreter _pyInterpreter{};
-        PyStdErrOutStreamRedirect _pyOutputRedirect{};
 
         Console _console;
         Explorer _explorer;

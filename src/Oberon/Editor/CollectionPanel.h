@@ -37,7 +37,7 @@
 class CollectionPanel: public AbstractPanel {
     public:
         CollectionPanel(FileNode* fileNode, OberonResourceManager& resourceManager, Importer& importer, const Vector2i& viewportTextureSize, const Vector2& dpiScaleRatio);
-        void drawViewport(Float deltaTime);
+        void drawViewport();
         void newFrame();
 
     private:

@@ -16,16 +16,7 @@ jobs:
         sudo apt-get update
         sudo apt-get install -y libglfw3-dev
 
-        cd ..
-        curl -L https://github.com/pybind/pybind11/archive/v2.4.3.tar.gz --output pybind11.tar.gz && tar -xzf pybind11.tar.gz
-        cd pybind11-2.4.3 && mkdir build && cd build
-        cmake .. \
-          -DCMAKE_INSTALL_PREFIX=$HOME/deps \
-          -DPYBIND11_TEST=OFF
-        cmake --build .
-        cmake --build . --target install
-
-        cd ../..
+        cd $GITHUB_WORKSPACE
         git clone --depth 1 https://github.com/mosra/corrade.git
         cd corrade && mkdir build && cd build
         cmake .. \
@@ -36,7 +27,7 @@ jobs:
         cmake --build .
         cmake --build . --target install
 
-        cd ../..
+        cd $GITHUB_WORKSPACE
         git clone --depth 1 https://github.com/mosra/magnum.git
         cd magnum && mkdir build && cd build
         cmake .. \
@@ -68,9 +59,7 @@ jobs:
 
     - name: Install dependencies
       run: |
-        brew install glfw3 pybind11
-
-        cd ../..
+        cd $GITHUB_WORKSPACE
         git clone --depth 1 https://github.com/mosra/corrade.git
         cd corrade && mkdir build && cd build
         cmake .. \
@@ -81,7 +70,7 @@ jobs:
         cmake --build .
         cmake --build . --target install
 
-        cd ../..
+        cd $GITHUB_WORKSPACE
         git clone --depth 1 https://github.com/mosra/magnum.git
         cd magnum && mkdir build && cd build
         cmake .. \
@@ -114,22 +103,7 @@ jobs:
     - name: Install dependencies
       shell: bash
       run: |
-        cd $HOME
-        curl -L https://github.com/glfw/glfw/releases/download/3.3.1/glfw-3.3.1.bin.WIN64.zip --output glfw.zip
-        7z x glfw.zip && mv glfw-3.3.1.bin.WIN64 glfw
-        mkdir deps && mkdir deps/lib && mkdir deps/bin && mkdir deps/include
-        cp -a glfw/include/. deps/include/ && cp -a glfw/lib-vc2019/. deps/lib/
-
         cd $GITHUB_WORKSPACE
-        curl -L https://github.com/pybind/pybind11/archive/v2.4.3.tar.gz --output pybind11.tar.gz && tar -xzf pybind11.tar.gz
-        cd pybind11-2.4.3 && mkdir build && cd build
-        cmake .. \
-          -DCMAKE_INSTALL_PREFIX=$HOME/deps \
-          -DPYBIND11_TEST=OFF
-        cmake --build .
-        cmake --build . --target install
-
-        cd ../..
         git clone --depth 1 https://github.com/mosra/corrade.git
         cd corrade && mkdir build && cd build
         cmake .. \
@@ -140,7 +114,7 @@ jobs:
         cmake --build .
         cmake --build . --target install
 
-        cd ../..
+        cd $GITHUB_WORKSPACE
         git clone --depth 1 https://github.com/mosra/magnum.git
         cd magnum && mkdir build && cd build
         cmake .. \

@@ -25,6 +25,7 @@
 find_package(Magnum REQUIRED
     MeshTools
     Primitives
+    SceneGraph
     Shaders)
 
 set_directory_properties(PROPERTIES CORRADE_USE_PEDANTIC_FLAGS ON)
@@ -55,8 +56,8 @@ target_include_directories(OberonCore PUBLIC
 target_link_libraries(OberonCore PRIVATE
     Magnum::MeshTools
     Magnum::Primitives
-    Magnum::Shaders
-    PUBLIC Oberon::Bindings)
+    Magnum::SceneGraph
+    Magnum::Shaders)
 
 # Oberon Core library for superprojects
 add_library(Oberon::Core ALIAS OberonCore)

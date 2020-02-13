@@ -69,7 +69,7 @@ CollectionPanel::CollectionPanel(FileNode* fileNode, OberonResourceManager& reso
     updateDrawablesId();
 }
 
-void CollectionPanel::drawViewport(Float deltaTime) {
+void CollectionPanel::drawViewport() {
     /* If the window is not visible, end the method here. */
     if(!_isVisible || !_isOpen)
         return;
@@ -79,13 +79,6 @@ void CollectionPanel::drawViewport(Float deltaTime) {
         .clearColor(1, Vector4ui{0})
         .clearDepth(1.0f)
         .bind();
-
-    if(_isSimulating) {
-        for(std::size_t i = 0; i != _scripts.size(); ++i) {
-            Script& script = _scripts[i];
-            script.pyModule().attr("update")(&script.object(), deltaTime);
-        }
-    }
 
     for(std::size_t i = 0; i != _lights.size(); ++i)
         _lights[i].updateShader();
@@ -252,23 +245,6 @@ CollectionPanel& CollectionPanel::updateDrawablesId() {
 }
 
 CollectionPanel& CollectionPanel::startSimulation() {
-    try {
-        for(std::size_t i = 0; i != _scripts.size(); ++i) {
-            Script& script = _scripts[i];
-
-            if(script.pyModule())
-                script.pyModule().reload();
-            else
-                script.pyModule() = py::module::import(script.path().c_str());
-
-            script.pyModule().attr("init")(&script.object());
-        }
-
-        _isSimulating = true;
-    } catch (py::error_already_set const &pythonErr) {
-        py::print(pythonErr.what());
-    }
-
     return *this;
 }
 

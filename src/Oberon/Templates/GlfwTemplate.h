@@ -7,8 +7,6 @@
 
 #include <Oberon/Core/Importer.h>
 
-#include <pybind11/embed.h>
-
 class GlfwTemplate: public Platform::Application {
     public:
         explicit GlfwTemplate(const Arguments& arguments);
@@ -27,5 +25,4 @@ class GlfwTemplate: public Platform::Application {
         LightGroup _lights;
 
         OberonResourceManager _resourceManager;
-        py::scoped_interpreter _pyInterpreter{};
 };

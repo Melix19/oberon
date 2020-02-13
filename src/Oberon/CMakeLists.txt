@@ -22,7 +22,6 @@
 #   SOFTWARE.
 #
 
-add_subdirectory(Bindings)
 add_subdirectory(Core)
 add_subdirectory(Editor)
 
