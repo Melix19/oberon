@@ -32,7 +32,7 @@
 #include <Corrade/Utility/ConfigurationGroup.h>
 #include <Magnum/ResourceManager.h>
 #include <Magnum/SceneGraph/TranslationRotationScalingTransformation3D.h>
-#include <Magnum/Trade/AbstractImporter.h>
+#include <MagnumPlugins/PngImporter/PngImporter.h>
 
 typedef SceneGraph::Object<SceneGraph::TranslationRotationScalingTransformation3D> Object3D;
 typedef SceneGraph::Scene<SceneGraph::TranslationRotationScalingTransformation3D> Scene3D;
@@ -54,6 +54,5 @@ class Importer {
     private:
         std::string _projectPath;
 
-        PluginManager::Manager<Trade::AbstractImporter> pluginManager;
-        Containers::Pointer<Trade::AbstractImporter> pngImporter;
+        Trade::PngImporter _pngImporter;
 };

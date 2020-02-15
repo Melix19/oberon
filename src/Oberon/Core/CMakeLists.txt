@@ -27,6 +27,7 @@ find_package(Magnum REQUIRED
     Primitives
     SceneGraph
     Shaders)
+find_package(MagnumPlugins REQUIRED PngImporter)
 
 set_directory_properties(PROPERTIES CORRADE_USE_PEDANTIC_FLAGS ON)
 
@@ -57,7 +58,8 @@ target_link_libraries(OberonCore PRIVATE
     Magnum::MeshTools
     Magnum::Primitives
     Magnum::SceneGraph
-    Magnum::Shaders)
+    Magnum::Shaders
+    MagnumPlugins::PngImporter)
 
 # Oberon Core library for superprojects
 add_library(Oberon::Core ALIAS OberonCore)

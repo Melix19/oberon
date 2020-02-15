@@ -141,11 +141,8 @@ void Importer::loadFeature(Utility::ConfigurationGroup* featureConfig, Object3D*
 
             Resource<GL::Texture2D> textureResource = resourceManager.get<GL::Texture2D>(path);
             if(!textureResource) {
-                if(!pngImporter)
-                    pngImporter = pluginManager.loadAndInstantiate("PngImporter");
-
-                pngImporter->openData(Utility::Directory::read(Utility::Directory::join(_projectPath, path)));
-                Containers::Optional<Trade::ImageData2D> image = pngImporter->image2D(0);
+                _pngImporter.openData(Utility::Directory::read(Utility::Directory::join(_projectPath, path)));
+                Containers::Optional<Trade::ImageData2D> image = _pngImporter.image2D(0);
                 CORRADE_INTERNAL_ASSERT(image);
 
                 GL::Texture2D texture;
