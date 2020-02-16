@@ -23,7 +23,10 @@
 #
 
 add_subdirectory(Core)
-add_subdirectory(Editor)
+
+if(WITH_EDITOR)
+    add_subdirectory(Editor)
+endif()
 
 if(WITH_EXPORT_TEMPLATES)
     add_subdirectory(Templates)
