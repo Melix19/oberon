@@ -22,8 +22,5 @@
 #   SOFTWARE.
 #
 
-if(WITH_EDITOR)
-    add_subdirectory(OberonExternal)
-endif()
-
+add_subdirectory(OberonExternal)
 add_subdirectory(Oberon)

@@ -28,7 +28,6 @@ project(Oberon CXX)
 
 set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/modules/" ${CMAKE_MODULE_PATH})
 
-option(WITH_EDITOR "Build editor" ON)
 option(WITH_EXPORT_TEMPLATES "Build export templates" ON)
 
 add_subdirectory(src)
