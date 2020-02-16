@@ -263,7 +263,7 @@ void Inspector::newFrame() {
                 /* Class name */
                 setNextItemRightAlign("Class name");
                 std::string className = featureConfig->value("class_name");
-                if(ImGui::InputText("##Script.ClassName", &className)) {
+                if(ImGui::InputText("##Script.ClassName", &className, ImGuiInputTextFlags_EnterReturnsTrue)) {
                     script->setClassName(className);
                     featureConfig->setValue("class_name", className);
                 }
@@ -286,14 +286,15 @@ void Inspector::newFrame() {
             CORRADE_INTERNAL_ASSERT(sprite != nullptr);
 
             bool featureIsOpen = true;
+            bool reloadFeature = false;
 
             if(ImGui::CollapsingHeader("Sprite", &featureIsOpen, ImGuiTreeNodeFlags_DefaultOpen)) {
                 /* Path */
                 setNextItemRightAlign("Path");
                 std::string path = featureConfig->value("path");
-                if(ImGui::InputText("##Sprite.Path", &path)) {
-                    //script->setPath(path);
+                if(ImGui::InputText("##Sprite.Path", &path, ImGuiInputTextFlags_EnterReturnsTrue)) {
                     featureConfig->setValue("path", path);
+                    reloadFeature = true;
                 }
 
                 /* Pixel size */
@@ -305,9 +306,11 @@ void Inspector::newFrame() {
                 }
             }
 
-            if(!featureIsOpen) {
+            if(!featureIsOpen || reloadFeature) {
                 delete sprite;
-                objectNode->objectConfig()->removeGroup(featureConfig);
+
+                if(reloadFeature) _panel->addFeatureToObject(objectNode, featureConfig);
+                else objectNode->objectConfig()->removeGroup(featureConfig);
             }
         }
     }
