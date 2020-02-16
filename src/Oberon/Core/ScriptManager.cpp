@@ -22,29 +22,21 @@
     SOFTWARE.
 */
 
-#pragma once
+#include "ScriptManager.h"
 
-#include <string>
+void ScriptManager::loadScripts(ScriptGroup& scripts) {
+    for(std::size_t i = 0; i != scripts.size(); ++i) {
+        Script& script = scripts[i];
 
-#include <Magnum/SceneGraph/AbstractGroupedFeature.h>
+        if(_manager.loadState(script.className()) & PluginManager::LoadState::NotLoaded)
+            _manager.load(script.className());
 
-using namespace Magnum;
+        Object3D* object = static_cast<Object3D*>(&script.object());
+        Containers::arrayAppend(_scripts, std::make_pair(_manager.instantiate(script.className()), object));
+    }
+}
 
-class Script;
-typedef SceneGraph::FeatureGroup3D<Script> ScriptGroup;
-
-class Script: public SceneGraph::AbstractGroupedFeature3D<Script> {
-    public:
-        explicit Script(SceneGraph::AbstractObject3D& object, ScriptGroup* scripts, const std::string& className):
-            SceneGraph::AbstractGroupedFeature3D<Script>{object, scripts}, _className(className) {}
-
-        std::string className() const { return _className; }
-
-        Script& setClassName(const std::string& className) {
-            _className = className;
-            return *this;
-        }
-
-    private:
-        std::string _className;
-};
+void ScriptManager::update(Float deltaTime) {
+    for(auto& script: _scripts)
+        script.first->update(script.second, deltaTime);
+}

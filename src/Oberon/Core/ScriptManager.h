@@ -24,27 +24,18 @@
 
 #pragma once
 
-#include <string>
+#include "AbstractScript.h"
+#include "Script.h"
 
-#include <Magnum/SceneGraph/AbstractGroupedFeature.h>
+#include <Corrade/Containers/GrowableArray.h>
+#include <Corrade/PluginManager/Manager.h>
 
-using namespace Magnum;
-
-class Script;
-typedef SceneGraph::FeatureGroup3D<Script> ScriptGroup;
-
-class Script: public SceneGraph::AbstractGroupedFeature3D<Script> {
+class ScriptManager {
     public:
-        explicit Script(SceneGraph::AbstractObject3D& object, ScriptGroup* scripts, const std::string& className):
-            SceneGraph::AbstractGroupedFeature3D<Script>{object, scripts}, _className(className) {}
-
-        std::string className() const { return _className; }
-
-        Script& setClassName(const std::string& className) {
-            _className = className;
-            return *this;
-        }
+        void loadScripts(ScriptGroup& scripts);
+        void update(Float deltaTime);
 
     private:
-        std::string _className;
+        PluginManager::Manager<AbstractScript> _manager;
+        Containers::Array<std::pair<Containers::Pointer<AbstractScript>, Object3D*>> _scripts;
 };

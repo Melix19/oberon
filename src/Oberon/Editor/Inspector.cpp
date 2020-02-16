@@ -120,7 +120,7 @@ void Inspector::newFrame() {
                     primitiveString[0] = toupper(primitiveString[0]);
 
                     setNextItemRightAlign("Type");
-                    if(ImGui::BeginCombo("##MeshPrimitiveType", primitiveString.c_str())) {
+                    if(ImGui::BeginCombo("##Mesh.Primitive.Type", primitiveString.c_str())) {
                         const char* primitives[] = {"Circle", "Cube", "Plane", "Sphere", "Square"};
 
                         for(auto& type: primitives) {
@@ -147,7 +147,7 @@ void Inspector::newFrame() {
                     if(primitiveConfig) {
                         setNextItemRightAlign("Size");
                         Vector3 size = primitiveConfig->value<Vector3>("size");
-                        if(ImGui::DragFloat3("##MeshPrimitiveSize", size.data(), 0.002f)) {
+                        if(ImGui::DragFloat3("##Mesh.Primitive.Size", size.data(), 0.002f)) {
                             mesh->setSize(size);
                             primitiveConfig->setValue("size", size);
                         }
@@ -155,7 +155,7 @@ void Inspector::newFrame() {
                         if(primitiveType == "sphere") {
                             setNextItemRightAlign("Rings");
                             Int rings = primitiveConfig->value<Int>("rings");
-                            if(ImGui::DragInt("##MeshPrimitiveRings", &rings, 1.0f, 2, INT_MAX)) {
+                            if(ImGui::DragInt("##Mesh.Primitive.Rings", &rings, 1.0f, 2, INT_MAX)) {
                                 primitiveConfig->setValue("rings", rings);
                                 updateMesh = true;
                             }
@@ -164,7 +164,7 @@ void Inspector::newFrame() {
                         if(primitiveType == "circle" || primitiveType == "sphere") {
                             setNextItemRightAlign("Segments");
                             Int segments = primitiveConfig->value<Int>("segments");
-                            if(ImGui::DragInt("##MeshPrimitiveSegments", &segments, 1.0f, 3, INT_MAX)) {
+                            if(ImGui::DragInt("##Mesh.Primitive.Segments", &segments, 1.0f, 3, INT_MAX)) {
                                 primitiveConfig->setValue("segments", segments);
                                 updateMesh = true;
                             }
@@ -179,28 +179,28 @@ void Inspector::newFrame() {
                 if(materialConfig && ImGui::TreeNodeEx("Material", nodeFlags)) {
                     setNextItemRightAlign("Ambient color");
                     Color3 ambient = materialConfig->value<Color3>("ambient");
-                    if(ImGui::ColorEdit3("##MeshMaterialAmbient", ambient.data())) {
+                    if(ImGui::ColorEdit3("##Mesh.Material.Ambient", ambient.data())) {
                         materialConfig->setValue("ambient", ambient);
                         mesh->setAmbientColor(ambient);
                     }
 
                     setNextItemRightAlign("Diffuse color");
                     Color3 diffuse = materialConfig->value<Color3>("diffuse");
-                    if(ImGui::ColorEdit3("##MeshMaterialDiffuse", diffuse.data())) {
+                    if(ImGui::ColorEdit3("##Mesh.Material.Diffuse", diffuse.data())) {
                         materialConfig->setValue("diffuse", diffuse);
                         mesh->setDiffuseColor(diffuse);
                     }
 
                     setNextItemRightAlign("Specular color");
                     Color3 specular = materialConfig->value<Color3>("specular");
-                    if(ImGui::ColorEdit3("##MeshMaterialSpecular", specular.data())) {
+                    if(ImGui::ColorEdit3("##Mesh.Material.Specular", specular.data())) {
                         materialConfig->setValue("specular", specular);
                         mesh->setSpecularColor(specular);
                     }
 
                     setNextItemRightAlign("Shininess");
                     Float shininess = materialConfig->value<Float>("shininess");
-                    if(ImGui::DragFloat("##MeshMaterialShininess", &shininess, 0.1f, 1.0f, FLT_MAX)) {
+                    if(ImGui::DragFloat("##Mesh.Material.Shininess", &shininess, 0.1f, 1.0f, FLT_MAX)) {
                         materialConfig->setValue("shininess", shininess);
                         mesh->setShininess(shininess);
                     }
@@ -233,7 +233,7 @@ void Inspector::newFrame() {
                 /* Color */
                 setNextItemRightAlign("Color");
                 Color3 color = featureConfig->value<Color3>("color");
-                if(ImGui::ColorEdit3("##LightColor", color.data())) {
+                if(ImGui::ColorEdit3("##Light.Color", color.data())) {
                     light->setColor(color);
                     featureConfig->setValue("color", color);
                 }
@@ -260,12 +260,12 @@ void Inspector::newFrame() {
             bool featureIsOpen = true;
 
             if(ImGui::CollapsingHeader("Script", &featureIsOpen, ImGuiTreeNodeFlags_DefaultOpen)) {
-                /* Path */
-                setNextItemRightAlign("Path");
-                std::string path = featureConfig->value("path");
-                if(ImGui::InputText("##ScriptPath", &path)) {
-                    script->setPath(path);
-                    featureConfig->setValue("path", path);
+                /* Class name */
+                setNextItemRightAlign("Class name");
+                std::string className = featureConfig->value("class_name");
+                if(ImGui::InputText("##Script.ClassName", &className)) {
+                    script->setClassName(className);
+                    featureConfig->setValue("class_name", className);
                 }
             }
 
@@ -291,7 +291,7 @@ void Inspector::newFrame() {
                 /* Path */
                 setNextItemRightAlign("Path");
                 std::string path = featureConfig->value("path");
-                if(ImGui::InputText("##SpritePath", &path)) {
+                if(ImGui::InputText("##Sprite.Path", &path)) {
                     //script->setPath(path);
                     featureConfig->setValue("path", path);
                 }
@@ -299,7 +299,7 @@ void Inspector::newFrame() {
                 /* Pixel size */
                 setNextItemRightAlign("Pixel size");
                 Float pixelSize = featureConfig->value<Float>("pixel_size");
-                if(ImGui::DragFloat("##SpritePixelSize", &pixelSize, 0.001f)) {
+                if(ImGui::DragFloat("##Sprite.PixelSize", &pixelSize, 0.001f)) {
                     sprite->setPixelSize(pixelSize);
                     featureConfig->setValue("pixel_size", pixelSize);
                 }

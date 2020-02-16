@@ -25,26 +25,28 @@
 #pragma once
 
 #include <string>
+#include <vector>
 
-#include <Magnum/SceneGraph/AbstractGroupedFeature.h>
+#include <Corrade/PluginManager/AbstractManager.h>
+#include <Corrade/PluginManager/AbstractPlugin.h>
+#include <Magnum/SceneGraph/TranslationRotationScalingTransformation3D.h>
 
 using namespace Magnum;
 
-class Script;
-typedef SceneGraph::FeatureGroup3D<Script> ScriptGroup;
+typedef SceneGraph::Object<SceneGraph::TranslationRotationScalingTransformation3D> Object3D;
 
-class Script: public SceneGraph::AbstractGroupedFeature3D<Script> {
+class AbstractScript: public PluginManager::AbstractPlugin {
     public:
-        explicit Script(SceneGraph::AbstractObject3D& object, ScriptGroup* scripts, const std::string& className):
-            SceneGraph::AbstractGroupedFeature3D<Script>{object, scripts}, _className(className) {}
-
-        std::string className() const { return _className; }
-
-        Script& setClassName(const std::string& className) {
-            _className = className;
-            return *this;
+        static std::string pluginInterface() {
+            return "Melix19.Oberon.Bindings.AbstractScript/1.0";
         }
 
-    private:
-        std::string _className;
+        static std::vector<std::string> pluginSearchPaths() {
+            return {""};
+        }
+
+        explicit AbstractScript(PluginManager::AbstractManager& manager, const std::string& plugin):
+            AbstractPlugin{manager, plugin} {}
+
+        virtual void update(Object3D* object, Float deltaTime) const = 0;
 };

@@ -30,6 +30,7 @@
 #include <Magnum/GL/Texture.h>
 #include <Magnum/SceneGraph/Scene.h>
 #include <Oberon/Core/Importer.h>
+#include <Oberon/Core/ScriptManager.h>
 
 #include "AbstractPanel.h"
 #include "ObjectNode.h"
@@ -37,7 +38,7 @@
 class CollectionPanel: public AbstractPanel {
     public:
         CollectionPanel(FileNode* fileNode, OberonResourceManager& resourceManager, Importer& importer, const Vector2i& viewportTextureSize, const Vector2& dpiScaleRatio);
-        void drawViewport();
+        void drawViewport(Float deltaTime);
         void newFrame();
 
     private:
@@ -92,6 +93,8 @@ class CollectionPanel: public AbstractPanel {
         GL::Texture2D _viewportTexture;
         GL::Renderbuffer _depth;
         GL::Renderbuffer _objectId;
+
+        ScriptManager _scriptManager;
 
         SceneGraph::DrawableGroup3D _drawables;
         SceneGraph::DrawableGroup3D _editorDrawables;

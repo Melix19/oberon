@@ -69,7 +69,7 @@ CollectionPanel::CollectionPanel(FileNode* fileNode, OberonResourceManager& reso
     updateDrawablesId();
 }
 
-void CollectionPanel::drawViewport() {
+void CollectionPanel::drawViewport(Float deltaTime) {
     /* If the window is not visible, end the method here. */
     if(!_isVisible || !_isOpen)
         return;
@@ -79,6 +79,8 @@ void CollectionPanel::drawViewport() {
         .clearColor(1, Vector4ui{0})
         .clearDepth(1.0f)
         .bind();
+
+    if(_isSimulating) _scriptManager.update(deltaTime);
 
     for(std::size_t i = 0; i != _lights.size(); ++i)
         _lights[i].updateShader();
@@ -245,6 +247,8 @@ CollectionPanel& CollectionPanel::updateDrawablesId() {
 }
 
 CollectionPanel& CollectionPanel::startSimulation() {
+    _scriptManager.loadScripts(_scripts);
+
     _isSimulating = true;
     return *this;
 }
