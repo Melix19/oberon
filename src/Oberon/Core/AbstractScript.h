@@ -38,7 +38,7 @@ typedef SceneGraph::Object<SceneGraph::TranslationRotationScalingTransformation3
 class AbstractScript: public PluginManager::AbstractPlugin {
     public:
         static std::string pluginInterface() {
-            return "Melix19.Oberon.Bindings.AbstractScript/1.0";
+            return "Oberon.Bindings.AbstractScript/1.0";
         }
 
         static std::vector<std::string> pluginSearchPaths() {
