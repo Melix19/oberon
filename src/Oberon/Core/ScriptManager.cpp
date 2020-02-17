@@ -28,11 +28,11 @@ void ScriptManager::loadScripts(ScriptGroup& scripts) {
     for(std::size_t i = 0; i != scripts.size(); ++i) {
         Script& script = scripts[i];
 
-        if(_manager.loadState(script.className()) & PluginManager::LoadState::NotLoaded)
-            _manager.load(script.className());
+        if(_manager.loadState(script.name()) & PluginManager::LoadState::NotLoaded)
+            _manager.load(script.name());
 
         Object3D* object = static_cast<Object3D*>(&script.object());
-        Containers::arrayAppend(_scripts, std::make_pair(_manager.instantiate(script.className()), object));
+        Containers::arrayAppend(_scripts, std::make_pair(_manager.instantiate(script.name()), object));
     }
 }
 

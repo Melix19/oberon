@@ -59,6 +59,8 @@ class Editor: public Platform::Application {
         Vector2 _dpiScaleRatio;
         Timeline _timeline;
 
+        std::string _projectPath;
+
         ImGuiIntegration::Context _imgui{NoCreate};
         OberonResourceManager _resourceManager;
         Importer _importer;

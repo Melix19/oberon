@@ -35,16 +35,16 @@ typedef SceneGraph::FeatureGroup3D<Script> ScriptGroup;
 
 class Script: public SceneGraph::AbstractGroupedFeature3D<Script> {
     public:
-        explicit Script(SceneGraph::AbstractObject3D& object, ScriptGroup* scripts, const std::string& className):
-            SceneGraph::AbstractGroupedFeature3D<Script>{object, scripts}, _className(className) {}
+        explicit Script(SceneGraph::AbstractObject3D& object, ScriptGroup* scripts, const std::string& name):
+            SceneGraph::AbstractGroupedFeature3D<Script>{object, scripts}, _name(name) {}
 
-        std::string className() const { return _className; }
+        std::string name() const { return _name; }
 
-        Script& setClassName(const std::string& className) {
-            _className = className;
+        Script& setname(const std::string& name) {
+            _name = name;
             return *this;
         }
 
     private:
-        std::string _className;
+        std::string _name;
 };

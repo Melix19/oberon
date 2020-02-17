@@ -35,8 +35,8 @@
 
 #include <algorithm>
 
-CollectionPanel::CollectionPanel(FileNode* fileNode, OberonResourceManager& resourceManager, Importer& importer, const Vector2i& viewportTextureSize, const Vector2& dpiScaleRatio):
-    _resourceManager{resourceManager}, _importer{importer}, _viewportTextureSize{viewportTextureSize}, _dpiScaleRatio{dpiScaleRatio}
+CollectionPanel::CollectionPanel(const std::string& projectPath, FileNode* fileNode, OberonResourceManager& resourceManager, Importer& importer, const Vector2i& viewportTextureSize, const Vector2& dpiScaleRatio):
+    _resourceManager{resourceManager}, _importer{importer}, _viewportTextureSize{viewportTextureSize}, _dpiScaleRatio{dpiScaleRatio}, _scriptManager{projectPath}
 {
     _fileNode = fileNode;
     _name = Utility::Directory::filename(_fileNode->path());

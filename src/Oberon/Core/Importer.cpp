@@ -110,10 +110,10 @@ void Importer::loadFeature(Utility::ConfigurationGroup* featureConfig, Object3D*
         object->addFeature<Light>(lights, shaderResource, color);
     } else if(type == "script") {
         /* Class name */
-        std::string className = featureConfig->value("class_name");
+        std::string name = featureConfig->value("name");
 
         /* Script */
-        object->addFeature<Script>(scripts, className);
+        object->addFeature<Script>(scripts, name);
     } else if(type == "sprite") {
         /* Mesh */
         Resource<GL::Mesh> meshResource = resourceManager.get<GL::Mesh>("square_texture_coords");

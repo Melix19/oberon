@@ -260,12 +260,12 @@ void Inspector::newFrame() {
             bool featureIsOpen = true;
 
             if(ImGui::CollapsingHeader("Script", &featureIsOpen, ImGuiTreeNodeFlags_DefaultOpen)) {
-                /* Class name */
-                setNextItemRightAlign("Class name");
-                std::string className = featureConfig->value("class_name");
-                if(ImGui::InputText("##Script.ClassName", &className, ImGuiInputTextFlags_EnterReturnsTrue)) {
-                    script->setClassName(className);
-                    featureConfig->setValue("class_name", className);
+                /* Script name */
+                setNextItemRightAlign("Script name");
+                std::string name = featureConfig->value("name");
+                if(ImGui::InputText("##Script.Name", &name, ImGuiInputTextFlags_EnterReturnsTrue)) {
+                    script->setname(name);
+                    featureConfig->setValue("name", name);
                 }
             }
 
