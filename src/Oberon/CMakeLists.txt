@@ -24,7 +24,3 @@
 
 add_subdirectory(Core)
 add_subdirectory(Editor)
-
-if(WITH_EXPORT_TEMPLATES)
-    add_subdirectory(Templates)
-endif()
