@@ -22,13 +22,16 @@
 #   SOFTWARE.
 #
 
-cmake_minimum_required(VERSION 3.4)
+find_package(Magnum REQUIRED GlfwApplication)
 
-project(Oberon CXX)
+set_directory_properties(PROPERTIES CORRADE_USE_PEDANTIC_FLAGS ON)
 
-set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/modules/" ${CMAKE_MODULE_PATH})
+add_library(OberonGlfwPlatform GlfwPlatform.cpp GlfwPlatform.h)
+target_link_libraries(OberonGlfwPlatform PRIVATE
+    Magnum::Application
+    Oberon::Core)
 
-option(WITH_EDITOR "Build editor" ON)
-option(WITH_PLATFORMS "Build platform libraries" ON)
-
-add_subdirectory(src)
+install(TARGETS OberonGlfwPlatform
+    RUNTIME DESTINATION bin
+    LIBRARY DESTINATION lib
+    ARCHIVE DESTINATION lib)
