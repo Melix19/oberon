@@ -40,6 +40,7 @@ jobs:
         cmake .. \
           -DCMAKE_INSTALL_PREFIX=$GITHUB_WORKSPACE/deps \
           -DCMAKE_BUILD_TYPE=Release \
+          -DBUILD_PLUGINS_STATIC=ON \
           -DWITH_PNGIMPORTER=ON
         cmake --build . --target install
 
@@ -91,6 +92,7 @@ jobs:
         cmake .. \
           -DCMAKE_INSTALL_PREFIX=$GITHUB_WORKSPACE/deps \
           -DCMAKE_BUILD_TYPE=Release \
+          -DBUILD_PLUGINS_STATIC=ON \
           -DWITH_PNGIMPORTER=ON
         cmake --build . --target install
 
@@ -145,6 +147,7 @@ jobs:
           -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake \
           -DCMAKE_INSTALL_PREFIX=$GITHUB_WORKSPACE/deps \
           -DCMAKE_BUILD_TYPE=Release \
+          -DBUILD_PLUGINS_STATIC=ON \
           -DWITH_PNGIMPORTER=ON
         cmake --build . --target install
 
