@@ -23,7 +23,7 @@
 #
 
 find_package(ImGui REQUIRED SourcesMiscCpp)
-find_package(Magnum REQUIRED GL GlfwApplication)
+find_package(Magnum REQUIRED GlfwApplication)
 
 set_directory_properties(PROPERTIES CORRADE_USE_PEDANTIC_FLAGS ON)
 
@@ -65,8 +65,6 @@ add_executable(Oberon MACOSX_BUNDLE
 target_link_libraries(Oberon PRIVATE
     ImGui::SourcesMiscCpp
     Magnum::Application
-    Magnum::GL
-    Magnum::Magnum
     MagnumIntegration::ImGui
     Oberon::Core
     portable_file_dialogs)
