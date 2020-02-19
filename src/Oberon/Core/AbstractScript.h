@@ -48,5 +48,5 @@ class AbstractScript: public PluginManager::AbstractPlugin {
         explicit AbstractScript(PluginManager::AbstractManager& manager, const std::string& plugin):
             AbstractPlugin{manager, plugin} {}
 
-        virtual void update(Object3D* object, Float deltaTime) const = 0;
+        virtual void update(Object3D* object, Float deltaTime) = 0;
 };

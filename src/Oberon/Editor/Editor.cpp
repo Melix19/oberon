@@ -291,7 +291,7 @@ void Editor::openFile(FileNode* fileNode) {
         if(extension == ".col") {
             _panels.push_back(Containers::pointer<CollectionPanel>(_projectPath, fileNode,
                 _resourceManager, _importer, _maximizedWindowSize, _dpiScaleRatio));
-            _collectionPanels.push_back(static_cast<CollectionPanel*>(_panels.back().get()));
+            _collectionPanels.push_back(reinterpret_cast<CollectionPanel*>(_panels.back().get()));
         } else {
             _panels.push_back(Containers::pointer<CodePanel>(fileNode));
         }

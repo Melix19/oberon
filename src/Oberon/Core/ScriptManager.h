@@ -33,9 +33,10 @@
 
 class ScriptManager {
     public:
-        ScriptManager(const std::string& projectPath = ""): _manager{Utility::Directory::join(projectPath, "plugins")} {}
+        ScriptManager(const std::string& projectPath = ""): _manager{Utility::Directory::join(projectPath, "build")} {}
 
         void loadScripts(ScriptGroup& scripts);
+        void unloadScripts();
         void update(Float deltaTime);
 
     private:

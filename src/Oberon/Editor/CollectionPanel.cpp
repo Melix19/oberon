@@ -254,6 +254,7 @@ CollectionPanel& CollectionPanel::startSimulation() {
 }
 
 CollectionPanel& CollectionPanel::stopSimulation() {
+    _scriptManager.unloadScripts();
     resetObjectAndChildren(_rootNode.get());
 
     _isSimulating = false;

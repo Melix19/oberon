@@ -31,9 +31,18 @@ void ScriptManager::loadScripts(ScriptGroup& scripts) {
         if(_manager.loadState(script.name()) & PluginManager::LoadState::NotLoaded)
             _manager.load(script.name());
 
-        Object3D* object = static_cast<Object3D*>(&script.object());
+        Object3D* object = reinterpret_cast<Object3D*>(&script.object());
         Containers::arrayAppend(_scripts, std::make_pair(_manager.instantiate(script.name()), object));
     }
+}
+
+void ScriptManager::unloadScripts() {
+    for(auto& script: _scripts)
+        script.first.reset(nullptr);
+    _scripts.release();
+
+    for(auto& plugin: _manager.pluginList())
+        _manager.unload(plugin);
 }
 
 void ScriptManager::update(Float deltaTime) {
