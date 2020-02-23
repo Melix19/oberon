@@ -148,10 +148,9 @@ jobs:
         cd corrade && mkdir build && cd build
         cmake .. \
           -DCMAKE_INSTALL_PREFIX=$GITHUB_WORKSPACE/deps \
-          -DCMAKE_BUILD_TYPE=Release \
           -DWITH_INTERCONNECT=OFF \
           -DWITH_TESTSUITE=OFF
-        cmake --build . --target install
+        cmake --build . --config Release --target install
 
         cd $GITHUB_WORKSPACE
         git clone --depth 1 https://github.com/mosra/magnum.git
@@ -159,13 +158,12 @@ jobs:
         cmake .. \
           -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake \
           -DCMAKE_INSTALL_PREFIX=$GITHUB_WORKSPACE/deps \
-          -DCMAKE_BUILD_TYPE=Release \
           -DWITH_GLFWAPPLICATION=ON \
           -DWITH_DEBUGTOOLS=OFF \
           -DWITH_TEXT=OFF \
           -DWITH_TEXTURETOOLS=OFF \
           -DWITH_TRADE=OFF
-        cmake --build . --target install
+        cmake --build . --config Release --target install
 
         cd $GITHUB_WORKSPACE
         git clone --depth 1 https://github.com/mosra/magnum-plugins.git
@@ -173,10 +171,9 @@ jobs:
         cmake .. \
           -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake \
           -DCMAKE_INSTALL_PREFIX=$GITHUB_WORKSPACE/deps \
-          -DCMAKE_BUILD_TYPE=Release \
           -DBUILD_PLUGINS_STATIC=ON \
           -DWITH_PNGIMPORTER=ON
-        cmake --build . --target install
+        cmake --build . --config Release --target install
 
     - name: Configure
       shell: bash
@@ -184,17 +181,16 @@ jobs:
         mkdir build && cd build
         cmake .. \
           -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake \
-          -DCMAKE_PREFIX_PATH=$GITHUB_WORKSPACE/deps \
-          -DCMAKE_BUILD_TYPE=Release
+          -DCMAKE_PREFIX_PATH=$GITHUB_WORKSPACE/deps
 
     - name: Build
       shell: bash
       run: |
         cd build
-        cmake --build .
+        cmake --build . --config Release
 
     - name: Upload artifact
       uses: actions/upload-artifact@v1
       with:
         name: Oberon-Windows
-        path: build\Debug\bin
+        path: build\Release\bin
