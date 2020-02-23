@@ -61,6 +61,12 @@ jobs:
         cd build
         cmake --build .
 
+    - name: Upload artifact
+      uses: actions/upload-artifact@v1
+      with:
+        name: Oberon-Linux
+        path: build/Release/bin
+
   macOS:
     runs-on: macOS-latest
 
@@ -117,6 +123,12 @@ jobs:
       run: |
         cd build
         cmake --build .
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v1
+      with:
+        name: Oberon-macOS
+        path: build/Release/bin
 
   Windows:
     runs-on: windows-latest
@@ -180,3 +192,9 @@ jobs:
       run: |
         cd build
         cmake --build .
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v1
+      with:
+        name: Oberon-Windows
+        path: build\Debug\bin
