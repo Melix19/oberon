@@ -22,6 +22,7 @@ jobs:
         cmake .. \
           -DCMAKE_INSTALL_PREFIX=$GITHUB_WORKSPACE/deps \
           -DCMAKE_BUILD_TYPE=Release \
+          -DBUILD_STATIC=ON \
           -DWITH_INTERCONNECT=OFF \
           -DWITH_TESTSUITE=OFF
         cmake --build . --target install
@@ -32,6 +33,7 @@ jobs:
         cmake .. \
           -DCMAKE_INSTALL_PREFIX=$GITHUB_WORKSPACE/deps \
           -DCMAKE_BUILD_TYPE=Release \
+          -DBUILD_STATIC=ON \
           -DWITH_GLFWAPPLICATION=ON \
           -DWITH_DEBUGTOOLS=OFF \
           -DWITH_TEXT=OFF \
@@ -54,7 +56,8 @@ jobs:
         mkdir build && cd build
         cmake .. \
           -DCMAKE_PREFIX_PATH=$GITHUB_WORKSPACE/deps \
-          -DCMAKE_BUILD_TYPE=Release
+          -DCMAKE_BUILD_TYPE=Release \
+          -DBUILD_STATIC=ON
 
     - name: Build
       run: |
@@ -85,6 +88,7 @@ jobs:
         cmake .. \
           -DCMAKE_INSTALL_PREFIX=$GITHUB_WORKSPACE/deps \
           -DCMAKE_BUILD_TYPE=Release \
+          -DBUILD_STATIC=ON \
           -DWITH_INTERCONNECT=OFF \
           -DWITH_TESTSUITE=OFF
         cmake --build . --target install
@@ -95,6 +99,7 @@ jobs:
         cmake .. \
           -DCMAKE_INSTALL_PREFIX=$GITHUB_WORKSPACE/deps \
           -DCMAKE_BUILD_TYPE=Release \
+          -DBUILD_STATIC=ON \
           -DWITH_GLFWAPPLICATION=ON \
           -DWITH_DEBUGTOOLS=OFF \
           -DWITH_TEXT=OFF \
@@ -117,7 +122,8 @@ jobs:
         mkdir build && cd build
         cmake .. \
           -DCMAKE_PREFIX_PATH=$GITHUB_WORKSPACE/deps \
-          -DCMAKE_BUILD_TYPE=Release
+          -DCMAKE_BUILD_TYPE=Release \
+          -DBUILD_STATIC=ON
 
     - name: Build
       run: |
@@ -141,13 +147,14 @@ jobs:
     - name: Install dependencies
       shell: bash
       run: |
-        vcpkg install glfw3 libpng --triplet x64-windows
+        vcpkg install glfw3 libpng --triplet x64-windows-static
 
         cd $GITHUB_WORKSPACE
         git clone --depth 1 https://github.com/mosra/corrade.git
         cd corrade && mkdir build && cd build
         cmake .. \
           -DCMAKE_INSTALL_PREFIX=$GITHUB_WORKSPACE/deps \
+          -DBUILD_STATIC=ON \
           -DWITH_INTERCONNECT=OFF \
           -DWITH_TESTSUITE=OFF
         cmake --build . --config Release --target install
@@ -157,7 +164,9 @@ jobs:
         cd magnum && mkdir build && cd build
         cmake .. \
           -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake \
+          -DVCPKG_TARGET_TRIPLET=x64-windows-static \
           -DCMAKE_INSTALL_PREFIX=$GITHUB_WORKSPACE/deps \
+          -DBUILD_STATIC=ON \
           -DWITH_GLFWAPPLICATION=ON \
           -DWITH_DEBUGTOOLS=OFF \
           -DWITH_TEXT=OFF \
@@ -170,6 +179,7 @@ jobs:
         cd magnum-plugins && mkdir build && cd build
         cmake .. \
           -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake \
+          -DVCPKG_TARGET_TRIPLET=x64-windows-static \
           -DCMAKE_INSTALL_PREFIX=$GITHUB_WORKSPACE/deps \
           -DBUILD_PLUGINS_STATIC=ON \
           -DWITH_PNGIMPORTER=ON
@@ -181,7 +191,9 @@ jobs:
         mkdir build && cd build
         cmake .. \
           -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake \
-          -DCMAKE_PREFIX_PATH=$GITHUB_WORKSPACE/deps
+          -DVCPKG_TARGET_TRIPLET=x64-windows-static \
+          -DCMAKE_PREFIX_PATH=$GITHUB_WORKSPACE/deps \
+          -DBUILD_STATIC=ON
 
     - name: Build
       shell: bash
