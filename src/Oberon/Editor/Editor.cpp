@@ -294,6 +294,7 @@ void Editor::openFile(FileNode* fileNode) {
             _collectionPanels.push_back(reinterpret_cast<CollectionPanel*>(_panels.back().get()));
         } else {
             _panels.push_back(Containers::pointer<CodePanel>(fileNode));
+            _codePanels.push_back(reinterpret_cast<CodePanel*>(_panels.back().get()));
         }
     }
 }
@@ -338,6 +339,9 @@ void Editor::keyReleaseEvent(KeyEvent& event) {
 void Editor::mousePressEvent(MouseEvent& event) {
     for(auto& collectionPanel: _collectionPanels)
         collectionPanel->handleMousePressEvent(event);
+
+    for(auto& codePanel: _codePanels)
+        codePanel->handleMousePressEvent(event);
 
     _imgui.handleMousePressEvent(event);
 }

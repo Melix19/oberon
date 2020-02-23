@@ -24,51 +24,9 @@
 
 #pragma once
 
-#include "AbstractPanel.h"
+#include "CodePanel.h"
 
-#include <Corrade/Containers/GrowableArray.h>
-#include <Magnum/Magnum.h>
-#include <imgui.h>
-
-using namespace Magnum;
-
-class CodePanel: public AbstractPanel {
-    public:
-        CodePanel(FileNode* fileNode);
-
-        void newFrame() override;
-
-    public:
-        template<class MouseEvent> void handleMousePressEvent(MouseEvent& event);
-
-    private:
-        std::string _textBuffer;
-
-    private:
-        enum class PaletteIndex: UnsignedInt {
-            Default,
-            LineNumber
-        };
-
-        ImU32 getColorFromIndex(PaletteIndex index);
-
-    private:
-        struct Glyph {
-            char _character;
-            PaletteIndex _colorIndex = PaletteIndex::Default;
-
-            Glyph(char character, PaletteIndex colorIndex):
-                _character(character), _colorIndex(colorIndex) {}
-        };
-
-        typedef Containers::Array<Glyph> Line;
-        typedef Containers::Array<Line> Lines;
-
-        Lines _lines;
-
-    private:
-        struct Coordinates {
-            UnsignedInt _row;
-            UnsignedInt _column;
-        };
-};
+template<class MouseEvent> void CodePanel::handleMousePressEvent(MouseEvent& event) {
+    if(event.button() == MouseEvent::Button::Left && _isHovered) {
+    }
+}

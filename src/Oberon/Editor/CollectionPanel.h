@@ -39,7 +39,7 @@ class CollectionPanel: public AbstractPanel {
     public:
         CollectionPanel(const std::string& projectPath, FileNode* fileNode, OberonResourceManager& resourceManager, Importer& importer, const Vector2i& viewportTextureSize, const Vector2& dpiScaleRatio);
         void drawViewport(Float deltaTime);
-        void newFrame();
+        void newFrame() override;
 
     private:
         OberonResourceManager& _resourceManager;
@@ -106,9 +106,6 @@ class CollectionPanel: public AbstractPanel {
         Object3D* _cameraObject;
         Object3D* _gridObject;
         SceneGraph::Camera3D* _camera;
-
-    private:
-        bool _isHovered{false};
 
     public:
         bool isSimulating() const { return _isSimulating; }

@@ -45,6 +45,7 @@ void CodePanel::newFrame() {
     _isVisible = ImGui::Begin(_name.c_str(), &_isOpen);
 
     _isFocused = ImGui::IsWindowFocused();
+    _isHovered = ImGui::IsWindowHovered();
 
     /* If the window is not visible, end the method here. */
     if(!_isVisible || !_isOpen) {
