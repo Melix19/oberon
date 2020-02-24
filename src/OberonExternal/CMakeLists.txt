@@ -22,8 +22,4 @@
 #   SOFTWARE.
 #
 
-set(WITH_IMGUI ON CACHE BOOL "" FORCE)
-set(IMGUI_DIR "${CMAKE_CURRENT_SOURCE_DIR}/imgui/" CACHE STRING "" FORCE)
-
-add_subdirectory(magnum-integration)
 add_subdirectory(portable-file-dialogs)

@@ -51,13 +51,25 @@ jobs:
           -DWITH_PNGIMPORTER=ON
         cmake --build . --target install
 
+        cd $GITHUB_WORKSPACE
+        git clone --depth 1 -b docking https://github.com/ocornut/imgui.git
+        git clone --depth 1 https://github.com/mosra/magnum-integration.git
+        cd magnum-integration && mkdir build && cd build
+        cmake .. \
+          -DCMAKE_INSTALL_PREFIX=$GITHUB_WORKSPACE/deps \
+          -DCMAKE_BUILD_TYPE=Release \
+          -DBUILD_STATIC=ON \
+          -DWITH_IMGUI=ON \
+          -DIMGUI_DIR=$GITHUB_WORKSPACE/imgui
+        cmake --build . --target install
+
     - name: Configure
       run: |
         mkdir build && cd build
         cmake .. \
           -DCMAKE_PREFIX_PATH=$GITHUB_WORKSPACE/deps \
           -DCMAKE_BUILD_TYPE=Release \
-          -DBUILD_STATIC=ON
+          -DIMGUI_DIR=$GITHUB_WORKSPACE/imgui
 
     - name: Build
       run: |
@@ -117,13 +129,25 @@ jobs:
           -DWITH_PNGIMPORTER=ON
         cmake --build . --target install
 
+        cd $GITHUB_WORKSPACE
+        git clone --depth 1 -b docking https://github.com/ocornut/imgui.git
+        git clone --depth 1 https://github.com/mosra/magnum-integration.git
+        cd magnum-integration && mkdir build && cd build
+        cmake .. \
+          -DCMAKE_INSTALL_PREFIX=$GITHUB_WORKSPACE/deps \
+          -DCMAKE_BUILD_TYPE=Release \
+          -DBUILD_STATIC=ON \
+          -DWITH_IMGUI=ON \
+          -DIMGUI_DIR=$GITHUB_WORKSPACE/imgui
+        cmake --build . --target install
+
     - name: Configure
       run: |
         mkdir build && cd build
         cmake .. \
           -DCMAKE_PREFIX_PATH=$GITHUB_WORKSPACE/deps \
           -DCMAKE_BUILD_TYPE=Release \
-          -DBUILD_STATIC=ON
+          -DIMGUI_DIR=$GITHUB_WORKSPACE/imgui
 
     - name: Build
       run: |
@@ -185,6 +209,17 @@ jobs:
           -DWITH_PNGIMPORTER=ON
         cmake --build . --config Release --target install
 
+        cd $GITHUB_WORKSPACE
+        git clone --depth 1 -b docking https://github.com/ocornut/imgui.git
+        git clone --depth 1 https://github.com/mosra/magnum-integration.git
+        cd magnum-integration && mkdir build && cd build
+        cmake .. \
+          -DCMAKE_INSTALL_PREFIX=$GITHUB_WORKSPACE/deps \
+          -DBUILD_STATIC=ON \
+          -DWITH_IMGUI=ON \
+          -DIMGUI_DIR=$GITHUB_WORKSPACE/imgui
+        cmake --build . --config Release --target install
+
     - name: Configure
       shell: bash
       run: |
@@ -193,7 +228,7 @@ jobs:
           -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake \
           -DVCPKG_TARGET_TRIPLET=x64-windows-static \
           -DCMAKE_PREFIX_PATH=$GITHUB_WORKSPACE/deps \
-          -DBUILD_STATIC=ON
+          -DIMGUI_DIR=$GITHUB_WORKSPACE/imgui
 
     - name: Build
       shell: bash

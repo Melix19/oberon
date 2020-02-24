@@ -30,8 +30,3 @@ add_library(OberonGlfwPlatform GlfwPlatform.cpp GlfwPlatform.h)
 target_link_libraries(OberonGlfwPlatform PRIVATE
     Magnum::Application
     Oberon::Core)
-
-install(TARGETS OberonGlfwPlatform
-    RUNTIME DESTINATION bin
-    LIBRARY DESTINATION lib
-    ARCHIVE DESTINATION lib)

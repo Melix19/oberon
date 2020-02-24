@@ -64,11 +64,5 @@ target_link_libraries(OberonCore PRIVATE
     Magnum::Shaders
     MagnumPlugins::PngImporter)
 
-install(TARGETS OberonCore
-    RUNTIME DESTINATION bin
-    LIBRARY DESTINATION lib
-    ARCHIVE DESTINATION lib)
-install(FILES AbstractScript.h DESTINATION include/Oberon/Core)
-
 # Oberon Core library for superprojects
 add_library(Oberon::Core ALIAS OberonCore)

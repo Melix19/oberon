@@ -24,6 +24,7 @@
 
 find_package(ImGui REQUIRED SourcesMiscCpp)
 find_package(Magnum REQUIRED GlfwApplication)
+find_package(MagnumIntegration REQUIRED ImGui)
 
 set_directory_properties(PROPERTIES CORRADE_USE_PEDANTIC_FLAGS ON)
 
