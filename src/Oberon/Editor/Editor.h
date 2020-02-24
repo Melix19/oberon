@@ -64,6 +64,7 @@ class Editor: public Platform::Application {
         ImGuiIntegration::Context _imgui{NoCreate};
         OberonResourceManager _resourceManager;
         Importer _importer;
+        ScriptManager _scriptManager;
 
         Console _console;
         Explorer _explorer;

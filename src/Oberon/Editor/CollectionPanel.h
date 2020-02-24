@@ -37,13 +37,14 @@
 
 class CollectionPanel: public AbstractPanel {
     public:
-        CollectionPanel(const std::string& projectPath, FileNode* fileNode, OberonResourceManager& resourceManager, Importer& importer, const Vector2i& viewportTextureSize, const Vector2& dpiScaleRatio);
+        CollectionPanel(FileNode* fileNode, OberonResourceManager& resourceManager, Importer& importer, ScriptManager& scriptManager, const Vector2i& viewportTextureSize, const Vector2& dpiScaleRatio);
         void drawViewport(Float deltaTime);
         void newFrame() override;
 
     private:
         OberonResourceManager& _resourceManager;
         Importer& _importer;
+        ScriptManager& _scriptManager;
 
         Vector2i _viewportTextureSize;
         Vector2 _dpiScaleRatio;
@@ -93,8 +94,6 @@ class CollectionPanel: public AbstractPanel {
         GL::Texture2D _viewportTexture;
         GL::Renderbuffer _depth;
         GL::Renderbuffer _objectId;
-
-        ScriptManager _scriptManager;
 
         SceneGraph::DrawableGroup3D _drawables;
         SceneGraph::DrawableGroup3D _editorDrawables;
