@@ -55,7 +55,7 @@ class Editor: public Platform::Application {
         void mouseScrollEvent(MouseScrollEvent& event) override;
         void textInputEvent(TextInputEvent& event) override;
 
-        Vector2i _maximizedWindowSize;
+        Vector2i _screenResolution;
         Vector2 _dpiScaleRatio;
         Timeline _timeline;
 

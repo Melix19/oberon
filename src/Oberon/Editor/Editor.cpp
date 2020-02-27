@@ -37,7 +37,9 @@ Editor::Editor(const Arguments& arguments, const std::string& projectPath): Plat
     GLConfiguration{}.setColorBufferSize({8, 8, 8, 8})}, _projectPath{projectPath}, _importer{projectPath},
     _scriptManager{projectPath}, _explorer{projectPath}
 {
-    _maximizedWindowSize = windowSize();
+    const GLFWvidmode* videoMode = glfwGetVideoMode(glfwGetPrimaryMonitor());
+
+    _screenResolution = Vector2i{videoMode->width, videoMode->height};
     _dpiScaleRatio = Vector2{framebufferSize()}/(Vector2{windowSize()}/dpiScaling());
 
     ImGui::CreateContext();
@@ -290,7 +292,7 @@ void Editor::openFile(FileNode* fileNode) {
 
         if(extension == ".col") {
             _panels.push_back(Containers::pointer<CollectionPanel>(fileNode, _resourceManager,
-                _importer, _scriptManager, _maximizedWindowSize, _dpiScaleRatio));
+                _importer, _scriptManager, _screenResolution, _dpiScaleRatio));
             _collectionPanels.push_back(reinterpret_cast<CollectionPanel*>(_panels.back().get()));
         } else {
             _panels.push_back(Containers::pointer<CodePanel>(fileNode));
