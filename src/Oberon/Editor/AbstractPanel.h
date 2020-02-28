@@ -50,7 +50,6 @@ class AbstractPanel {
         FileNode* _fileNode;
 
         bool _isOpen{true};
-        bool _isHovered{false};
         bool _isVisible{false};
         bool _isFocused{false};
         bool _needsDocking{true};

@@ -38,9 +38,6 @@ class CodePanel: public AbstractPanel {
 
         void newFrame() override;
 
-    public:
-        template<class MouseEvent> void handleMousePressEvent(MouseEvent& event);
-
     private:
         std::string _textBuffer;
 

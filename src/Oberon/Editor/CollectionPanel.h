@@ -88,6 +88,7 @@ class CollectionPanel: public AbstractPanel {
         Containers::Pointer<ObjectNode> _rootNode;
         std::vector<ObjectNode*> _selectedNodes;
 
+        bool _isHovered{false};
         bool _isDragging{false};
 
         GL::Framebuffer _framebuffer{NoCreate};

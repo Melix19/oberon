@@ -24,7 +24,7 @@
 
 #pragma once
 
-#include "CodePanel.hpp"
+#include "CodePanel.h"
 #include "CollectionPanel.hpp"
 #include "Console.h"
 #include "Explorer.h"
@@ -72,7 +72,6 @@ class Editor: public Platform::Application {
         Outliner _outliner;
 
         std::vector<Containers::Pointer<AbstractPanel>> _panels;
-        std::vector<CodePanel*> _codePanels;
         std::vector<CollectionPanel*> _collectionPanels;
         AbstractPanel* _activePanel{nullptr};
 };
