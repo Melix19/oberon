@@ -28,5 +28,6 @@ namespace Themer {
 
 void styleColorsDark();
 void styleColorsLight();
+void setNextItemRightAlign(const char* label);
 
 }

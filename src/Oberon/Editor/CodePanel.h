@@ -27,6 +27,7 @@
 #include "AbstractPanel.h"
 
 #include <Corrade/Containers/GrowableArray.h>
+#include <Corrade/Utility/Configuration.h>
 #include <Magnum/Magnum.h>
 #include <imgui.h>
 
@@ -40,6 +41,12 @@ class CodePanel: public AbstractPanel {
 
     private:
         std::string _textBuffer;
+        Containers::Pointer<Utility::Configuration> _configuration;
+        bool _uiMode{false};
+
+    private:
+        void showCode();
+        void showUi();
 
     private:
         enum class PaletteIndex: UnsignedInt {

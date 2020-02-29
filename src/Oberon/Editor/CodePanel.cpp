@@ -25,10 +25,20 @@
 #include "CodePanel.h"
 
 #include <Corrade/Utility/Directory.h>
+#include <Magnum/Math/ConfigurationValue.h>
+#include <misc/cpp/imgui_stdlib.h>
+
+#include "Themer.h"
 
 CodePanel::CodePanel(FileNode* fileNode) {
     _fileNode = fileNode;
     _name = Utility::Directory::filename(_fileNode->path());
+
+    std::string extension = Utility::Directory::splitExtension(_fileNode->path()).second;
+    if(extension == ".oberon") {
+        _configuration = Containers::pointer<Utility::Configuration>(_fileNode->path());
+        _uiMode = true;
+    }
 
     std::string codeText = Utility::Directory::readString(_fileNode->path());
     Containers::arrayAppend(_lines, Line{});
@@ -52,13 +62,20 @@ void CodePanel::newFrame() {
         return;
     }
 
+    if(_uiMode) showUi();
+    else showCode();
+
+    ImGui::End();
+}
+
+void CodePanel::showCode() {
     const Float textSpacing = 15.0f;
 
+    ImGui::PushFont(ImGui::GetIO().Fonts->Fonts[1]);
     Float maxLineNumWidth = ImGui::CalcTextSize(std::to_string(_lines.size()).c_str()).x;
     ImVec2 lineStartPos = ImGui::GetCursorScreenPos();
     ImDrawList* drawList = ImGui::GetWindowDrawList();
 
-    ImGui::PushFont(ImGui::GetIO().Fonts->Fonts[1]);
     for(size_t lineIndex = 0; lineIndex < _lines.size(); ++lineIndex) {
         /* Draw line number */
         _textBuffer = std::to_string(lineIndex + 1);
@@ -80,8 +97,18 @@ void CodePanel::newFrame() {
         lineStartPos.y += ImGui::GetTextLineHeightWithSpacing();
     }
     ImGui::PopFont();
+}
 
-    ImGui::End();
+void CodePanel::showUi() {
+    Themer::setNextItemRightAlign("Name");
+    std::string name = _configuration->value("name");
+    if(ImGui::InputText("##Project.Name", &name))
+        _configuration->setValue("name", name);
+
+    Themer::setNextItemRightAlign("Window size");
+    Vector2i windowSize = _configuration->value<Vector2i>("window_size");
+    if(ImGui::DragInt2("##Project.WindowSize", windowSize.data()))
+        _configuration->setValue<Vector2i>("window_size", windowSize);
 }
 
 ImU32 CodePanel::getColorFromIndex(PaletteIndex index) {

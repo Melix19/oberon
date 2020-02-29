@@ -108,4 +108,11 @@ void styleColorsLight() {
     style.Colors[ImGuiCol_Text] = textColor;
 }
 
+void setNextItemRightAlign(const char* label) {
+    ImGui::AlignTextToFramePadding();
+    ImGui::Text(label);
+    ImGui::SameLine(130.0f);
+    ImGui::SetNextItemWidth(-1);
+}
+
 }
