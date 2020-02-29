@@ -232,6 +232,21 @@ bool Explorer::displayFileNode(FileNode* node) {
         ImGui::EndDragDropSource();
     }
 
+    if(isDirectory && ImGui::BeginDragDropTarget()) {
+        const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("FileNode.Other");
+        if(!payload) payload = ImGui::AcceptDragDropPayload("FileNode.Image");
+
+        if(payload) {
+            IM_ASSERT(payload->DataSize == sizeof(FileNode*));
+            const FileNode* sourceNode = *static_cast<const FileNode**>(payload->Data);
+            std::string filename = Utility::Directory::filename(sourceNode->path());
+            std::string newPath = Utility::Directory::join(node->path(), filename);
+
+            Utility::Directory::move(sourceNode->path(), newPath);
+        }
+        ImGui::EndDragDropTarget();
+    }
+
     return isOpen;
 }
 
