@@ -31,7 +31,7 @@
 #include <algorithm>
 
 Explorer::Explorer(const std::string& projectPath):
-    _rootNode{projectPath, "."}, watcher{projectPath}
+    _rootNode{projectPath, ""}, watcher{projectPath}
 {
     updateFileNodeChildren(&_rootNode);
 }
@@ -164,8 +164,8 @@ bool Explorer::displayFileNode(FileNode* node) {
 
         if(isShortcutKey && ImGui::IsItemClicked(0)) {
             if(node->isSelected()) {
-                _selectedNodes.erase(std::find_if(_selectedNodes.begin(), _selectedNodes.end(),
-                    [&node](FileNode* n) { return n == node; }));
+                _selectedNodes.erase(std::find_if(_selectedNodes.begin(),
+                    _selectedNodes.end(), [&node](FileNode* n) { return n == node; }));
             } else _selectedNodes.push_back(node);
 
             node->setSelected(!node->isSelected());
@@ -174,10 +174,11 @@ bool Explorer::displayFileNode(FileNode* node) {
                 deselectAllNodes();
 
             selectNode(node);
-
-            if(!isDirectory && ImGui::IsItemClicked(0)) _clickedNode = node;
         }
     }
+
+    if(!isDirectory && ImGui::IsItemHovered() && ImGui::IsMouseReleased(0))
+        _clickedNode = node;
 
     if(ImGui::BeginPopupContextItem()) {
         if(isDirectory) {
@@ -217,6 +218,18 @@ bool Explorer::displayFileNode(FileNode* node) {
         if(ImGui::MenuItem("Delete")) _deleteSelectedNodes = true;
 
         ImGui::EndPopup();
+    }
+
+    if(ImGui::BeginDragDropSource()) {
+        std::string extension = Utility::Directory::splitExtension(node->path()).second;
+        std::string typeName = "FileNode.";
+
+        if(extension == ".png") typeName.append("Image");
+        else typeName.append("Other");
+
+        ImGui::SetDragDropPayload(typeName.c_str(), &node, sizeof(FileNode*));
+        ImGui::Text(nodeName.c_str());
+        ImGui::EndDragDropSource();
     }
 
     return isOpen;

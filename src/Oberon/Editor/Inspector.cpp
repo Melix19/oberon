@@ -297,6 +297,17 @@ void Inspector::newFrame() {
                     reloadFeature = true;
                 }
 
+                if(ImGui::BeginDragDropTarget()) {
+                    if(const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("FileNode.Image")) {
+                        IM_ASSERT(payload->DataSize == sizeof(FileNode*));
+                        const FileNode* fileNode = *static_cast<const FileNode**>(payload->Data);
+
+                        featureConfig->setValue("path", fileNode->resourcePath());
+                        reloadFeature = true;
+                    }
+                    ImGui::EndDragDropTarget();
+                }
+
                 /* Pixel size */
                 setNextItemRightAlign("Pixel size");
                 Float pixelSize = featureConfig->value<Float>("pixel_size");
