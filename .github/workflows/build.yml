@@ -52,7 +52,7 @@ jobs:
         cmake --build . --target install
 
         cd $GITHUB_WORKSPACE
-        git clone --depth 1 -b docking https://github.com/ocornut/imgui.git
+        git clone --depth 1 --branch docking https://github.com/ocornut/imgui.git
         git clone --depth 1 https://github.com/mosra/magnum-integration.git
         cd magnum-integration && mkdir build && cd build
         cmake .. \
@@ -130,7 +130,7 @@ jobs:
         cmake --build . --target install
 
         cd $GITHUB_WORKSPACE
-        git clone --depth 1 -b docking https://github.com/ocornut/imgui.git
+        git clone --depth 1 --branch docking https://github.com/ocornut/imgui.git
         git clone --depth 1 https://github.com/mosra/magnum-integration.git
         cd magnum-integration && mkdir build && cd build
         cmake .. \
@@ -210,7 +210,7 @@ jobs:
         cmake --build . --config Release --target install
 
         cd $GITHUB_WORKSPACE
-        git clone --depth 1 -b docking https://github.com/ocornut/imgui.git
+        git clone --depth 1 --branch docking https://github.com/ocornut/imgui.git
         git clone --depth 1 https://github.com/mosra/magnum-integration.git
         cd magnum-integration && mkdir build && cd build
         cmake .. \

@@ -187,11 +187,7 @@ void Editor::drawEvent() {
     _console.newFrame();
     _explorer.newFrame();
 
-    if(_explorer.clickedNode()) {
-        bool isDirectory = Utility::Directory::isDirectory(_explorer.clickedNode()->path());
-        if(!isDirectory)
-            openFile(_explorer.clickedNode());
-    }
+    if(_explorer.clickedNode()) openFile(_explorer.clickedNode());
 
     showPanels(dockSpaceId);
 

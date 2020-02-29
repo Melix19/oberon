@@ -33,24 +33,29 @@ using namespace Corrade;
 
 class FileNode {
     public:
-        FileNode(const std::string& path): _path(path), _isSelected(false) {}
+        FileNode(const std::string& path, const std::string resourcePath):
+            _path{path}, _resourcePath{resourcePath} {}
 
         std::string path() const { return _path; }
-
         FileNode& setPath(const std::string& path) {
             _path = path;
             return *this;
         }
 
-        bool isSelected() const { return _isSelected; }
-
-        FileNode& setSelected(bool select) {
-            _isSelected = select;
+        std::string resourcePath() const { return _resourcePath; }
+        FileNode& setResourcePath(const std::string& resourcePath) {
+            _resourcePath = resourcePath;
             return *this;
         }
 
-        FileNode* addChild(const std::string& path) {
-            auto child = Containers::pointer<FileNode>(path);
+        bool isSelected() const { return _isSelected; }
+        FileNode& setSelected(bool selected) {
+            _isSelected = selected;
+            return *this;
+        }
+
+        FileNode* addChild(const std::string& path, const std::string& resourcePath) {
+            auto child = Containers::pointer<FileNode>(path, resourcePath);
             child->_parent = this;
 
             _children.push_back(std::move(child));
@@ -58,12 +63,12 @@ class FileNode {
         }
 
         FileNode* parent() const { return _parent; }
-
         std::vector<Containers::Pointer<FileNode>>& children() { return _children; }
 
     private:
         std::string _path;
-        bool _isSelected;
+        std::string _resourcePath;
+        bool _isSelected{false};
 
         FileNode* _parent;
         std::vector<Containers::Pointer<FileNode>> _children;

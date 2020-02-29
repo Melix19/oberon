@@ -30,8 +30,8 @@
 
 #include <algorithm>
 
-Explorer::Explorer(const std::string& rootPath): _rootNode{rootPath},
-    watcher{rootPath}
+Explorer::Explorer(const std::string& projectPath):
+    _rootNode{projectPath, "."}, watcher{projectPath}
 {
     updateFileNodeChildren(&_rootNode);
 }
@@ -175,7 +175,7 @@ bool Explorer::displayFileNode(FileNode* node) {
 
             selectNode(node);
 
-            if(ImGui::IsItemClicked(0)) _clickedNode = node;
+            if(!isDirectory && ImGui::IsItemClicked(0)) _clickedNode = node;
         }
     }
 
@@ -261,7 +261,8 @@ void Explorer::updateFileNodeChildren(FileNode* node) {
 
     for(auto& filename: directoryList) {
         std::string childPath = Utility::Directory::join(node->path(), filename);
-        FileNode* childNode = node->addChild(childPath);
+        std::string childResourcePath = Utility::Directory::join(node->resourcePath(), filename);
+        FileNode* childNode = node->addChild(childPath, childResourcePath);
 
         updateFileNodeChildren(childNode);
     }

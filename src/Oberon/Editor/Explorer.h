@@ -33,7 +33,7 @@ using namespace Magnum;
 
 class Explorer {
     public:
-        Explorer(const std::string& rootPath);
+        Explorer(const std::string& projectPath);
         void newFrame();
 
         void selectNode(FileNode* node);
