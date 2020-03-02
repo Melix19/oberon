@@ -293,9 +293,10 @@ void Editor::openFile(FileNode* fileNode) {
         } else if(extension == ".oberon") {
             _panels.push_back(Containers::pointer<PropertiesPanel>(fileNode));
         } else {
-            std::string command = "code '";
+            /* Open every other file with Visual Studio Code */
+            std::string command = "code \"";
             command.append(fileNode->path());
-            command.append("'");
+            command.append("\"");
 
             system(command.c_str());
         }
