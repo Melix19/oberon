@@ -24,12 +24,12 @@
 
 #pragma once
 
-#include "CodePanel.h"
 #include "CollectionPanel.hpp"
 #include "Console.h"
 #include "Explorer.h"
 #include "Inspector.h"
 #include "Outliner.h"
+#include "PropertiesPanel.h"
 
 #include <Magnum/ImGuiIntegration/Context.hpp>
 #include <Magnum/Platform/GlfwApplication.h>

@@ -24,55 +24,15 @@
 
 #pragma once
 
+#include <Corrade/Utility/Configuration.h>
+
 #include "AbstractPanel.h"
 
-#include <Corrade/Containers/GrowableArray.h>
-#include <Corrade/Utility/Configuration.h>
-#include <Magnum/Magnum.h>
-#include <imgui.h>
-
-using namespace Magnum;
-
-class CodePanel: public AbstractPanel {
+class PropertiesPanel: public AbstractPanel {
     public:
-        CodePanel(FileNode* fileNode);
-
+        PropertiesPanel(FileNode* fileNode);
         void newFrame() override;
 
     private:
-        std::string _textBuffer;
-        Containers::Pointer<Utility::Configuration> _configuration;
-        bool _uiMode{false};
-
-    private:
-        void showCode();
-        void showUi();
-
-    private:
-        enum class PaletteIndex: UnsignedInt {
-            Default,
-            LineNumber
-        };
-
-        ImU32 getColorFromIndex(PaletteIndex index);
-
-    private:
-        struct Glyph {
-            char _character;
-            PaletteIndex _colorIndex = PaletteIndex::Default;
-
-            Glyph(char character, PaletteIndex colorIndex):
-                _character(character), _colorIndex(colorIndex) {}
-        };
-
-        typedef Containers::Array<Glyph> Line;
-        typedef Containers::Array<Line> Lines;
-
-        Lines _lines;
-
-    private:
-        struct Coordinates {
-            UnsignedInt _row;
-            UnsignedInt _column;
-        };
+        Utility::Configuration _configuration;
 };

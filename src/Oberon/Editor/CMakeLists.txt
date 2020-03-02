@@ -31,7 +31,6 @@ set_directory_properties(PROPERTIES CORRADE_USE_PEDANTIC_FLAGS ON)
 corrade_add_resource(OberonEditor_RCS resources.conf)
 
 set(OberonEditor_SRCS
-    CodePanel.cpp
     CollectionPanel.cpp
     Console.cpp
     Editor.cpp
@@ -40,13 +39,13 @@ set(OberonEditor_SRCS
     Oberon.cpp
     Outliner.cpp
     ProjectManager.cpp
+    PropertiesPanel.cpp
     Themer.cpp
 
     ${OberonEditor_RCS})
 
 set(OberonEditor_HEADERS
     AbstractPanel.h
-    CodePanel.h
     CollectionPanel.h
     CollectionPanel.hpp
     Console.h
@@ -57,6 +56,7 @@ set(OberonEditor_HEADERS
     ObjectNode.h
     Outliner.h
     ProjectManager.h
+    PropertiesPanel.h
     Themer.h)
 
 add_executable(Oberon MACOSX_BUNDLE

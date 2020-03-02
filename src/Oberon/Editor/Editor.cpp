@@ -273,8 +273,8 @@ void Editor::openFile(FileNode* fileNode) {
             if(collectionPanel && collectionPanel->fileNode() == fileNode)
                 return true;
 
-            CodePanel* codePanel = dynamic_cast<CodePanel*>(p.get());
-            if(codePanel && codePanel->fileNode() == fileNode)
+            PropertiesPanel* propertiesPanel = dynamic_cast<PropertiesPanel*>(p.get());
+            if(propertiesPanel && propertiesPanel->fileNode() == fileNode)
                 return true;
 
             return false;
@@ -290,8 +290,15 @@ void Editor::openFile(FileNode* fileNode) {
             _panels.push_back(Containers::pointer<CollectionPanel>(fileNode, _resourceManager,
                 _importer, _scriptManager, _screenResolution, _dpiScaleRatio));
             _collectionPanels.push_back(reinterpret_cast<CollectionPanel*>(_panels.back().get()));
-        } else
-            _panels.push_back(Containers::pointer<CodePanel>(fileNode));
+        } else if(extension == ".oberon") {
+            _panels.push_back(Containers::pointer<PropertiesPanel>(fileNode));
+        } else {
+            std::string command = "code '";
+            command.append(fileNode->path());
+            command.append("'");
+
+            system(command.c_str());
+        }
     }
 }
 
