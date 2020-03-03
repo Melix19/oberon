@@ -26,6 +26,7 @@
 
 #include "FileNode.h"
 
+#include <Corrade/Containers/GrowableArray.h>
 #include <Corrade/Utility/FileWatcher.h>
 #include <Magnum/Magnum.h>
 
@@ -53,7 +54,7 @@ class Explorer {
         static bool sortFileNodes(const Containers::Pointer<FileNode>& a, const Containers::Pointer<FileNode>& b);
 
         FileNode _rootNode;
-        Utility::FileWatcher watcher;
+        Containers::Array<std::pair<Containers::Pointer<Utility::FileWatcher>, std::string>> _watchers;
 
         std::vector<FileNode*> _selectedNodes;
         FileNode* _clickedNode{nullptr};

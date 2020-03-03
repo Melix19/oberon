@@ -31,15 +31,23 @@
 #include <algorithm>
 
 Explorer::Explorer(const std::string& projectPath):
-    _rootNode{projectPath, ""}, watcher{projectPath}
+    _rootNode{projectPath, ""}
 {
+    Containers::arrayAppend(_watchers, std::make_pair(
+        Containers::pointer<Utility::FileWatcher>(projectPath),
+        projectPath));
+
     updateFileNodeChildren(&_rootNode);
 }
 
 void Explorer::newFrame() {
     _clickedNode = nullptr;
 
-    if(watcher.hasChanged()) updateFileNodeChildren(&_rootNode);
+    bool updateNodes = false;
+    for(auto& watcher: _watchers)
+        if(watcher.first->hasChanged()) updateNodes = true;
+
+    if(updateNodes) updateFileNodeChildren(&_rootNode);
 
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
     bool isVisible = ImGui::Begin("Explorer");
@@ -286,11 +294,24 @@ void Explorer::updateFileNodeChildren(FileNode* node) {
     node->children().clear();
 
     auto directoryList = Utility::Directory::list(node->path(), Utility::Directory::Flag::SkipDotAndDotDot);
-
     for(auto& filename: directoryList) {
         std::string childPath = Utility::Directory::join(node->path(), filename);
         std::string childResourcePath = Utility::Directory::join(node->resourcePath(), filename);
         FileNode* childNode = node->addChild(childPath, childResourcePath);
+        bool isDirectory = Utility::Directory::isDirectory(childPath);
+
+        if(isDirectory) {
+            auto found = std::find_if(_watchers.begin(), _watchers.end(),
+                [&childPath](std::pair<Containers::Pointer<Utility::FileWatcher>, std::string>& n) {
+                    return n.second == childPath;
+                });
+
+            if(found == _watchers.end()) {
+                Containers::arrayAppend(_watchers, std::make_pair(
+                    Containers::pointer<Utility::FileWatcher>(childPath),
+                    childPath));
+            }
+        }
 
         updateFileNodeChildren(childNode);
     }
