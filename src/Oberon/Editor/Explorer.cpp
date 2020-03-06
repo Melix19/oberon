@@ -30,24 +30,58 @@
 
 #include <algorithm>
 
-Explorer::Explorer(const std::string& projectPath):
-    _rootNode{projectPath, ""}
-{
-    Containers::arrayAppend(_watchers, std::make_pair(
-        Containers::pointer<Utility::FileWatcher>(projectPath),
-        projectPath));
+namespace {
 
+bool sortFileNodes(const Containers::Pointer<FileNode>& a, const Containers::Pointer<FileNode>& b) {
+    bool aIsDirectory = Utility::Directory::isDirectory(a->path());
+    bool bIsDirectory = Utility::Directory::isDirectory(b->path());
+
+    /* Show directories first */
+    if(aIsDirectory && !bIsDirectory) return true;
+    else if(!aIsDirectory && bIsDirectory) return false;
+    else {
+        std::string aFileame = Utility::Directory::filename(a->path());
+        std::string bFilename = Utility::Directory::filename(b->path());
+        std::transform(aFileame.begin(), aFileame.end(), aFileame.begin(), ::tolower);
+        std::transform(bFilename.begin(), bFilename.end(), bFilename.begin(), ::tolower);
+
+        return aFileame < bFilename;
+    }
+}
+
+void updateFileNodeChildren(FileNode* node) {
+    auto directoryList = Utility::Directory::list(node->path(),
+        Utility::Directory::Flag::SkipDotAndDotDot);
+    for(auto& filename: directoryList) {
+        std::string childPath = Utility::Directory::join(node->path(), filename);
+        std::string childResourcePath = Utility::Directory::join(node->resourcePath(), filename);
+        FileNode* childNode = node->addChild(childPath, childResourcePath);
+
+        bool isDirectory = Utility::Directory::isDirectory(childPath);
+        if(isDirectory) updateFileNodeChildren(childNode);
+    }
+
+    std::sort(node->children().begin(), node->children().end(), sortFileNodes);
+}
+
+void removeFileIterative(const std::string& path) {
+    auto directoryList = Utility::Directory::list(path, Utility::Directory::Flag::SkipDotAndDotDot);
+    for(auto& filename: directoryList)
+        removeFileIterative(Utility::Directory::join(path, filename));
+
+    Utility::Directory::rm(path);
+}
+
+}
+
+Explorer::Explorer(const std::string& projectPath):
+    _rootNode{projectPath}
+{
     updateFileNodeChildren(&_rootNode);
 }
 
 void Explorer::newFrame() {
     _clickedNode = nullptr;
-
-    bool updateNodes = false;
-    for(auto& watcher: _watchers)
-        if(watcher.first->hasChanged()) updateNodes = true;
-
-    if(updateNodes) updateFileNodeChildren(&_rootNode);
 
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
     bool isVisible = ImGui::Begin("Explorer");
@@ -59,59 +93,18 @@ void Explorer::newFrame() {
         return;
     }
 
-    if(ImGui::BeginPopupContextWindow()) {
-        if(ImGui::BeginMenu("New file")) {
-            if(ImGui::MenuItem("Collection")) {
-                _editNode = &_rootNode;
-                _editNodeMode = EditMode::FileCreation;
-                _editNodeText = ".col";
-                _editNodeNeedsFocus = true;
-            }
-
-            if(ImGui::MenuItem("Script")) {
-                _editNode = &_rootNode;
-                _editNodeMode = EditMode::FileCreation;
-                _editNodeText = "";
-                _editNodeNeedsFocus = true;
-            }
-
-            ImGui::EndMenu();
-        }
-
-        if(ImGui::MenuItem("New folder")) {
-            _editNode = &_rootNode;
-            _editNodeMode = EditMode::FolderCreation;
-            _editNodeText = "";
-            _editNodeNeedsFocus = true;
-        }
-
-        ImGui::EndPopup();
-    }
-
     ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0.0f, 0.0f));
-    displayTree(&_rootNode, true);
+    displayNode(&_rootNode);
     ImGui::PopStyleVar();
 
     ImGui::End();
 
     if(_deleteSelectedNodes) {
-        if(!_selectedNodes.empty()) {
-            for(auto& selectedNode: _selectedNodes) {
-                auto& parentChildren = selectedNode->parent()->children();
-                auto found = std::find_if(parentChildren.begin(), parentChildren.end(),
-                    [&selectedNode](Containers::Pointer<FileNode>& n) { return n.get() == selectedNode; });
-
-                CORRADE_INTERNAL_ASSERT(found != parentChildren.end());
-
-                removeEntireFile((*found)->path());
-                parentChildren.erase(found);
-            }
-
-            _selectedNodes.clear();
-        }
-
+        deleteSelectedNodes();
         _deleteSelectedNodes = false;
     }
+
+    applyDragDrop();
 }
 
 void Explorer::selectNode(FileNode* node) {
@@ -125,50 +118,38 @@ void Explorer::deselectAllNodes() {
     _selectedNodes.clear();
 }
 
-void Explorer::displayTree(FileNode* node, bool isRoot) {
-    bool isEditNode = (node == _editNode);
-    bool isOpen = true;
+void Explorer::displayNode(FileNode* node) {
+    if(node == _editNode && _editNodeMode == EditMode::Rename)
+        displayEditNode(node);
+    else {
+        displayFileNode(node);
 
-    if(!isRoot) {
-        if(isEditNode && _editNodeMode == EditMode::Rename)
+        if(node == _editNode && _editNodeMode != EditMode::Rename)
             displayEditNode(node);
-        else
-            isOpen = displayFileNode(node);
-    }
-
-    if(isOpen) {
-        for(auto& child: node->children())
-            displayTree(child.get(), false);
-
-        if(isEditNode && _editNodeMode != EditMode::Rename)
-            displayEditNode(node);
-
-        if(isEditNode)
-            ImGui::Unindent(ImGui::GetTreeNodeToLabelSpacing());
-
-        if(!isRoot && (!isEditNode || (isEditNode && _editNodeMode != EditMode::Rename)))
-            ImGui::TreePop();
     }
 }
 
-bool Explorer::displayFileNode(FileNode* node) {
+void Explorer::displayFileNode(FileNode* node) {
     std::string nodeName = Utility::Directory::filename(node->path());
     ImGuiTreeNodeFlags nodeFlags = ImGuiTreeNodeFlags_FramePadding |
         ImGuiTreeNodeFlags_SpanFullWidth;
+
     bool isDirectory = Utility::Directory::isDirectory(node->path());
-
-    if(node->isSelected()) nodeFlags |= ImGuiTreeNodeFlags_Selected;
-
     if(!isDirectory) nodeFlags |= ImGuiTreeNodeFlags_Leaf;
+    if(node->isSelected()) nodeFlags |= ImGuiTreeNodeFlags_Selected;
+    if(node == &_rootNode) nodeFlags |= ImGuiTreeNodeFlags_DefaultOpen;
 
     bool isOpen = ImGui::TreeNodeEx(nodeName.c_str(), nodeFlags);
+
+    if(!isDirectory && ImGui::IsItemHovered() && ImGui::IsMouseReleased(0))
+        _clickedNode = node;
 
     if(ImGui::IsItemClicked(0) || ImGui::IsItemClicked(1)) {
         ImGuiIO& io = ImGui::GetIO();
 
         /* Use the macOS style shortcuts (Cmd/Super instead of Ctrl) for macOS. */
-        const bool isShortcutKey = (io.ConfigMacOSXBehaviors ? (io.KeySuper && !io.KeyCtrl) :
-            (io.KeyCtrl && !io.KeySuper)) && !io.KeyAlt && !io.KeyShift;
+        const bool isShortcutKey = (io.ConfigMacOSXBehaviors ? (io.KeySuper &&
+            !io.KeyCtrl) : (io.KeyCtrl && !io.KeySuper)) && !io.KeyAlt && !io.KeyShift;
 
         if(isShortcutKey && ImGui::IsItemClicked(0)) {
             if(node->isSelected()) {
@@ -178,15 +159,10 @@ bool Explorer::displayFileNode(FileNode* node) {
 
             node->setSelected(!node->isSelected());
         } else if(!node->isSelected() || ImGui::IsItemClicked(0)) {
-            if(!_selectedNodes.empty())
-                deselectAllNodes();
-
+            if(!_selectedNodes.empty()) deselectAllNodes();
             selectNode(node);
         }
     }
-
-    if(!isDirectory && ImGui::IsItemHovered() && ImGui::IsMouseReleased(0))
-        _clickedNode = node;
 
     if(ImGui::BeginPopupContextItem()) {
         if(isDirectory) {
@@ -195,13 +171,6 @@ bool Explorer::displayFileNode(FileNode* node) {
                     _editNode = node;
                     _editNodeMode = EditMode::FileCreation;
                     _editNodeText = ".col";
-                    _editNodeNeedsFocus = true;
-                }
-
-                if(ImGui::MenuItem("Script")) {
-                    _editNode = node;
-                    _editNodeMode = EditMode::FileCreation;
-                    _editNodeText = "";
                     _editNodeNeedsFocus = true;
                 }
 
@@ -216,14 +185,16 @@ bool Explorer::displayFileNode(FileNode* node) {
             }
         }
 
-        if(ImGui::MenuItem("Rename")) {
-            _editNode = node;
-            _editNodeMode = EditMode::Rename;
-            _editNodeText = nodeName;
-            _editNodeNeedsFocus = true;
-        }
+        if(node != &_rootNode) {
+            if(ImGui::MenuItem("Rename")) {
+                _editNode = node;
+                _editNodeMode = EditMode::Rename;
+                _editNodeText = nodeName;
+                _editNodeNeedsFocus = true;
+            }
 
-        if(ImGui::MenuItem("Delete")) _deleteSelectedNodes = true;
+            if(ImGui::MenuItem("Delete")) _deleteSelectedNodes = true;
+        }
 
         ImGui::EndPopup();
     }
@@ -243,19 +214,17 @@ bool Explorer::displayFileNode(FileNode* node) {
     if(isDirectory && ImGui::BeginDragDropTarget()) {
         const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("FileNode.Other");
         if(!payload) payload = ImGui::AcceptDragDropPayload("FileNode.Image");
+        if(payload) _dragDropTarget = node;
 
-        if(payload) {
-            IM_ASSERT(payload->DataSize == sizeof(FileNode*));
-            const FileNode* sourceNode = *static_cast<const FileNode**>(payload->Data);
-            std::string filename = Utility::Directory::filename(sourceNode->path());
-            std::string newPath = Utility::Directory::join(node->path(), filename);
-
-            Utility::Directory::move(sourceNode->path(), newPath);
-        }
         ImGui::EndDragDropTarget();
     }
 
-    return isOpen;
+    if(isOpen) {
+        for(auto& child: node->children())
+            displayNode(child.get());
+
+        ImGui::TreePop();
+    }
 }
 
 void Explorer::displayEditNode(FileNode* node) {
@@ -263,84 +232,102 @@ void Explorer::displayEditNode(FileNode* node) {
     ImGui::SetNextItemWidth(ImGui::GetWindowContentRegionWidth() -
         ImGui::GetTreeNodeToLabelSpacing());
 
-    /* Set focus in it's first frame. */
     if(_editNodeNeedsFocus) ImGui::SetKeyboardFocusHere();
 
     if(ImGui::InputText("##FileName", &_editNodeText, ImGuiInputTextFlags_EnterReturnsTrue)) {
         switch (_editNodeMode) {
             case EditMode::FileCreation: {
                 std::string newPath = Utility::Directory::join(node->path(), _editNodeText);
-                Utility::Directory::writeString(newPath, "");
+                bool success = Utility::Directory::writeString(newPath, "");
+                if(success) {
+                    std::string newResourcePath = Utility::Directory::join(node->resourcePath(),
+                        _editNodeText);
+                    node->addChild(newPath, newResourcePath);
+
+                    std::sort(node->children().begin(), node->children().end(), sortFileNodes);
+                }
             } break;
             case EditMode::FolderCreation: {
                 std::string newPath = Utility::Directory::join(node->path(), _editNodeText);
-                Utility::Directory::mkpath(newPath);
+                bool success = Utility::Directory::mkpath(newPath);
+                if(success) {
+                    std::string newResourcePath = Utility::Directory::join(node->resourcePath(),
+                        _editNodeText);
+                    node->addChild(newPath, newResourcePath);
+
+                    std::sort(node->children().begin(), node->children().end(), sortFileNodes);
+                }
             } break;
             case EditMode::Rename: {
-                std::string newPath = Utility::Directory::join(node->parent()->path(),
-                    _editNodeText);
-                Utility::Directory::move(node->path(), newPath);
+                std::string newPath = Utility::Directory::join(node->parent()->path(), _editNodeText);
+                bool success = Utility::Directory::move(node->path(), newPath);
+                if(success) {
+                    std::string newResourcePath = Utility::Directory::join(node->parent()->resourcePath(),
+                        _editNodeText);
+                    node->setPath(newPath);
+                    node->setResourcePath(newResourcePath);
+
+                    std::sort(node->parent()->children().begin(), node->parent()->children().end(),
+                        sortFileNodes);
+                }
             } break;
         }
     }
 
-    /* In the first frame, delay the focus check on the next frame
+    /* Delay the focus check on the next frame
         otherwise it will be deleted right away. */
     if(_editNodeNeedsFocus) _editNodeNeedsFocus = false;
     else if(!ImGui::IsItemActive()) _editNode = nullptr;
+
+    if(_editNodeMode == EditMode::Rename)
+        for(auto& child: node->children())
+            displayNode(child.get());
+
+    ImGui::Unindent(ImGui::GetTreeNodeToLabelSpacing());
 }
 
-void Explorer::updateFileNodeChildren(FileNode* node) {
-    node->children().clear();
+void Explorer::applyDragDrop() {
+    if(_dragDropTarget) {
+        for(auto& selectedNode: _selectedNodes) {
+            std::string filename = Utility::Directory::filename(selectedNode->path());
+            std::string newPath = Utility::Directory::join(_dragDropTarget->path(), filename);
 
-    auto directoryList = Utility::Directory::list(node->path(), Utility::Directory::Flag::SkipDotAndDotDot);
-    for(auto& filename: directoryList) {
-        std::string childPath = Utility::Directory::join(node->path(), filename);
-        std::string childResourcePath = Utility::Directory::join(node->resourcePath(), filename);
-        FileNode* childNode = node->addChild(childPath, childResourcePath);
-        bool isDirectory = Utility::Directory::isDirectory(childPath);
+            bool success = Utility::Directory::move(selectedNode->path(), newPath);
+            if(success) {
+                std::string newResourcePath = Utility::Directory::join(_dragDropTarget->resourcePath(),
+                    filename);
+                FileNode* newNode = _dragDropTarget->addChild(newPath, newResourcePath);
+                std::sort(_dragDropTarget->children().begin(), _dragDropTarget->children().end(),
+                    sortFileNodes);
 
-        if(isDirectory) {
-            auto found = std::find_if(_watchers.begin(), _watchers.end(),
-                [&childPath](std::pair<Containers::Pointer<Utility::FileWatcher>, std::string>& n) {
-                    return n.second == childPath;
-                });
+                bool isDirectory = Utility::Directory::isDirectory(newPath);
+                if(isDirectory) updateFileNodeChildren(newNode);
 
-            if(found == _watchers.end()) {
-                Containers::arrayAppend(_watchers, std::make_pair(
-                    Containers::pointer<Utility::FileWatcher>(childPath),
-                    childPath));
+                auto& nodeParentChildren = selectedNode->parent()->children();
+                nodeParentChildren.erase(std::find_if(nodeParentChildren.begin(),
+                    nodeParentChildren.end(), [&selectedNode](Containers::Pointer<FileNode>& n) {
+                        return n.get() == selectedNode; }));
             }
         }
 
-        updateFileNodeChildren(childNode);
+        _dragDropTarget = nullptr;
     }
-
-    std::sort(node->children().begin(), node->children().end(), sortFileNodes);
 }
 
-void Explorer::removeEntireFile(const std::string& path) {
-    auto directoryList = Utility::Directory::list(path, Utility::Directory::Flag::SkipDotAndDotDot);
+void Explorer::deleteSelectedNodes() {
+    if(!_selectedNodes.empty()) {
+        for(auto& selectedNode: _selectedNodes) {
+            auto& parentChildren = selectedNode->parent()->children();
+            auto found = std::find_if(parentChildren.begin(), parentChildren.end(),
+                [&selectedNode](Containers::Pointer<FileNode>& n) {
+                    return n.get() == selectedNode; });
 
-    for(auto& filename: directoryList)
-        removeEntireFile(Utility::Directory::join(path, filename));
+            if(found != parentChildren.end()) {
+                removeFileIterative((*found)->path());
+                parentChildren.erase(found);
+            }
+        }
 
-    Utility::Directory::rm(path);
-}
-
-bool Explorer::sortFileNodes(const Containers::Pointer<FileNode>& a, const Containers::Pointer<FileNode>& b) {
-    bool aIsDirectory = Utility::Directory::isDirectory(a->path());
-    bool bIsDirectory = Utility::Directory::isDirectory(b->path());
-
-    /* Show directories first */
-    if(aIsDirectory && !bIsDirectory) return true;
-    else if(!aIsDirectory && bIsDirectory) return false;
-    else {
-        std::string aFileame = Utility::Directory::filename(a->path());
-        std::string bFilename = Utility::Directory::filename(b->path());
-        std::transform(aFileame.begin(), aFileame.end(), aFileame.begin(), ::tolower);
-        std::transform(bFilename.begin(), bFilename.end(), bFilename.begin(), ::tolower);
-
-        return aFileame < bFilename;
+        _selectedNodes.clear();
     }
 }

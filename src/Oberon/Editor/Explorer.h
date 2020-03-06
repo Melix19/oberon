@@ -26,12 +26,6 @@
 
 #include "FileNode.h"
 
-#include <Corrade/Containers/GrowableArray.h>
-#include <Corrade/Utility/FileWatcher.h>
-#include <Magnum/Magnum.h>
-
-using namespace Magnum;
-
 class Explorer {
     public:
         Explorer(const std::string& projectPath);
@@ -43,26 +37,24 @@ class Explorer {
         FileNode* clickedNode() const { return _clickedNode; }
 
     private:
-        void displayTree(FileNode* node, bool isRoot);
-
-        bool displayFileNode(FileNode* node);
+        void displayNode(FileNode* node);
+        void displayFileNode(FileNode* node);
         void displayEditNode(FileNode* node);
 
-        void updateFileNodeChildren(FileNode* node);
-        void removeEntireFile(const std::string& path);
+        void deleteSelectedNodes();
+        void applyDragDrop();
 
-        static bool sortFileNodes(const Containers::Pointer<FileNode>& a, const Containers::Pointer<FileNode>& b);
-
+    private:
         FileNode _rootNode;
-        Containers::Array<std::pair<Containers::Pointer<Utility::FileWatcher>, std::string>> _watchers;
 
-        std::vector<FileNode*> _selectedNodes;
         FileNode* _clickedNode{nullptr};
+        std::vector<FileNode*> _selectedNodes;
 
+        FileNode* _dragDropTarget{nullptr};
         bool _deleteSelectedNodes{false};
 
     private:
-        enum class EditMode: UnsignedByte {
+        enum class EditMode {
             FileCreation,
             FolderCreation,
             Rename

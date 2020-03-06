@@ -24,16 +24,16 @@
 
 #pragma once
 
+#include <Corrade/Containers/Pointer.h>
+
 #include <string>
 #include <vector>
-
-#include <Corrade/Containers/Pointer.h>
 
 using namespace Corrade;
 
 class FileNode {
     public:
-        FileNode(const std::string& path, const std::string resourcePath):
+        FileNode(const std::string& path, const std::string& resourcePath = ""):
             _path{path}, _resourcePath{resourcePath} {}
 
         std::string path() const { return _path; }
@@ -63,6 +63,7 @@ class FileNode {
         }
 
         FileNode* parent() const { return _parent; }
+
         std::vector<Containers::Pointer<FileNode>>& children() { return _children; }
 
     private:
