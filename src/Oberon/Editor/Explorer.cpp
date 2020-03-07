@@ -235,7 +235,7 @@ void Explorer::displayEditNode(FileNode* node) {
     if(_editNodeNeedsFocus) ImGui::SetKeyboardFocusHere();
 
     if(ImGui::InputText("##FileName", &_editNodeText, ImGuiInputTextFlags_EnterReturnsTrue)) {
-        switch (_editNodeMode) {
+        switch(_editNodeMode) {
             case EditMode::FileCreation: {
                 std::string newPath = Utility::Directory::join(node->path(), _editNodeText);
                 bool success = Utility::Directory::writeString(newPath, "");
@@ -317,15 +317,13 @@ void Explorer::applyDragDrop() {
 void Explorer::deleteSelectedNodes() {
     if(!_selectedNodes.empty()) {
         for(auto& selectedNode: _selectedNodes) {
-            auto& parentChildren = selectedNode->parent()->children();
-            auto found = std::find_if(parentChildren.begin(), parentChildren.end(),
-                [&selectedNode](Containers::Pointer<FileNode>& n) {
-                    return n.get() == selectedNode; });
+            removeFileIterative(selectedNode->path());
 
-            if(found != parentChildren.end()) {
-                removeFileIterative((*found)->path());
-                parentChildren.erase(found);
-            }
+            auto& parentChildren = selectedNode->parent()->children();
+            parentChildren.erase(std::find_if(parentChildren.begin(), parentChildren.end(),
+                [&selectedNode](Containers::Pointer<FileNode>& n) {
+                    return n.get() == selectedNode;
+                }));
         }
 
         _selectedNodes.clear();

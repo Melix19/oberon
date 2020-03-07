@@ -79,7 +79,7 @@ void Inspector::newFrame() {
     }
 
     /* Features */
-    for(auto featureConfig: objectNode->objectConfig()->groups("feature")) {
+    for(auto& featureConfig: objectNode->objectConfig()->groups("feature")) {
         std::string type = featureConfig->value("type");
 
         if(type == "mesh") {

@@ -33,22 +33,24 @@ typedef SceneGraph::Object<SceneGraph::TranslationRotationScalingTransformation3
 
 class ObjectNode {
     public:
-        ObjectNode(Object3D* object, Utility::ConfigurationGroup* objectConfig): _object(object),
-            _objectConfig(objectConfig), _isSelected(false) {}
+        ObjectNode(Object3D* object, Utility::ConfigurationGroup* objectConfig):
+            _object{object}, _objectConfig{objectConfig} {}
 
         Object3D* object() const { return _object; }
 
         Utility::ConfigurationGroup* objectConfig() const { return _objectConfig; }
+        ObjectNode& setObjectConfig(Utility::ConfigurationGroup* objectConfig) {
+            _objectConfig = objectConfig;
+            return *this;
+        }
 
         bool isSelected() const { return _isSelected; }
-
-        ObjectNode& setSelected(bool select) {
-            _isSelected = select;
+        ObjectNode& setSelected(bool selected) {
+            _isSelected = selected;
             return *this;
         }
 
         Vector3 rotationDegree() { return _rotationDegree; }
-
         ObjectNode& setRotationDegree(const Vector3& rotationDegree) {
             _rotationDegree = rotationDegree;
             return *this;
@@ -63,13 +65,17 @@ class ObjectNode {
         }
 
         ObjectNode* parent() const { return _parent; }
+        ObjectNode& setParent(ObjectNode* parent) {
+            _parent = parent;
+            return *this;
+        }
 
         std::vector<Containers::Pointer<ObjectNode>>& children() { return _children; }
 
     private:
         Object3D* _object;
         Utility::ConfigurationGroup* _objectConfig;
-        bool _isSelected;
+        bool _isSelected{false};
 
         Vector3 _rotationDegree;
 

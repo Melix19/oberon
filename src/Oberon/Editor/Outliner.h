@@ -28,8 +28,6 @@
 
 class Outliner {
     public:
-        Outliner(): _panel(nullptr), _deleteSelectedNodes(false), _editNode(nullptr) {}
-
         void newFrame();
 
         Outliner& setPanel(CollectionPanel* panel) {
@@ -38,20 +36,26 @@ class Outliner {
         }
 
     private:
-        void displayTree(ObjectNode* node);
-
-        bool displayObjectNode(ObjectNode* node);
+        void displayNode(ObjectNode* node);
+        void displayObjectNode(ObjectNode* node);
         void displayEditNode(ObjectNode* node);
 
-        CollectionPanel* _panel;
-        bool _deleteSelectedNodes;
+        void deleteSelectedNodes();
+        void applyDragDrop();
 
-        enum class EditMode: UnsignedByte {
+    private:
+        CollectionPanel* _panel{nullptr};
+
+        ObjectNode* _dragDropTarget{nullptr};
+        bool _deleteSelectedNodes{false};
+
+    private:
+        enum class EditMode {
             ObjectCreation,
             Rename
         };
 
-        ObjectNode* _editNode;
+        ObjectNode* _editNode{nullptr};
         EditMode _editNodeMode;
         std::string _editNodeText;
         bool _editNodeNeedsFocus;

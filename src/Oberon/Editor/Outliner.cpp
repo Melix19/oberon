@@ -29,6 +29,17 @@
 
 #include <algorithm>
 
+namespace {
+
+Utility::ConfigurationGroup* moveObjectConfig(ObjectNode* source, ObjectNode* target) {
+    Utility::ConfigurationGroup* newConfig = target->objectConfig()->addGroup("child");
+    *newConfig = std::move(*source->objectConfig());
+    source->parent()->objectConfig()->removeGroup(source->objectConfig());
+    return newConfig;
+}
+
+}
+
 void Outliner::newFrame() {
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
     bool isVisible = ImGui::Begin("Outliner");
@@ -41,73 +52,42 @@ void Outliner::newFrame() {
     }
 
     ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0.0f, 0.0f));
-    displayTree(_panel->rootNode());
+    displayNode(_panel->rootNode());
     ImGui::PopStyleVar();
 
     ImGui::End();
 
     if(_deleteSelectedNodes) {
-        auto& selectedNodes = _panel->selectedNodes();
-
-        if(!selectedNodes.empty()) {
-            for(auto& selectedNode: selectedNodes) {
-                delete selectedNode->object();
-
-                std::string name = selectedNode->objectConfig()->value("name");
-                ObjectNode* parent =  selectedNode->parent();
-
-                parent->objectConfig()->removeGroup(selectedNode->objectConfig());
-
-                parent->children().erase(std::find_if(parent->children().begin(), parent->children().end(),
-                    [&selectedNode](Containers::Pointer<ObjectNode>& n) { return n.get() == selectedNode; }));
-            }
-
-            selectedNodes.clear();
-        }
-
+        deleteSelectedNodes();
         _deleteSelectedNodes = false;
     }
+
+    applyDragDrop();
 }
 
-void Outliner::displayTree(ObjectNode* node) {
-    bool isEditNode = (node == _editNode);
-    bool isOpen = true;
-
-    if(isEditNode && _editNodeMode == EditMode::Rename)
+void Outliner::displayNode(ObjectNode* node) {
+    if(node == _editNode && _editNodeMode == EditMode::Rename)
         displayEditNode(node);
-    else
-        isOpen = displayObjectNode(node);
+    else {
+        displayObjectNode(node);
 
-    if(isOpen) {
-        for(auto& child: node->children())
-            displayTree(child.get());
-
-        if(isEditNode && _editNodeMode != EditMode::Rename)
+        if(node == _editNode && _editNodeMode != EditMode::Rename)
             displayEditNode(node);
-
-        if(isEditNode)
-            ImGui::Unindent(ImGui::GetTreeNodeToLabelSpacing());
-
-        if(!isEditNode || (isEditNode && _editNodeMode != EditMode::Rename))
-            ImGui::TreePop();
     }
 }
 
-bool Outliner::displayObjectNode(ObjectNode* node) {
+void Outliner::displayObjectNode(ObjectNode* node) {
+    std::string nodeName;
+    if(node == _panel->rootNode()) nodeName = "scene";
+    else nodeName = node->objectConfig()->value("name");
+
     ImGuiTreeNodeFlags nodeFlags = ImGuiTreeNodeFlags_FramePadding |
         ImGuiTreeNodeFlags_SpanFullWidth | ImGuiTreeNodeFlags_DefaultOpen |
         ImGuiTreeNodeFlags_OpenOnArrow;
+
     bool hasChildren = !node->children().empty();
-    std::string nodeName;
-
-    if(node->isSelected()) nodeFlags |= ImGuiTreeNodeFlags_Selected;
-
     if(!hasChildren) nodeFlags |= ImGuiTreeNodeFlags_Leaf;
-
-    if(node == _panel->rootNode())
-        nodeName = "scene";
-    else
-        nodeName = node->objectConfig()->value("name");
+    if(node->isSelected()) nodeFlags |= ImGuiTreeNodeFlags_Selected;
 
     bool isOpen = ImGui::TreeNodeEx(nodeName.c_str(), nodeFlags);
 
@@ -116,13 +96,13 @@ bool Outliner::displayObjectNode(ObjectNode* node) {
         ImGuiIO& io = ImGui::GetIO();
 
         /* Use the macOS style shortcuts (Cmd/Super instead of Ctrl) for macOS. */
-        const bool isShortcutKey = (io.ConfigMacOSXBehaviors ? (io.KeySuper && !io.KeyCtrl) :
-            (io.KeyCtrl && !io.KeySuper)) && !io.KeyAlt && !io.KeyShift;
+        const bool isShortcutKey = (io.ConfigMacOSXBehaviors ? (io.KeySuper &&
+            !io.KeyCtrl) : (io.KeyCtrl && !io.KeySuper)) && !io.KeyAlt && !io.KeyShift;
 
         if(isShortcutKey && ImGui::IsItemClicked(0)) {
             if(node->isSelected()) {
-                selectedNodes.erase(std::find_if(selectedNodes.begin(), selectedNodes.end(),
-                    [&node](ObjectNode* n) { return n == node; }));
+                selectedNodes.erase(std::find_if(selectedNodes.begin(),
+                    selectedNodes.end(), [&node](ObjectNode* n) { return n == node; }));
             } else selectedNodes.push_back(node);
 
             node->setSelected(!node->isSelected());
@@ -130,7 +110,6 @@ bool Outliner::displayObjectNode(ObjectNode* node) {
             if(!selectedNodes.empty()) {
                 for(auto& selectedNode: selectedNodes)
                     selectedNode->setSelected(false);
-
                 selectedNodes.clear();
             }
 
@@ -155,14 +134,31 @@ bool Outliner::displayObjectNode(ObjectNode* node) {
                 _editNodeNeedsFocus = true;
             }
 
-            if(ImGui::MenuItem("Delete"))
-                _deleteSelectedNodes = true;
+            if(ImGui::MenuItem("Delete")) _deleteSelectedNodes = true;
         }
 
         ImGui::EndPopup();
     }
 
-    return isOpen;
+    if(ImGui::BeginDragDropSource()) {
+        ImGui::SetDragDropPayload("ObjectNode", &node, sizeof(FileNode*));
+        ImGui::Text(nodeName.c_str());
+        ImGui::EndDragDropSource();
+    }
+
+    if(ImGui::BeginDragDropTarget()) {
+        const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ObjectNode");
+        if(payload) _dragDropTarget = node;
+
+        ImGui::EndDragDropTarget();
+    }
+
+    if(isOpen) {
+        for(auto& child: node->children())
+            displayNode(child.get());
+
+        ImGui::TreePop();
+    }
 }
 
 void Outliner::displayEditNode(ObjectNode* node) {
@@ -170,19 +166,16 @@ void Outliner::displayEditNode(ObjectNode* node) {
     ImGui::SetNextItemWidth(ImGui::GetWindowContentRegionWidth() -
         ImGui::GetTreeNodeToLabelSpacing());
 
-    /* Set focus in it's first frame. */
     if(_editNodeNeedsFocus) ImGui::SetKeyboardFocusHere();
 
     if(ImGui::InputText("##ObjectName", &_editNodeText, ImGuiInputTextFlags_EnterReturnsTrue)) {
-        switch (_editNodeMode) {
+        switch(_editNodeMode) {
             case EditMode::ObjectCreation: {
-                /* Add the new ObjectNode. */
                 Utility::ConfigurationGroup* childConfig = node->objectConfig()->addGroup("child");
                 childConfig->setValue("name", _editNodeText);
 
                 Object3D* child = new Object3D{node->object()};
-                ObjectNode* childNode = node->addChild(child, childConfig);
-                _panel->resetObjectAndChildren(childNode);
+                node->addChild(child, childConfig);
             } break;
             case EditMode::Rename: {
                 node->objectConfig()->setValue("name", _editNodeText);
@@ -190,8 +183,56 @@ void Outliner::displayEditNode(ObjectNode* node) {
         }
     }
 
-    /* In the first frame, delay the focus check on the next frame
+    /* Delay the focus check on the next frame
         otherwise it will be deleted right away. */
     if(_editNodeNeedsFocus) _editNodeNeedsFocus = false;
     else if(!ImGui::IsItemActive()) _editNode = nullptr;
+
+    if(_editNodeMode == EditMode::Rename)
+        for(auto& child: node->children())
+            displayNode(child.get());
+
+    ImGui::Unindent(ImGui::GetTreeNodeToLabelSpacing());
+}
+
+void Outliner::applyDragDrop() {
+    if(_dragDropTarget) {
+        auto& selectedNodes = _panel->selectedNodes();
+        for(auto& selectedNode: selectedNodes) {
+            auto& nodeParentChildren = selectedNode->parent()->children();
+            auto found = std::find_if(nodeParentChildren.begin(),
+                nodeParentChildren.end(), [&selectedNode](Containers::Pointer<ObjectNode>& n) {
+                    return n.get() == selectedNode; });
+
+            if(found != nodeParentChildren.end()) {
+                Utility::ConfigurationGroup* childConfig = moveObjectConfig(selectedNode, _dragDropTarget);
+                selectedNode->setObjectConfig(childConfig);
+                selectedNode->object()->setParent(_dragDropTarget->object());
+                selectedNode->setParent(_dragDropTarget);
+
+                _dragDropTarget->children().push_back(std::move(*found));
+                nodeParentChildren.erase(found);
+            }
+        }
+
+        _dragDropTarget = nullptr;
+    }
+}
+
+void Outliner::deleteSelectedNodes() {
+    auto& selectedNodes = _panel->selectedNodes();
+    if(!selectedNodes.empty()) {
+        for(auto& selectedNode: selectedNodes) {
+            delete selectedNode->object();
+            selectedNode->parent()->objectConfig()->removeGroup(selectedNode->objectConfig());
+
+            auto& parentChildren = selectedNode->parent()->children();
+            parentChildren.erase(std::find_if(parentChildren.begin(), parentChildren.end(),
+                [&selectedNode](Containers::Pointer<ObjectNode>& n) {
+                    return n.get() == selectedNode;
+                }));
+        }
+
+        selectedNodes.clear();
+    }
 }
