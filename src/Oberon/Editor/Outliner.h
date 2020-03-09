@@ -40,6 +40,9 @@ class Outliner {
         void displayObjectNode(ObjectNode* node);
         void displayEditNode(ObjectNode* node);
 
+        void selectNode(ObjectNode* node);
+        void deselectAllNodes();
+
         void deleteSelectedNodes();
         void applyDragDrop();
 
@@ -48,6 +51,7 @@ class Outliner {
 
         ObjectNode* _dragDropTarget{nullptr};
         bool _deleteSelectedNodes{false};
+        bool _isDraggingNodes{false};
 
     private:
         enum class EditMode {

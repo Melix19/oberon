@@ -141,26 +141,55 @@ void Explorer::displayFileNode(FileNode* node) {
 
     bool isOpen = ImGui::TreeNodeEx(nodeName.c_str(), nodeFlags);
 
-    if(!isDirectory && ImGui::IsItemHovered() && ImGui::IsMouseReleased(0))
-        _clickedNode = node;
+    if(ImGui::BeginDragDropSource()) {
+        std::string extension = Utility::Directory::splitExtension(node->path()).second;
+        std::string typeName = "FileNode.";
 
-    if(ImGui::IsItemClicked(0) || ImGui::IsItemClicked(1)) {
+        if(extension == ".png") typeName.append("Image");
+        else typeName.append("Other");
+
+        if(!_isDraggingNodes) {
+            if(!node->isSelected()) {
+                if(!_selectedNodes.empty()) deselectAllNodes();
+                selectNode(node);
+            }
+
+            _isDraggingNodes = true;
+        }
+
+        ImGui::SetDragDropPayload(typeName.c_str(), &node, sizeof(FileNode*));
+        ImGui::Text(nodeName.c_str());
+        ImGui::EndDragDropSource();
+    } else _isDraggingNodes = false;
+
+    if(isDirectory && ImGui::BeginDragDropTarget()) {
+        const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("FileNode.Other");
+        if(!payload) payload = ImGui::AcceptDragDropPayload("FileNode.Image");
+        if(payload) _dragDropTarget = node;
+
+        ImGui::EndDragDropTarget();
+    }
+
+    if(!_dragDropTarget && ImGui::IsItemHovered() && (ImGui::IsMouseReleased(0) || ImGui::IsMouseReleased(1))) {
         ImGuiIO& io = ImGui::GetIO();
 
         /* Use the macOS style shortcuts (Cmd/Super instead of Ctrl) for macOS. */
         const bool isShortcutKey = (io.ConfigMacOSXBehaviors ? (io.KeySuper &&
             !io.KeyCtrl) : (io.KeyCtrl && !io.KeySuper)) && !io.KeyAlt && !io.KeyShift;
 
-        if(isShortcutKey && ImGui::IsItemClicked(0)) {
+        if(isShortcutKey && ImGui::IsMouseReleased(0)) {
             if(node->isSelected()) {
                 _selectedNodes.erase(std::find_if(_selectedNodes.begin(),
                     _selectedNodes.end(), [&node](FileNode* n) { return n == node; }));
             } else _selectedNodes.push_back(node);
 
             node->setSelected(!node->isSelected());
-        } else if(!node->isSelected() || ImGui::IsItemClicked(0)) {
+        } else if(!node->isSelected() || ImGui::IsMouseReleased(0)) {
             if(!_selectedNodes.empty()) deselectAllNodes();
             selectNode(node);
+
+            if(!isDirectory && ImGui::IsMouseReleased(0))
+                _clickedNode = node;
         }
     }
 
@@ -197,26 +226,6 @@ void Explorer::displayFileNode(FileNode* node) {
         }
 
         ImGui::EndPopup();
-    }
-
-    if(ImGui::BeginDragDropSource()) {
-        std::string extension = Utility::Directory::splitExtension(node->path()).second;
-        std::string typeName = "FileNode.";
-
-        if(extension == ".png") typeName.append("Image");
-        else typeName.append("Other");
-
-        ImGui::SetDragDropPayload(typeName.c_str(), &node, sizeof(FileNode*));
-        ImGui::Text(nodeName.c_str());
-        ImGui::EndDragDropSource();
-    }
-
-    if(isDirectory && ImGui::BeginDragDropTarget()) {
-        const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("FileNode.Other");
-        if(!payload) payload = ImGui::AcceptDragDropPayload("FileNode.Image");
-        if(payload) _dragDropTarget = node;
-
-        ImGui::EndDragDropTarget();
     }
 
     if(isOpen) {
@@ -289,6 +298,8 @@ void Explorer::displayEditNode(FileNode* node) {
 void Explorer::applyDragDrop() {
     if(_dragDropTarget) {
         for(auto& selectedNode: _selectedNodes) {
+            if(selectedNode->parent() == _dragDropTarget) continue;
+
             std::string filename = Utility::Directory::filename(selectedNode->path());
             std::string newPath = Utility::Directory::join(_dragDropTarget->path(), filename);
 

@@ -91,7 +91,30 @@ void Outliner::displayObjectNode(ObjectNode* node) {
 
     bool isOpen = ImGui::TreeNodeEx(nodeName.c_str(), nodeFlags);
 
-    if(ImGui::IsItemClicked(0) || ImGui::IsItemClicked(1)) {
+    if(ImGui::BeginDragDropSource()) {
+        if(!_isDraggingNodes) {
+            if(!node->isSelected()) {
+                auto& selectedNodes = _panel->selectedNodes();
+                if(!selectedNodes.empty()) deselectAllNodes();
+                selectNode(node);
+            }
+
+            _isDraggingNodes = true;
+        }
+
+        ImGui::SetDragDropPayload("ObjectNode", &node, sizeof(FileNode*));
+        ImGui::Text(nodeName.c_str());
+        ImGui::EndDragDropSource();
+    } else _isDraggingNodes = false;
+
+    if(ImGui::BeginDragDropTarget()) {
+        const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ObjectNode");
+        if(payload) _dragDropTarget = node;
+
+        ImGui::EndDragDropTarget();
+    }
+
+    if(!_dragDropTarget && ImGui::IsItemHovered() && (ImGui::IsMouseReleased(0) || ImGui::IsMouseReleased(1))) {
         auto& selectedNodes = _panel->selectedNodes();
         ImGuiIO& io = ImGui::GetIO();
 
@@ -99,22 +122,16 @@ void Outliner::displayObjectNode(ObjectNode* node) {
         const bool isShortcutKey = (io.ConfigMacOSXBehaviors ? (io.KeySuper &&
             !io.KeyCtrl) : (io.KeyCtrl && !io.KeySuper)) && !io.KeyAlt && !io.KeyShift;
 
-        if(isShortcutKey && ImGui::IsItemClicked(0)) {
+        if(isShortcutKey && ImGui::IsMouseReleased(0)) {
             if(node->isSelected()) {
                 selectedNodes.erase(std::find_if(selectedNodes.begin(),
                     selectedNodes.end(), [&node](ObjectNode* n) { return n == node; }));
             } else selectedNodes.push_back(node);
 
             node->setSelected(!node->isSelected());
-        } else if(!node->isSelected() || ImGui::IsItemClicked(0)) {
-            if(!selectedNodes.empty()) {
-                for(auto& selectedNode: selectedNodes)
-                    selectedNode->setSelected(false);
-                selectedNodes.clear();
-            }
-
-            selectedNodes.push_back(node);
-            node->setSelected(true);
+        } else if(!node->isSelected() || ImGui::IsMouseReleased(0)) {
+            if(!selectedNodes.empty()) deselectAllNodes();
+            selectNode(node);
         }
     }
 
@@ -138,19 +155,6 @@ void Outliner::displayObjectNode(ObjectNode* node) {
         }
 
         ImGui::EndPopup();
-    }
-
-    if(ImGui::BeginDragDropSource()) {
-        ImGui::SetDragDropPayload("ObjectNode", &node, sizeof(FileNode*));
-        ImGui::Text(nodeName.c_str());
-        ImGui::EndDragDropSource();
-    }
-
-    if(ImGui::BeginDragDropTarget()) {
-        const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ObjectNode");
-        if(payload) _dragDropTarget = node;
-
-        ImGui::EndDragDropTarget();
     }
 
     if(isOpen) {
@@ -195,10 +199,25 @@ void Outliner::displayEditNode(ObjectNode* node) {
     ImGui::Unindent(ImGui::GetTreeNodeToLabelSpacing());
 }
 
+void Outliner::selectNode(ObjectNode* node) {
+    auto& selectedNodes = _panel->selectedNodes();
+    selectedNodes.push_back(node);
+    node->setSelected(true);
+}
+
+void Outliner::deselectAllNodes() {
+    auto& selectedNodes = _panel->selectedNodes();
+    for(auto& selectedNode: selectedNodes)
+        selectedNode->setSelected(false);
+    selectedNodes.clear();
+}
+
 void Outliner::applyDragDrop() {
     if(_dragDropTarget) {
         auto& selectedNodes = _panel->selectedNodes();
         for(auto& selectedNode: selectedNodes) {
+            if(selectedNode->parent() == _dragDropTarget) continue;
+
             auto& nodeParentChildren = selectedNode->parent()->children();
             auto found = std::find_if(nodeParentChildren.begin(),
                 nodeParentChildren.end(), [&selectedNode](Containers::Pointer<ObjectNode>& n) {

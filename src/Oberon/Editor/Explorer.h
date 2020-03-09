@@ -52,6 +52,7 @@ class Explorer {
 
         FileNode* _dragDropTarget{nullptr};
         bool _deleteSelectedNodes{false};
+        bool _isDraggingNodes{false};
 
     private:
         enum class EditMode {
