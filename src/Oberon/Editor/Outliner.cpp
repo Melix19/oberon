@@ -69,12 +69,7 @@ void Outliner::newFrame() {
 void Outliner::displayNode(ObjectNode* node) {
     if(node == _editNode && _editNodeMode == EditMode::Rename)
         displayEditNode(node);
-    else {
-        displayObjectNode(node);
-
-        if(node == _editNode && _editNodeMode != EditMode::Rename)
-            displayEditNode(node);
-    }
+    else displayObjectNode(node);
 }
 
 void Outliner::displayObjectNode(ObjectNode* node) {
@@ -161,6 +156,9 @@ void Outliner::displayObjectNode(ObjectNode* node) {
     if(isOpen) {
         for(auto& child: node->children())
             displayNode(child.get());
+
+        if(node == _editNode && _editNodeMode != EditMode::Rename)
+            displayEditNode(node);
 
         ImGui::TreePop();
     }

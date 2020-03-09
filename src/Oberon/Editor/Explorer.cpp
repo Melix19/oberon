@@ -121,12 +121,7 @@ void Explorer::deselectAllNodes() {
 void Explorer::displayNode(FileNode* node) {
     if(node == _editNode && _editNodeMode == EditMode::Rename)
         displayEditNode(node);
-    else {
-        displayFileNode(node);
-
-        if(node == _editNode && _editNodeMode != EditMode::Rename)
-            displayEditNode(node);
-    }
+    else displayFileNode(node);
 }
 
 void Explorer::displayFileNode(FileNode* node) {
@@ -231,6 +226,9 @@ void Explorer::displayFileNode(FileNode* node) {
     if(isOpen) {
         for(auto& child: node->children())
             displayNode(child.get());
+
+        if(node == _editNode && _editNodeMode != EditMode::Rename)
+            displayEditNode(node);
 
         ImGui::TreePop();
     }
