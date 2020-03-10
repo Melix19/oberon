@@ -38,27 +38,46 @@ typedef SceneGraph::FeatureGroup3D<Light> LightGroup;
 
 class Light: public SceneGraph::AbstractGroupedFeature3D<Light> {
     public:
-        explicit Light(SceneGraph::AbstractObject3D& object, LightGroup* lights, Resource<GL::AbstractShaderProgram, Oberon::Shader>& shader, Color3& color):
-            SceneGraph::AbstractGroupedFeature3D<Light>{object, lights}, _id(lights->size() - 1), _shader(shader), _color(color) {}
+        explicit Light(SceneGraph::AbstractObject3D& object, LightGroup* lights, Resource<GL::AbstractShaderProgram, Oberon::Shader>& shader):
+            SceneGraph::AbstractGroupedFeature3D<Light>{object, lights}, _shader{shader}, _id(lights->size() - 1) {}
+
+        void updateShader() {
+            _shader->setLightPosition(_id, SceneGraph::AbstractGroupedFeature3D<Light>::object().transformationMatrix().translation())
+                .setLightColor(_id, _color)
+                .setLightAttributes(_id, _constant, _linear, _quadratic);
+        }
 
         Light& setId(UnsignedInt id) {
             _id = id;
             return *this;
         }
 
-        Light& setColor(Color3& color) {
+        Light& setColor(const Color3& color) {
             _color = color;
             return *this;
         }
 
-        void updateShader() {
-            _shader->setLightPosition(_id, SceneGraph::AbstractGroupedFeature3D<Light>::object().transformationMatrix().translation());
-            _shader->setLightColor(_id, _color);
+        Light& setConstant(Float constant) {
+            _constant = constant;
+            return *this;
+        }
+
+        Light& setLinear(Float linear) {
+            _linear = linear;
+            return *this;
+        }
+
+        Light& setQuadratic(Float quadratic) {
+            _quadratic = quadratic;
+            return *this;
         }
 
     private:
-        UnsignedInt _id;
         Resource<GL::AbstractShaderProgram, Oberon::Shader> _shader;
 
+        UnsignedInt _id;
         Color3 _color;
+        Float _constant;
+        Float _linear;
+        Float _quadratic;
 };

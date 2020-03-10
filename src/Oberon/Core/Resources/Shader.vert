@@ -26,7 +26,6 @@ uniform highp mat4 transformationMatrix;
 uniform highp mat4 projectionMatrix;
 #if LIGHT_COUNT
 uniform mediump mat3 normalMatrix;
-uniform highp vec3 lightPositions[LIGHT_COUNT];
 #endif
 
 layout(location = 0) in highp vec4 position;
@@ -35,22 +34,16 @@ layout(location = 2) in mediump vec3 normal;
 #endif
 
 #if LIGHT_COUNT
+out highp vec3 transformedPosition;
 out mediump vec3 transformedNormal;
-out highp vec3 lightDirections[LIGHT_COUNT];
-out highp vec3 cameraDirection;
 #endif
 
 void main() {
     highp vec4 transformedPosition4 = transformationMatrix*position;
-    highp vec3 transformedPosition = transformedPosition4.xyz/transformedPosition4.w;
 
     #if LIGHT_COUNT
+    transformedPosition = transformedPosition4.xyz/transformedPosition4.w;
     transformedNormal = normalMatrix*normal;
-
-    for(int i = 0; i < LIGHT_COUNT; ++i)
-        lightDirections[i] = normalize(lightPositions[i] - transformedPosition);
-
-    cameraDirection = -transformedPosition;
     #endif
 
     gl_Position = projectionMatrix*transformedPosition4;

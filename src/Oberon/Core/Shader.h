@@ -53,6 +53,7 @@ class Shader: public GL::AbstractShaderProgram {
 
         Shader& setLightPosition(UnsignedInt id, const Vector3& position);
         Shader& setLightColor(UnsignedInt id, const Color3& color);
+        Shader& setLightAttributes(UnsignedInt id, Float constant, Float linear, Float quadratic);
 
     private:
         UnsignedInt _lightCount;
@@ -63,9 +64,7 @@ class Shader: public GL::AbstractShaderProgram {
             _diffuseColorUniform,
             _specularColorUniform,
             _shininessUniform,
-            _objectIdUniform,
-            _lightPositionsUniform,
-            _lightColorsUniform;
+            _objectIdUniform;
 };
 
 }

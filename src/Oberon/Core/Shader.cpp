@@ -68,8 +68,6 @@ Shader::Shader(const UnsignedInt lightCount): _lightCount{lightCount} {
         _diffuseColorUniform = uniformLocation("diffuseColor");
         _specularColorUniform = uniformLocation("specularColor");
         _shininessUniform = uniformLocation("shininess");
-        _lightPositionsUniform = uniformLocation("lightPositions");
-        _lightColorsUniform = uniformLocation("lightColors");
     }
 }
 
@@ -115,13 +113,21 @@ Shader& Shader::setProjectionMatrix(const Matrix4& matrix) {
 
 Shader& Shader::setLightPosition(UnsignedInt id, const Vector3& position) {
     CORRADE_INTERNAL_ASSERT(id < _lightCount);
-    setUniform(_lightPositionsUniform + id, position);
+    setUniform(uniformLocation("lights[" + std::to_string(id) + "].position"), position);
     return *this;
 }
 
 Shader& Shader::setLightColor(UnsignedInt id, const Color3& color) {
     CORRADE_INTERNAL_ASSERT(id < _lightCount);
-    setUniform(_lightColorsUniform + id, color);
+    setUniform(uniformLocation("lights[" + std::to_string(id) + "].color"), color);
+    return *this;
+}
+
+Shader& Shader::setLightAttributes(UnsignedInt id, Float constant, Float linear, Float quadratic) {
+    CORRADE_INTERNAL_ASSERT(id < _lightCount);
+    setUniform(uniformLocation("lights[" + std::to_string(id) + "].constant"), constant);
+    setUniform(uniformLocation("lights[" + std::to_string(id) + "].linear"), linear);
+    setUniform(uniformLocation("lights[" + std::to_string(id) + "].quadratic"), quadratic);
     return *this;
 }
 

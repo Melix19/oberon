@@ -103,11 +103,20 @@ void Importer::loadFeature(Utility::ConfigurationGroup* featureConfig, Object3D*
         Resource<GL::AbstractShaderProgram, Oberon::Shader> shaderResource = resourceManager.get<GL::AbstractShaderProgram, Oberon::Shader>("phong");
         resourceManager.set<GL::AbstractShaderProgram>(shaderResource.key(), new Oberon::Shader{UnsignedInt(lights->size() + 1)}, ResourceDataState::Mutable, ResourcePolicy::ReferenceCounted);
 
-        /* Color */
-        Color3 color = featureConfig->value<Color3>("color");
-
         /* Light */
-        object->addFeature<Light>(lights, shaderResource, color);
+        Light& light = object->addFeature<Light>(lights, shaderResource);
+
+        Color3 color = featureConfig->value<Color3>("color");
+        light.setColor(color);
+
+        Float constant = featureConfig->value<Float>("constant");
+        light.setConstant(constant);
+
+        Float linear = featureConfig->value<Float>("linear");
+        light.setLinear(linear);
+
+        Float quadratic = featureConfig->value<Float>("quadratic");
+        light.setQuadratic(quadratic);
     } else if(type == "script") {
         /* Class name */
         std::string name = featureConfig->value("name");

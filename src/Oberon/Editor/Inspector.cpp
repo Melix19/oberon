@@ -230,6 +230,30 @@ void Inspector::newFrame() {
                     light->setColor(color);
                     featureConfig->setValue("color", color);
                 }
+
+                /* Constant */
+                Themer::setNextItemRightAlign("Constant");
+                Float constant = featureConfig->value<Float>("constant");
+                if(ImGui::DragFloat("##Light.Contant", &constant, 0.0001f, 0.0f, FLT_MAX, "%f")) {
+                    light->setConstant(constant);
+                    featureConfig->setValue("constant", constant);
+                }
+
+                /* Linear */
+                Themer::setNextItemRightAlign("Linear");
+                Float linear = featureConfig->value<Float>("linear");
+                if(ImGui::DragFloat("##Light.Linear", &linear, 0.0001f, 0.0f, FLT_MAX, "%f")) {
+                    light->setLinear(linear);
+                    featureConfig->setValue("linear", linear);
+                }
+
+                /* Quadratic */
+                Themer::setNextItemRightAlign("Quadratic");
+                Float quadratic = featureConfig->value<Float>("quadratic");
+                if(ImGui::DragFloat("##Light.Quadratic", &quadratic, 0.0001f, 0.0f, FLT_MAX, "%f")) {
+                    light->setQuadratic(quadratic);
+                    featureConfig->setValue("quadratic", quadratic);
+                }
             }
 
             if(!featureIsOpen) {
