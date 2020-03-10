@@ -36,7 +36,7 @@
 #include <algorithm>
 
 CollectionPanel::CollectionPanel(FileNode* fileNode, OberonResourceManager& resourceManager, Importer& importer, ScriptManager& scriptManager, const Vector2i& viewportTextureSize, const Vector2& dpiScaleRatio):
-    _resourceManager{resourceManager}, _importer{importer}, _viewportTextureSize{viewportTextureSize}, _dpiScaleRatio{dpiScaleRatio}, _scriptManager{scriptManager}
+    _resourceManager{resourceManager}, _importer{importer}, _scriptManager{scriptManager}, _viewportTextureSize{viewportTextureSize}, _dpiScaleRatio{dpiScaleRatio}
 {
     _fileNode = fileNode;
     _name = Utility::Directory::filename(_fileNode->path());
