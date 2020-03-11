@@ -31,7 +31,7 @@
 #include <Magnum/Math/ConfigurationValue.h>
 #include <Magnum/MeshTools/Compile.h>
 #include <Magnum/Primitives/Grid.h>
-#include <Magnum/Trade/MeshData3D.h>
+#include <Magnum/Trade/MeshData.h>
 
 #include <algorithm>
 

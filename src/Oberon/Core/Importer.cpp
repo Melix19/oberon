@@ -36,8 +36,7 @@
 #include <Magnum/Primitives/Square.h>
 #include <Magnum/Primitives/UVSphere.h>
 #include <Magnum/Trade/ImageData.h>
-#include <Magnum/Trade/MeshData2D.h>
-#include <Magnum/Trade/MeshData3D.h>
+#include <Magnum/Trade/MeshData.h>
 
 Object3D* Importer::loadObject(Utility::ConfigurationGroup* objectConfig, Object3D* parent, OberonResourceManager& resourceManager, SceneGraph::DrawableGroup3D* drawables, ScriptGroup* scripts, LightGroup* lights) {
     Object3D* object = new Object3D{parent};
