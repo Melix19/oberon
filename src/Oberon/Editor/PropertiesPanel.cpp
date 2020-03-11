@@ -51,12 +51,14 @@ void PropertiesPanel::newFrame() {
         return;
     }
 
-    Themer::setNextItemRightAlign("Name");
+    const Float spacing = 150.0f;
+
+    Themer::setNextItemRightAlign("Name", spacing);
     std::string name = _configuration.value("name");
     if(ImGui::InputText("##Project.Name", &name))
         _configuration.setValue("name", name);
 
-    Themer::setNextItemRightAlign("Window size");
+    Themer::setNextItemRightAlign("Window size", spacing);
     Vector2i windowSize = _configuration.value<Vector2i>("window_size");
     if(ImGui::DragInt2("##Project.WindowSize", windowSize.data()))
         _configuration.setValue<Vector2i>("window_size", windowSize);

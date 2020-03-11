@@ -48,9 +48,11 @@ void Inspector::newFrame() {
         return;
     }
 
+    const Float spacing = 100.0f;
+
     if(ImGui::CollapsingHeader("Transform", ImGuiTreeNodeFlags_DefaultOpen)) {
         /* Translation */
-        Themer::setNextItemRightAlign("Translation");
+        Themer::setNextItemRightAlign("Translation", spacing);
         Vector3 translation = objectNode->objectConfig()->value<Matrix4>("transformation").translation();
         if(ImGui::DragFloat3("##Translation", translation.data(), 0.002f)) {
             objectNode->object()->setTranslation(translation);
@@ -58,7 +60,7 @@ void Inspector::newFrame() {
         }
 
         /* Rotation */
-        Themer::setNextItemRightAlign("Rotation");
+        Themer::setNextItemRightAlign("Rotation", spacing);
         Vector3 rotationDegree = objectNode->rotationDegree();
         if(ImGui::DragFloat3("##Rotation", rotationDegree.data(), 0.1f)) {
             objectNode->object()->setRotation(
@@ -70,7 +72,7 @@ void Inspector::newFrame() {
         }
 
         /* Scaling */
-        Themer::setNextItemRightAlign("Scaling");
+        Themer::setNextItemRightAlign("Scaling", spacing);
         Vector3 scaling = objectNode->objectConfig()->value<Matrix4>("transformation").scaling();
         if(ImGui::DragFloat3("##Scaling", scaling.data(), 0.001f)) {
             objectNode->object()->setScaling(scaling);
@@ -112,7 +114,7 @@ void Inspector::newFrame() {
                     std::string primitiveString = primitiveType;
                     primitiveString[0] = toupper(primitiveString[0]);
 
-                    Themer::setNextItemRightAlign("Type");
+                    Themer::setNextItemRightAlign("Type", spacing);
                     if(ImGui::BeginCombo("##Mesh.Primitive.Type", primitiveString.c_str())) {
                         const char* primitives[] = {"Circle", "Cube", "Plane", "Sphere", "Square"};
 
@@ -138,7 +140,7 @@ void Inspector::newFrame() {
                     }
 
                     if(primitiveConfig) {
-                        Themer::setNextItemRightAlign("Size");
+                        Themer::setNextItemRightAlign("Size", spacing);
                         Vector3 size = primitiveConfig->value<Vector3>("size");
                         if(ImGui::DragFloat3("##Mesh.Primitive.Size", size.data(), 0.002f)) {
                             mesh->setSize(size);
@@ -146,7 +148,7 @@ void Inspector::newFrame() {
                         }
 
                         if(primitiveType == "sphere") {
-                            Themer::setNextItemRightAlign("Rings");
+                            Themer::setNextItemRightAlign("Rings", spacing);
                             Int rings = primitiveConfig->value<Int>("rings");
                             if(ImGui::DragInt("##Mesh.Primitive.Rings", &rings, 1.0f, 2, INT_MAX)) {
                                 primitiveConfig->setValue("rings", rings);
@@ -155,7 +157,7 @@ void Inspector::newFrame() {
                         }
 
                         if(primitiveType == "circle" || primitiveType == "sphere") {
-                            Themer::setNextItemRightAlign("Segments");
+                            Themer::setNextItemRightAlign("Segments", spacing);
                             Int segments = primitiveConfig->value<Int>("segments");
                             if(ImGui::DragInt("##Mesh.Primitive.Segments", &segments, 1.0f, 3, INT_MAX)) {
                                 primitiveConfig->setValue("segments", segments);
@@ -170,28 +172,28 @@ void Inspector::newFrame() {
                 }
 
                 if(materialConfig && ImGui::TreeNodeEx("Material", nodeFlags)) {
-                    Themer::setNextItemRightAlign("Ambient color");
+                    Themer::setNextItemRightAlign("Ambient", spacing);
                     Color3 ambient = materialConfig->value<Color3>("ambient");
                     if(ImGui::ColorEdit3("##Mesh.Material.Ambient", ambient.data())) {
                         materialConfig->setValue("ambient", ambient);
                         mesh->setAmbientColor(ambient);
                     }
 
-                    Themer::setNextItemRightAlign("Diffuse color");
+                    Themer::setNextItemRightAlign("Diffuse", spacing);
                     Color3 diffuse = materialConfig->value<Color3>("diffuse");
                     if(ImGui::ColorEdit3("##Mesh.Material.Diffuse", diffuse.data())) {
                         materialConfig->setValue("diffuse", diffuse);
                         mesh->setDiffuseColor(diffuse);
                     }
 
-                    Themer::setNextItemRightAlign("Specular color");
+                    Themer::setNextItemRightAlign("Specular", spacing);
                     Color3 specular = materialConfig->value<Color3>("specular");
                     if(ImGui::ColorEdit3("##Mesh.Material.Specular", specular.data())) {
                         materialConfig->setValue("specular", specular);
                         mesh->setSpecularColor(specular);
                     }
 
-                    Themer::setNextItemRightAlign("Shininess");
+                    Themer::setNextItemRightAlign("Shininess", spacing);
                     Float shininess = materialConfig->value<Float>("shininess");
                     if(ImGui::DragFloat("##Mesh.Material.Shininess", &shininess, 0.1f, 1.0f, FLT_MAX)) {
                         materialConfig->setValue("shininess", shininess);
@@ -224,7 +226,7 @@ void Inspector::newFrame() {
 
             if(ImGui::CollapsingHeader("Light", &featureIsOpen, ImGuiTreeNodeFlags_DefaultOpen)) {
                 /* Color */
-                Themer::setNextItemRightAlign("Color");
+                Themer::setNextItemRightAlign("Color", spacing);
                 Color3 color = featureConfig->value<Color3>("color");
                 if(ImGui::ColorEdit3("##Light.Color", color.data())) {
                     light->setColor(color);
@@ -232,7 +234,7 @@ void Inspector::newFrame() {
                 }
 
                 /* Constant */
-                Themer::setNextItemRightAlign("Constant");
+                Themer::setNextItemRightAlign("Constant", spacing);
                 Float constant = featureConfig->value<Float>("constant");
                 if(ImGui::DragFloat("##Light.Contant", &constant, 0.0001f, 0.0f, FLT_MAX, "%f")) {
                     light->setConstant(constant);
@@ -240,7 +242,7 @@ void Inspector::newFrame() {
                 }
 
                 /* Linear */
-                Themer::setNextItemRightAlign("Linear");
+                Themer::setNextItemRightAlign("Linear", spacing);
                 Float linear = featureConfig->value<Float>("linear");
                 if(ImGui::DragFloat("##Light.Linear", &linear, 0.0001f, 0.0f, FLT_MAX, "%f")) {
                     light->setLinear(linear);
@@ -248,7 +250,7 @@ void Inspector::newFrame() {
                 }
 
                 /* Quadratic */
-                Themer::setNextItemRightAlign("Quadratic");
+                Themer::setNextItemRightAlign("Quadratic", spacing);
                 Float quadratic = featureConfig->value<Float>("quadratic");
                 if(ImGui::DragFloat("##Light.Quadratic", &quadratic, 0.0001f, 0.0f, FLT_MAX, "%f")) {
                     light->setQuadratic(quadratic);
@@ -278,7 +280,7 @@ void Inspector::newFrame() {
 
             if(ImGui::CollapsingHeader("Script", &featureIsOpen, ImGuiTreeNodeFlags_DefaultOpen)) {
                 /* Script name */
-                Themer::setNextItemRightAlign("Script name");
+                Themer::setNextItemRightAlign("Script name", spacing);
                 std::string name = featureConfig->value("name");
                 if(ImGui::InputText("##Script.Name", &name, ImGuiInputTextFlags_EnterReturnsTrue)) {
                     script->setname(name);
@@ -307,7 +309,7 @@ void Inspector::newFrame() {
 
             if(ImGui::CollapsingHeader("Sprite", &featureIsOpen, ImGuiTreeNodeFlags_DefaultOpen)) {
                 /* Path */
-                Themer::setNextItemRightAlign("Path");
+                Themer::setNextItemRightAlign("Path", spacing);
                 std::string path = featureConfig->value("path");
                 if(ImGui::InputText("##Sprite.Path", &path, ImGuiInputTextFlags_EnterReturnsTrue)) {
                     featureConfig->setValue("path", path);
@@ -326,7 +328,7 @@ void Inspector::newFrame() {
                 }
 
                 /* Pixel size */
-                Themer::setNextItemRightAlign("Pixel size");
+                Themer::setNextItemRightAlign("Pixel size", spacing);
                 Float pixelSize = featureConfig->value<Float>("pixel_size");
                 if(ImGui::DragFloat("##Sprite.PixelSize", &pixelSize, 0.001f)) {
                     sprite->setPixelSize(pixelSize);
