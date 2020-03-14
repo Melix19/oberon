@@ -24,16 +24,16 @@
 
 uniform highp mat4 transformationMatrix;
 uniform highp mat4 projectionMatrix;
-#if LIGHT_COUNT
+#if NUM_POINT_LIGHTS
 uniform mediump mat3 normalMatrix;
 #endif
 
 layout(location = 0) in highp vec4 position;
-#if LIGHT_COUNT
+#if NUM_POINT_LIGHTS
 layout(location = 2) in mediump vec3 normal;
 #endif
 
-#if LIGHT_COUNT
+#if NUM_POINT_LIGHTS
 out highp vec3 transformedPosition;
 out mediump vec3 transformedNormal;
 #endif
@@ -41,7 +41,7 @@ out mediump vec3 transformedNormal;
 void main() {
     highp vec4 transformedPosition4 = transformationMatrix*position;
 
-    #if LIGHT_COUNT
+    #if NUM_POINT_LIGHTS
     transformedPosition = transformedPosition4.xyz/transformedPosition4.w;
     transformedNormal = normalMatrix*normal;
     #endif

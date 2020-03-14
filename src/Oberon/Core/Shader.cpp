@@ -47,10 +47,10 @@ Shader::Shader(const UnsignedInt lightCount): _lightCount{lightCount} {
     GL::Shader vert{GL::Version::GL330, GL::Shader::Type::Vertex},
         frag{GL::Version::GL330, GL::Shader::Type::Fragment};
 
-    vert.addSource(Utility::formatString("#define LIGHT_COUNT {}\n", lightCount))
+    vert.addSource(Utility::formatString("#define NUM_POINT_LIGHTS {}\n", lightCount))
         .addSource(rs.get("Shader.vert"));
 
-    frag.addSource(Utility::formatString("#define LIGHT_COUNT {}\n", lightCount))
+    frag.addSource(Utility::formatString("#define NUM_POINT_LIGHTS {}\n", lightCount))
         .addSource(rs.get("Shader.frag"));
 
     CORRADE_INTERNAL_ASSERT(GL::Shader::compile({vert, frag}));
@@ -113,21 +113,21 @@ Shader& Shader::setProjectionMatrix(const Matrix4& matrix) {
 
 Shader& Shader::setLightPosition(UnsignedInt id, const Vector3& position) {
     CORRADE_INTERNAL_ASSERT(id < _lightCount);
-    setUniform(uniformLocation("lights[" + std::to_string(id) + "].position"), position);
+    setUniform(uniformLocation("pointLights[" + std::to_string(id) + "].position"), position);
     return *this;
 }
 
 Shader& Shader::setLightColor(UnsignedInt id, const Color3& color) {
     CORRADE_INTERNAL_ASSERT(id < _lightCount);
-    setUniform(uniformLocation("lights[" + std::to_string(id) + "].color"), color);
+    setUniform(uniformLocation("pointLights[" + std::to_string(id) + "].color"), color);
     return *this;
 }
 
 Shader& Shader::setLightAttributes(UnsignedInt id, Float constant, Float linear, Float quadratic) {
     CORRADE_INTERNAL_ASSERT(id < _lightCount);
-    setUniform(uniformLocation("lights[" + std::to_string(id) + "].constant"), constant);
-    setUniform(uniformLocation("lights[" + std::to_string(id) + "].linear"), linear);
-    setUniform(uniformLocation("lights[" + std::to_string(id) + "].quadratic"), quadratic);
+    setUniform(uniformLocation("pointLights[" + std::to_string(id) + "].constant"), constant);
+    setUniform(uniformLocation("pointLights[" + std::to_string(id) + "].linear"), linear);
+    setUniform(uniformLocation("pointLights[" + std::to_string(id) + "].quadratic"), quadratic);
     return *this;
 }
 

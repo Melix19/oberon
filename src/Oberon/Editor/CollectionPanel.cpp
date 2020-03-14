@@ -83,7 +83,7 @@ void CollectionPanel::drawViewport(Float deltaTime) {
     if(_isSimulating) _scriptManager.update(deltaTime);
 
     for(std::size_t i = 0; i != _lights.size(); ++i)
-        _lights[i].updateShader();
+        _lights[i].updateShader(*_camera);
 
     _camera->draw(_drawables);
     _camera->draw(_editorDrawables);

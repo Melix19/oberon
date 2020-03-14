@@ -64,7 +64,7 @@ void GlfwPlatform::drawEvent() {
     _scriptManager.update(_timeline.previousFrameDuration());
 
     for(std::size_t i = 0; i != _lights.size(); ++i)
-        _lights[i].updateShader();
+        _lights[i].updateShader(*_camera);
 
     _camera->draw(_drawables);
 

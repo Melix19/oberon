@@ -24,12 +24,12 @@
 
 uniform highp uint objectId;
 uniform lowp vec3 ambientColor;
-#if LIGHT_COUNT
+#if NUM_POINT_LIGHTS
 uniform lowp vec3 diffuseColor;
 uniform lowp vec3 specularColor;
 uniform mediump float shininess;
 
-struct Light {
+struct PointLight {
     highp vec3 position;
     lowp vec3 color;
 
@@ -38,10 +38,10 @@ struct Light {
     mediump float quadratic;
 };
 
-uniform Light lights[LIGHT_COUNT];
+uniform PointLight pointLights[NUM_POINT_LIGHTS];
 #endif
 
-#if LIGHT_COUNT
+#if NUM_POINT_LIGHTS
 in highp vec3 transformedPosition;
 in mediump vec3 transformedNormal;
 #endif
@@ -53,20 +53,19 @@ void main() {
     /* Ambient */
     fragmentColor.rgb = ambientColor;
 
-    #if LIGHT_COUNT
-    /* Normal */
+    #if NUM_POINT_LIGHTS
     mediump vec3 normalizedTransformedNormal = normalize(transformedNormal);
 
-    for(int i = 0; i < LIGHT_COUNT; ++i) {
-        /* Point light attenuation */
-        mediump float distance = length(lights[i].position - transformedPosition);
-        mediump float attenuation = 1.0/(lights[i].constant + lights[i].linear*distance +
-            lights[i].quadratic*(distance*distance));
+    for(int i = 0; i < NUM_POINT_LIGHTS; ++i) {
+        /* Attenuation */
+        mediump float distance = length(pointLights[i].position - transformedPosition);
+        mediump float attenuation = 1.0/(pointLights[i].constant + pointLights[i].linear*distance +
+            pointLights[i].quadratic*(distance*distance));
 
         /* Diffuse */
-        highp vec3 normalizedLightDirection = normalize(lights[i].position - transformedPosition);
+        highp vec3 normalizedLightDirection = normalize(pointLights[i].position - transformedPosition);
         lowp float intensity = max(0.0, dot(normalizedTransformedNormal, normalizedLightDirection));
-        fragmentColor.rgb += diffuseColor*lights[i].color*intensity*attenuation;
+        fragmentColor.rgb += diffuseColor*pointLights[i].color*intensity*attenuation;
 
         /* Specular, if needed */
         if(intensity > 0.001) {

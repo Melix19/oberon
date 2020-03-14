@@ -28,6 +28,7 @@
 #include <Magnum/Math/Matrix4.h>
 #include <Magnum/Resource.h>
 #include <Magnum/SceneGraph/AbstractGroupedFeature.h>
+#include <Magnum/SceneGraph/Camera.h>
 
 #include "Shader.h"
 
@@ -41,8 +42,8 @@ class Light: public SceneGraph::AbstractGroupedFeature3D<Light> {
         explicit Light(SceneGraph::AbstractObject3D& object, LightGroup* lights, Resource<GL::AbstractShaderProgram, Oberon::Shader>& shader):
             SceneGraph::AbstractGroupedFeature3D<Light>{object, lights}, _shader{shader}, _id(lights->size() - 1) {}
 
-        void updateShader() {
-            _shader->setLightPosition(_id, SceneGraph::AbstractGroupedFeature3D<Light>::object().transformationMatrix().translation())
+        void updateShader(SceneGraph::Camera3D& camera) {
+            _shader->setLightPosition(_id, camera.cameraMatrix().transformPoint(object().absoluteTransformationMatrix().translation()))
                 .setLightColor(_id, _color)
                 .setLightAttributes(_id, _constant, _linear, _quadratic);
         }
