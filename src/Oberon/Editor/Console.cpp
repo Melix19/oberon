@@ -43,5 +43,5 @@ void Console::addString(const std::string& s) {
 }
 
 void Console::resetStrings() {
-    _strings.release();
+    Containers::arrayResize(_strings, 0);
 }

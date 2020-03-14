@@ -38,7 +38,7 @@
 #include <Magnum/Trade/ImageData.h>
 #include <Magnum/Trade/MeshData.h>
 
-Object3D* Importer::loadObject(Utility::ConfigurationGroup* objectConfig, Object3D* parent, OberonResourceManager& resourceManager, SceneGraph::DrawableGroup3D* drawables, ScriptGroup* scripts, LightGroup* lights) {
+Object3D* Importer::loadObject(Utility::ConfigurationGroup* objectConfig, Object3D* parent, OberonResourceManager& resourceManager, SceneGraph::DrawableGroup3D* drawables, ScriptGroup* scripts, LightGroup* lights, const std::string& collectionPath) {
     Object3D* object = new Object3D{parent};
 
     /* Transformation */
@@ -47,28 +47,28 @@ Object3D* Importer::loadObject(Utility::ConfigurationGroup* objectConfig, Object
     object->setTransformation(transformation);
 
     for(auto featureConfig: objectConfig->groups("feature"))
-        loadFeature(featureConfig, object, resourceManager, drawables, scripts, lights);
+        loadFeature(featureConfig, object, resourceManager, drawables, scripts, lights, collectionPath);
 
     return object;
 }
 
-Object3D* Importer::loadChildrenObject(Utility::ConfigurationGroup* parentConfig, Object3D* parent, OberonResourceManager& resourceManager, SceneGraph::DrawableGroup3D* drawables, ScriptGroup* scripts, LightGroup* lights) {
+Object3D* Importer::loadChildrenObject(Utility::ConfigurationGroup* parentConfig, Object3D* parent, OberonResourceManager& resourceManager, SceneGraph::DrawableGroup3D* drawables, ScriptGroup* scripts, LightGroup* lights, const std::string& collectionPath) {
     for(auto childConfig: parentConfig->groups("child")) {
-        Object3D* child = loadObject(childConfig, parent, resourceManager, drawables, scripts, lights);
+        Object3D* child = loadObject(childConfig, parent, resourceManager, drawables, scripts, lights, collectionPath);
 
         if(childConfig->hasGroup("child"))
-            loadChildrenObject(childConfig, child, resourceManager, drawables, scripts, lights);
+            loadChildrenObject(childConfig, child, resourceManager, drawables, scripts, lights, collectionPath);
     }
 
     return parent;
 }
 
-void Importer::loadFeature(Utility::ConfigurationGroup* featureConfig, Object3D* object, OberonResourceManager& resourceManager, SceneGraph::DrawableGroup3D* drawables, ScriptGroup* scripts, LightGroup* lights) {
+void Importer::loadFeature(Utility::ConfigurationGroup* featureConfig, Object3D* object, OberonResourceManager& resourceManager, SceneGraph::DrawableGroup3D* drawables, ScriptGroup* scripts, LightGroup* lights, const std::string& collectionPath) {
     std::string type = featureConfig->value("type");
 
     if(type == "mesh") {
         /* Shader */
-        Resource<GL::AbstractShaderProgram, Oberon::Shader> shaderResource = resourceManager.get<GL::AbstractShaderProgram, Oberon::Shader>("phong");
+        Resource<GL::AbstractShaderProgram, Oberon::Shader> shaderResource = resourceManager.get<GL::AbstractShaderProgram, Oberon::Shader>(collectionPath);
         if(!shaderResource)
             resourceManager.set<GL::AbstractShaderProgram>(shaderResource.key(), new Oberon::Shader{0}, ResourceDataState::Mutable, ResourcePolicy::ReferenceCounted);
 
@@ -99,7 +99,7 @@ void Importer::loadFeature(Utility::ConfigurationGroup* featureConfig, Object3D*
         }
     } else if(type == "light") {
         /* Shader */
-        Resource<GL::AbstractShaderProgram, Oberon::Shader> shaderResource = resourceManager.get<GL::AbstractShaderProgram, Oberon::Shader>("phong");
+        Resource<GL::AbstractShaderProgram, Oberon::Shader> shaderResource = resourceManager.get<GL::AbstractShaderProgram, Oberon::Shader>(collectionPath);
         resourceManager.set<GL::AbstractShaderProgram>(shaderResource.key(), new Oberon::Shader{UnsignedInt(lights->size() + 1)}, ResourceDataState::Mutable, ResourcePolicy::ReferenceCounted);
 
         /* Light */

@@ -45,12 +45,13 @@ GlfwPlatform::GlfwPlatform(const Arguments& arguments): Platform::Application{ar
         .setViewport(GL::defaultFramebuffer.viewport().size());
 
     std::string projectPath = Utility::Directory::path(Utility::Directory::executableLocation());
+    std::string collectionPath = Utility::Directory::join(projectPath, "rect.col");
 
-    Utility::Configuration collectionConfig{Utility::Directory::join(projectPath, "rect.col")};
+    Utility::Configuration collectionConfig{collectionPath};
     Utility::ConfigurationGroup* sceneConfig = collectionConfig.group("scene");
 
     Importer importer{projectPath};
-    importer.loadChildrenObject(sceneConfig, &_scene, _resourceManager, &_drawables, &_scripts, &_lights);
+    importer.loadChildrenObject(sceneConfig, &_scene, _resourceManager, &_drawables, &_scripts, &_lights, collectionPath);
 
     _scriptManager.loadScripts(_scripts);
 

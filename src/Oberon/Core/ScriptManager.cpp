@@ -39,7 +39,7 @@ void ScriptManager::loadScripts(ScriptGroup& scripts) {
 void ScriptManager::unloadScripts() {
     for(auto& script: _scripts)
         script.first.reset(nullptr);
-    _scripts.release();
+    Containers::arrayResize(_scripts, 0);
 
     for(auto& plugin: _manager.pluginList())
         _manager.unload(plugin);
