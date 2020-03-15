@@ -53,7 +53,7 @@ void Inspector::newFrame() {
     if(ImGui::CollapsingHeader("Transform", ImGuiTreeNodeFlags_DefaultOpen)) {
         /* Translation */
         Themer::setNextItemRightAlign("Translation", spacing);
-        Vector3 translation = objectNode->objectConfig()->value<Matrix4>("transformation").translation();
+        Vector3 translation = objectNode->object()->translation();
         if(ImGui::DragFloat3("##Translation", translation.data(), 0.002f)) {
             objectNode->object()->setTranslation(translation);
             objectNode->objectConfig()->setValue("transformation", objectNode->object()->transformation());
@@ -73,7 +73,7 @@ void Inspector::newFrame() {
 
         /* Scaling */
         Themer::setNextItemRightAlign("Scaling", spacing);
-        Vector3 scaling = objectNode->objectConfig()->value<Matrix4>("transformation").scaling();
+        Vector3 scaling = objectNode->object()->scaling();
         if(ImGui::DragFloat3("##Scaling", scaling.data(), 0.001f)) {
             objectNode->object()->setScaling(scaling);
             objectNode->objectConfig()->setValue("transformation", objectNode->object()->transformation());
@@ -141,7 +141,7 @@ void Inspector::newFrame() {
 
                     if(primitiveConfig) {
                         Themer::setNextItemRightAlign("Size", spacing);
-                        Vector3 size = primitiveConfig->value<Vector3>("size");
+                        Vector3 size = mesh->size();
                         if(ImGui::DragFloat3("##Mesh.Primitive.Size", size.data(), 0.002f)) {
                             mesh->setSize(size);
                             primitiveConfig->setValue("size", size);
@@ -173,28 +173,28 @@ void Inspector::newFrame() {
 
                 if(materialConfig && ImGui::TreeNodeEx("Material", nodeFlags)) {
                     Themer::setNextItemRightAlign("Ambient", spacing);
-                    Color3 ambient = materialConfig->value<Color3>("ambient");
+                    Color3 ambient = mesh->ambientColor();
                     if(ImGui::ColorEdit3("##Mesh.Material.Ambient", ambient.data())) {
                         materialConfig->setValue("ambient", ambient);
                         mesh->setAmbientColor(ambient);
                     }
 
                     Themer::setNextItemRightAlign("Diffuse", spacing);
-                    Color3 diffuse = materialConfig->value<Color3>("diffuse");
+                    Color3 diffuse = mesh->diffuseColor();
                     if(ImGui::ColorEdit3("##Mesh.Material.Diffuse", diffuse.data())) {
                         materialConfig->setValue("diffuse", diffuse);
                         mesh->setDiffuseColor(diffuse);
                     }
 
                     Themer::setNextItemRightAlign("Specular", spacing);
-                    Color3 specular = materialConfig->value<Color3>("specular");
+                    Color3 specular = mesh->specularColor();
                     if(ImGui::ColorEdit3("##Mesh.Material.Specular", specular.data())) {
                         materialConfig->setValue("specular", specular);
                         mesh->setSpecularColor(specular);
                     }
 
                     Themer::setNextItemRightAlign("Shininess", spacing);
-                    Float shininess = materialConfig->value<Float>("shininess");
+                    Float shininess = mesh->shininess();
                     if(ImGui::DragFloat("##Mesh.Material.Shininess", &shininess, 0.1f, 1.0f, FLT_MAX)) {
                         materialConfig->setValue("shininess", shininess);
                         mesh->setShininess(shininess);
@@ -227,7 +227,7 @@ void Inspector::newFrame() {
             if(ImGui::CollapsingHeader("Light", &featureIsOpen, ImGuiTreeNodeFlags_DefaultOpen)) {
                 /* Color */
                 Themer::setNextItemRightAlign("Color", spacing);
-                Color3 color = featureConfig->value<Color3>("color");
+                Color3 color = light->color();
                 if(ImGui::ColorEdit3("##Light.Color", color.data())) {
                     light->setColor(color);
                     featureConfig->setValue("color", color);
@@ -235,7 +235,7 @@ void Inspector::newFrame() {
 
                 /* Constant */
                 Themer::setNextItemRightAlign("Constant", spacing);
-                Float constant = featureConfig->value<Float>("constant");
+                Float constant = light->constant();
                 if(ImGui::DragFloat("##Light.Contant", &constant, 0.0001f, 0.0f, FLT_MAX, "%f")) {
                     light->setConstant(constant);
                     featureConfig->setValue("constant", constant);
@@ -243,7 +243,7 @@ void Inspector::newFrame() {
 
                 /* Linear */
                 Themer::setNextItemRightAlign("Linear", spacing);
-                Float linear = featureConfig->value<Float>("linear");
+                Float linear = light->linear();
                 if(ImGui::DragFloat("##Light.Linear", &linear, 0.0001f, 0.0f, FLT_MAX, "%f")) {
                     light->setLinear(linear);
                     featureConfig->setValue("linear", linear);
@@ -251,7 +251,7 @@ void Inspector::newFrame() {
 
                 /* Quadratic */
                 Themer::setNextItemRightAlign("Quadratic", spacing);
-                Float quadratic = featureConfig->value<Float>("quadratic");
+                Float quadratic = light->quadratic();
                 if(ImGui::DragFloat("##Light.Quadratic", &quadratic, 0.0001f, 0.0f, FLT_MAX, "%f")) {
                     light->setQuadratic(quadratic);
                     featureConfig->setValue("quadratic", quadratic);
@@ -329,7 +329,7 @@ void Inspector::newFrame() {
 
                 /* Pixel size */
                 Themer::setNextItemRightAlign("Pixel size", spacing);
-                Float pixelSize = featureConfig->value<Float>("pixel_size");
+                Float pixelSize = sprite->pixelSize();
                 if(ImGui::DragFloat("##Sprite.PixelSize", &pixelSize, 0.001f)) {
                     sprite->setPixelSize(pixelSize);
                     featureConfig->setValue("pixel_size", pixelSize);

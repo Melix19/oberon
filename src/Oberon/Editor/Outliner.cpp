@@ -176,7 +176,6 @@ void Outliner::displayEditNode(ObjectNode* node) {
             case EditMode::ObjectCreation: {
                 Utility::ConfigurationGroup* childConfig = node->objectConfig()->addGroup("child");
                 childConfig->setValue("name", _editNodeText);
-                childConfig->setValue<Matrix4>("transformation", Matrix4::scaling({1, 1, 1}));
 
                 Object3D* child = new Object3D{node->object()};
                 node->addChild(child, childConfig);

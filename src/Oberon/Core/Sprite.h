@@ -35,8 +35,8 @@ using namespace Magnum;
 
 class Sprite: public SceneGraph::Drawable3D {
     public:
-        explicit Sprite(SceneGraph::AbstractObject3D& object, SceneGraph::DrawableGroup3D* drawables, Resource<GL::Mesh>& mesh, Resource<GL::AbstractShaderProgram, Shaders::Flat3D>& shader, Float pixelSize):
-            SceneGraph::Drawable3D{object, drawables}, _mesh{mesh}, _shader{shader}, _pixelSize{pixelSize} {}
+        explicit Sprite(SceneGraph::AbstractObject3D& object, SceneGraph::DrawableGroup3D* drawables, Resource<GL::Mesh>& mesh, Resource<GL::AbstractShaderProgram, Shaders::Flat3D>& shader):
+            SceneGraph::Drawable3D{object, drawables}, _mesh{mesh}, _shader{shader} {}
 
         Sprite& setTexture(Resource<GL::Texture2D>& texture) {
             _texture = texture;
@@ -69,5 +69,5 @@ class Sprite: public SceneGraph::Drawable3D {
         Resource<GL::AbstractShaderProgram, Shaders::Flat3D> _shader;
 
         UnsignedByte _id{0};
-        Float _pixelSize;
+        Float _pixelSize{0.01f};
 };

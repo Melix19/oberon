@@ -42,18 +42,19 @@ Object3D* Importer::loadObject(Utility::ConfigurationGroup* objectConfig, Object
     Object3D* object = new Object3D{parent};
 
     /* Transformation */
-    if(!objectConfig->hasValue("transformation")) objectConfig->setValue<Matrix4>("transformation", Matrix4::scaling({1, 1, 1}));
-    Matrix4 transformation = objectConfig->value<Matrix4>("transformation");
-    object->setTransformation(transformation);
+    if(objectConfig->hasValue("transformation")) {
+        Matrix4 transformation = objectConfig->value<Matrix4>("transformation");
+        object->setTransformation(transformation);
+    }
 
-    for(auto featureConfig: objectConfig->groups("feature"))
+    for(auto& featureConfig: objectConfig->groups("feature"))
         loadFeature(featureConfig, object, resourceManager, drawables, scripts, lights, collectionPath);
 
     return object;
 }
 
 Object3D* Importer::loadChildrenObject(Utility::ConfigurationGroup* parentConfig, Object3D* parent, OberonResourceManager& resourceManager, SceneGraph::DrawableGroup3D* drawables, ScriptGroup* scripts, LightGroup* lights, const std::string& collectionPath) {
-    for(auto childConfig: parentConfig->groups("child")) {
+    for(auto& childConfig: parentConfig->groups("child")) {
         Object3D* child = loadObject(childConfig, parent, resourceManager, drawables, scripts, lights, collectionPath);
 
         if(childConfig->hasGroup("child"))
@@ -85,17 +86,25 @@ void Importer::loadFeature(Utility::ConfigurationGroup* featureConfig, Object3D*
         if(featureConfig->hasGroup("material")) {
             Utility::ConfigurationGroup* materialConfig = featureConfig->group("material");
 
-            Color3 ambient = materialConfig->value<Color3>("ambient");
-            mesh.setAmbientColor(ambient);
+            if(materialConfig->hasValue("ambient")) {
+                Color3 ambient = materialConfig->value<Color3>("ambient");
+                mesh.setAmbientColor(ambient);
+            }
 
-            Color3 diffuse = materialConfig->value<Color3>("diffuse");
-            mesh.setDiffuseColor(diffuse);
+            if(materialConfig->hasValue("diffuse")) {
+                Color3 diffuse = materialConfig->value<Color3>("diffuse");
+                mesh.setDiffuseColor(diffuse);
+            }
 
-            Color3 specular = materialConfig->value<Color3>("specular");
-            mesh.setSpecularColor(specular);
+            if(materialConfig->hasValue("specular")) {
+                Color3 specular = materialConfig->value<Color3>("specular");
+                mesh.setSpecularColor(specular);
+            }
 
-            Float shininess = materialConfig->value<Float>("shininess");
-            mesh.setShininess(shininess);
+            if(materialConfig->hasValue("shininess")) {
+                Float shininess = materialConfig->value<Float>("shininess");
+                mesh.setShininess(shininess);
+            }
         }
     } else if(type == "light") {
         /* Shader */
@@ -105,17 +114,25 @@ void Importer::loadFeature(Utility::ConfigurationGroup* featureConfig, Object3D*
         /* Light */
         Light& light = object->addFeature<Light>(lights, shaderResource);
 
-        Color3 color = featureConfig->value<Color3>("color");
-        light.setColor(color);
+        if(featureConfig->hasValue("color")) {
+            Color3 color = featureConfig->value<Color3>("color");
+            light.setColor(color);
+        }
 
-        Float constant = featureConfig->value<Float>("constant");
-        light.setConstant(constant);
+        if(featureConfig->hasValue("constant")) {
+            Float constant = featureConfig->value<Float>("constant");
+            light.setConstant(constant);
+        }
 
-        Float linear = featureConfig->value<Float>("linear");
-        light.setLinear(linear);
+        if(featureConfig->hasValue("linear")) {
+            Float linear = featureConfig->value<Float>("linear");
+            light.setLinear(linear);
+        }
 
-        Float quadratic = featureConfig->value<Float>("quadratic");
-        light.setQuadratic(quadratic);
+        if(featureConfig->hasValue("quadratic")) {
+            Float quadratic = featureConfig->value<Float>("quadratic");
+            light.setQuadratic(quadratic);
+        }
     } else if(type == "script") {
         /* Class name */
         std::string name = featureConfig->value("name");
@@ -135,13 +152,14 @@ void Importer::loadFeature(Utility::ConfigurationGroup* featureConfig, Object3D*
         if(!shaderResource)
             resourceManager.set<GL::AbstractShaderProgram>(shaderResource.key(), new Shaders::Flat3D{Shaders::Flat3D::Flag::ObjectId | Shaders::Flat3D::Flag::Textured}, ResourceDataState::Final, ResourcePolicy::ReferenceCounted);
 
-        /* Pixel size */
-        if(!featureConfig->hasValue("pixel_size"))
-            featureConfig->setValue<Float>("pixel_size", 0.01f);
-        Float pixelSize = featureConfig->value<Float>("pixel_size");
-
         /* Sprite */
-        Sprite& sprite = object->addFeature<Sprite>(drawables, meshResource, shaderResource, pixelSize);
+        Sprite& sprite = object->addFeature<Sprite>(drawables, meshResource, shaderResource);
+
+        /* Pixel size */
+        if(featureConfig->hasValue("pixel_size")) {
+            Float pixelSize = featureConfig->value<Float>("pixel_size");
+            sprite.setPixelSize(pixelSize);
+        }
 
         /* Texture */
         if(featureConfig->hasValue("path")) {
@@ -187,8 +205,10 @@ void Importer::loadMeshFeature(Mesh& mesh, Utility::ConfigurationGroup* primitiv
 
     Resource<GL::Mesh> meshResource = resourceManager.get<GL::Mesh>(meshKey);
 
-    if(!primitiveConfig->hasValue("size")) primitiveConfig->setValue<Vector3>("size", {2, 2, 2});
-    Vector3 size = primitiveConfig->value<Vector3>("size");
+    if(primitiveConfig->hasValue("size")) {
+        Vector3 size = primitiveConfig->value<Vector3>("size");
+        mesh.setSize(size);
+    }
 
     if(!meshResource) {
         if(primitiveType == "sphere" && !primitiveConfig->hasValue("rings"))
@@ -203,11 +223,11 @@ void Importer::loadMeshFeature(Mesh& mesh, Utility::ConfigurationGroup* primitiv
         UnsignedInt rings = primitiveConfig->value<UnsignedInt>("rings");
         GL::Mesh glMesh{NoCreate};
 
-        if(primitiveType == "circle")       glMesh = MeshTools::compile(Primitives::circle3DSolid(segments));
-        else if(primitiveType == "cube")    glMesh = MeshTools::compile(Primitives::cubeSolid());
-        else if(primitiveType == "plane")   glMesh = MeshTools::compile(Primitives::planeSolid());
-        else if(primitiveType == "sphere")  glMesh = MeshTools::compile(Primitives::uvSphereSolid(rings, segments));
-        else if(primitiveType == "square")  glMesh = MeshTools::compile(Primitives::squareSolid());
+        if(primitiveType == "circle") glMesh = MeshTools::compile(Primitives::circle3DSolid(segments));
+        else if(primitiveType == "cube") glMesh = MeshTools::compile(Primitives::cubeSolid());
+        else if(primitiveType == "plane") glMesh = MeshTools::compile(Primitives::planeSolid());
+        else if(primitiveType == "sphere") glMesh = MeshTools::compile(Primitives::uvSphereSolid(rings, segments));
+        else if(primitiveType == "square") glMesh = MeshTools::compile(Primitives::squareSolid());
 
         resourceManager.set(meshResource.key(), std::move(glMesh), ResourceDataState::Final, ResourcePolicy::ReferenceCounted);
     }
@@ -215,5 +235,4 @@ void Importer::loadMeshFeature(Mesh& mesh, Utility::ConfigurationGroup* primitiv
     CORRADE_INTERNAL_ASSERT(meshResource);
 
     mesh.setMesh(meshResource);
-    mesh.setSize(size);
 }

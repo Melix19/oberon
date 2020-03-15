@@ -168,11 +168,9 @@ void CollectionPanel::updateObjectNodeChildren(ObjectNode* node) {
         if(!_drawables.isEmpty() && child == &_drawables[_drawables.size() - 1].object())
             _drawablesNodes.push_back(childNode);
 
-        Math::Vector3<Rad> rotationRadians = Quaternion::fromMatrix(childConfig->value<Matrix4>("transformation").
-            rotation()).toEuler();
-
-        childNode->setRotationDegree(Vector3{Float(Deg{rotationRadians.x()}), Float(Deg{rotationRadians.y()}),
-            Float(Deg{rotationRadians.z()})});
+        Math::Vector3<Rad> rotationRadians = child->rotation().toEuler();
+        childNode->setRotationDegree({Float{Deg{rotationRadians.x()}}, Float{Deg{rotationRadians.y()}},
+            Float{Deg{rotationRadians.z()}}});
 
         updateObjectNodeChildren(childNode);
     }
@@ -223,7 +221,7 @@ CollectionPanel& CollectionPanel::updateShader() {
 }
 
 CollectionPanel& CollectionPanel::addFeatureToObject(ObjectNode* objectNode, Utility::ConfigurationGroup* featureConfig) {
-    size_t drawablesNum = _drawables.size();
+    std::size_t drawablesNum = _drawables.size();
     _importer.loadFeature(featureConfig, objectNode->object(), _resourceManager, &_drawables, &_scripts, &_lights, _fileNode->path());
 
     if(drawablesNum < _drawables.size()) {

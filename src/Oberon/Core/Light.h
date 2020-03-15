@@ -53,21 +53,25 @@ class Light: public SceneGraph::AbstractGroupedFeature3D<Light> {
             return *this;
         }
 
+        Color3 color() { return _color; }
         Light& setColor(const Color3& color) {
             _color = color;
             return *this;
         }
 
+        Float constant() { return _constant; }
         Light& setConstant(Float constant) {
             _constant = constant;
             return *this;
         }
 
+        Float linear() { return _linear; }
         Light& setLinear(Float linear) {
             _linear = linear;
             return *this;
         }
 
+        Float quadratic() { return _quadratic; }
         Light& setQuadratic(Float quadratic) {
             _quadratic = quadratic;
             return *this;
@@ -77,8 +81,8 @@ class Light: public SceneGraph::AbstractGroupedFeature3D<Light> {
         Resource<GL::AbstractShaderProgram, Oberon::Shader> _shader;
 
         UnsignedInt _id;
-        Color3 _color;
-        Float _constant;
-        Float _linear;
-        Float _quadratic;
+        Color3 _color{1.0f};
+        Float _constant{1.0f};
+        Float _linear{0.09f};
+        Float _quadratic{0.032f};
 };

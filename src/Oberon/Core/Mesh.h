@@ -55,21 +55,25 @@ class Mesh: public SceneGraph::Drawable3D {
             return *this;
         }
 
+        Color3 ambientColor() { return _ambientColor; }
         Mesh& setAmbientColor(const Color3& color) {
             _ambientColor = color;
             return *this;
         }
 
+        Color3 diffuseColor() { return _diffuseColor; }
         Mesh& setDiffuseColor(const Color3& color) {
             _diffuseColor = color;
             return *this;
         }
 
+        Color3 specularColor() { return _specularColor; }
         Mesh& setSpecularColor(const Color3& color) {
             _specularColor = color;
             return *this;
         }
 
+        Float shininess() { return _shininess; }
         Mesh& setShininess(Float shininess) {
             _shininess = shininess;
             return *this;
@@ -94,10 +98,10 @@ class Mesh: public SceneGraph::Drawable3D {
         Resource<GL::AbstractShaderProgram, Oberon::Shader> _shader;
 
         UnsignedByte _id;
-        Vector3 _size;
+        Vector3 _size{2.0f};
 
-        Color3 _ambientColor;
-        Color3 _diffuseColor;
-        Color3 _specularColor;
-        Float _shininess;
+        Color3 _ambientColor{0.0f};
+        Color3 _diffuseColor{1.0f};
+        Color3 _specularColor{1.0f};
+        Float _shininess{80.0f};
 };
