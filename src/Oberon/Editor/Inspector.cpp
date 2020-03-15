@@ -119,7 +119,7 @@ void Inspector::newFrame() {
                         const char* primitives[] = {"Circle", "Cube", "Plane", "Sphere", "Square"};
 
                         for(auto& type: primitives) {
-                            bool isSelected = (primitiveString.c_str() == type);
+                            bool isSelected = !std::strcmp(primitiveString.c_str(), type);
 
                             if(ImGui::Selectable(type, isSelected)) {
                                 primitiveType = type;
@@ -134,6 +134,7 @@ void Inspector::newFrame() {
 
                                 updateMesh = true;
                             }
+                            if(isSelected) ImGui::SetItemDefaultFocus();
                         }
 
                         ImGui::EndCombo();
@@ -349,11 +350,12 @@ void Inspector::newFrame() {
     ImGui::Separator();
     ImGui::Dummy(ImVec2(0.0f, 10.0f));
 
-    ImVec2 featureButtonsize(100.0f, 0.0f);
-    ImGui::SetCursorPosX(ImGui::GetWindowWidth()/2 - featureButtonsize.x/2);
+    const Float featureButtonWidth = 100.0f;
+    ImGui::SetCursorPosX(ImGui::GetWindowWidth()/2 - featureButtonWidth/2);
     ImGui::PushStyleVar(ImGuiStyleVar_SelectableTextAlign, ImVec2(0.5f, 0.5f));
 
-    if(ImGui::Button("Add feature", featureButtonsize))
+    ImGui::PushItemWidth(featureButtonWidth);
+    if(ImGui::Button("Add feature"))
         ImGui::OpenPopup("FeaturePopup");
 
     ImGui::PopStyleVar();
@@ -361,8 +363,8 @@ void Inspector::newFrame() {
     if(ImGui::BeginPopup("FeaturePopup")) {
         std::string newFeatureType;
 
-        if(ImGui::Selectable("Mesh"))   newFeatureType = "mesh";
-        if(ImGui::Selectable("Light"))  newFeatureType = "light";
+        if(ImGui::Selectable("Mesh")) newFeatureType = "mesh";
+        if(ImGui::Selectable("Light")) newFeatureType = "light";
         if(ImGui::Selectable("Script")) newFeatureType = "script";
         if(ImGui::Selectable("Sprite")) newFeatureType = "sprite";
 
