@@ -108,17 +108,25 @@ void CollectionPanel::newFrame() {
     }
 
     if(ImGui::BeginMenuBar()) {
-        std::string label = "Orthographic";
-        if(_isOrthographicCamera)
-            label = "Perspective";
+        const char* projections[] = {"Orthographic", "Perspective"};
+        const char* currentProjection = projections[!_isOrthographicCamera];
 
-        ImVec2 size = ImGui::CalcTextSize(label.c_str());
-        if(ImGui::Selectable(label.c_str(), false, ImGuiSelectableFlags_None, size)) {
-            _isOrthographicCamera = !_isOrthographicCamera;
+        ImGui::PushItemWidth(120);
+        if(ImGui::BeginCombo("##CameraProjection", currentProjection)) {
+            for(auto& projection: projections) {
+                bool isSelected = (currentProjection == projection);
 
-            Matrix4 currentCameraTransformation = _cameraObject->transformation();
-            _cameraObject->setTransformation(_prevCameraTransformation);
-            _prevCameraTransformation = currentCameraTransformation;
+                if(ImGui::Selectable(projection, isSelected)) {
+                    _isOrthographicCamera = !_isOrthographicCamera;
+
+                    Matrix4 currentCameraTransformation = _cameraObject->transformation();
+                    _cameraObject->setTransformation(_prevCameraTransformation);
+                    _prevCameraTransformation = currentCameraTransformation;
+                }
+                if(isSelected) ImGui::SetItemDefaultFocus();
+            }
+
+            ImGui::EndCombo();
         }
 
         ImGui::EndMenuBar();
