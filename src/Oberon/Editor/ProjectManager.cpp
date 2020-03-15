@@ -116,7 +116,7 @@ void ProjectManager::drawEvent() {
     ImGui::Begin("Main");
 
     if(ImGui::Button("Open")) {
-        _projectPath = pfd::select_folder("").result();
+        _projectPath = Utility::Directory::fromNativeSeparators(pfd::select_folder("").result());
 
         if(!_projectPath.empty())
             exit();
@@ -125,7 +125,7 @@ void ProjectManager::drawEvent() {
     ImGui::SameLine();
 
     if(ImGui::Button("Create")) {
-        _projectPath = pfd::select_folder("").result();
+        _projectPath = Utility::Directory::fromNativeSeparators(pfd::select_folder("").result());
 
         if(!_projectPath.empty()) {
             createProject(_projectPath);
