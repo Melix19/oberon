@@ -143,7 +143,7 @@ void Importer::loadFeature(Utility::ConfigurationGroup* featureConfig, Object3D*
         /* Mesh */
         Resource<GL::Mesh> meshResource = resourceManager.get<GL::Mesh>("square_texture_coords");
         if(!meshResource) {
-            GL::Mesh glMesh = MeshTools::compile(Primitives::squareSolid(Primitives::SquareTextureCoords::Generate));
+            GL::Mesh glMesh = MeshTools::compile(Primitives::squareSolid(Primitives::SquareFlag::TextureCoordinates));
             resourceManager.set<GL::Mesh>(meshResource.key(), std::move(glMesh), ResourceDataState::Final, ResourcePolicy::ReferenceCounted);
         }
 

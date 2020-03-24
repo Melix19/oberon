@@ -61,7 +61,7 @@ class Sprite: public SceneGraph::Drawable3D {
             _shader->setTransformationProjectionMatrix(camera.projectionMatrix()*transformation*Matrix4::scaling(Vector3{Vector3i{_texture->imageSize(0)/2, 0}}*_pixelSize))
                 .bindTexture(*_texture)
                 .setObjectId(_id);
-            _mesh->draw(*_shader);
+            _shader->draw(*_mesh);
         }
 
         Resource<GL::Texture2D> _texture;

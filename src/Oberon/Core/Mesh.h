@@ -91,7 +91,7 @@ class Mesh: public SceneGraph::Drawable3D {
                 .setSpecularColor(_specularColor)
                 .setShininess(_shininess)
                 .setObjectId(_id);
-            _mesh->draw(*_shader);
+            _shader->draw(*_mesh);
         }
 
         Resource<GL::Mesh> _mesh;
