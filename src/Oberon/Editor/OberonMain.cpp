@@ -22,7 +22,7 @@
     SOFTWARE.
 */
 
-#include "Editor.h"
+#include "EditorApplication.h"
 #include "ProjectManager.h"
 
 int main(int argc, char** argv) {
@@ -36,7 +36,7 @@ int main(int argc, char** argv) {
     }
 
     if(exitCode == 0 && !projectPath.empty()) {
-        Editor editor({argc, argv}, projectPath);
+        EditorApplication editor({argc, argv}, projectPath);
         return editor.exec();
     } else return exitCode;
 }

@@ -22,7 +22,7 @@
     SOFTWARE.
 */
 
-#include "Editor.h"
+#include "EditorApplication.h"
 
 #include <Corrade/Utility/Directory.h>
 #include <Magnum/GL/DefaultFramebuffer.h>
@@ -31,7 +31,7 @@
 
 #include "Themer.h"
 
-Editor::Editor(const Arguments& arguments, const std::string& projectPath): Platform::Application{arguments,
+EditorApplication::EditorApplication(const Arguments& arguments, const std::string& projectPath): Platform::Application{arguments,
     Configuration{}.setTitle("Oberon")
                    .setWindowFlags(Configuration::WindowFlag::Maximized|Configuration::WindowFlag::Resizable),
     GLConfiguration{}.setColorBufferSize({8, 8, 8, 8})}, _projectPath{projectPath}, _importer{projectPath},
@@ -78,7 +78,7 @@ Editor::Editor(const Arguments& arguments, const std::string& projectPath): Plat
     _timeline.start();
 }
 
-void Editor::drawEvent() {
+void EditorApplication::drawEvent() {
     GL::Renderer::enable(GL::Renderer::Feature::DepthTest);
     GL::Renderer::enable(GL::Renderer::Feature::FaceCulling);
 
@@ -213,7 +213,7 @@ void Editor::drawEvent() {
     _timeline.nextFrame();
 }
 
-void Editor::showPanels(ImGuiID dockSpaceId) {
+void EditorApplication::showPanels(ImGuiID dockSpaceId) {
     for(auto it = _panels.begin(); it != _panels.end();) {
         Containers::Pointer<AbstractPanel>& panel = *it;
 
@@ -265,7 +265,7 @@ void Editor::showPanels(ImGuiID dockSpaceId) {
     }
 }
 
-void Editor::openFile(FileNode* fileNode) {
+void EditorApplication::openFile(FileNode* fileNode) {
     /* Check if the file is already open in a panel */
     auto found = std::find_if(_panels.begin(), _panels.end(),
         [&](Containers::Pointer<AbstractPanel>& p) {
@@ -303,14 +303,14 @@ void Editor::openFile(FileNode* fileNode) {
     }
 }
 
-void Editor::viewportEvent(ViewportEvent& event) {
+void EditorApplication::viewportEvent(ViewportEvent& event) {
     GL::defaultFramebuffer.setViewport({{}, event.framebufferSize()});
 
     _imgui.relayout(Vector2{event.windowSize()}/event.dpiScaling(),
         event.windowSize(), event.framebufferSize());
 }
 
-void Editor::keyPressEvent(KeyEvent& event) {
+void EditorApplication::keyPressEvent(KeyEvent& event) {
     if(_activePanel) {
         const bool altPressed = event.modifiers() >= KeyEvent::Modifier::Alt;
         const bool ctrlPressed = event.modifiers() >= KeyEvent::Modifier::Ctrl;
@@ -336,32 +336,32 @@ void Editor::keyPressEvent(KeyEvent& event) {
     _imgui.handleKeyPressEvent(event);
 }
 
-void Editor::keyReleaseEvent(KeyEvent& event) {
+void EditorApplication::keyReleaseEvent(KeyEvent& event) {
     _imgui.handleKeyReleaseEvent(event);
 }
 
-void Editor::mousePressEvent(MouseEvent& event) {
+void EditorApplication::mousePressEvent(MouseEvent& event) {
     for(auto& collectionPanel: _collectionPanels)
         collectionPanel->handleMousePressEvent(event);
 
     _imgui.handleMousePressEvent(event);
 }
 
-void Editor::mouseReleaseEvent(MouseEvent& event) {
+void EditorApplication::mouseReleaseEvent(MouseEvent& event) {
     for(auto& collectionPanel: _collectionPanels)
         collectionPanel->handleMouseReleaseEvent(event);
 
     _imgui.handleMouseReleaseEvent(event);
 }
 
-void Editor::mouseMoveEvent(MouseMoveEvent& event) {
+void EditorApplication::mouseMoveEvent(MouseMoveEvent& event) {
     for(auto& collectionPanel: _collectionPanels)
         collectionPanel->handleMouseMoveEvent(event);
 
     _imgui.handleMouseMoveEvent(event);
 }
 
-void Editor::mouseScrollEvent(MouseScrollEvent& event) {
+void EditorApplication::mouseScrollEvent(MouseScrollEvent& event) {
     if(_imgui.handleMouseScrollEvent(event)) {
         /* Prevent scrolling the page */
         event.setAccepted();
@@ -369,6 +369,6 @@ void Editor::mouseScrollEvent(MouseScrollEvent& event) {
     }
 }
 
-void Editor::textInputEvent(TextInputEvent& event) {
+void EditorApplication::textInputEvent(TextInputEvent& event) {
     _imgui.handleTextInputEvent(event);
 }

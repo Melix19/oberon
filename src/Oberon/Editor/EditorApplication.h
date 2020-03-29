@@ -34,9 +34,9 @@
 #include <Magnum/ImGuiIntegration/Context.hpp>
 #include <Magnum/Platform/GlfwApplication.h>
 
-class Editor: public Platform::Application {
+class EditorApplication: public Platform::Application {
     public:
-        explicit Editor(const Arguments& arguments, const std::string& projectPath);
+        explicit EditorApplication(const Arguments& arguments, const std::string& projectPath);
 
     private:
         void drawEvent() override;

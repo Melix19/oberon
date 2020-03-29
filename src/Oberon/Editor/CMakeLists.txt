@@ -33,10 +33,10 @@ corrade_add_resource(OberonEditor_RCS resources.conf)
 set(OberonEditor_SRCS
     CollectionPanel.cpp
     Console.cpp
-    Editor.cpp
+    EditorApplication.cpp
     Explorer.cpp
     Inspector.cpp
-    Oberon.cpp
+    OberonMain.cpp
     Outliner.cpp
     ProjectManager.cpp
     PropertiesPanel.cpp
@@ -49,7 +49,7 @@ set(OberonEditor_HEADERS
     CollectionPanel.h
     CollectionPanel.hpp
     Console.h
-    Editor.h
+    EditorApplication.h
     Explorer.h
     FileNode.h
     Inspector.h
