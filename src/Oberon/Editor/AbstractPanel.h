@@ -24,7 +24,7 @@
 
 #pragma once
 
-#include "FileNode.h"
+#include "Editor.h"
 
 class AbstractPanel {
     public:

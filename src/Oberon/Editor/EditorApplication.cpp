@@ -24,11 +24,17 @@
 
 #include "EditorApplication.h"
 
+#include <algorithm>
+#include <imgui_internal.h>
 #include <Corrade/Utility/Directory.h>
 #include <Magnum/GL/DefaultFramebuffer.h>
 #include <Magnum/GL/Renderer.h>
-#include <imgui_internal.h>
+#include <Oberon/Core/Light.h>
+#include <Oberon/Core/Script.h>
 
+#include "CollectionPanel.hpp"
+#include "FileNode.h"
+#include "PropertiesPanel.h"
 #include "Themer.h"
 
 EditorApplication::EditorApplication(const Arguments& arguments, const std::string& projectPath): Platform::Application{arguments,

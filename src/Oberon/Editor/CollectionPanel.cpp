@@ -24,16 +24,25 @@
 
 #include "CollectionPanel.h"
 
+#include <algorithm>
+#include <Corrade/Utility/Configuration.h>
 #include <Corrade/Utility/Directory.h>
+#include <Magnum/GL/Mesh.h>
 #include <Magnum/GL/RenderbufferFormat.h>
 #include <Magnum/GL/TextureFormat.h>
 #include <Magnum/ImGuiIntegration/Integration.h>
-#include <Magnum/Math/ConfigurationValue.h>
 #include <Magnum/MeshTools/Compile.h>
 #include <Magnum/Primitives/Grid.h>
 #include <Magnum/Trade/MeshData.h>
+#include <Oberon/Core/Importer.h>
+#include <Oberon/Core/Light.h>
+#include <Oberon/Core/Mesh.h>
+#include <Oberon/Core/Script.h>
+#include <Oberon/Core/ScriptManager.h>
+#include <Oberon/Core/Sprite.h>
 
-#include <algorithm>
+#include "FileNode.h"
+#include "ObjectNode.h"
 
 CollectionPanel::CollectionPanel(FileNode* fileNode, OberonResourceManager& resourceManager, Importer& importer, ScriptManager& scriptManager, const Vector2i& viewportTextureSize, const Vector2& dpiScaleRatio):
     _resourceManager{resourceManager}, _importer{importer}, _scriptManager{scriptManager}, _viewportTextureSize{viewportTextureSize}, _dpiScaleRatio{dpiScaleRatio}

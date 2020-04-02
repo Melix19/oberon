@@ -24,15 +24,16 @@
 
 #pragma once
 
-#include "CollectionPanel.hpp"
+#include <Magnum/ResourceManager.h>
+#include <Magnum/ImGuiIntegration/Context.hpp>
+#include <Magnum/Platform/GlfwApplication.h>
+#include <Oberon/Core/Importer.h>
+#include <Oberon/Core/ScriptManager.h>
+
 #include "Console.h"
 #include "Explorer.h"
 #include "Inspector.h"
 #include "Outliner.h"
-#include "PropertiesPanel.h"
-
-#include <Magnum/ImGuiIntegration/Context.hpp>
-#include <Magnum/Platform/GlfwApplication.h>
 
 class EditorApplication: public Platform::Application {
     public:

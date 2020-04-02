@@ -24,12 +24,11 @@
 
 #pragma once
 
-#include <Corrade/Utility/Resource.h>
 #include <Magnum/GL/AbstractShaderProgram.h>
 
-namespace Oberon {
+#include "Core.h"
 
-using namespace Magnum;
+namespace Oberon {
 
 class Shader: public GL::AbstractShaderProgram {
     public:
@@ -38,7 +37,7 @@ class Shader: public GL::AbstractShaderProgram {
             ObjectIdOutput = 1
         };
 
-        explicit Shader(const UnsignedInt lightCount);
+        explicit Shader(UnsignedInt lightCount);
 
         Shader& setAmbientColor(const Color3& color);
         Shader& setDiffuseColor(const Color3& color);

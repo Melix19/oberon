@@ -24,11 +24,12 @@
 
 #pragma once
 
-#include <Magnum/Platform/GlfwApplication.h>
-#include <Magnum/SceneGraph/Scene.h>
+#include <Magnum/ResourceManager.h>
 #include <Magnum/Timeline.h>
-
-#include <Oberon/Core/Importer.h>
+#include <Magnum/Platform/GlfwApplication.h>
+#include <Magnum/SceneGraph/Drawable.h>
+#include <Magnum/SceneGraph/Scene.h>
+#include <Magnum/SceneGraph/TranslationRotationScalingTransformation3D.h>
 #include <Oberon/Core/ScriptManager.h>
 
 class GlfwPlatform: public Platform::Application {

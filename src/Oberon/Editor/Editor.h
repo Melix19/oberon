@@ -22,38 +22,18 @@
     SOFTWARE.
 */
 
-#include "ScriptManager.h"
+#pragma once
 
-#include <Corrade/Containers/GrowableArray.h>
-#include <Corrade/Utility/Directory.h>
+#include <Oberon/Core/Core.h>
 
-#include "AbstractScript.h"
-#include "Script.h"
-
-ScriptManager::ScriptManager(const std::string& projectPath): _manager{Utility::Directory::join(projectPath, "build")} {}
-
-void ScriptManager::loadScripts(ScriptGroup& scripts) {
-    for(std::size_t i = 0; i != scripts.size(); ++i) {
-        Script& script = scripts[i];
-
-        if(_manager.loadState(script.name()) & PluginManager::LoadState::NotLoaded)
-            _manager.load(script.name());
-
-        Object3D* object = reinterpret_cast<Object3D*>(&script.object());
-        Containers::arrayAppend(_scripts, std::make_pair(_manager.instantiate(script.name()), object));
-    }
-}
-
-void ScriptManager::unloadScripts() {
-    for(auto& script: _scripts)
-        script.first.reset(nullptr);
-    Containers::arrayResize(_scripts, 0);
-
-    for(auto& plugin: _manager.pluginList())
-        _manager.unload(plugin);
-}
-
-void ScriptManager::update(Float deltaTime) {
-    for(auto& script: _scripts)
-        script.first->update(script.second, deltaTime);
-}
+class AbstractPanel;
+class CollectionPanel;
+class Console;
+class EditorApplication;
+class Explorer;
+class FileNode;
+class Inspector;
+class ObjectNode;
+class Outliner;
+class ProjectManager;
+class PropertiesPanel;

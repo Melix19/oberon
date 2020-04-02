@@ -24,16 +24,14 @@
 
 #pragma once
 
-#include "AbstractScript.h"
-#include "Script.h"
-
-#include <Corrade/Containers/GrowableArray.h>
+#include <Corrade/Containers/Array.h>
 #include <Corrade/PluginManager/Manager.h>
-#include <Corrade/Utility/Directory.h>
+
+#include "Core.h"
 
 class ScriptManager {
     public:
-        ScriptManager(const std::string& projectPath = ""): _manager{Utility::Directory::join(projectPath, "build")} {}
+        ScriptManager(const std::string& projectPath = "");
 
         void loadScripts(ScriptGroup& scripts);
         void unloadScripts();

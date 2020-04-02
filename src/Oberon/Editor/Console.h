@@ -24,11 +24,9 @@
 
 #pragma once
 
-#include <Corrade/Containers/GrowableArray.h>
+#include <Corrade/Containers/Array.h>
 
-#include <string>
-
-using namespace Corrade;
+#include "Editor.h"
 
 class Console {
     public:

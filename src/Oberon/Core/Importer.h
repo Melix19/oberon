@@ -24,20 +24,9 @@
 
 #pragma once
 
-#include "Light.h"
-#include "Mesh.h"
-#include "Script.h"
-#include "Sprite.h"
-
-#include <Corrade/Utility/ConfigurationGroup.h>
-#include <Magnum/ResourceManager.h>
-#include <Magnum/SceneGraph/TranslationRotationScalingTransformation3D.h>
 #include <MagnumPlugins/PngImporter/PngImporter.h>
 
-typedef SceneGraph::Object<SceneGraph::TranslationRotationScalingTransformation3D> Object3D;
-typedef SceneGraph::Scene<SceneGraph::TranslationRotationScalingTransformation3D> Scene3D;
-
-typedef ResourceManager<GL::AbstractShaderProgram, GL::Mesh, GL::Texture2D> OberonResourceManager;
+#include "Core.h"
 
 class Importer {
     public:

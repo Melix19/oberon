@@ -24,11 +24,16 @@
 
 #include "GlfwPlatform.h"
 
-#include <Magnum/GL/DefaultFramebuffer.h>
-#include <Corrade/PluginManager/Manager.h>
 #include <Corrade/Utility/Configuration.h>
 #include <Corrade/Utility/Directory.h>
+#include <Magnum/GL/DefaultFramebuffer.h>
+#include <Magnum/GL/Mesh.h>
 #include <Magnum/GL/Renderer.h>
+#include <Magnum/GL/Texture.h>
+#include <Magnum/SceneGraph/Camera.h>
+#include <Oberon/Core/Importer.h>
+#include <Oberon/Core/Light.h>
+#include <Oberon/Core/Script.h>
 
 GlfwPlatform::GlfwPlatform(const Arguments& arguments): Platform::Application{arguments,
     Configuration{}, GLConfiguration{}.setColorBufferSize({8, 8, 8, 8})}

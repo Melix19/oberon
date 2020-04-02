@@ -24,7 +24,7 @@
 
 #pragma once
 
-#include "CollectionPanel.h"
+#include "Editor.h"
 
 class Inspector {
     public:

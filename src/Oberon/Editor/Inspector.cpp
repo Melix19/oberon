@@ -24,13 +24,21 @@
 
 #include "Inspector.h"
 
-#include <Corrade/Utility/Assert.h>
-#include <Magnum/Math/ConfigurationValue.h>
+#include <climits>
+#include <cstring>
 #include <imgui.h>
 #include <misc/cpp/imgui_stdlib.h>
+#include <Corrade/Utility/ConfigurationGroup.h>
+#include <Magnum/GL/Mesh.h>
+#include <Magnum/Math/ConfigurationValue.h>
+#include <Oberon/Core/Light.h>
+#include <Oberon/Core/Mesh.h>
+#include <Oberon/Core/Script.h>
+#include <Oberon/Core/Sprite.h>
 
-#include <climits>
-
+#include "CollectionPanel.h"
+#include "FileNode.h"
+#include "ObjectNode.h"
 #include "Themer.h"
 
 void Inspector::newFrame() {

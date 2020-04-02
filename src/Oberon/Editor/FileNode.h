@@ -24,12 +24,11 @@
 
 #pragma once
 
-#include <Corrade/Containers/Pointer.h>
-
 #include <string>
 #include <vector>
+#include <Corrade/Containers/Pointer.h>
 
-using namespace Corrade;
+#include "Editor.h"
 
 class FileNode {
     public:

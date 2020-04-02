@@ -24,12 +24,11 @@
 
 #pragma once
 
+#include <vector>
 #include <Corrade/Containers/Pointer.h>
-#include <Magnum/SceneGraph/TranslationRotationScalingTransformation3D.h>
+#include <Magnum/Math/Vector3.h>
 
-using namespace Magnum;
-
-typedef SceneGraph::Object<SceneGraph::TranslationRotationScalingTransformation3D> Object3D;
+#include "Editor.h"
 
 class ObjectNode {
     public:
@@ -50,7 +49,7 @@ class ObjectNode {
             return *this;
         }
 
-        Vector3 rotationDegree() { return _rotationDegree; }
+        Vector3 rotationDegree() const { return _rotationDegree; }
         ObjectNode& setRotationDegree(const Vector3& rotationDegree) {
             _rotationDegree = rotationDegree;
             return *this;

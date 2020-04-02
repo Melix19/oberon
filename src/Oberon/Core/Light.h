@@ -24,22 +24,16 @@
 
 #pragma once
 
-#include <Magnum/Math/Color.h>
-#include <Magnum/Math/Matrix4.h>
 #include <Magnum/Resource.h>
+#include <Magnum/Math/Color.h>
 #include <Magnum/SceneGraph/AbstractGroupedFeature.h>
 #include <Magnum/SceneGraph/Camera.h>
 
 #include "Shader.h"
 
-using namespace Magnum;
-
-class Light;
-typedef SceneGraph::FeatureGroup3D<Light> LightGroup;
-
 class Light: public SceneGraph::AbstractGroupedFeature3D<Light> {
     public:
-        explicit Light(SceneGraph::AbstractObject3D& object, LightGroup* lights, Resource<GL::AbstractShaderProgram, Oberon::Shader>& shader):
+        explicit Light(SceneGraph::AbstractObject3D& object, LightGroup* lights, const Resource<GL::AbstractShaderProgram, Oberon::Shader>& shader):
             SceneGraph::AbstractGroupedFeature3D<Light>{object, lights}, _shader{shader}, _id(lights->size() - 1) {}
 
         void updateShader(SceneGraph::Camera3D& camera) {

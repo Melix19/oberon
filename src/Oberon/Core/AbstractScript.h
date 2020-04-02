@@ -24,16 +24,9 @@
 
 #pragma once
 
-#include <string>
-#include <vector>
-
-#include <Corrade/PluginManager/AbstractManager.h>
 #include <Corrade/PluginManager/AbstractPlugin.h>
-#include <Magnum/SceneGraph/TranslationRotationScalingTransformation3D.h>
 
-using namespace Magnum;
-
-typedef SceneGraph::Object<SceneGraph::TranslationRotationScalingTransformation3D> Object3D;
+#include "Core.h"
 
 class AbstractScript: public PluginManager::AbstractPlugin {
     public:

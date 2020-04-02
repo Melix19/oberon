@@ -24,15 +24,13 @@
 
 #include "PropertiesPanel.h"
 
-#include <Corrade/Utility/Directory.h>
-#include <Magnum/Magnum.h>
-#include <Magnum/Math/ConfigurationValue.h>
 #include <imgui.h>
 #include <misc/cpp/imgui_stdlib.h>
+#include <Corrade/Utility/Directory.h>
+#include <Magnum/Math/ConfigurationValue.h>
 
+#include "FileNode.h"
 #include "Themer.h"
-
-using namespace Magnum;
 
 PropertiesPanel::PropertiesPanel(FileNode* fileNode):
     _configuration{fileNode->path()}

@@ -24,7 +24,11 @@
 
 #pragma once
 
-#include "FileNode.h"
+#include <string>
+#include <vector>
+#include <Corrade/Containers/Pointer.h>
+
+#include "Editor.h"
 
 class Explorer {
     public:
@@ -45,7 +49,7 @@ class Explorer {
         void applyDragDrop();
 
     private:
-        FileNode _rootNode;
+        Containers::Pointer<FileNode> _rootNode;
 
         FileNode* _clickedNode{nullptr};
         std::vector<FileNode*> _selectedNodes;

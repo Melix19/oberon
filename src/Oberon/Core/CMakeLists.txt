@@ -42,6 +42,7 @@ set(OberonCore_SRCS
 
 set(OberonCore_HEADERS
     AbstractScript.h
+    Core.h
     Importer.h
     Light.h
     Mesh.h

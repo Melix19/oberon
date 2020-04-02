@@ -27,7 +27,7 @@
 #include <Magnum/ImGuiIntegration/Context.hpp>
 #include <Magnum/Platform/GlfwApplication.h>
 
-using namespace Magnum;
+#include "Editor.h"
 
 class ProjectManager: public Platform::Application {
     public:

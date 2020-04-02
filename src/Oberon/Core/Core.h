@@ -22,38 +22,30 @@
     SOFTWARE.
 */
 
-#include "ScriptManager.h"
+#pragma once
 
-#include <Corrade/Containers/GrowableArray.h>
-#include <Corrade/Utility/Directory.h>
+#include <Magnum/Magnum.h>
+#include <Magnum/GL/GL.h>
+#include <Magnum/SceneGraph/SceneGraph.h>
 
-#include "AbstractScript.h"
-#include "Script.h"
+using namespace Magnum;
 
-ScriptManager::ScriptManager(const std::string& projectPath): _manager{Utility::Directory::join(projectPath, "build")} {}
+typedef SceneGraph::Object<SceneGraph::TranslationRotationScalingTransformation3D> Object3D;
+typedef SceneGraph::Scene<SceneGraph::TranslationRotationScalingTransformation3D> Scene3D;
 
-void ScriptManager::loadScripts(ScriptGroup& scripts) {
-    for(std::size_t i = 0; i != scripts.size(); ++i) {
-        Script& script = scripts[i];
+typedef ResourceManager<GL::AbstractShaderProgram, GL::Mesh, GL::Texture2D> OberonResourceManager;
 
-        if(_manager.loadState(script.name()) & PluginManager::LoadState::NotLoaded)
-            _manager.load(script.name());
+class AbstractScript;
+class Importer;
 
-        Object3D* object = reinterpret_cast<Object3D*>(&script.object());
-        Containers::arrayAppend(_scripts, std::make_pair(_manager.instantiate(script.name()), object));
-    }
-}
+class Light;
+typedef SceneGraph::FeatureGroup3D<Light> LightGroup;
 
-void ScriptManager::unloadScripts() {
-    for(auto& script: _scripts)
-        script.first.reset(nullptr);
-    Containers::arrayResize(_scripts, 0);
+class Mesh;
 
-    for(auto& plugin: _manager.pluginList())
-        _manager.unload(plugin);
-}
+class Script;
+typedef SceneGraph::FeatureGroup3D<Script> ScriptGroup;
 
-void ScriptManager::update(Float deltaTime) {
-    for(auto& script: _scripts)
-        script.first->update(script.second, deltaTime);
-}
+class ScriptManager;
+class Shader;
+class Sprite;

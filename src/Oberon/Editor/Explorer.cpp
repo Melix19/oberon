@@ -24,11 +24,12 @@
 
 #include "Explorer.h"
 
-#include <Corrade/Utility/Directory.h>
+#include <algorithm>
 #include <imgui.h>
 #include <misc/cpp/imgui_stdlib.h>
+#include <Corrade/Utility/Directory.h>
 
-#include <algorithm>
+#include "FileNode.h"
 
 namespace {
 
@@ -74,10 +75,10 @@ void removeFileIterative(const std::string& path) {
 
 }
 
-Explorer::Explorer(const std::string& projectPath):
-    _rootNode{projectPath}
+Explorer::Explorer(const std::string& projectPath)
 {
-    updateFileNodeChildren(&_rootNode);
+    _rootNode = Containers::pointer<FileNode>(projectPath);
+    updateFileNodeChildren(_rootNode.get());
 }
 
 void Explorer::newFrame() {
@@ -94,7 +95,7 @@ void Explorer::newFrame() {
     }
 
     ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0.0f, 0.0f));
-    displayNode(&_rootNode);
+    displayNode(_rootNode.get());
     ImGui::PopStyleVar();
 
     ImGui::End();
@@ -132,7 +133,7 @@ void Explorer::displayFileNode(FileNode* node) {
     bool isDirectory = Utility::Directory::isDirectory(node->path());
     if(!isDirectory) nodeFlags |= ImGuiTreeNodeFlags_Leaf;
     if(node->isSelected()) nodeFlags |= ImGuiTreeNodeFlags_Selected;
-    if(node == &_rootNode) nodeFlags |= ImGuiTreeNodeFlags_DefaultOpen;
+    if(node == _rootNode.get()) nodeFlags |= ImGuiTreeNodeFlags_DefaultOpen;
 
     bool isOpen = ImGui::TreeNodeEx(nodeName.c_str(), nodeFlags);
 
@@ -209,7 +210,7 @@ void Explorer::displayFileNode(FileNode* node) {
             }
         }
 
-        if(node != &_rootNode) {
+        if(node != _rootNode.get()) {
             if(ImGui::MenuItem("Rename")) {
                 _editNode = node;
                 _editNodeMode = EditMode::Rename;

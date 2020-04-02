@@ -49,6 +49,7 @@ set(OberonEditor_HEADERS
     CollectionPanel.h
     CollectionPanel.hpp
     Console.h
+    Editor.h
     EditorApplication.h
     Explorer.h
     FileNode.h

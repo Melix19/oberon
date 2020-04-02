@@ -24,16 +24,15 @@
 
 #pragma once
 
-#include <Corrade/Utility/Configuration.h>
+#include <Corrade/Containers/Pointer.h>
 #include <Magnum/GL/Framebuffer.h>
 #include <Magnum/GL/Renderbuffer.h>
 #include <Magnum/GL/Texture.h>
+#include <Magnum/SceneGraph/Drawable.h>
 #include <Magnum/SceneGraph/Scene.h>
-#include <Oberon/Core/Importer.h>
-#include <Oberon/Core/ScriptManager.h>
+#include <Magnum/SceneGraph/TranslationRotationScalingTransformation3D.h>
 
 #include "AbstractPanel.h"
-#include "ObjectNode.h"
 
 class CollectionPanel: public AbstractPanel {
     public:

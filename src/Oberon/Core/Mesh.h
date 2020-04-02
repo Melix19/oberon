@@ -24,27 +24,24 @@
 
 #pragma once
 
-#include <Magnum/GL/Mesh.h>
-#include <Magnum/Math/Color.h>
 #include <Magnum/Resource.h>
+#include <Magnum/Math/Color.h>
 #include <Magnum/SceneGraph/Camera.h>
 #include <Magnum/SceneGraph/Drawable.h>
 
 #include "Shader.h"
 
-using namespace Magnum;
-
 class Mesh: public SceneGraph::Drawable3D {
     public:
-        explicit Mesh(SceneGraph::AbstractObject3D& object, SceneGraph::DrawableGroup3D* drawables, Resource<GL::AbstractShaderProgram, Oberon::Shader>& shader):
-            SceneGraph::Drawable3D{object, drawables}, _shader{shader}, _id{0} {}
+        explicit Mesh(SceneGraph::AbstractObject3D& object, SceneGraph::DrawableGroup3D* drawables, const Resource<GL::AbstractShaderProgram, Oberon::Shader>& shader):
+            SceneGraph::Drawable3D{object, drawables}, _shader{shader} {}
 
-        Mesh& setMesh(Resource<GL::Mesh>& mesh) {
+        Mesh& setMesh(const Resource<GL::Mesh>& mesh) {
             _mesh = mesh;
             return *this;
         }
 
-        Mesh& setObjectId(UnsignedByte id) {
+        Mesh& setObjectId(UnsignedInt id) {
             _id = id;
             return *this;
         }
@@ -90,14 +87,14 @@ class Mesh: public SceneGraph::Drawable3D {
                 .setDiffuseColor(_diffuseColor)
                 .setSpecularColor(_specularColor)
                 .setShininess(_shininess)
-                .setObjectId(_id);
-            _shader->draw(*_mesh);
+                .setObjectId(_id)
+                .draw(*_mesh);
         }
 
         Resource<GL::Mesh> _mesh;
         Resource<GL::AbstractShaderProgram, Oberon::Shader> _shader;
 
-        UnsignedByte _id;
+        UnsignedInt _id{0};
         Vector3 _size{2.0f};
 
         Color3 _ambientColor{0.0f};

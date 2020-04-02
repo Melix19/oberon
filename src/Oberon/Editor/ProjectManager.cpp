@@ -24,11 +24,11 @@
 
 #include "ProjectManager.h"
 
+#include <imgui_internal.h>
+#include <portable-file-dialogs.h>
 #include <Corrade/Utility/Directory.h>
 #include <Magnum/GL/DefaultFramebuffer.h>
 #include <Magnum/GL/Renderer.h>
-#include <imgui_internal.h>
-#include <portable-file-dialogs.h>
 
 #include "Themer.h"
 

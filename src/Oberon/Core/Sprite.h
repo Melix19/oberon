@@ -24,26 +24,25 @@
 
 #pragma once
 
-#include <Magnum/GL/Mesh.h>
-#include <Magnum/GL/Texture.h>
 #include <Magnum/Resource.h>
+#include <Magnum/GL/Texture.h>
 #include <Magnum/SceneGraph/Camera.h>
 #include <Magnum/SceneGraph/Drawable.h>
 #include <Magnum/Shaders/Flat.h>
 
-using namespace Magnum;
+#include "Core.h"
 
 class Sprite: public SceneGraph::Drawable3D {
     public:
-        explicit Sprite(SceneGraph::AbstractObject3D& object, SceneGraph::DrawableGroup3D* drawables, Resource<GL::Mesh>& mesh, Resource<GL::AbstractShaderProgram, Shaders::Flat3D>& shader):
+        explicit Sprite(SceneGraph::AbstractObject3D& object, SceneGraph::DrawableGroup3D* drawables, const Resource<GL::Mesh>& mesh, const Resource<GL::AbstractShaderProgram, Shaders::Flat3D>& shader):
             SceneGraph::Drawable3D{object, drawables}, _mesh{mesh}, _shader{shader} {}
 
-        Sprite& setTexture(Resource<GL::Texture2D>& texture) {
+        Sprite& setTexture(const Resource<GL::Texture2D>& texture) {
             _texture = texture;
             return *this;
         }
 
-        Sprite& setObjectId(UnsignedByte id) {
+        Sprite& setObjectId(UnsignedInt id) {
             _id = id;
             return *this;
         }
@@ -60,14 +59,14 @@ class Sprite: public SceneGraph::Drawable3D {
 
             _shader->setTransformationProjectionMatrix(camera.projectionMatrix()*transformation*Matrix4::scaling(Vector3{Vector3i{_texture->imageSize(0)/2, 0}}*_pixelSize))
                 .bindTexture(*_texture)
-                .setObjectId(_id);
-            _shader->draw(*_mesh);
+                .setObjectId(_id)
+                .draw(*_mesh);
         }
 
         Resource<GL::Texture2D> _texture;
         Resource<GL::Mesh> _mesh;
         Resource<GL::AbstractShaderProgram, Shaders::Flat3D> _shader;
 
-        UnsignedByte _id{0};
+        UnsignedInt _id{0};
         Float _pixelSize{0.01f};
 };

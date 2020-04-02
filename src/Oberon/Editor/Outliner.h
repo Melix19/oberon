@@ -24,7 +24,9 @@
 
 #pragma once
 
-#include "CollectionPanel.h"
+#include <string>
+
+#include "Editor.h"
 
 class Outliner {
     public:

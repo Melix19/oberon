@@ -24,11 +24,13 @@
 
 #include "Outliner.h"
 
-#include <Magnum/Math/ConfigurationValue.h>
+#include <algorithm>
 #include <imgui.h>
 #include <misc/cpp/imgui_stdlib.h>
+#include <Corrade/Utility/ConfigurationGroup.h>
 
-#include <algorithm>
+#include "CollectionPanel.h"
+#include "ObjectNode.h"
 
 namespace {
 

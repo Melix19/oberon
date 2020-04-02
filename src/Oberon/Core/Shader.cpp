@@ -26,9 +26,9 @@
 
 #include <Corrade/Containers/Reference.h>
 #include <Corrade/Utility/FormatStl.h>
-#include <Magnum/GL/Context.h>
-#include <Magnum/GL/Version.h>
+#include <Corrade/Utility/Resource.h>
 #include <Magnum/GL/Shader.h>
+#include <Magnum/GL/Version.h>
 #include <Magnum/Math/Color.h>
 #include <Magnum/Math/Matrix4.h>
 
@@ -38,7 +38,7 @@ static void importCoreResources() {
 
 namespace Oberon {
 
-Shader::Shader(const UnsignedInt lightCount): _lightCount{lightCount} {
+Shader::Shader(UnsignedInt lightCount): _lightCount{lightCount} {
     if(!Utility::Resource::hasGroup("OberonCore"))
         importCoreResources();
 

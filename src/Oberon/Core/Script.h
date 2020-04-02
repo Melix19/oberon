@@ -24,14 +24,9 @@
 
 #pragma once
 
-#include <string>
-
 #include <Magnum/SceneGraph/AbstractGroupedFeature.h>
 
-using namespace Magnum;
-
-class Script;
-typedef SceneGraph::FeatureGroup3D<Script> ScriptGroup;
+#include "Core.h"
 
 class Script: public SceneGraph::AbstractGroupedFeature3D<Script> {
     public:

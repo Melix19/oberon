@@ -25,9 +25,11 @@
 #include "Importer.h"
 
 #include <Corrade/Containers/Optional.h>
+#include <Corrade/Utility/ConfigurationGroup.h>
 #include <Corrade/Utility/Directory.h>
-#include <Magnum/GL/TextureFormat.h>
 #include <Magnum/ImageView.h>
+#include <Magnum/GL/Mesh.h>
+#include <Magnum/GL/TextureFormat.h>
 #include <Magnum/Math/ConfigurationValue.h>
 #include <Magnum/MeshTools/Compile.h>
 #include <Magnum/Primitives/Circle.h>
@@ -35,8 +37,14 @@
 #include <Magnum/Primitives/Plane.h>
 #include <Magnum/Primitives/Square.h>
 #include <Magnum/Primitives/UVSphere.h>
+#include <Magnum/SceneGraph/TranslationRotationScalingTransformation3D.h>
 #include <Magnum/Trade/ImageData.h>
 #include <Magnum/Trade/MeshData.h>
+
+#include "Light.h"
+#include "Mesh.h"
+#include "Script.h"
+#include "Sprite.h"
 
 Object3D* Importer::loadObject(Utility::ConfigurationGroup* objectConfig, Object3D* parent, OberonResourceManager& resourceManager, SceneGraph::DrawableGroup3D* drawables, ScriptGroup* scripts, LightGroup* lights, const std::string& collectionPath) {
     Object3D* object = new Object3D{parent};

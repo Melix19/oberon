@@ -24,7 +24,9 @@
 
 #include "Console.h"
 
+#include <string>
 #include <imgui.h>
+#include <Corrade/Containers/GrowableArray.h>
 
 void Console::newFrame() {
     ImGui::Begin("Console");
