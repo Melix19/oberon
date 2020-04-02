@@ -28,6 +28,8 @@
 #include <imgui.h>
 #include <misc/cpp/imgui_stdlib.h>
 #include <Corrade/Utility/ConfigurationGroup.h>
+#include <Oberon/Core/Light.h>
+#include <Oberon/Core/Script.h>
 
 #include "CollectionPanel.h"
 #include "ObjectNode.h"

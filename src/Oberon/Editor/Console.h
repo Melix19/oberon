@@ -24,6 +24,7 @@
 
 #pragma once
 
+#include <string>
 #include <Corrade/Containers/Array.h>
 
 #include "Editor.h"
