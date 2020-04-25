@@ -58,6 +58,10 @@ ProjectManager::ProjectManager(const Arguments& arguments): Platform::Applicatio
     _imgui = ImGuiIntegration::Context(*ImGui::GetCurrentContext(), size, windowSize(),
         framebufferSize());
 
+    /* Set appropriate states. */
+    GL::Renderer::enable(GL::Renderer::Feature::Blending);
+    GL::Renderer::enable(GL::Renderer::Feature::ScissorTest);
+
     /* Set up proper blending to be used by ImGui. */
     GL::Renderer::setBlendEquation(GL::Renderer::BlendEquation::Add,
         GL::Renderer::BlendEquation::Add);
@@ -140,15 +144,7 @@ void ProjectManager::drawEvent() {
     /* Update application cursor */
     _imgui.updateApplicationCursor(*this);
 
-    /* Set appropriate states. */
-    GL::Renderer::enable(GL::Renderer::Feature::Blending);
-    GL::Renderer::enable(GL::Renderer::Feature::ScissorTest);
-
     _imgui.drawFrame();
-
-    /* Reset state. */
-    GL::Renderer::disable(GL::Renderer::Feature::ScissorTest);
-    GL::Renderer::disable(GL::Renderer::Feature::Blending);
 
     swapBuffers();
     redraw();
