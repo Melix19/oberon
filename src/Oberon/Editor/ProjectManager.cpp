@@ -35,8 +35,7 @@
 ProjectManager::ProjectManager(const Arguments& arguments): Platform::Application{arguments,
     Configuration{}.setTitle("Oberon - Project Manager")
                    .setSize({1024, 576})
-                   .setWindowFlags(Configuration::WindowFlag::Resizable),
-    GLConfiguration{}.setColorBufferSize({8, 8, 8, 8})}
+                   .setWindowFlags(Configuration::WindowFlag::Resizable)}
 {
     ImGui::CreateContext();
     Themer::styleColorsDark();

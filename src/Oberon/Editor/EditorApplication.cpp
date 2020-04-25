@@ -39,9 +39,8 @@
 
 EditorApplication::EditorApplication(const Arguments& arguments, const std::string& projectPath): Platform::Application{arguments,
     Configuration{}.setTitle("Oberon")
-                   .setWindowFlags(Configuration::WindowFlag::Maximized|Configuration::WindowFlag::Resizable),
-    GLConfiguration{}.setColorBufferSize({8, 8, 8, 8})}, _projectPath{projectPath}, _importer{projectPath},
-    _scriptManager{projectPath}, _explorer{projectPath}
+                   .setWindowFlags(Configuration::WindowFlag::Maximized|Configuration::WindowFlag::Resizable)},
+    _projectPath{projectPath}, _importer{projectPath}, _scriptManager{projectPath}, _explorer{projectPath}
 {
     const GLFWvidmode* videoMode = glfwGetVideoMode(glfwGetPrimaryMonitor());
 

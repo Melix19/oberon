@@ -36,7 +36,8 @@
 #include <Oberon/Core/Script.h>
 
 GlfwPlatform::GlfwPlatform(const Arguments& arguments): Platform::Application{arguments,
-    Configuration{}, GLConfiguration{}.setColorBufferSize({8, 8, 8, 8})}
+    Configuration{}.setTitle("Application")
+                   .setSize({1024, 576})}
 {
     GL::Renderer::enable(GL::Renderer::Feature::DepthTest);
     GL::Renderer::enable(GL::Renderer::Feature::FaceCulling);
