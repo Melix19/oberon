@@ -24,8 +24,10 @@
 
 #include "GlfwPlatform.h"
 
+#include <sstream>
 #include <Corrade/Utility/Configuration.h>
 #include <Corrade/Utility/Directory.h>
+#include <Corrade/Utility/Resource.h>
 #include <Magnum/GL/DefaultFramebuffer.h>
 #include <Magnum/GL/Mesh.h>
 #include <Magnum/GL/Renderer.h>
@@ -34,6 +36,10 @@
 #include <Oberon/Core/Importer.h>
 #include <Oberon/Core/Light.h>
 #include <Oberon/Core/Script.h>
+
+static void importApplicationResources() {
+    CORRADE_RESOURCE_INITIALIZE(OberonApplication_RCS)
+}
 
 GlfwPlatform::GlfwPlatform(const Arguments& arguments): Platform::Application{arguments,
     Configuration{}.setTitle("Application")
@@ -50,14 +56,21 @@ GlfwPlatform::GlfwPlatform(const Arguments& arguments): Platform::Application{ar
         .setProjectionMatrix(Matrix4::perspectiveProjection(35.0_degf, 4.0f/3.0f, 0.001f, 100.0f))
         .setViewport(GL::defaultFramebuffer.viewport().size());
 
-    std::string projectPath = Utility::Directory::path(Utility::Directory::executableLocation());
-    std::string collectionPath = Utility::Directory::join(projectPath, "rect.col");
+    if(!Utility::Resource::hasGroup("OberonApplication"))
+        importApplicationResources();
 
-    Utility::Configuration collectionConfig{collectionPath};
-    Utility::ConfigurationGroup* sceneConfig = collectionConfig.group("scene");
+    Utility::Resource resources("OberonApplication");
 
-    Importer importer{projectPath};
-    importer.loadChildrenObject(sceneConfig, &_scene, _resourceManager, &_drawables, &_scripts, &_lights, collectionPath);
+    std::istringstream projectConfigurationStream(resources.get("project.oberon"));
+    Utility::Configuration projectConfiguration(projectConfigurationStream);
+
+    std::string mainCollectionPath = projectConfiguration.value("main-collection-path");
+    std::istringstream collectionStream(resources.get(mainCollectionPath));
+    Utility::Configuration collection(collectionStream);
+    Utility::ConfigurationGroup* sceneConfiguration = collection.group("scene");
+
+    Importer importer;
+    importer.loadChildrenObject(sceneConfiguration, &_scene, _resourceManager, &_drawables, &_scripts, &_lights);
 
     _scriptManager.loadScripts(_scripts);
 

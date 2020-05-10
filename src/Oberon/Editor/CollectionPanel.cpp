@@ -171,7 +171,7 @@ void CollectionPanel::save() {
 void CollectionPanel::updateObjectNodeChildren(ObjectNode* node) {
     for(auto childConfig: node->objectConfig()->groups("child")) {
         Object3D* child = _importer.loadObject(childConfig, node->object(),
-            _resourceManager, &_drawables, &_scripts, &_lights, _fileNode->path());
+            _resourceManager, &_drawables, &_scripts, &_lights);
         ObjectNode* childNode = node->addChild(child, childConfig);
 
         if(!_drawables.isEmpty() && child == &_drawables[_drawables.size() - 1].object())
@@ -231,7 +231,7 @@ CollectionPanel& CollectionPanel::updateShader() {
 
 CollectionPanel& CollectionPanel::addFeatureToObject(ObjectNode* objectNode, Utility::ConfigurationGroup* featureConfig) {
     std::size_t drawablesNum = _drawables.size();
-    _importer.loadFeature(featureConfig, objectNode->object(), _resourceManager, &_drawables, &_scripts, &_lights, _fileNode->path());
+    _importer.loadFeature(featureConfig, objectNode->object(), _resourceManager, &_drawables, &_scripts, &_lights);
 
     if(drawablesNum < _drawables.size()) {
         _drawablesNodes.push_back(objectNode);

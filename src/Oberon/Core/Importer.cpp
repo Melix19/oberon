@@ -46,7 +46,7 @@
 #include "Script.h"
 #include "Sprite.h"
 
-Object3D* Importer::loadObject(Utility::ConfigurationGroup* objectConfig, Object3D* parent, OberonResourceManager& resourceManager, SceneGraph::DrawableGroup3D* drawables, ScriptGroup* scripts, LightGroup* lights, const std::string& collectionPath) {
+Object3D* Importer::loadObject(Utility::ConfigurationGroup* objectConfig, Object3D* parent, OberonResourceManager& resourceManager, SceneGraph::DrawableGroup3D* drawables, ScriptGroup* scripts, LightGroup* lights) {
     Object3D* object = new Object3D{parent};
 
     /* Transformation */
@@ -56,28 +56,28 @@ Object3D* Importer::loadObject(Utility::ConfigurationGroup* objectConfig, Object
     }
 
     for(auto& featureConfig: objectConfig->groups("feature"))
-        loadFeature(featureConfig, object, resourceManager, drawables, scripts, lights, collectionPath);
+        loadFeature(featureConfig, object, resourceManager, drawables, scripts, lights);
 
     return object;
 }
 
-Object3D* Importer::loadChildrenObject(Utility::ConfigurationGroup* parentConfig, Object3D* parent, OberonResourceManager& resourceManager, SceneGraph::DrawableGroup3D* drawables, ScriptGroup* scripts, LightGroup* lights, const std::string& collectionPath) {
+Object3D* Importer::loadChildrenObject(Utility::ConfigurationGroup* parentConfig, Object3D* parent, OberonResourceManager& resourceManager, SceneGraph::DrawableGroup3D* drawables, ScriptGroup* scripts, LightGroup* lights) {
     for(auto& childConfig: parentConfig->groups("child")) {
-        Object3D* child = loadObject(childConfig, parent, resourceManager, drawables, scripts, lights, collectionPath);
+        Object3D* child = loadObject(childConfig, parent, resourceManager, drawables, scripts, lights);
 
         if(childConfig->hasGroup("child"))
-            loadChildrenObject(childConfig, child, resourceManager, drawables, scripts, lights, collectionPath);
+            loadChildrenObject(childConfig, child, resourceManager, drawables, scripts, lights);
     }
 
     return parent;
 }
 
-void Importer::loadFeature(Utility::ConfigurationGroup* featureConfig, Object3D* object, OberonResourceManager& resourceManager, SceneGraph::DrawableGroup3D* drawables, ScriptGroup* scripts, LightGroup* lights, const std::string& collectionPath) {
+void Importer::loadFeature(Utility::ConfigurationGroup* featureConfig, Object3D* object, OberonResourceManager& resourceManager, SceneGraph::DrawableGroup3D* drawables, ScriptGroup* scripts, LightGroup* lights) {
     std::string type = featureConfig->value("type");
 
     if(type == "mesh") {
         /* Shader */
-        Resource<GL::AbstractShaderProgram, Oberon::Shader> shaderResource = resourceManager.get<GL::AbstractShaderProgram, Oberon::Shader>(collectionPath);
+        Resource<GL::AbstractShaderProgram, Oberon::Shader> shaderResource = resourceManager.get<GL::AbstractShaderProgram, Oberon::Shader>("scene");
         if(!shaderResource)
             resourceManager.set<GL::AbstractShaderProgram>(shaderResource.key(), new Oberon::Shader{0}, ResourceDataState::Mutable, ResourcePolicy::ReferenceCounted);
 
@@ -116,7 +116,7 @@ void Importer::loadFeature(Utility::ConfigurationGroup* featureConfig, Object3D*
         }
     } else if(type == "light") {
         /* Shader */
-        Resource<GL::AbstractShaderProgram, Oberon::Shader> shaderResource = resourceManager.get<GL::AbstractShaderProgram, Oberon::Shader>(collectionPath);
+        Resource<GL::AbstractShaderProgram, Oberon::Shader> shaderResource = resourceManager.get<GL::AbstractShaderProgram, Oberon::Shader>("scene");
         resourceManager.set<GL::AbstractShaderProgram>(shaderResource.key(), new Oberon::Shader{UnsignedInt(lights->size() + 1)}, ResourceDataState::Mutable, ResourcePolicy::ReferenceCounted);
 
         /* Light */
@@ -175,7 +175,7 @@ void Importer::loadFeature(Utility::ConfigurationGroup* featureConfig, Object3D*
 
             Resource<GL::Texture2D> textureResource = resourceManager.get<GL::Texture2D>(path);
             if(!textureResource) {
-                _pngImporter.openData(Utility::Directory::read(Utility::Directory::join(_projectPath, path)));
+                _pngImporter.openData(Utility::Directory::read(path));
                 Containers::Optional<Trade::ImageData2D> image = _pngImporter.image2D(0);
                 CORRADE_INTERNAL_ASSERT(image);
 
