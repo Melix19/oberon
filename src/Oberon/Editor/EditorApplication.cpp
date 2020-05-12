@@ -26,6 +26,7 @@
 
 #include <algorithm>
 #include <imgui_internal.h>
+#include <portable-file-dialogs.h>
 #include <Corrade/Utility/Directory.h>
 #include <Magnum/GL/DefaultFramebuffer.h>
 #include <Magnum/GL/Renderer.h>
@@ -110,6 +111,13 @@ void EditorApplication::drawEvent() {
     ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(10.0f, 10.0f));
     if(ImGui::BeginMainMenuBar()) {
         ImGui::PopStyleVar();
+
+        if(ImGui::BeginMenu("Project")) {
+            if(ImGui::MenuItem("Export"))
+                exportProject();
+
+            ImGui::EndMenu();
+        }
 
         if(ImGui::BeginMenu("Editor")) {
             if(ImGui::MenuItem("Reset layout"))
@@ -306,6 +314,77 @@ void EditorApplication::openFile(FileNode* fileNode) {
             system(command.c_str());
         }
     }
+}
+
+void EditorApplication::exportProject() {
+    /* Get the libraries and export path */
+    std::string libFolderPath = Utility::Directory::fromNativeSeparators(pfd::select_folder("").result());
+    std::string exportPath = Utility::Directory::fromNativeSeparators(pfd::select_folder("").result());
+    if(libFolderPath.empty() || exportPath.empty())
+        return;
+
+    /* Create build directory */
+    Utility::Directory::mkpath(Utility::Directory::join(_projectPath, "build"));
+
+    /* Add required modules for finding the platform */
+    Utility::Directory::mkpath(Utility::Directory::join(_projectPath, "build/modules"));
+    std::string moduleText = Utility::Resource("OberonEditor").get("FindGLFW.cmake");
+    Utility::Directory::writeString(Utility::Directory::join(_projectPath, "build/modules/FindGLFW.cmake"), moduleText);
+
+    /* Create resources configuration */
+    Utility::Configuration resourcesConf(Utility::Directory::join(_projectPath, "build/resources.conf"));
+    resourcesConf.addValue("group", "OberonApplication");
+
+    /* Add the project settings into the resources */
+    Utility::ConfigurationGroup* projectFile = resourcesConf.addGroup("file");
+    projectFile->addValue("filename", "../project.oberon");
+    projectFile->addValue("alias", "project.oberon");
+
+    /* Add all the remaining files */
+    auto directoryList = Utility::Directory::list(_projectPath,
+        Utility::Directory::Flag::SkipDotAndDotDot);
+    for(auto& filename: directoryList) {
+        std::string extension = Utility::Directory::splitExtension(filename).second;
+        if(extension == ".col") {
+            Utility::ConfigurationGroup* collectionFile = resourcesConf.addGroup("file");
+            collectionFile->addValue("filename", "../" + filename);
+            collectionFile->addValue("alias", filename);
+        }
+    }
+
+    /* Save the resources configuration */
+    resourcesConf.save();
+
+    /* Create the CMakeLists for the export */
+    Utility::Directory::writeString(Utility::Directory::join(_projectPath, "build/CMakeLists.txt"), "\
+cmake_minimum_required(VERSION 3.4)\n\
+project(Application CXX)\n\
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY " + exportPath + ")\n\
+set(CMAKE_MODULE_PATH \"${PROJECT_SOURCE_DIR}/modules/\" ${CMAKE_MODULE_PATH})\n\
+link_directories(" + libFolderPath + ")\n\
+find_package(Magnum REQUIRED\n\
+    GlfwApplication\n\
+    MeshTools\n\
+    Primitives\n\
+    SceneGraph\n\
+    Shaders)\n\
+find_package(MagnumPlugins REQUIRED PngImporter)\n\
+corrade_add_resource(OberonApplication_RCS resources.conf)\n\
+add_executable(Application MACOSX_BUNDLE ${OberonApplication_RCS})\n\
+target_link_libraries(Application PRIVATE OberonGlfwPlatform OberonCore\n\
+    Magnum::Application\n\
+    Magnum::MeshTools\n\
+    Magnum::Primitives\n\
+    Magnum::SceneGraph\n\
+    Magnum::Shaders\n\
+    MagnumPlugins::PngImporter)"
+    );
+
+    /* Execute the command to export */
+    std::string command = "cd \"";
+    command.append(Utility::Directory::join(_projectPath, "build"));
+    command.append("\" && cmake . && cmake --build .");
+    system(command.c_str());
 }
 
 void EditorApplication::viewportEvent(ViewportEvent& event) {
