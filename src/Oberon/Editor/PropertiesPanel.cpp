@@ -61,5 +61,10 @@ void PropertiesPanel::newFrame() {
     if(ImGui::DragInt2("##Project.WindowSize", windowSize.data()))
         _configuration.setValue<Vector2i>("window_size", windowSize);
 
+    Themer::setNextItemRightAlign("Main collection", spacing);
+    std::string mainCollection = _configuration.value("main_collection");
+    if(ImGui::InputText("##Project.MainCollection", &mainCollection))
+        _configuration.setValue("main_collection", mainCollection);
+
     ImGui::End();
 }

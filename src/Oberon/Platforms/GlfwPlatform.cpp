@@ -64,8 +64,8 @@ GlfwPlatform::GlfwPlatform(const Arguments& arguments): Platform::Application{ar
     std::istringstream projectConfigurationStream(resources.get("project.oberon"));
     Utility::Configuration projectConfiguration(projectConfigurationStream);
 
-    std::string mainCollectionPath = projectConfiguration.value("main-collection-path");
-    std::istringstream collectionStream(resources.get(mainCollectionPath));
+    std::string mainCollection = projectConfiguration.value("main_collection");
+    std::istringstream collectionStream(resources.get(mainCollection));
     Utility::Configuration collection(collectionStream);
     Utility::ConfigurationGroup* sceneConfiguration = collection.group("scene");
 
