@@ -59,8 +59,8 @@ CollectionPanel::CollectionPanel(FileNode* fileNode, OberonResourceManager& reso
         .attachRenderbuffer(GL::Framebuffer::ColorAttachment{1}, _objectId)
         .attachRenderbuffer(GL::Framebuffer::BufferAttachment::Depth, _depth)
         .mapForDraw({
-            {Oberon::Shader::ColorOutput, GL::Framebuffer::ColorAttachment{0}},
-            {Oberon::Shader::ObjectIdOutput, GL::Framebuffer::ColorAttachment{1}}});
+            {SceneShader::ColorOutput, GL::Framebuffer::ColorAttachment{0}},
+            {SceneShader::ObjectIdOutput, GL::Framebuffer::ColorAttachment{1}}});
 
     _cameraObject = new Object3D{&_scene};
     _camera = new SceneGraph::Camera3D{*_cameraObject};
@@ -190,9 +190,9 @@ void CollectionPanel::createGrid() {
     _gridObject = new Object3D{&_scene};
     _gridObject->rotateX({Deg{90}});
 
-    Resource<GL::AbstractShaderProgram, Oberon::Shader> shaderResource = _resourceManager.get<GL::AbstractShaderProgram, Oberon::Shader>("shader");
+    Resource<GL::AbstractShaderProgram, SceneShader> shaderResource = _resourceManager.get<GL::AbstractShaderProgram, SceneShader>("editor");
     if(!shaderResource)
-        _resourceManager.set<GL::AbstractShaderProgram>(shaderResource.key(), new Oberon::Shader{0}, ResourceDataState::Mutable, ResourcePolicy::ReferenceCounted);
+        _resourceManager.set<GL::AbstractShaderProgram>(shaderResource.key(), new SceneShader{SceneShader::Flag::ObjectId}, ResourceDataState::Mutable, ResourcePolicy::ReferenceCounted);
 
     Resource<GL::Mesh> meshResource = _resourceManager.get<GL::Mesh>("grid");
     if(!meshResource) {
@@ -218,9 +218,9 @@ void CollectionPanel::loadMeshFeature(Mesh& mesh, Utility::ConfigurationGroup* p
 }
 
 CollectionPanel& CollectionPanel::updateShader() {
-    Resource<GL::AbstractShaderProgram, Oberon::Shader> shaderResource = _resourceManager.get<GL::AbstractShaderProgram,
-        Oberon::Shader>("shader");
-    _resourceManager.set<GL::AbstractShaderProgram>(shaderResource.key(), new Oberon::Shader{UnsignedInt(_lights.size())},
+    Resource<GL::AbstractShaderProgram, SceneShader> shaderResource = _resourceManager.get<GL::AbstractShaderProgram,
+        SceneShader>("scene-objectid");
+    _resourceManager.set<GL::AbstractShaderProgram>(shaderResource.key(), new SceneShader{SceneShader::Flag::ObjectId, UnsignedInt(_lights.size())},
         ResourceDataState::Mutable, ResourcePolicy::ReferenceCounted);
 
     for(std::size_t i = 0; i != _lights.size(); ++i)

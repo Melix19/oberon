@@ -22,29 +22,74 @@
     SOFTWARE.
 */
 
+#if defined(INSTANCED_OBJECT_ID) && !defined(GL_ES) && !defined(NEW_GLSL)
+#extension GL_EXT_gpu_shader4: require
+#endif
+
+#ifndef NEW_GLSL
+#define in attribute
+#define out varying
+#endif
+
+#ifdef EXPLICIT_UNIFORM_LOCATION
+layout(location = 0)
+#endif
 uniform highp mat4 transformationMatrix;
+
+#ifdef EXPLICIT_UNIFORM_LOCATION
+layout(location = 1)
+#endif
 uniform highp mat4 projectionMatrix;
-#if NUM_POINT_LIGHTS
+
+#if LIGHT_COUNT
+#ifdef EXPLICIT_UNIFORM_LOCATION
+layout(location = 2)
+#endif
 uniform mediump mat3 normalMatrix;
 #endif
 
-layout(location = 0) in highp vec4 position;
-#if NUM_POINT_LIGHTS
-layout(location = 2) in mediump vec3 normal;
+#ifdef EXPLICIT_ATTRIB_LOCATION
+layout(location = POSITION_ATTRIBUTE_LOCATION)
+#endif
+in highp vec4 position;
+
+#if LIGHT_COUNT
+#ifdef EXPLICIT_ATTRIB_LOCATION
+layout(location = NORMAL_ATTRIBUTE_LOCATION)
+#endif
+in mediump vec3 normal;
 #endif
 
-#if NUM_POINT_LIGHTS
+#ifdef TEXTURED
+#ifdef EXPLICIT_ATTRIB_LOCATION
+layout(location = TEXTURECOORDINATES_ATTRIBUTE_LOCATION)
+#endif
+in mediump vec2 textureCoordinates;
+
+out mediump vec2 interpolatedTextureCoordinates;
+#endif
+
+#if LIGHT_COUNT
 out highp vec3 transformedPosition;
 out mediump vec3 transformedNormal;
 #endif
 
 void main() {
+    /* Transformed vertex position */
     highp vec4 transformedPosition4 = transformationMatrix*position;
 
-    #if NUM_POINT_LIGHTS
+    #if LIGHT_COUNT
     transformedPosition = transformedPosition4.xyz/transformedPosition4.w;
+
+    /* Transformed normal and tangent vector */
     transformedNormal = normalMatrix*normal;
     #endif
 
+    /* Transform the position */
     gl_Position = projectionMatrix*transformedPosition4;
+
+    #ifdef TEXTURED
+    /* Texture coordinates, if needed */
+    interpolatedTextureCoordinates = textureCoordinates;
+    #endif
 }

@@ -35,8 +35,8 @@ corrade_add_resource(OberonCore_RCS resources.conf)
 
 set(OberonCore_SRCS
     Importer.cpp
+    SceneShader.cpp
     ScriptManager.cpp
-    Shader.cpp
 
     ${OberonCore_RCS})
 
@@ -46,9 +46,9 @@ set(OberonCore_HEADERS
     Importer.h
     Light.h
     Mesh.h
+    SceneShader.h
     Script.h
-    ScriptManager.h
-    Shader.h)
+    ScriptManager.h)
 
 add_library(OberonCore
     ${OberonCore_SRCS}

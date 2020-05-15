@@ -29,11 +29,11 @@
 #include <Magnum/SceneGraph/Camera.h>
 #include <Magnum/SceneGraph/Drawable.h>
 
-#include "Shader.h"
+#include "SceneShader.h"
 
 class Mesh: public SceneGraph::Drawable3D {
     public:
-        explicit Mesh(SceneGraph::AbstractObject3D& object, SceneGraph::DrawableGroup3D* drawables, const Resource<GL::AbstractShaderProgram, Oberon::Shader>& shader):
+        explicit Mesh(SceneGraph::AbstractObject3D& object, SceneGraph::DrawableGroup3D* drawables, const Resource<GL::AbstractShaderProgram, SceneShader>& shader):
             SceneGraph::Drawable3D{object, drawables}, _shader{shader} {}
 
         Mesh& setMesh(const Resource<GL::Mesh>& mesh) {
@@ -92,7 +92,7 @@ class Mesh: public SceneGraph::Drawable3D {
         }
 
         Resource<GL::Mesh> _mesh;
-        Resource<GL::AbstractShaderProgram, Oberon::Shader> _shader;
+        Resource<GL::AbstractShaderProgram, SceneShader> _shader;
 
         UnsignedInt _id{0};
         Vector3 _size{2.0f};

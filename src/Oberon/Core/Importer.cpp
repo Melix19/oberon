@@ -77,9 +77,9 @@ void Importer::loadFeature(Utility::ConfigurationGroup* featureConfig, Object3D*
 
     if(type == "mesh") {
         /* Shader */
-        Resource<GL::AbstractShaderProgram, Oberon::Shader> shaderResource = resourceManager.get<GL::AbstractShaderProgram, Oberon::Shader>("scene");
+        Resource<GL::AbstractShaderProgram, SceneShader> shaderResource = resourceManager.get<GL::AbstractShaderProgram, SceneShader>("scene-objectid");
         if(!shaderResource)
-            resourceManager.set<GL::AbstractShaderProgram>(shaderResource.key(), new Oberon::Shader{0}, ResourceDataState::Mutable, ResourcePolicy::ReferenceCounted);
+            resourceManager.set<GL::AbstractShaderProgram>(shaderResource.key(), new SceneShader{SceneShader::Flag::ObjectId}, ResourceDataState::Mutable, ResourcePolicy::ReferenceCounted);
 
         /* Mesh */
         Mesh& mesh = object->addFeature<Mesh>(drawables, shaderResource);
@@ -116,8 +116,8 @@ void Importer::loadFeature(Utility::ConfigurationGroup* featureConfig, Object3D*
         }
     } else if(type == "light") {
         /* Shader */
-        Resource<GL::AbstractShaderProgram, Oberon::Shader> shaderResource = resourceManager.get<GL::AbstractShaderProgram, Oberon::Shader>("scene");
-        resourceManager.set<GL::AbstractShaderProgram>(shaderResource.key(), new Oberon::Shader{UnsignedInt(lights->size() + 1)}, ResourceDataState::Mutable, ResourcePolicy::ReferenceCounted);
+        Resource<GL::AbstractShaderProgram, SceneShader> shaderResource = resourceManager.get<GL::AbstractShaderProgram, SceneShader>("scene-objectid");
+        resourceManager.set<GL::AbstractShaderProgram>(shaderResource.key(), new SceneShader{SceneShader::Flag::ObjectId, UnsignedInt(lights->size() + 1)}, ResourceDataState::Mutable, ResourcePolicy::ReferenceCounted);
 
         /* Light */
         Light& light = object->addFeature<Light>(lights, shaderResource);
@@ -156,9 +156,9 @@ void Importer::loadFeature(Utility::ConfigurationGroup* featureConfig, Object3D*
         }
 
         /* Shader */
-        Resource<GL::AbstractShaderProgram, Shaders::Flat3D> shaderResource = resourceManager.get<GL::AbstractShaderProgram, Shaders::Flat3D>("flat");
+        Resource<GL::AbstractShaderProgram, SceneShader> shaderResource = resourceManager.get<GL::AbstractShaderProgram, SceneShader>("scene-textured-objectid");
         if(!shaderResource)
-            resourceManager.set<GL::AbstractShaderProgram>(shaderResource.key(), new Shaders::Flat3D{Shaders::Flat3D::Flag::ObjectId | Shaders::Flat3D::Flag::Textured}, ResourceDataState::Final, ResourcePolicy::ReferenceCounted);
+            resourceManager.set<GL::AbstractShaderProgram>(shaderResource.key(), new SceneShader{SceneShader::Flag::Textured | SceneShader::Flag::ObjectId}, ResourceDataState::Mutable, ResourcePolicy::ReferenceCounted);
 
         /* Sprite */
         Sprite& sprite = object->addFeature<Sprite>(drawables, meshResource, shaderResource);

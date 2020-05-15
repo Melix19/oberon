@@ -42,10 +42,10 @@ class Light;
 typedef SceneGraph::FeatureGroup3D<Light> LightGroup;
 
 class Mesh;
+class SceneShader;
 
 class Script;
 typedef SceneGraph::FeatureGroup3D<Script> ScriptGroup;
 
 class ScriptManager;
-class Shader;
 class Sprite;

@@ -29,17 +29,15 @@
 #include <Magnum/SceneGraph/AbstractGroupedFeature.h>
 #include <Magnum/SceneGraph/Camera.h>
 
-#include "Shader.h"
+#include "SceneShader.h"
 
 class Light: public SceneGraph::AbstractGroupedFeature3D<Light> {
     public:
-        explicit Light(SceneGraph::AbstractObject3D& object, LightGroup* lights, const Resource<GL::AbstractShaderProgram, Oberon::Shader>& shader):
+        explicit Light(SceneGraph::AbstractObject3D& object, LightGroup* lights, const Resource<GL::AbstractShaderProgram, SceneShader>& shader):
             SceneGraph::AbstractGroupedFeature3D<Light>{object, lights}, _shader{shader}, _id(lights->size() - 1) {}
 
         void updateShader(SceneGraph::Camera3D& camera) {
-            _shader->setLightPosition(_id, camera.cameraMatrix().transformPoint(object().absoluteTransformationMatrix().translation()))
-                .setLightColor(_id, _color)
-                .setLightAttributes(_id, _constant, _linear, _quadratic);
+            _shader->setPointLight(_id, camera.cameraMatrix().transformPoint(object().absoluteTransformationMatrix().translation()), _color, _constant, _linear, _quadratic);
         }
 
         Light& setId(UnsignedInt id) {
@@ -72,7 +70,7 @@ class Light: public SceneGraph::AbstractGroupedFeature3D<Light> {
         }
 
     private:
-        Resource<GL::AbstractShaderProgram, Oberon::Shader> _shader;
+        Resource<GL::AbstractShaderProgram, SceneShader> _shader;
 
         UnsignedInt _id;
         Color3 _color{1.0f};
