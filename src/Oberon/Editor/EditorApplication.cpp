@@ -41,7 +41,7 @@
 EditorApplication::EditorApplication(const Arguments& arguments, const std::string& projectPath): Platform::Application{arguments,
     Configuration{}.setTitle("Oberon")
                    .setWindowFlags(Configuration::WindowFlag::Maximized|Configuration::WindowFlag::Resizable)},
-    _projectPath{projectPath}, _scriptManager{projectPath}, _explorer{projectPath}
+    _projectPath{projectPath}, _importer{_resourceManager}, _scriptManager{projectPath}, _explorer{projectPath}
 {
     const GLFWvidmode* videoMode = glfwGetVideoMode(glfwGetPrimaryMonitor());
 
@@ -73,7 +73,8 @@ EditorApplication::EditorApplication(const Arguments& arguments, const std::stri
     _imgui = ImGuiIntegration::Context(*ImGui::GetCurrentContext(), size, windowSize(),
         framebufferSize());
 
-    /* Set up proper blending to be used by ImGui. */
+    GL::Renderer::enable(GL::Renderer::Feature::Blending);
+
     GL::Renderer::setBlendEquation(GL::Renderer::BlendEquation::Add,
         GL::Renderer::BlendEquation::Add);
     GL::Renderer::setBlendFunction(GL::Renderer::BlendFunction::SourceAlpha,
@@ -211,14 +212,12 @@ void EditorApplication::drawEvent() {
     _imgui.updateApplicationCursor(*this);
 
     /* Set appropriate states. */
-    GL::Renderer::enable(GL::Renderer::Feature::Blending);
     GL::Renderer::enable(GL::Renderer::Feature::ScissorTest);
 
     _imgui.drawFrame();
 
     /* Reset state. */
     GL::Renderer::disable(GL::Renderer::Feature::ScissorTest);
-    GL::Renderer::disable(GL::Renderer::Feature::Blending);
 
     swapBuffers();
     redraw();

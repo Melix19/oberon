@@ -30,6 +30,7 @@
 #include <Magnum/SceneGraph/Drawable.h>
 #include <Magnum/SceneGraph/Scene.h>
 #include <Magnum/SceneGraph/TranslationRotationScalingTransformation3D.h>
+#include <Oberon/Core/SceneShader.h>
 #include <Oberon/Core/ScriptManager.h>
 
 class GlfwPlatform: public Platform::Application {
@@ -51,4 +52,5 @@ class GlfwPlatform: public Platform::Application {
         LightGroup _lights;
 
         OberonResourceManager _resourceManager;
+        std::vector<std::pair<std::string, SceneShader::Flags>> shaderKeys;
 };

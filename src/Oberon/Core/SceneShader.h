@@ -33,6 +33,7 @@ class SceneShader: public GL::AbstractShaderProgram {
     public:
         typedef Shaders::Generic3D::Position Position;
         typedef Shaders::Generic3D::Normal Normal;
+        typedef Shaders::Generic3D::Tangent Tangent;
         typedef Shaders::Generic3D::TextureCoordinates TextureCoordinates;
         #ifndef MAGNUM_TARGET_GLES2
         typedef Shaders::Generic3D::ObjectId ObjectId;
@@ -46,9 +47,12 @@ class SceneShader: public GL::AbstractShaderProgram {
         };
 
         enum class Flag: UnsignedShort {
-            Textured = 1 << 0,
+            AmbientTexture = 1 << 0,
+            DiffuseTexture = 1 << 1,
+            SpecularTexture = 1 << 2,
+            NormalTexture = 1 << 3,
             #ifndef MAGNUM_TARGET_GLES2
-            ObjectId = 1 << 1
+            ObjectId = 1 << 4
             #endif
         };
 
@@ -61,6 +65,8 @@ class SceneShader: public GL::AbstractShaderProgram {
 
         SceneShader& setDiffuseColor(const Color4& color);
         SceneShader& bindDiffuseTexture(GL::Texture2D& texture);
+
+        SceneShader& bindNormalTexture(GL::Texture2D& texture);
 
         SceneShader& setSpecularColor(const Color4& color);
         SceneShader& bindSpecularTexture(GL::Texture2D& texture);

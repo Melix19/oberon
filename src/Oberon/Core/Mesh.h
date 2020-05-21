@@ -33,16 +33,16 @@
 
 class Mesh: public SceneGraph::Drawable3D {
     public:
-        explicit Mesh(SceneGraph::AbstractObject3D& object, SceneGraph::DrawableGroup3D* drawables, const Resource<GL::AbstractShaderProgram, SceneShader>& shader):
-            SceneGraph::Drawable3D{object, drawables}, _shader{shader} {}
+        explicit Mesh(SceneGraph::AbstractObject3D& object, SceneGraph::DrawableGroup3D* drawables):
+            SceneGraph::Drawable3D{object, drawables} {}
 
         Mesh& setMesh(const Resource<GL::Mesh>& mesh) {
             _mesh = mesh;
             return *this;
         }
 
-        Mesh& setObjectId(UnsignedInt id) {
-            _id = id;
+        Mesh& setShader(const Resource<GL::AbstractShaderProgram, SceneShader>& shader) {
+            _shader = shader;
             return *this;
         }
 
@@ -52,21 +52,62 @@ class Mesh: public SceneGraph::Drawable3D {
             return *this;
         }
 
-        Color3 ambientColor() { return _ambientColor; }
-        Mesh& setAmbientColor(const Color3& color) {
+        Mesh& setObjectId(UnsignedInt id) {
+            _id = id;
+            return *this;
+        }
+
+        Color4 ambientColor() { return _ambientColor; }
+        Mesh& setAmbientColor(const Color4& color) {
             _ambientColor = color;
             return *this;
         }
 
-        Color3 diffuseColor() { return _diffuseColor; }
-        Mesh& setDiffuseColor(const Color3& color) {
+        bool hasAmbientTexture() {
+            if(_ambientTexture) return true;
+            else return false;
+        }
+        Mesh& setAmbientTexture(const Resource<GL::Texture2D>& texture) {
+            _ambientTexture = texture;
+            return *this;
+        }
+
+        Color4 diffuseColor() { return _diffuseColor; }
+        Mesh& setDiffuseColor(const Color4& color) {
             _diffuseColor = color;
             return *this;
         }
 
-        Color3 specularColor() { return _specularColor; }
-        Mesh& setSpecularColor(const Color3& color) {
+        bool hasDiffuseTexture() {
+            if(_diffuseTexture) return true;
+            else return false;
+        }
+        Mesh& setDiffuseTexture(const Resource<GL::Texture2D>& texture) {
+            _diffuseTexture = texture;
+            return *this;
+        }
+
+        Color4 specularColor() { return _specularColor; }
+        Mesh& setSpecularColor(const Color4& color) {
             _specularColor = color;
+            return *this;
+        }
+
+        bool hasSpecularTexture() {
+            if(_specularTexture) return true;
+            else return false;
+        }
+        Mesh& setSpecularTexture(const Resource<GL::Texture2D>& texture) {
+            _specularTexture = texture;
+            return *this;
+        }
+
+        bool hasNormalTexture() {
+            if(_normalTexture) return true;
+            else return false;
+        }
+        Mesh& setNormalTexture(const Resource<GL::Texture2D>& texture) {
+            _normalTexture = texture;
             return *this;
         }
 
@@ -78,7 +119,7 @@ class Mesh: public SceneGraph::Drawable3D {
 
     private:
         void draw(const Matrix4& transformation, SceneGraph::Camera3D& camera) override {
-            if(!_mesh) return;
+            if(!_shader || !_mesh) return;
 
             _shader->setTransformationMatrix(transformation*Matrix4::scaling(_size/2))
                 .setNormalMatrix(transformation.normalMatrix())
@@ -86,19 +127,31 @@ class Mesh: public SceneGraph::Drawable3D {
                 .setAmbientColor(_ambientColor)
                 .setDiffuseColor(_diffuseColor)
                 .setSpecularColor(_specularColor)
-                .setShininess(_shininess)
-                .setObjectId(_id)
-                .draw(*_mesh);
+                .setShininess(_shininess);
+
+            if(_id) _shader->setObjectId(_id);
+            if(_ambientTexture) _shader->bindAmbientTexture(*_ambientTexture);
+            if(_diffuseTexture) _shader->bindDiffuseTexture(*_diffuseTexture);
+            if(_specularTexture) _shader->bindSpecularTexture(*_specularTexture);
+            if(_normalTexture) _shader->bindNormalTexture(*_normalTexture);
+
+            _shader->draw(*_mesh);
         }
 
         Resource<GL::Mesh> _mesh;
         Resource<GL::AbstractShaderProgram, SceneShader> _shader;
 
-        UnsignedInt _id{0};
         Vector3 _size{2.0f};
+        UnsignedInt _id{0};
 
-        Color3 _ambientColor{0.0f};
-        Color3 _diffuseColor{1.0f};
-        Color3 _specularColor{1.0f};
+        Color4 _ambientColor{0.0f};
+        Color4 _diffuseColor{1.0f};
+        Color4 _specularColor{1.0f};
+
+        Resource<GL::Texture2D> _ambientTexture;
+        Resource<GL::Texture2D> _diffuseTexture;
+        Resource<GL::Texture2D> _specularTexture;
+        Resource<GL::Texture2D> _normalTexture;
+
         Float _shininess{80.0f};
 };

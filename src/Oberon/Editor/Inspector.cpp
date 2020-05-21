@@ -24,371 +24,103 @@
 
 #include "Inspector.h"
 
+#include <algorithm>
 #include <climits>
-#include <cstring>
 #include <imgui.h>
 #include <misc/cpp/imgui_stdlib.h>
 #include <Corrade/Utility/ConfigurationGroup.h>
+#include <Corrade/Utility/Directory.h>
 #include <Magnum/GL/Mesh.h>
 #include <Magnum/Math/ConfigurationValue.h>
+#include <Oberon/Core/Importer.h>
 #include <Oberon/Core/Light.h>
 #include <Oberon/Core/Mesh.h>
 #include <Oberon/Core/Script.h>
-#include <Oberon/Core/Sprite.h>
 
 #include "CollectionPanel.h"
 #include "FileNode.h"
 #include "ObjectNode.h"
 #include "Themer.h"
 
+namespace {
+
+template<class T> T* getObjectFeature(Object3D* object) {
+    Containers::LinkedList<SceneGraph::AbstractFeature3D>& features = object->features();
+    T* feature = nullptr;
+    for(SceneGraph::AbstractFeature3D& f: features) {
+        if((feature = dynamic_cast<T*>(&f)))
+            break;
+    }
+    return feature;
+}
+
+std::string snakeCaseToPhrase(const std::string& snakeCase) {
+    std::string phrase = snakeCase;
+    std::replace(phrase.begin(), phrase.end(), '_', ' ');
+    phrase[0] = std::toupper(phrase[0]);
+    return phrase;
+}
+
+}
+
 void Inspector::newFrame() {
     bool isVisible = ImGui::Begin("Inspector");
 
-    auto& selectedNodes = _panel->selectedNodes();
-    ObjectNode* objectNode;
+    std::vector<ObjectNode*>& selectedNodes = _panel->selectedNodes();
+    ObjectNode* objectNode = nullptr;
 
     if(_panel && !selectedNodes.empty())
         objectNode = selectedNodes.front();
 
-    /* If the window is not visible, end the method here. */
-    if(!isVisible || !_panel || selectedNodes.empty() || (objectNode == _panel->rootNode())) {
+    /* If the window is not visible or the object node is the root, end the method here. */
+    if(!isVisible || !_panel || selectedNodes.empty() || objectNode == _panel->rootNode()) {
         ImGui::End();
         return;
     }
 
-    const Float spacing = 100.0f;
+    _spacing = ImGui::GetWindowWidth()/2;
 
-    if(ImGui::CollapsingHeader("Transform", ImGuiTreeNodeFlags_DefaultOpen)) {
-        /* Translation */
-        Themer::setNextItemRightAlign("Translation", spacing);
-        Vector3 translation = objectNode->object()->translation();
-        if(ImGui::DragFloat3("##Translation", translation.data(), 0.002f)) {
-            objectNode->object()->setTranslation(translation);
-            objectNode->objectConfig()->setValue("transformation", objectNode->object()->transformation());
-        }
+    showTransformationHeader(objectNode);
+    ImGui::Dummy(ImVec2(0.0f, 5.0f));
 
-        /* Rotation */
-        Themer::setNextItemRightAlign("Rotation", spacing);
-        Vector3 rotationDegree = objectNode->rotationDegree();
-        if(ImGui::DragFloat3("##Rotation", rotationDegree.data(), 0.1f)) {
-            objectNode->object()->setRotation(
-                Quaternion::rotation(Rad{Deg{rotationDegree.z()}}, Vector3::zAxis())*
-                Quaternion::rotation(Rad{Deg{rotationDegree.y()}}, Vector3::yAxis())*
-                Quaternion::rotation(Rad{Deg{rotationDegree.x()}}, Vector3::xAxis()));
-            objectNode->objectConfig()->setValue("transformation", objectNode->object()->transformation());
-            objectNode->setRotationDegree(rotationDegree);
-        }
-
-        /* Scaling */
-        Themer::setNextItemRightAlign("Scaling", spacing);
-        Vector3 scaling = objectNode->object()->scaling();
-        if(ImGui::DragFloat3("##Scaling", scaling.data(), 0.001f)) {
-            objectNode->object()->setScaling(scaling);
-            objectNode->objectConfig()->setValue("transformation", objectNode->object()->transformation());
-        }
-    }
-
-    /* Features */
-    for(auto& featureConfig: objectNode->objectConfig()->groups("feature")) {
+    for(Utility::ConfigurationGroup* featureConfig: objectNode->objectConfig()->groups("feature")) {
         std::string type = featureConfig->value("type");
+        if(type == "light") showLightHeader(objectNode, featureConfig);
+        else if(type == "mesh") showMeshHeader(objectNode, featureConfig);
+        else if(type == "script") showScriptHeader(objectNode, featureConfig);
 
-        if(type == "mesh") {
-            /* Mesh */
-            auto& features = objectNode->object()->features();
-            Mesh* mesh = nullptr;
-
-            for(auto& feature: features) {
-                if((mesh = dynamic_cast<Mesh*>(&feature)))
-                    break;
-            }
-
-            CORRADE_INTERNAL_ASSERT(mesh != nullptr);
-
-            bool featureIsOpen = true;
-
-            if(ImGui::CollapsingHeader("Mesh", &featureIsOpen, ImGuiTreeNodeFlags_DefaultOpen)) {
-                Utility::ConfigurationGroup* primitiveConfig = featureConfig->group("primitive");
-                Utility::ConfigurationGroup* materialConfig = featureConfig->group("material");
-                ImGuiTreeNodeFlags nodeFlags = ImGuiTreeNodeFlags_FramePadding |
-                    ImGuiTreeNodeFlags_SpanFullWidth;
-
-                if(ImGui::TreeNodeEx("Primitive", nodeFlags)) {
-                    std::string primitiveType = "none";
-                    bool updateMesh = false;
-
-                    if(primitiveConfig && primitiveConfig->hasValue("type"))
-                        primitiveType = primitiveConfig->value("type");
-
-                    std::string primitiveString = primitiveType;
-                    primitiveString[0] = toupper(primitiveString[0]);
-
-                    Themer::setNextItemRightAlign("Type", spacing);
-                    if(ImGui::BeginCombo("##Mesh.Primitive.Type", primitiveString.c_str())) {
-                        const char* primitives[] = {"Circle", "Cube", "Plane", "Sphere", "Square"};
-
-                        for(auto& type: primitives) {
-                            bool isSelected = !std::strcmp(primitiveString.c_str(), type);
-
-                            if(ImGui::Selectable(type, isSelected)) {
-                                primitiveType = type;
-                                primitiveType[0] = tolower(primitiveType[0]);
-
-                                featureConfig->removeGroup("primitive");
-                                primitiveConfig = featureConfig->addGroup("primitive");
-                                primitiveConfig->setValue("type", primitiveType);
-
-                                if(!materialConfig)
-                                    materialConfig = featureConfig->addGroup("material");
-
-                                updateMesh = true;
-                            }
-                            if(isSelected) ImGui::SetItemDefaultFocus();
-                        }
-
-                        ImGui::EndCombo();
-                    }
-
-                    if(primitiveConfig) {
-                        Themer::setNextItemRightAlign("Size", spacing);
-                        Vector3 size = mesh->size();
-                        if(ImGui::DragFloat3("##Mesh.Primitive.Size", size.data(), 0.002f)) {
-                            mesh->setSize(size);
-                            primitiveConfig->setValue("size", size);
-                        }
-
-                        if(primitiveType == "sphere") {
-                            Themer::setNextItemRightAlign("Rings", spacing);
-                            Int rings = primitiveConfig->value<Int>("rings");
-                            if(ImGui::DragInt("##Mesh.Primitive.Rings", &rings, 1.0f, 2, INT_MAX)) {
-                                primitiveConfig->setValue("rings", rings);
-                                updateMesh = true;
-                            }
-                        }
-
-                        if(primitiveType == "circle" || primitiveType == "sphere") {
-                            Themer::setNextItemRightAlign("Segments", spacing);
-                            Int segments = primitiveConfig->value<Int>("segments");
-                            if(ImGui::DragInt("##Mesh.Primitive.Segments", &segments, 1.0f, 3, INT_MAX)) {
-                                primitiveConfig->setValue("segments", segments);
-                                updateMesh = true;
-                            }
-                        }
-                    }
-
-                    if(updateMesh) _panel->loadMeshFeature(*mesh, primitiveConfig);
-
-                    ImGui::TreePop();
-                }
-
-                if(materialConfig && ImGui::TreeNodeEx("Material", nodeFlags)) {
-                    Themer::setNextItemRightAlign("Ambient", spacing);
-                    Color3 ambient = mesh->ambientColor();
-                    if(ImGui::ColorEdit3("##Mesh.Material.Ambient", ambient.data())) {
-                        materialConfig->setValue("ambient", ambient);
-                        mesh->setAmbientColor(ambient);
-                    }
-
-                    Themer::setNextItemRightAlign("Diffuse", spacing);
-                    Color3 diffuse = mesh->diffuseColor();
-                    if(ImGui::ColorEdit3("##Mesh.Material.Diffuse", diffuse.data())) {
-                        materialConfig->setValue("diffuse", diffuse);
-                        mesh->setDiffuseColor(diffuse);
-                    }
-
-                    Themer::setNextItemRightAlign("Specular", spacing);
-                    Color3 specular = mesh->specularColor();
-                    if(ImGui::ColorEdit3("##Mesh.Material.Specular", specular.data())) {
-                        materialConfig->setValue("specular", specular);
-                        mesh->setSpecularColor(specular);
-                    }
-
-                    Themer::setNextItemRightAlign("Shininess", spacing);
-                    Float shininess = mesh->shininess();
-                    if(ImGui::DragFloat("##Mesh.Material.Shininess", &shininess, 0.1f, 1.0f, FLT_MAX)) {
-                        materialConfig->setValue("shininess", shininess);
-                        mesh->setShininess(shininess);
-                    }
-
-                    ImGui::TreePop();
-                }
-            }
-
-            if(!featureIsOpen) {
-                delete mesh;
-                objectNode->objectConfig()->removeGroup(featureConfig);
-
-                _panel->removeDrawableNode(objectNode);
-            }
-        } else if(type == "light") {
-            /* Light */
-            auto& features = objectNode->object()->features();
-            Light* light = nullptr;
-
-            for(auto& feature: features) {
-                if((light = dynamic_cast<Light*>(&feature)))
-                    break;
-            }
-
-            CORRADE_INTERNAL_ASSERT(light != nullptr);
-
-            bool featureIsOpen = true;
-
-            if(ImGui::CollapsingHeader("Light", &featureIsOpen, ImGuiTreeNodeFlags_DefaultOpen)) {
-                /* Color */
-                Themer::setNextItemRightAlign("Color", spacing);
-                Color3 color = light->color();
-                if(ImGui::ColorEdit3("##Light.Color", color.data())) {
-                    light->setColor(color);
-                    featureConfig->setValue("color", color);
-                }
-
-                /* Constant */
-                Themer::setNextItemRightAlign("Constant", spacing);
-                Float constant = light->constant();
-                if(ImGui::DragFloat("##Light.Contant", &constant, 0.0001f, 0.0f, FLT_MAX, "%f")) {
-                    light->setConstant(constant);
-                    featureConfig->setValue("constant", constant);
-                }
-
-                /* Linear */
-                Themer::setNextItemRightAlign("Linear", spacing);
-                Float linear = light->linear();
-                if(ImGui::DragFloat("##Light.Linear", &linear, 0.0001f, 0.0f, FLT_MAX, "%f")) {
-                    light->setLinear(linear);
-                    featureConfig->setValue("linear", linear);
-                }
-
-                /* Quadratic */
-                Themer::setNextItemRightAlign("Quadratic", spacing);
-                Float quadratic = light->quadratic();
-                if(ImGui::DragFloat("##Light.Quadratic", &quadratic, 0.0001f, 0.0f, FLT_MAX, "%f")) {
-                    light->setQuadratic(quadratic);
-                    featureConfig->setValue("quadratic", quadratic);
-                }
-            }
-
-            if(!featureIsOpen) {
-                delete light;
-                objectNode->objectConfig()->removeGroup(featureConfig);
-
-                _panel->updateShader();
-            }
-        } else if(type == "script") {
-            /* Script */
-            auto& features = objectNode->object()->features();
-            Script* script = nullptr;
-
-            for(auto& feature: features) {
-                if((script = dynamic_cast<Script*>(&feature)))
-                    break;
-            }
-
-            CORRADE_INTERNAL_ASSERT(script != nullptr);
-
-            bool featureIsOpen = true;
-
-            if(ImGui::CollapsingHeader("Script", &featureIsOpen, ImGuiTreeNodeFlags_DefaultOpen)) {
-                /* Script name */
-                Themer::setNextItemRightAlign("Script name", spacing);
-                std::string name = featureConfig->value("name");
-                if(ImGui::InputText("##Script.Name", &name, ImGuiInputTextFlags_EnterReturnsTrue)) {
-                    script->setname(name);
-                    featureConfig->setValue("name", name);
-                }
-            }
-
-            if(!featureIsOpen) {
-                delete script;
-                objectNode->objectConfig()->removeGroup(featureConfig);
-            }
-        } else if(type == "sprite") {
-            /* Sprite */
-            auto& features = objectNode->object()->features();
-            Sprite* sprite = nullptr;
-
-            for(auto& feature: features) {
-                if((sprite = dynamic_cast<Sprite*>(&feature)))
-                    break;
-            }
-
-            CORRADE_INTERNAL_ASSERT(sprite != nullptr);
-
-            bool featureIsOpen = true;
-            bool reloadFeature = false;
-
-            if(ImGui::CollapsingHeader("Sprite", &featureIsOpen, ImGuiTreeNodeFlags_DefaultOpen)) {
-                /* Path */
-                Themer::setNextItemRightAlign("Path", spacing);
-                std::string path = featureConfig->value("path");
-                if(ImGui::InputText("##Sprite.Path", &path, ImGuiInputTextFlags_EnterReturnsTrue)) {
-                    featureConfig->setValue("path", path);
-                    reloadFeature = true;
-                }
-
-                if(ImGui::BeginDragDropTarget()) {
-                    if(const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("FileNode.Image")) {
-                        IM_ASSERT(payload->DataSize == sizeof(FileNode*));
-                        const FileNode* fileNode = *static_cast<const FileNode**>(payload->Data);
-
-                        featureConfig->setValue("path", fileNode->resourcePath());
-                        reloadFeature = true;
-                    }
-                    ImGui::EndDragDropTarget();
-                }
-
-                /* Pixel size */
-                Themer::setNextItemRightAlign("Pixel size", spacing);
-                Float pixelSize = sprite->pixelSize();
-                if(ImGui::DragFloat("##Sprite.PixelSize", &pixelSize, 0.001f)) {
-                    sprite->setPixelSize(pixelSize);
-                    featureConfig->setValue("pixel_size", pixelSize);
-                }
-            }
-
-            if(!featureIsOpen || reloadFeature) {
-                delete sprite;
-
-                if(reloadFeature) _panel->addFeatureToObject(objectNode, featureConfig);
-                else objectNode->objectConfig()->removeGroup(featureConfig);
-            }
-        }
+        ImGui::Dummy(ImVec2(0.0f, 5.0f));
     }
 
-    ImGui::Dummy(ImVec2(0.0f, 10.0f));
     ImGui::Separator();
-    ImGui::Dummy(ImVec2(0.0f, 10.0f));
+    ImGui::Dummy(ImVec2(0.0f, 5.0f));
 
-    const Float featureButtonWidth = 100.0f;
-    ImGui::SetCursorPosX(ImGui::GetWindowWidth()/2 - featureButtonWidth/2);
-    ImGui::PushStyleVar(ImGuiStyleVar_SelectableTextAlign, ImVec2(0.5f, 0.5f));
+    /* Add feature button */
+    const Float addFeatureButtonWidth = ImGui::GetWindowWidth()/2;
+    ImGui::SetCursorPosX(ImGui::GetWindowWidth()/2 - addFeatureButtonWidth/2);
 
-    ImGui::PushItemWidth(featureButtonWidth);
-    if(ImGui::Button("Add feature"))
+    if(ImGui::Button("Add feature", ImVec2(addFeatureButtonWidth, 0)))
         ImGui::OpenPopup("FeaturePopup");
 
-    ImGui::PopStyleVar();
-
     if(ImGui::BeginPopup("FeaturePopup")) {
-        std::string newFeatureType;
+        const char* features[] = {"light", "mesh", "script"};
+        for(const char* feature: features) {
+            if(ImGui::Selectable(snakeCaseToPhrase(feature).c_str())) {
+                bool featureAlreadyPresent = false;
 
-        if(ImGui::Selectable("Mesh")) newFeatureType = "mesh";
-        if(ImGui::Selectable("Light")) newFeatureType = "light";
-        if(ImGui::Selectable("Script")) newFeatureType = "script";
-        if(ImGui::Selectable("Sprite")) newFeatureType = "sprite";
+                for(Utility::ConfigurationGroup* featureConfig: objectNode->objectConfig()->groups("feature")) {
+                    std::string type = featureConfig->value("type");
+                    if(type == feature) {
+                        featureAlreadyPresent = true;
+                        break;
+                    }
+                }
 
-        if(!newFeatureType.empty()) {
-            bool featureAlreadyPresent = false;
-
-            for(auto featureConfig: objectNode->objectConfig()->groups("feature")) {
-                std::string type = featureConfig->value("type");
-                if(type == newFeatureType) featureAlreadyPresent = true;
-            }
-
-            if(!featureAlreadyPresent) {
-                Utility::ConfigurationGroup* featureConfig = objectNode->objectConfig()->addGroup("feature");
-                featureConfig->setValue("type", newFeatureType);
-
-                _panel->addFeatureToObject(objectNode, featureConfig);
+                if(!featureAlreadyPresent) {
+                    Utility::ConfigurationGroup* featureConfig = objectNode->objectConfig()->addGroup("feature");
+                    featureConfig->setValue("type", feature);
+                    _panel->addFeatureToObject(objectNode, featureConfig);
+                }
             }
         }
 
@@ -397,3 +129,214 @@ void Inspector::newFrame() {
 
     ImGui::End();
 }
+
+void Inspector::showTransformationHeader(ObjectNode* objectNode) {
+    if(ImGui::CollapsingHeader("Transformation", ImGuiTreeNodeFlags_DefaultOpen)) {
+        /* Translation */
+        ImGui::Text("Translation");
+        ImGui::SetNextItemWidth(-1);
+        Vector3 translation = objectNode->object()->translation();
+        if(ImGui::DragFloat3("##Transformation.Translation", translation.data(), 0.005f)) {
+            objectNode->object()->setTranslation(translation);
+            objectNode->objectConfig()->setValue("transformation", objectNode->object()->transformation());
+        }
+
+        /* Rotation */
+        ImGui::Text("Rotation");
+        ImGui::SetNextItemWidth(-1);
+        Vector3 rotationDegree = objectNode->rotationDegree();
+        if(ImGui::DragFloat3("##Transformation.Rotation", rotationDegree.data(), 0.1f)) {
+            objectNode->object()->setRotation(
+                Quaternion::rotation(Rad{Deg{rotationDegree.z()}}, Vector3::zAxis())*
+                Quaternion::rotation(Rad{Deg{rotationDegree.y()}}, Vector3::yAxis())*
+                Quaternion::rotation(Rad{Deg{rotationDegree.x()}}, Vector3::xAxis()));
+            objectNode->setRotationDegree(rotationDegree);
+            objectNode->objectConfig()->setValue("transformation", objectNode->object()->transformation());
+        }
+
+        /* Scaling */
+        ImGui::Text("Scaling");
+        ImGui::SetNextItemWidth(-1);
+        Vector3 scaling = objectNode->object()->scaling();
+        if(ImGui::DragFloat3("##Transformation.Scaling", scaling.data(), 0.002f)) {
+            objectNode->object()->setScaling(scaling);
+            objectNode->objectConfig()->setValue("transformation", objectNode->object()->transformation());
+        }
+    }
+}
+
+void Inspector::showLightHeader(ObjectNode* objectNode, Utility::ConfigurationGroup* featureConfig) {
+    Light* light = getObjectFeature<Light>(objectNode->object());
+    bool headerIsOpen = true;
+
+    if(ImGui::CollapsingHeader("Light", &headerIsOpen, ImGuiTreeNodeFlags_DefaultOpen)) {
+        ImGui::Text("Color");
+        ImGui::SetNextItemWidth(-1);
+        Color4 color = light->color();
+        if(ImGui::ColorEdit4("##Light.Color", color.data())) {
+            light->setColor(color);
+            featureConfig->setValue("color", color);
+        }
+
+        Themer::setNextItemRightAlign("Constant", _spacing);
+        Float constant = light->constant();
+        if(ImGui::DragFloat("##Light.Contant", &constant, 0.0001f, 0.0f, 0.0f, "%f")) {
+            light->setConstant(constant);
+            featureConfig->setValue("constant", constant);
+        }
+
+        Themer::setNextItemRightAlign("Linear", _spacing);
+        Float linear = light->linear();
+        if(ImGui::DragFloat("##Light.Linear", &linear, 0.0001f, 0.0f, 0.0f, "%f")) {
+            light->setLinear(linear);
+            featureConfig->setValue("linear", linear);
+        }
+
+        Themer::setNextItemRightAlign("Quadratic", _spacing);
+        Float quadratic = light->quadratic();
+        if(ImGui::DragFloat("##Light.Quadratic", &quadratic, 0.0001f, 0.0f, 0.0f, "%f")) {
+            light->setQuadratic(quadratic);
+            featureConfig->setValue("quadratic", quadratic);
+        }
+    }
+
+    if(!headerIsOpen) {
+        delete light;
+        objectNode->objectConfig()->removeGroup(featureConfig);
+
+        _panel->recreateShaders();
+        _panel->resetLightsId();
+    }
+}
+
+void Inspector::showMeshHeader(ObjectNode* objectNode, Utility::ConfigurationGroup* featureConfig) {
+    Mesh* mesh = getObjectFeature<Mesh>(objectNode->object());
+    bool headerIsOpen = true;
+    bool reloadFeature = false;
+
+    if(ImGui::CollapsingHeader("Mesh", &headerIsOpen, ImGuiTreeNodeFlags_DefaultOpen)) {
+        Utility::ConfigurationGroup* primitiveConfig = featureConfig->group("primitive");
+        ImGuiTreeNodeFlags nodeFlags = ImGuiTreeNodeFlags_FramePadding |
+            ImGuiTreeNodeFlags_NoTreePushOnOpen | ImGuiTreeNodeFlags_SpanFullWidth;
+
+        if(ImGui::TreeNodeEx("Primitive", nodeFlags)) {
+            std::string primitiveType = "none";
+            if(primitiveConfig) primitiveType = primitiveConfig->value("type");
+
+            Themer::setNextItemRightAlign("Type", _spacing);
+            if(ImGui::BeginCombo("##Mesh.Primitive.Type", snakeCaseToPhrase(primitiveType).c_str())) {
+                const char* primitives[] = {"circle", "cube", "plane", "sphere"};
+                for(const char* type: primitives) {
+                    bool isSelected = false;
+
+                    if(ImGui::Selectable(snakeCaseToPhrase(type).c_str(), isSelected)) {
+                        /* Recreate the group to remove superfluous values */
+                        featureConfig->removeGroup("primitive");
+                        primitiveConfig = featureConfig->addGroup("primitive");
+
+                        primitiveConfig->setValue("type", type);
+                        reloadFeature = true;
+                    }
+                    if(isSelected) ImGui::SetItemDefaultFocus();
+                }
+
+                ImGui::EndCombo();
+            }
+
+            if(primitiveConfig) {
+                ImGui::Text("Size");
+                ImGui::SetNextItemWidth(-1);
+                Vector3 size = mesh->size();
+                if(ImGui::DragFloat3("##Mesh.Primitive.Size", size.data(), 0.002f)) {
+                    mesh->setSize(size);
+                    primitiveConfig->setValue("size", size);
+                }
+
+                if(primitiveType == "sphere") {
+                    Themer::setNextItemRightAlign("Rings", _spacing);
+                    Int rings = primitiveConfig->value<Int>("rings");
+                    if(ImGui::DragInt("##Mesh.Primitive.Rings", &rings, 1.0f, 2, INT_MAX)) {
+                        primitiveConfig->setValue("rings", rings);
+                        reloadFeature = true;
+                    }
+                }
+
+                if(primitiveType == "circle" || primitiveType == "sphere") {
+                    Themer::setNextItemRightAlign("Segments", _spacing);
+                    Int segments = primitiveConfig->value<Int>("segments");
+                    if(ImGui::DragInt("##Mesh.Primitive.Segments", &segments, 1.0f, 3, INT_MAX)) {
+                        primitiveConfig->setValue("segments", segments);
+                        reloadFeature = true;
+                    }
+                }
+            }
+        }
+
+        if(ImGui::TreeNodeEx("Material", nodeFlags)) {
+            Utility::ConfigurationGroup* materialConfig = featureConfig->group("material");
+
+            ImGui::Text("Ambient color");
+            ImGui::SetNextItemWidth(-1);
+            Color4 ambientColor = mesh->ambientColor();
+            if(ImGui::ColorEdit4("##Mesh.Material.AmbientColor", ambientColor.data())) {
+                if(!materialConfig) materialConfig = featureConfig->addGroup("material");
+                materialConfig->setValue("ambient_color", ambientColor);
+                mesh->setAmbientColor(ambientColor);
+            }
+
+            ImGui::Text("Diffuse color");
+            ImGui::SetNextItemWidth(-1);
+            Color4 diffuseColor = mesh->diffuseColor();
+            if(ImGui::ColorEdit4("##Mesh.Material.DiffuseColor", diffuseColor.data())) {
+                if(!materialConfig) materialConfig = featureConfig->addGroup("material");
+                materialConfig->setValue("diffuse_color", diffuseColor);
+                mesh->setDiffuseColor(diffuseColor);
+            }
+
+            ImGui::Text("Specular color");
+            ImGui::SetNextItemWidth(-1);
+            Color4 specularColor = mesh->specularColor();
+            if(ImGui::ColorEdit4("##Mesh.Material.SpecularColor", specularColor.data())) {
+                if(!materialConfig) materialConfig = featureConfig->addGroup("material");
+                materialConfig->setValue("specular_color", specularColor);
+                mesh->setSpecularColor(specularColor);
+            }
+
+            Themer::setNextItemRightAlign("Shininess", _spacing);
+            Float shininess = mesh->shininess();
+            if(ImGui::DragFloat("##Mesh.Material.Shininess", &shininess, 0.1f, 1.0f, FLT_MAX)) {
+                if(!materialConfig) materialConfig = featureConfig->addGroup("material");
+                materialConfig->setValue("shininess", shininess);
+                mesh->setShininess(shininess);
+            }
+        }
+    }
+
+    if(!headerIsOpen || reloadFeature) {
+        delete mesh;
+        _panel->removeDrawableNode(objectNode);
+
+        if(reloadFeature) _panel->addFeatureToObject(objectNode, featureConfig);
+        else objectNode->objectConfig()->removeGroup(featureConfig);
+    }
+}
+
+void Inspector::showScriptHeader(ObjectNode* objectNode, Utility::ConfigurationGroup* featureConfig) {
+    Script* script = getObjectFeature<Script>(objectNode->object());
+    bool headerIsOpen = true;
+
+    if(ImGui::CollapsingHeader("Script", &headerIsOpen, ImGuiTreeNodeFlags_DefaultOpen)) {
+        Themer::setNextItemRightAlign("Name", _spacing);
+        std::string name = script->name();
+        if(ImGui::InputText("##Script.Name", &name, ImGuiInputTextFlags_EnterReturnsTrue)) {
+            script->setName(name);
+            featureConfig->setValue("name", name);
+        }
+    }
+
+    if(!headerIsOpen) {
+        delete script;
+        objectNode->objectConfig()->removeGroup(featureConfig);
+    }
+}
+

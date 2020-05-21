@@ -39,7 +39,6 @@
 #include <Oberon/Core/Mesh.h>
 #include <Oberon/Core/Script.h>
 #include <Oberon/Core/ScriptManager.h>
-#include <Oberon/Core/Sprite.h>
 
 #include "FileNode.h"
 #include "ObjectNode.h"
@@ -75,7 +74,9 @@ CollectionPanel::CollectionPanel(FileNode* fileNode, OberonResourceManager& reso
     _rootNode = Containers::pointer<ObjectNode>(&_scene, _collectionConfig->group("scene"));
 
     updateObjectNodeChildren(_rootNode.get());
-    updateDrawablesId();
+    resetDrawablesId();
+
+    _importer.createShaders(&_drawables, _lights.size(), shaderKeys, true);
 }
 
 void CollectionPanel::drawViewport(Float deltaTime) {
@@ -92,7 +93,7 @@ void CollectionPanel::drawViewport(Float deltaTime) {
     if(_isSimulating) _scriptManager.update(deltaTime);
 
     for(std::size_t i = 0; i != _lights.size(); ++i)
-        _lights[i].updateShader(*_camera);
+        _lights[i].updateShader(*_camera, shaderKeys);
 
     _camera->draw(_drawables);
     _camera->draw(_editorDrawables);
@@ -171,7 +172,7 @@ void CollectionPanel::save() {
 void CollectionPanel::updateObjectNodeChildren(ObjectNode* node) {
     for(auto childConfig: node->objectConfig()->groups("child")) {
         Object3D* child = _importer.loadObject(childConfig, node->object(),
-            _resourceManager, &_drawables, &_scripts, &_lights);
+            &_drawables, &_scripts, &_lights);
         ObjectNode* childNode = node->addChild(child, childConfig);
 
         if(!_drawables.isEmpty() && child == &_drawables[_drawables.size() - 1].object())
@@ -200,8 +201,9 @@ void CollectionPanel::createGrid() {
         _resourceManager.set(meshResource.key(), std::move(glMesh), ResourceDataState::Final, ResourcePolicy::ReferenceCounted);
     }
 
-    Mesh& mesh = _gridObject->addFeature<Mesh>(&_editorDrawables, shaderResource);
+    Mesh& mesh = _gridObject->addFeature<Mesh>(&_editorDrawables);
     mesh.setMesh(meshResource);
+    mesh.setShader(shaderResource);
     mesh.setSize({size, size, size});
     mesh.setAmbientColor(Color3{0.3f});
 }
@@ -213,65 +215,53 @@ void CollectionPanel::resetObjectAndChildren(ObjectNode* node) {
         resetObjectAndChildren(child.get());
 }
 
-void CollectionPanel::loadMeshFeature(Mesh& mesh, Utility::ConfigurationGroup* primitiveConfig) {
-    _importer.loadMeshFeature(mesh, primitiveConfig, _resourceManager);
+void CollectionPanel::recreateShaders() {
+    for(std::pair<std::string, SceneShader::Flags>& key: shaderKeys) {
+        _resourceManager.set<GL::AbstractShaderProgram>(key.first, new SceneShader{key.second, UnsignedInt(_lights.size())},
+            ResourceDataState::Mutable, ResourcePolicy::ReferenceCounted);
+    }
 }
 
-CollectionPanel& CollectionPanel::updateShader() {
-    Resource<GL::AbstractShaderProgram, SceneShader> shaderResource = _resourceManager.get<GL::AbstractShaderProgram,
-        SceneShader>("scene-objectid");
-    _resourceManager.set<GL::AbstractShaderProgram>(shaderResource.key(), new SceneShader{SceneShader::Flag::ObjectId, UnsignedInt(_lights.size())},
-        ResourceDataState::Mutable, ResourcePolicy::ReferenceCounted);
-
+void CollectionPanel::resetLightsId() {
     for(std::size_t i = 0; i != _lights.size(); ++i)
         _lights[i].setId(i);
-
-    return *this;
 }
 
-CollectionPanel& CollectionPanel::addFeatureToObject(ObjectNode* objectNode, Utility::ConfigurationGroup* featureConfig) {
-    std::size_t drawablesNum = _drawables.size();
-    _importer.loadFeature(featureConfig, objectNode->object(), _resourceManager, &_drawables, &_scripts, &_lights);
+void CollectionPanel::addFeatureToObject(ObjectNode* objectNode, Utility::ConfigurationGroup* featureConfig) {
+    SceneGraph::AbstractFeature3D* newFeature = _importer.loadFeature(featureConfig, objectNode->object(), &_drawables, &_scripts, &_lights);
 
-    if(drawablesNum < _drawables.size()) {
+    if(featureConfig->value("type") == "light")
+        recreateShaders();
+    else if(featureConfig->value("type") == "mesh") {
+        Mesh& mesh = reinterpret_cast<Mesh&>(*newFeature);
+        Resource<GL::AbstractShaderProgram, SceneShader> shaderResource = _importer.createShader(mesh, _lights.size(), shaderKeys, true);
+        mesh.setObjectId(_drawables.size());
+        mesh.setShader(shaderResource);
         _drawablesNodes.push_back(objectNode);
-        updateDrawablesId();
     }
-
-    return *this;
 }
 
-CollectionPanel& CollectionPanel::removeDrawableNode(ObjectNode* objectNode) {
+void CollectionPanel::removeDrawableNode(ObjectNode* objectNode) {
     _drawablesNodes.erase(std::find_if(_drawablesNodes.begin(), _drawablesNodes.end(),
         [&objectNode](ObjectNode* n) { return n == objectNode; }));
 
-    updateDrawablesId();
-    return *this;
+    resetDrawablesId();
 }
 
-CollectionPanel& CollectionPanel::updateDrawablesId() {
+void CollectionPanel::resetDrawablesId() {
     for(std::size_t i = 0; i != _drawables.size(); ++i) {
         Mesh* mesh = dynamic_cast<Mesh*>(&_drawables[i]);
-        if(mesh) { mesh->setObjectId(i + 1); continue; }
-
-        Sprite* sprite = dynamic_cast<Sprite*>(&_drawables[i]);
-        if(sprite) { sprite->setObjectId(i + 1); continue; }
+        if(mesh) { mesh->setObjectId(i + 1); }
     }
-
-    return *this;
 }
 
-CollectionPanel& CollectionPanel::startSimulation() {
+void CollectionPanel::startSimulation() {
     _scriptManager.loadScripts(_scripts);
-
     _isSimulating = true;
-    return *this;
 }
 
-CollectionPanel& CollectionPanel::stopSimulation() {
+void CollectionPanel::stopSimulation() {
     _scriptManager.unloadScripts();
     resetObjectAndChildren(_rootNode.get());
-
     _isSimulating = false;
-    return *this;
 }

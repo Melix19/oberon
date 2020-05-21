@@ -26,18 +26,29 @@
 
 #include <MagnumPlugins/PngImporter/PngImporter.h>
 
-#include "Core.h"
+#include "SceneShader.h"
 
 class Importer {
     public:
-        Object3D* loadObject(Utility::ConfigurationGroup* objectConfig, Object3D* parent, OberonResourceManager& resourceManager, SceneGraph::DrawableGroup3D* drawables, ScriptGroup* scripts, LightGroup* lights);
-        Object3D* loadChildrenObject(Utility::ConfigurationGroup* parentConfig, Object3D* parent, OberonResourceManager& resourceManager, SceneGraph::DrawableGroup3D* drawables, ScriptGroup* scripts, LightGroup* lights);
+        Importer(OberonResourceManager& resourceManager): _resourceManager(resourceManager) {}
 
-        void loadFeature(Utility::ConfigurationGroup* featureConfig, Object3D* object, OberonResourceManager& resourceManager, SceneGraph::DrawableGroup3D* drawables, ScriptGroup* scripts, LightGroup* lights);
+        Object3D* loadObject(Utility::ConfigurationGroup* objectConfig, Object3D* parent, SceneGraph::DrawableGroup3D* drawables, ScriptGroup* scripts, LightGroup* lights);
+        Object3D* loadChildrenObject(Utility::ConfigurationGroup* parentConfig, Object3D* parent, SceneGraph::DrawableGroup3D* drawables, ScriptGroup* scripts, LightGroup* lights);
+
+        SceneGraph::AbstractFeature3D* loadFeature(Utility::ConfigurationGroup* featureConfig, Object3D* object, SceneGraph::DrawableGroup3D* drawables, ScriptGroup* scripts, LightGroup* lights);
         void resetObject(Object3D* object, Utility::ConfigurationGroup* objectConfig);
 
-        void loadMeshFeature(Mesh& mesh, Utility::ConfigurationGroup* primitiveConfig, OberonResourceManager& resourceManager);
+        void loadMeshFeature(Mesh& mesh, Utility::ConfigurationGroup* primitiveConfig);
+
+        Resource<GL::AbstractShaderProgram, SceneShader> createShader(Mesh& mesh, UnsignedInt lightCount, std::vector<std::pair<std::string, SceneShader::Flags>>& shaderKeys, bool useObjectId);
+        void createShaders(SceneGraph::DrawableGroup3D* drawables, UnsignedInt lightCount, std::vector<std::pair<std::string, SceneShader::Flags>>& shaderKeys, bool useObjectId = false);
+
+        GL::Texture2D loadTexture(Containers::ArrayView<const char> data);
 
     private:
+        std::pair<std::string, SceneShader::Flags> calculateShaderKey(Mesh& mesh, bool useObjectId);
+
+    private:
+        OberonResourceManager& _resourceManager;
         Trade::PngImporter _pngImporter;
 };

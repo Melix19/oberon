@@ -45,8 +45,14 @@ GlfwPlatform::GlfwPlatform(const Arguments& arguments): Platform::Application{ar
     Configuration{}.setTitle("Application")
                    .setSize({1024, 576})}
 {
+    GL::Renderer::enable(GL::Renderer::Feature::Blending);
     GL::Renderer::enable(GL::Renderer::Feature::DepthTest);
     GL::Renderer::enable(GL::Renderer::Feature::FaceCulling);
+
+    GL::Renderer::setBlendEquation(GL::Renderer::BlendEquation::Add,
+        GL::Renderer::BlendEquation::Add);
+    GL::Renderer::setBlendFunction(GL::Renderer::BlendFunction::SourceAlpha,
+        GL::Renderer::BlendFunction::OneMinusSourceAlpha);
 
     using namespace Math::Literals;
 
@@ -69,8 +75,9 @@ GlfwPlatform::GlfwPlatform(const Arguments& arguments): Platform::Application{ar
     Utility::Configuration collection(collectionStream);
     Utility::ConfigurationGroup* sceneConfiguration = collection.group("scene");
 
-    Importer importer;
-    importer.loadChildrenObject(sceneConfiguration, &_scene, _resourceManager, &_drawables, &_scripts, &_lights);
+    Importer importer{_resourceManager};
+    importer.loadChildrenObject(sceneConfiguration, &_scene, &_drawables, &_scripts, &_lights);
+    importer.createShaders(&_drawables, _lights.size(), shaderKeys);
 
     _scriptManager.loadScripts(_scripts);
 
@@ -83,7 +90,7 @@ void GlfwPlatform::drawEvent() {
     _scriptManager.update(_timeline.previousFrameDuration());
 
     for(std::size_t i = 0; i != _lights.size(); ++i)
-        _lights[i].updateShader(*_camera);
+        _lights[i].updateShader(*_camera, shaderKeys);
 
     _camera->draw(_drawables);
 

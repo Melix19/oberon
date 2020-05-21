@@ -28,6 +28,21 @@
 
 namespace Themer {
 
+namespace {
+
+void commonStyle() {
+    ImGuiStyle& style = ImGui::GetStyle();
+
+    style.ChildBorderSize = 0.0f;
+    style.ItemSpacing.y = 5.0f;
+    style.ItemInnerSpacing.x = 5.0f;
+    style.FrameRounding = 4.0f;
+    style.GrabRounding = 4.0f;
+    style.PopupRounding = 4.0f;
+}
+
+}
+
 void styleColorsDark() {
     ImGuiStyle& style = ImGui::GetStyle();
 
@@ -66,6 +81,8 @@ void styleColorsDark() {
 
     ImVec4 textColor(1.0f, 1.0f, 1.0f, 1.0f);
     style.Colors[ImGuiCol_Text] = textColor;
+
+    commonStyle();
 }
 
 void styleColorsLight() {
@@ -106,6 +123,8 @@ void styleColorsLight() {
 
     ImVec4 textColor(0.0f, 0.0f, 0.0f, 1.0f);
     style.Colors[ImGuiCol_Text] = textColor;
+
+    commonStyle();
 }
 
 void setNextItemRightAlign(const char* label, float spacing) {

@@ -35,7 +35,7 @@ class Script: public SceneGraph::AbstractGroupedFeature3D<Script> {
 
         std::string name() const { return _name; }
 
-        Script& setname(const std::string& name) {
+        Script& setName(const std::string& name) {
             _name = name;
             return *this;
         }

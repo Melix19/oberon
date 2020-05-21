@@ -31,6 +31,7 @@
 #include <Magnum/SceneGraph/Drawable.h>
 #include <Magnum/SceneGraph/Scene.h>
 #include <Magnum/SceneGraph/TranslationRotationScalingTransformation3D.h>
+#include <Oberon/Core/SceneShader.h>
 
 #include "AbstractPanel.h"
 
@@ -68,13 +69,12 @@ class CollectionPanel: public AbstractPanel {
 
         std::vector<ObjectNode*>& selectedNodes() { return _selectedNodes; }
 
-        void loadMeshFeature(Mesh& mesh, Utility::ConfigurationGroup* primitiveConfig);
+        void recreateShaders();
+        void resetLightsId();
 
-        CollectionPanel& updateShader();
-
-        CollectionPanel& addFeatureToObject(ObjectNode* objectNode, Utility::ConfigurationGroup* featureConfig);
-        CollectionPanel& removeDrawableNode(ObjectNode* objectNode);
-        CollectionPanel& updateDrawablesId();
+        void addFeatureToObject(ObjectNode* objectNode, Utility::ConfigurationGroup* featureConfig);
+        void removeDrawableNode(ObjectNode* objectNode);
+        void resetDrawablesId();
 
     private:
         void updateObjectNodeChildren(ObjectNode* node);
@@ -100,6 +100,7 @@ class CollectionPanel: public AbstractPanel {
         std::vector<ObjectNode*> _drawablesNodes;
         ScriptGroup _scripts;
         LightGroup _lights;
+        std::vector<std::pair<std::string, SceneShader::Flags>> shaderKeys;
 
         Scene3D _scene;
         Object3D* _cameraObject;
@@ -109,8 +110,8 @@ class CollectionPanel: public AbstractPanel {
     public:
         bool isSimulating() const { return _isSimulating; }
 
-        CollectionPanel& startSimulation();
-        CollectionPanel& stopSimulation();
+        void startSimulation();
+        void stopSimulation();
 
     private:
         bool _isSimulating{false};

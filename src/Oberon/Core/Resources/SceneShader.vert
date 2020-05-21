@@ -22,10 +22,6 @@
     SOFTWARE.
 */
 
-#if defined(INSTANCED_OBJECT_ID) && !defined(GL_ES) && !defined(NEW_GLSL)
-#extension GL_EXT_gpu_shader4: require
-#endif
-
 #ifndef NEW_GLSL
 #define in attribute
 #define out varying
@@ -58,6 +54,13 @@ in highp vec4 position;
 layout(location = NORMAL_ATTRIBUTE_LOCATION)
 #endif
 in mediump vec3 normal;
+
+#ifdef NORMAL_TEXTURE
+#ifdef EXPLICIT_ATTRIB_LOCATION
+layout(location = TANGENT_ATTRIBUTE_LOCATION)
+#endif
+in mediump vec3 tangent;
+#endif
 #endif
 
 #ifdef TEXTURED
@@ -72,6 +75,9 @@ out mediump vec2 interpolatedTextureCoordinates;
 #if LIGHT_COUNT
 out highp vec3 transformedPosition;
 out mediump vec3 transformedNormal;
+#ifdef NORMAL_TEXTURE
+out mediump vec3 transformedTangent;
+#endif
 #endif
 
 void main() {
@@ -83,6 +89,9 @@ void main() {
 
     /* Transformed normal and tangent vector */
     transformedNormal = normalMatrix*normal;
+    #ifdef NORMAL_TEXTURE
+    transformedTangent = normalMatrix*tangent;
+    #endif
     #endif
 
     /* Transform the position */

@@ -71,7 +71,8 @@ inline GL::Shader createCompatibilityShader(const Utility::Resource& rs, GL::Ver
 enum: Int {
     AmbientTextureUnit = 0,
     DiffuseTextureUnit = 1,
-    SpecularTextureUnit = 2
+    SpecularTextureUnit = 2,
+    NormalTextureUnit = 3
 };
 
 }
@@ -92,11 +93,15 @@ SceneShader::SceneShader(const Flags flags, const UnsignedInt lightCount): _flag
     GL::Shader vert = createCompatibilityShader(magnumRs, version, GL::Shader::Type::Vertex);
     GL::Shader frag = createCompatibilityShader(magnumRs, version, GL::Shader::Type::Fragment);
 
-    vert.addSource(flags & Flag::Textured ? "#define TEXTURED\n" : "")
+    vert.addSource(flags & (Flag::AmbientTexture|Flag::DiffuseTexture|Flag::SpecularTexture|Flag::NormalTexture) ? "#define TEXTURED\n" : "")
+        .addSource(flags & Flag::NormalTexture ? "#define NORMAL_TEXTURE\n" : "")
         .addSource(Utility::formatString("#define LIGHT_COUNT {}\n", lightCount))
         .addSource(magnumRs.get("generic.glsl"))
         .addSource(rs.get("SceneShader.vert"));
-    frag.addSource(flags & Flag::Textured ? "#define TEXTURED\n" : "")
+    frag.addSource(flags & Flag::AmbientTexture ? "#define AMBIENT_TEXTURE\n" : "")
+        .addSource(flags & Flag::DiffuseTexture ? "#define DIFFUSE_TEXTURE\n" : "")
+        .addSource(flags & Flag::SpecularTexture ? "#define SPECULAR_TEXTURE\n" : "")
+        .addSource(flags & Flag::NormalTexture ? "#define NORMAL_TEXTURE\n" : "")
         #ifndef MAGNUM_TARGET_GLES2
         .addSource(flags & Flag::ObjectId ? "#define OBJECT_ID\n" : "")
         #endif
@@ -118,7 +123,9 @@ SceneShader::SceneShader(const Flags flags, const UnsignedInt lightCount): _flag
         bindAttributeLocation(Position::Location, "position");
         if(lightCount)
             bindAttributeLocation(Normal::Location, "normal");
-        if(flags & (Flag::Textured))
+        if((flags & Flag::NormalTexture) && lightCount)
+            bindAttributeLocation(Tangent::Location, "tangent");
+        if(flags & (Flag::AmbientTexture|Flag::DiffuseTexture|Flag::SpecularTexture))
             bindAttributeLocation(TextureCoordinates::Location, "textureCoordinates");
         #ifndef MAGNUM_TARGET_GLES2
         if(flags & Flag::ObjectId) {
@@ -154,12 +161,11 @@ SceneShader::SceneShader(const Flags flags, const UnsignedInt lightCount): _flag
     if(flags && !GL::Context::current().isExtensionSupported<GL::Extensions::ARB::shading_language_420pack>(version))
     #endif
     {
-        if(flags & Flag::Textured) {
-            setUniform(uniformLocation("ambientTexture"), AmbientTextureUnit);
-            if(lightCount) {
-                setUniform(uniformLocation("diffuseTexture"), DiffuseTextureUnit);
-                setUniform(uniformLocation("specularTexture"), SpecularTextureUnit);
-            }
+        if(flags & Flag::AmbientTexture) setUniform(uniformLocation("ambientTexture"), AmbientTextureUnit);
+        if(lightCount) {
+            if(flags & Flag::DiffuseTexture) setUniform(uniformLocation("diffuseTexture"), DiffuseTextureUnit);
+            if(flags & Flag::SpecularTexture) setUniform(uniformLocation("specularTexture"), SpecularTextureUnit);
+            if(flags & Flag::NormalTexture) setUniform(uniformLocation("normalTexture"), NormalTextureUnit);
         }
     }
 }
@@ -170,8 +176,8 @@ SceneShader& SceneShader::setAmbientColor(const Color4& color) {
 }
 
 SceneShader& SceneShader::bindAmbientTexture(GL::Texture2D& texture) {
-    CORRADE_ASSERT(_flags & Flag::Textured,
-        "SceneShader::bindAmbientTexture(): the shader was not created with texturing enabled", *this);
+    CORRADE_ASSERT(_flags & Flag::AmbientTexture,
+        "SceneShader::bindAmbientTexture(): the shader was not created with ambient texture enabled", *this);
     texture.bind(AmbientTextureUnit);
     return *this;
 }
@@ -182,8 +188,8 @@ SceneShader& SceneShader::setDiffuseColor(const Color4& color) {
 }
 
 SceneShader& SceneShader::bindDiffuseTexture(GL::Texture2D& texture) {
-    CORRADE_ASSERT(_flags & Flag::Textured,
-        "SceneShader::bindDiffuseTexture(): the shader was not created with texturing enabled", *this);
+    CORRADE_ASSERT(_flags & Flag::DiffuseTexture,
+        "SceneShader::bindDiffuseTexture(): the shader was not created with diffuse texture enabled", *this);
     if(_lightCount) texture.bind(DiffuseTextureUnit);
     return *this;
 }
@@ -194,9 +200,16 @@ SceneShader& SceneShader::setSpecularColor(const Color4& color) {
 }
 
 SceneShader& SceneShader::bindSpecularTexture(GL::Texture2D& texture) {
-    CORRADE_ASSERT(_flags & Flag::Textured,
-        "SceneShader::bindSpecularTexture(): the shader was not created with texturing enabled", *this);
+    CORRADE_ASSERT(_flags & Flag::SpecularTexture,
+        "SceneShader::bindSpecularTexture(): the shader was not created with specular texture enabled", *this);
     if(_lightCount) texture.bind(SpecularTextureUnit);
+    return *this;
+}
+
+SceneShader& SceneShader::bindNormalTexture(GL::Texture2D& texture) {
+    CORRADE_ASSERT(_flags & Flag::NormalTexture,
+        "SceneShader::bindNormalTexture(): the shader was not created with normal texture enabled", *this);
+    if(_lightCount) texture.bind(NormalTextureUnit);
     return *this;
 }
 

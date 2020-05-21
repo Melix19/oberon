@@ -29,13 +29,13 @@
 #include <Corrade/Utility/Directory.h>
 #include <Magnum/ImageView.h>
 #include <Magnum/GL/Mesh.h>
+#include <Magnum/GL/Texture.h>
 #include <Magnum/GL/TextureFormat.h>
 #include <Magnum/Math/ConfigurationValue.h>
 #include <Magnum/MeshTools/Compile.h>
 #include <Magnum/Primitives/Circle.h>
 #include <Magnum/Primitives/Cube.h>
 #include <Magnum/Primitives/Plane.h>
-#include <Magnum/Primitives/Square.h>
 #include <Magnum/Primitives/UVSphere.h>
 #include <Magnum/SceneGraph/TranslationRotationScalingTransformation3D.h>
 #include <Magnum/Trade/ImageData.h>
@@ -44,9 +44,8 @@
 #include "Light.h"
 #include "Mesh.h"
 #include "Script.h"
-#include "Sprite.h"
 
-Object3D* Importer::loadObject(Utility::ConfigurationGroup* objectConfig, Object3D* parent, OberonResourceManager& resourceManager, SceneGraph::DrawableGroup3D* drawables, ScriptGroup* scripts, LightGroup* lights) {
+Object3D* Importer::loadObject(Utility::ConfigurationGroup* objectConfig, Object3D* parent, SceneGraph::DrawableGroup3D* drawables, ScriptGroup* scripts, LightGroup* lights) {
     Object3D* object = new Object3D{parent};
 
     /* Transformation */
@@ -56,57 +55,54 @@ Object3D* Importer::loadObject(Utility::ConfigurationGroup* objectConfig, Object
     }
 
     for(auto& featureConfig: objectConfig->groups("feature"))
-        loadFeature(featureConfig, object, resourceManager, drawables, scripts, lights);
+        loadFeature(featureConfig, object, drawables, scripts, lights);
 
     return object;
 }
 
-Object3D* Importer::loadChildrenObject(Utility::ConfigurationGroup* parentConfig, Object3D* parent, OberonResourceManager& resourceManager, SceneGraph::DrawableGroup3D* drawables, ScriptGroup* scripts, LightGroup* lights) {
+Object3D* Importer::loadChildrenObject(Utility::ConfigurationGroup* parentConfig, Object3D* parent, SceneGraph::DrawableGroup3D* drawables, ScriptGroup* scripts, LightGroup* lights) {
     for(auto& childConfig: parentConfig->groups("child")) {
-        Object3D* child = loadObject(childConfig, parent, resourceManager, drawables, scripts, lights);
+        Object3D* child = loadObject(childConfig, parent, drawables, scripts, lights);
 
         if(childConfig->hasGroup("child"))
-            loadChildrenObject(childConfig, child, resourceManager, drawables, scripts, lights);
+            loadChildrenObject(childConfig, child, drawables, scripts, lights);
     }
 
     return parent;
 }
 
-void Importer::loadFeature(Utility::ConfigurationGroup* featureConfig, Object3D* object, OberonResourceManager& resourceManager, SceneGraph::DrawableGroup3D* drawables, ScriptGroup* scripts, LightGroup* lights) {
+SceneGraph::AbstractFeature3D* Importer::loadFeature(Utility::ConfigurationGroup* featureConfig, Object3D* object, SceneGraph::DrawableGroup3D* drawables, ScriptGroup* scripts, LightGroup* lights) {
     std::string type = featureConfig->value("type");
+    SceneGraph::AbstractFeature3D* newFeature;
 
     if(type == "mesh") {
-        /* Shader */
-        Resource<GL::AbstractShaderProgram, SceneShader> shaderResource = resourceManager.get<GL::AbstractShaderProgram, SceneShader>("scene-objectid");
-        if(!shaderResource)
-            resourceManager.set<GL::AbstractShaderProgram>(shaderResource.key(), new SceneShader{SceneShader::Flag::ObjectId}, ResourceDataState::Mutable, ResourcePolicy::ReferenceCounted);
-
         /* Mesh */
-        Mesh& mesh = object->addFeature<Mesh>(drawables, shaderResource);
+        Mesh& mesh = object->addFeature<Mesh>(drawables);
+        newFeature = &mesh;
 
         /* Primitive */
         if(featureConfig->hasGroup("primitive")) {
             Utility::ConfigurationGroup* primitiveConfig = featureConfig->group("primitive");
-            loadMeshFeature(mesh, primitiveConfig, resourceManager);
+            loadMeshFeature(mesh, primitiveConfig);
         }
 
         /* Material */
         if(featureConfig->hasGroup("material")) {
             Utility::ConfigurationGroup* materialConfig = featureConfig->group("material");
 
-            if(materialConfig->hasValue("ambient")) {
-                Color3 ambient = materialConfig->value<Color3>("ambient");
-                mesh.setAmbientColor(ambient);
+            if(materialConfig->hasValue("ambient_color")) {
+                Color4 ambientColor = materialConfig->value<Color4>("ambient_color");
+                mesh.setAmbientColor(ambientColor);
             }
 
-            if(materialConfig->hasValue("diffuse")) {
-                Color3 diffuse = materialConfig->value<Color3>("diffuse");
-                mesh.setDiffuseColor(diffuse);
+            if(materialConfig->hasValue("diffuse_color")) {
+                Color4 diffuseColor = materialConfig->value<Color4>("diffuse_color");
+                mesh.setDiffuseColor(diffuseColor);
             }
 
-            if(materialConfig->hasValue("specular")) {
-                Color3 specular = materialConfig->value<Color3>("specular");
-                mesh.setSpecularColor(specular);
+            if(materialConfig->hasValue("specular_color")) {
+                Color4 specularColor = materialConfig->value<Color4>("specular_color");
+                mesh.setSpecularColor(specularColor);
             }
 
             if(materialConfig->hasValue("shininess")) {
@@ -115,15 +111,12 @@ void Importer::loadFeature(Utility::ConfigurationGroup* featureConfig, Object3D*
             }
         }
     } else if(type == "light") {
-        /* Shader */
-        Resource<GL::AbstractShaderProgram, SceneShader> shaderResource = resourceManager.get<GL::AbstractShaderProgram, SceneShader>("scene-objectid");
-        resourceManager.set<GL::AbstractShaderProgram>(shaderResource.key(), new SceneShader{SceneShader::Flag::ObjectId, UnsignedInt(lights->size() + 1)}, ResourceDataState::Mutable, ResourcePolicy::ReferenceCounted);
-
         /* Light */
-        Light& light = object->addFeature<Light>(lights, shaderResource);
+        Light& light = object->addFeature<Light>(lights, _resourceManager);
+        newFeature = &light;
 
         if(featureConfig->hasValue("color")) {
-            Color3 color = featureConfig->value<Color3>("color");
+            Color4 color = featureConfig->value<Color4>("color");
             light.setColor(color);
         }
 
@@ -146,52 +139,11 @@ void Importer::loadFeature(Utility::ConfigurationGroup* featureConfig, Object3D*
         std::string name = featureConfig->value("name");
 
         /* Script */
-        object->addFeature<Script>(scripts, name);
-    } else if(type == "sprite") {
-        /* Mesh */
-        Resource<GL::Mesh> meshResource = resourceManager.get<GL::Mesh>("square_texture_coords");
-        if(!meshResource) {
-            GL::Mesh glMesh = MeshTools::compile(Primitives::squareSolid(Primitives::SquareFlag::TextureCoordinates));
-            resourceManager.set<GL::Mesh>(meshResource.key(), std::move(glMesh), ResourceDataState::Final, ResourcePolicy::ReferenceCounted);
-        }
-
-        /* Shader */
-        Resource<GL::AbstractShaderProgram, SceneShader> shaderResource = resourceManager.get<GL::AbstractShaderProgram, SceneShader>("scene-textured-objectid");
-        if(!shaderResource)
-            resourceManager.set<GL::AbstractShaderProgram>(shaderResource.key(), new SceneShader{SceneShader::Flag::Textured | SceneShader::Flag::ObjectId}, ResourceDataState::Mutable, ResourcePolicy::ReferenceCounted);
-
-        /* Sprite */
-        Sprite& sprite = object->addFeature<Sprite>(drawables, meshResource, shaderResource);
-
-        /* Pixel size */
-        if(featureConfig->hasValue("pixel_size")) {
-            Float pixelSize = featureConfig->value<Float>("pixel_size");
-            sprite.setPixelSize(pixelSize);
-        }
-
-        /* Texture */
-        if(featureConfig->hasValue("path")) {
-            std::string path = featureConfig->value("path");
-
-            Resource<GL::Texture2D> textureResource = resourceManager.get<GL::Texture2D>(path);
-            if(!textureResource) {
-                _pngImporter.openData(Utility::Directory::read(path));
-                Containers::Optional<Trade::ImageData2D> image = _pngImporter.image2D(0);
-                CORRADE_INTERNAL_ASSERT(image);
-
-                GL::Texture2D texture;
-                texture.setWrapping(GL::SamplerWrapping::ClampToEdge)
-                    .setMagnificationFilter(GL::SamplerFilter::Linear)
-                    .setMinificationFilter(GL::SamplerFilter::Linear)
-                    .setStorage(1, GL::textureFormat(image->format()), image->size())
-                    .setSubImage(0, {}, *image);
-
-                resourceManager.set(textureResource.key(), std::move(texture), ResourceDataState::Final, ResourcePolicy::ReferenceCounted);
-            }
-
-            sprite.setTexture(textureResource);
-        }
+        Script& script = object->addFeature<Script>(scripts, name);
+        newFeature = &script;
     }
+
+    return newFeature;
 }
 
 void Importer::resetObject(Object3D* object, Utility::ConfigurationGroup* objectConfig) {
@@ -201,7 +153,7 @@ void Importer::resetObject(Object3D* object, Utility::ConfigurationGroup* object
     object->setTransformation(transformation);
 }
 
-void Importer::loadMeshFeature(Mesh& mesh, Utility::ConfigurationGroup* primitiveConfig, OberonResourceManager& resourceManager) {
+void Importer::loadMeshFeature(Mesh& mesh, Utility::ConfigurationGroup* primitiveConfig) {
     std::string primitiveType = primitiveConfig->value("type");
     std::string meshKey = primitiveType;
 
@@ -211,7 +163,7 @@ void Importer::loadMeshFeature(Mesh& mesh, Utility::ConfigurationGroup* primitiv
     if(primitiveConfig->hasValue("segments"))
         meshKey += std::to_string(primitiveConfig->value<UnsignedInt>("segments"));
 
-    Resource<GL::Mesh> meshResource = resourceManager.get<GL::Mesh>(meshKey);
+    Resource<GL::Mesh> meshResource = _resourceManager.get<GL::Mesh>(meshKey);
 
     if(primitiveConfig->hasValue("size")) {
         Vector3 size = primitiveConfig->value<Vector3>("size");
@@ -231,16 +183,103 @@ void Importer::loadMeshFeature(Mesh& mesh, Utility::ConfigurationGroup* primitiv
         UnsignedInt rings = primitiveConfig->value<UnsignedInt>("rings");
         GL::Mesh glMesh{NoCreate};
 
-        if(primitiveType == "circle") glMesh = MeshTools::compile(Primitives::circle3DSolid(segments));
-        else if(primitiveType == "cube") glMesh = MeshTools::compile(Primitives::cubeSolid());
-        else if(primitiveType == "plane") glMesh = MeshTools::compile(Primitives::planeSolid());
-        else if(primitiveType == "sphere") glMesh = MeshTools::compile(Primitives::uvSphereSolid(rings, segments));
-        else if(primitiveType == "square") glMesh = MeshTools::compile(Primitives::squareSolid());
+        if(primitiveType == "circle") {
+            Primitives::Circle3DFlags flags;
+            if(mesh.hasAmbientTexture() || mesh.hasDiffuseTexture() || mesh.hasSpecularTexture() || mesh.hasNormalTexture()) {
+                flags |= Primitives::Circle3DFlag::TextureCoordinates;
+                if(mesh.hasNormalTexture())
+                    flags |= Primitives::Circle3DFlag::Tangents;
+            }
+            glMesh = MeshTools::compile(Primitives::circle3DSolid(segments, flags));
+        } else if(primitiveType == "cube") {
+            glMesh = MeshTools::compile(Primitives::cubeSolid());
+        } else if(primitiveType == "plane") {
+            Primitives::PlaneFlags flags;
+            if(mesh.hasAmbientTexture() || mesh.hasDiffuseTexture() || mesh.hasSpecularTexture() || mesh.hasNormalTexture()) {
+                flags |= Primitives::PlaneFlag::TextureCoordinates;
+                if(mesh.hasNormalTexture())
+                    flags |= Primitives::PlaneFlag::Tangents;
+            }
+            glMesh = MeshTools::compile(Primitives::planeSolid(flags));
+        } else if(primitiveType == "sphere") {
+            Primitives::UVSphereFlags flags;
+            if(mesh.hasAmbientTexture() || mesh.hasDiffuseTexture() || mesh.hasSpecularTexture() || mesh.hasNormalTexture()) {
+                flags |= Primitives::UVSphereFlag::TextureCoordinates;
+                if(mesh.hasNormalTexture())
+                    flags |= Primitives::UVSphereFlag::Tangents;
+            }
+            glMesh = MeshTools::compile(Primitives::uvSphereSolid(rings, segments, flags));
+        }
 
-        resourceManager.set(meshResource.key(), std::move(glMesh), ResourceDataState::Final, ResourcePolicy::ReferenceCounted);
+        _resourceManager.set(meshResource.key(), std::move(glMesh), ResourceDataState::Final, ResourcePolicy::ReferenceCounted);
     }
 
     CORRADE_INTERNAL_ASSERT(meshResource);
 
     mesh.setMesh(meshResource);
+}
+
+Resource<GL::AbstractShaderProgram, SceneShader> Importer::createShader(Mesh& mesh, UnsignedInt lightCount, std::vector<std::pair<std::string, SceneShader::Flags>>& shaderKeys, bool useObjectId) {
+    std::pair<std::string, SceneShader::Flags> shaderKey = calculateShaderKey(mesh, useObjectId);
+    Resource<GL::AbstractShaderProgram, SceneShader> shaderResource = _resourceManager.get<GL::AbstractShaderProgram, SceneShader>(shaderKey.first);
+
+    if(!shaderResource) {
+        _resourceManager.set<GL::AbstractShaderProgram>(shaderResource.key(), new SceneShader{shaderKey.second, lightCount},
+            ResourceDataState::Mutable, ResourcePolicy::ReferenceCounted);
+        shaderKeys.push_back(shaderKey);
+    }
+
+    return shaderResource;
+}
+
+void Importer::createShaders(SceneGraph::DrawableGroup3D* drawables, UnsignedInt lightCount, std::vector<std::pair<std::string, SceneShader::Flags>>& shaderKeys, bool useObjectId) {
+    for(std::size_t i = 0; i != drawables->size(); ++i) {
+        Mesh* mesh = dynamic_cast<Mesh*>(&(*drawables)[i]);
+        if(mesh) {
+            Resource<GL::AbstractShaderProgram, SceneShader> shaderResource = createShader(*mesh, lightCount, shaderKeys, useObjectId);
+            mesh->setShader(shaderResource);
+        }
+    }
+}
+
+GL::Texture2D Importer::loadTexture(Containers::ArrayView<const char> data) {
+    _pngImporter.openData(data);
+    Containers::Optional<Trade::ImageData2D> image = _pngImporter.image2D(0);
+    CORRADE_INTERNAL_ASSERT(image);
+
+    GL::Texture2D texture;
+    texture.setWrapping(GL::SamplerWrapping::ClampToEdge)
+        .setMagnificationFilter(GL::SamplerFilter::Linear)
+        .setMinificationFilter(GL::SamplerFilter::Linear)
+        .setStorage(1, GL::textureFormat(image->format()), image->size())
+        .setSubImage(0, {}, *image);
+    return texture;
+}
+
+std::pair<std::string, SceneShader::Flags> Importer::calculateShaderKey(Mesh& mesh, bool useObjectId) {
+    std::string shaderKey = "scene";
+    SceneShader::Flags flags;
+
+    if(mesh.hasAmbientTexture()) {
+        shaderKey.append("-ambientTexture");
+        flags |= SceneShader::Flag::AmbientTexture;
+    }
+    if(mesh.hasDiffuseTexture()) {
+        shaderKey.append("-diffuseTexture");
+        flags |= SceneShader::Flag::DiffuseTexture;
+    }
+    if(mesh.hasSpecularTexture()) {
+        shaderKey.append("-specularTexture");
+        flags |= SceneShader::Flag::SpecularTexture;
+    }
+    if(mesh.hasNormalTexture()) {
+        shaderKey.append("-normalTexture");
+        flags |= SceneShader::Flag::NormalTexture;
+    }
+    if(useObjectId) {
+        shaderKey.append("-objectId");
+        flags |= SceneShader::Flag::ObjectId;
+    }
+
+    return std::make_pair(shaderKey, flags);
 }

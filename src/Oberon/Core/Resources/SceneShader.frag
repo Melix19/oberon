@@ -36,7 +36,7 @@
 #define const
 #endif
 
-#ifdef TEXTURED
+#ifdef AMBIENT_TEXTURE
 #ifdef EXPLICIT_TEXTURE_LAYER
 layout(binding = 0)
 #endif
@@ -49,7 +49,7 @@ layout(location = 3)
 uniform lowp vec4 ambientColor;
 
 #if LIGHT_COUNT
-#ifdef TEXTURED
+#ifdef DIFFUSE_TEXTURE
 #ifdef EXPLICIT_TEXTURE_LAYER
 layout(binding = 1)
 #endif
@@ -61,11 +61,18 @@ layout(location = 4)
 #endif
 uniform lowp vec4 diffuseColor;
 
-#ifdef TEXTURED
+#ifdef SPECULAR_TEXTURE
 #ifdef EXPLICIT_TEXTURE_LAYER
 layout(binding = 2)
 #endif
 uniform lowp sampler2D specularTexture;
+#endif
+
+#ifdef NORMAL_TEXTURE
+#ifdef EXPLICIT_TEXTURE_LAYER
+layout(binding = 3)
+#endif
+uniform lowp sampler2D normalTexture;
 #endif
 
 #ifdef EXPLICIT_UNIFORM_LOCATION
@@ -106,9 +113,12 @@ uniform PointLight pointLights[LIGHT_COUNT];
 #if LIGHT_COUNT
 in highp vec3 transformedPosition;
 in mediump vec3 transformedNormal;
+#ifdef NORMAL_TEXTURE
+in mediump vec3 transformedTangent;
+#endif
 #endif
 
-#if defined(TEXTURED)
+#if defined(AMBIENT_TEXTURE) || defined(DIFFUSE_TEXTURE) || defined(SPECULAR_TEXTURE) || defined(NORMAL_TEXTURE)
 in mediump vec2 interpolatedTextureCoordinates;
 #endif
 
@@ -127,18 +137,18 @@ out highp uint fragmentObjectId;
 
 void main() {
     lowp const vec4 finalAmbientColor =
-        #ifdef TEXTURED
+        #ifdef AMBIENT_TEXTURE
         texture(ambientTexture, interpolatedTextureCoordinates)*
         #endif
         ambientColor;
     #if LIGHT_COUNT
     lowp const vec4 finalDiffuseColor =
-        #ifdef TEXTURED
+        #ifdef DIFFUSE_TEXTURE
         texture(diffuseTexture, interpolatedTextureCoordinates)*
         #endif
         diffuseColor;
     lowp const vec4 finalSpecularColor =
-        #ifdef TEXTURED
+        #ifdef SPECULAR_TEXTURE
         texture(specularTexture, interpolatedTextureCoordinates)*
         #endif
         specularColor;
@@ -152,6 +162,16 @@ void main() {
 
     /* Normal */
     mediump vec3 normalizedTransformedNormal = normalize(transformedNormal);
+    #ifdef NORMAL_TEXTURE
+    mediump vec3 normalizedTransformedTangent = normalize(transformedTangent);
+    mediump mat3 tbn = mat3(
+        normalizedTransformedTangent,
+        normalize(cross(normalizedTransformedNormal,
+                        normalizedTransformedTangent)),
+        normalizedTransformedNormal
+    );
+    normalizedTransformedNormal = tbn*(texture(normalTexture, interpolatedTextureCoordinates).rgb*2.0 - vec3(1.0));
+    #endif
 
     /* Add diffuse color for each light */
     for(int i = 0; i < LIGHT_COUNT; ++i) {

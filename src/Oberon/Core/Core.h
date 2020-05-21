@@ -48,4 +48,3 @@ class Script;
 typedef SceneGraph::FeatureGroup3D<Script> ScriptGroup;
 
 class ScriptManager;
-class Sprite;

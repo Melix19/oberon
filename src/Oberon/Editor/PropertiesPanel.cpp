@@ -49,7 +49,7 @@ void PropertiesPanel::newFrame() {
         return;
     }
 
-    const Float spacing = 150.0f;
+    const Float spacing = ImGui::GetWindowWidth()/2;
 
     Themer::setNextItemRightAlign("Name", spacing);
     std::string name = _configuration.value("name");

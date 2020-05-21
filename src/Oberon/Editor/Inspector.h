@@ -36,5 +36,12 @@ class Inspector {
         }
 
     private:
+        void showTransformationHeader(ObjectNode* objectNode);
+        void showLightHeader(ObjectNode* objectNode, Utility::ConfigurationGroup* featureConfig);
+        void showMeshHeader(ObjectNode* objectNode, Utility::ConfigurationGroup* featureConfig);
+        void showScriptHeader(ObjectNode* objectNode, Utility::ConfigurationGroup* featureConfig);
+
+    private:
+        Float _spacing;
         CollectionPanel* _panel{nullptr};
 };

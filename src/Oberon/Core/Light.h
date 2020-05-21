@@ -33,11 +33,19 @@
 
 class Light: public SceneGraph::AbstractGroupedFeature3D<Light> {
     public:
-        explicit Light(SceneGraph::AbstractObject3D& object, LightGroup* lights, const Resource<GL::AbstractShaderProgram, SceneShader>& shader):
-            SceneGraph::AbstractGroupedFeature3D<Light>{object, lights}, _shader{shader}, _id(lights->size() - 1) {}
+        explicit Light(SceneGraph::AbstractObject3D& object, LightGroup* lights, OberonResourceManager& resourceManager):
+            SceneGraph::AbstractGroupedFeature3D<Light>{object, lights}, _resourceManager{resourceManager}, _id(lights->size() - 1) {}
 
-        void updateShader(SceneGraph::Camera3D& camera) {
-            _shader->setPointLight(_id, camera.cameraMatrix().transformPoint(object().absoluteTransformationMatrix().translation()), _color, _constant, _linear, _quadratic);
+        void updateShader(SceneGraph::Camera3D& camera, std::vector<std::pair<std::string, SceneShader::Flags>>& shaderKeys) {
+            for(auto it = shaderKeys.begin(); it != shaderKeys.end();) {
+                Resource<GL::AbstractShaderProgram, SceneShader> shaderResource = _resourceManager.get<GL::AbstractShaderProgram, SceneShader>(it->first);
+                if(shaderResource) {
+                    shaderResource->setPointLight(_id, camera.cameraMatrix().transformPoint(object().absoluteTransformationMatrix().translation()), _color, _constant, _linear, _quadratic);
+                    ++it;
+                } else {
+                    it = shaderKeys.erase(it);
+                }
+            }
         }
 
         Light& setId(UnsignedInt id) {
@@ -45,8 +53,8 @@ class Light: public SceneGraph::AbstractGroupedFeature3D<Light> {
             return *this;
         }
 
-        Color3 color() { return _color; }
-        Light& setColor(const Color3& color) {
+        Color4 color() { return _color; }
+        Light& setColor(const Color4& color) {
             _color = color;
             return *this;
         }
@@ -70,10 +78,10 @@ class Light: public SceneGraph::AbstractGroupedFeature3D<Light> {
         }
 
     private:
-        Resource<GL::AbstractShaderProgram, SceneShader> _shader;
+        OberonResourceManager& _resourceManager;
 
         UnsignedInt _id;
-        Color3 _color{1.0f};
+        Color4 _color{1.0f};
         Float _constant{1.0f};
         Float _linear{0.09f};
         Float _quadratic{0.032f};
