@@ -28,6 +28,7 @@
 #include <imgui.h>
 #include <misc/cpp/imgui_stdlib.h>
 #include <Corrade/Utility/ConfigurationGroup.h>
+#include <Magnum/GL/Mesh.h>
 #include <Oberon/Core/Light.h>
 #include <Oberon/Core/Script.h>
 
