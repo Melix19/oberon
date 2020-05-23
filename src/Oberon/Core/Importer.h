@@ -38,7 +38,7 @@ class Importer {
         SceneGraph::AbstractFeature3D* loadFeature(Utility::ConfigurationGroup* featureConfig, Object3D* object, SceneGraph::DrawableGroup3D* drawables, ScriptGroup* scripts, LightGroup* lights);
         void resetObject(Object3D* object, Utility::ConfigurationGroup* objectConfig);
 
-        void loadMeshFeature(Mesh& mesh, Utility::ConfigurationGroup* primitiveConfig);
+        void updateMeshPrimitive(Mesh& mesh, Utility::ConfigurationGroup* primitiveConfig);
 
         Resource<GL::AbstractShaderProgram, SceneShader> createShader(Mesh& mesh, UnsignedInt lightCount, std::vector<std::pair<std::string, SceneShader::Flags>>& shaderKeys, bool useObjectId);
         void createShaders(SceneGraph::DrawableGroup3D* drawables, UnsignedInt lightCount, std::vector<std::pair<std::string, SceneShader::Flags>>& shaderKeys, bool useObjectId = false);

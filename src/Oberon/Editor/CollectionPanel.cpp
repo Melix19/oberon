@@ -25,7 +25,6 @@
 #include "CollectionPanel.h"
 
 #include <algorithm>
-#include <Corrade/Utility/Configuration.h>
 #include <Corrade/Utility/Directory.h>
 #include <Magnum/GL/Mesh.h>
 #include <Magnum/GL/RenderbufferFormat.h>
@@ -43,10 +42,9 @@
 #include "FileNode.h"
 #include "ObjectNode.h"
 
-CollectionPanel::CollectionPanel(FileNode* fileNode, OberonResourceManager& resourceManager, Importer& importer, ScriptManager& scriptManager, const Vector2i& viewportTextureSize, const Vector2& dpiScaleRatio):
-    _resourceManager{resourceManager}, _importer{importer}, _scriptManager{scriptManager}, _viewportTextureSize{viewportTextureSize}, _dpiScaleRatio{dpiScaleRatio}
+CollectionPanel::CollectionPanel(FileNode* fileNode, OberonResourceManager& resourceManager, Importer& importer, ScriptManager& scriptManager, const Vector2i& viewportTextureSize, const Vector2& dpiScaleRatio, const std::string& projectPath):
+    AbstractPanel{fileNode}, _collectionConfig{fileNode->path()}, _resourceManager{resourceManager}, _importer{importer}, _scriptManager{scriptManager}, _viewportTextureSize{viewportTextureSize}, _dpiScaleRatio{dpiScaleRatio}, _projectPath(projectPath)
 {
-    _fileNode = fileNode;
     _name = Utility::Directory::filename(_fileNode->path());
 
     _viewportTexture.setStorage(1, GL::TextureFormat::RGBA8, _viewportTextureSize*_dpiScaleRatio);
@@ -67,12 +65,12 @@ CollectionPanel::CollectionPanel(FileNode* fileNode, OberonResourceManager& reso
 
     createGrid();
 
-    _collectionConfig = Containers::pointer<Utility::Configuration>(_fileNode->path());
-    if(!_collectionConfig->hasGroup("scene"))
-        _collectionConfig->addGroup("scene");
+    loadResources();
 
-    _rootNode = Containers::pointer<ObjectNode>(&_scene, _collectionConfig->group("scene"));
+    if(!_collectionConfig.hasGroup("scene"))
+        _collectionConfig.addGroup("scene");
 
+    _rootNode = Containers::pointer<ObjectNode>(&_scene, _collectionConfig.group("scene"));
     updateObjectNodeChildren(_rootNode.get());
     resetDrawablesId();
 
@@ -166,7 +164,22 @@ void CollectionPanel::newFrame() {
 }
 
 void CollectionPanel::save() {
-    _collectionConfig->save();
+    _collectionConfig.save();
+}
+
+void CollectionPanel::loadResources() {
+    if(!_collectionConfig.hasGroup("external_resources"))
+        return;
+
+    for(Utility::ConfigurationGroup* resource: _collectionConfig.group("external_resources")->groups("resource")) {
+        std::string resourceType = resource->value("type");
+        std::string resourcePath = resource->value("path");
+
+        if(resourceType == "Texture2D") {
+            GL::Texture2D texture = _importer.loadTexture(Utility::Directory::read(Utility::Directory::join(_projectPath, resourcePath)));
+            _resourceManager.set(resourcePath, std::move(texture), ResourceDataState::Final, ResourcePolicy::ReferenceCounted);
+        }
+    }
 }
 
 void CollectionPanel::updateObjectNodeChildren(ObjectNode* node) {
@@ -213,6 +226,11 @@ void CollectionPanel::resetObjectAndChildren(ObjectNode* node) {
 
     for(auto& child: node->children())
         resetObjectAndChildren(child.get());
+}
+
+void CollectionPanel::updateShader(Mesh& mesh) {
+    Resource<Magnum::GL::AbstractShaderProgram, SceneShader> shaderResource = _importer.createShader(mesh, _lights.size(), shaderKeys, true);
+    mesh.setShader(shaderResource);
 }
 
 void CollectionPanel::recreateShaders() {

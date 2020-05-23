@@ -39,6 +39,7 @@ class GlfwPlatform: public Platform::Application {
 
     private:
         void drawEvent() override;
+        void loadCompiledReources(Utility::Configuration& collectionConfig, Utility::Resource& resources, Importer& importer);
 
         Scene3D _scene;
         Object3D* _cameraObject;

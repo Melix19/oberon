@@ -87,6 +87,15 @@ class Mesh: public SceneGraph::Drawable3D {
             return *this;
         }
 
+        bool hasNormalTexture() {
+            if(_normalTexture) return true;
+            else return false;
+        }
+        Mesh& setNormalTexture(const Resource<GL::Texture2D>& texture) {
+            _normalTexture = texture;
+            return *this;
+        }
+
         Color4 specularColor() { return _specularColor; }
         Mesh& setSpecularColor(const Color4& color) {
             _specularColor = color;
@@ -99,15 +108,6 @@ class Mesh: public SceneGraph::Drawable3D {
         }
         Mesh& setSpecularTexture(const Resource<GL::Texture2D>& texture) {
             _specularTexture = texture;
-            return *this;
-        }
-
-        bool hasNormalTexture() {
-            if(_normalTexture) return true;
-            else return false;
-        }
-        Mesh& setNormalTexture(const Resource<GL::Texture2D>& texture) {
-            _normalTexture = texture;
             return *this;
         }
 
@@ -132,8 +132,8 @@ class Mesh: public SceneGraph::Drawable3D {
             if(_id) _shader->setObjectId(_id);
             if(_ambientTexture) _shader->bindAmbientTexture(*_ambientTexture);
             if(_diffuseTexture) _shader->bindDiffuseTexture(*_diffuseTexture);
-            if(_specularTexture) _shader->bindSpecularTexture(*_specularTexture);
             if(_normalTexture) _shader->bindNormalTexture(*_normalTexture);
+            if(_specularTexture) _shader->bindSpecularTexture(*_specularTexture);
 
             _shader->draw(*_mesh);
         }
@@ -150,8 +150,8 @@ class Mesh: public SceneGraph::Drawable3D {
 
         Resource<GL::Texture2D> _ambientTexture;
         Resource<GL::Texture2D> _diffuseTexture;
-        Resource<GL::Texture2D> _specularTexture;
         Resource<GL::Texture2D> _normalTexture;
+        Resource<GL::Texture2D> _specularTexture;
 
         Float _shininess{80.0f};
 };

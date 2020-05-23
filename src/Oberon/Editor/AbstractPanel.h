@@ -28,6 +28,7 @@
 
 class AbstractPanel {
     public:
+        AbstractPanel(FileNode* fileNode): _fileNode(fileNode) {}
         virtual ~AbstractPanel() = default;
 
         virtual void newFrame() = 0;

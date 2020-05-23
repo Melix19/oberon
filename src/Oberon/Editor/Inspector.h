@@ -24,10 +24,14 @@
 
 #pragma once
 
+#include <string>
+
 #include "Editor.h"
 
 class Inspector {
     public:
+        Inspector(OberonResourceManager& resourceManager, Importer& importer): _resourceManager(resourceManager), _importer(importer) {}
+
         void newFrame();
 
         Inspector& setPanel(CollectionPanel* panel) {
@@ -41,7 +45,12 @@ class Inspector {
         void showMeshHeader(ObjectNode* objectNode, Utility::ConfigurationGroup* featureConfig);
         void showScriptHeader(ObjectNode* objectNode, Utility::ConfigurationGroup* featureConfig);
 
+        void addResource(const std::string& resourcePath, const std::string& resourceType);
+
     private:
+        OberonResourceManager& _resourceManager;
+        Importer& _importer;
+
         Float _spacing;
         CollectionPanel* _panel{nullptr};
 };

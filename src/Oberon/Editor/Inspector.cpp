@@ -212,12 +212,12 @@ void Inspector::showLightHeader(ObjectNode* objectNode, Utility::ConfigurationGr
 void Inspector::showMeshHeader(ObjectNode* objectNode, Utility::ConfigurationGroup* featureConfig) {
     Mesh* mesh = getObjectFeature<Mesh>(objectNode->object());
     bool headerIsOpen = true;
-    bool reloadFeature = false;
 
     if(ImGui::CollapsingHeader("Mesh", &headerIsOpen, ImGuiTreeNodeFlags_DefaultOpen)) {
         Utility::ConfigurationGroup* primitiveConfig = featureConfig->group("primitive");
         ImGuiTreeNodeFlags nodeFlags = ImGuiTreeNodeFlags_FramePadding |
             ImGuiTreeNodeFlags_NoTreePushOnOpen | ImGuiTreeNodeFlags_SpanFullWidth;
+        bool reloadPrimitive = false;
 
         if(ImGui::TreeNodeEx("Primitive", nodeFlags)) {
             std::string primitiveType = "none";
@@ -235,7 +235,7 @@ void Inspector::showMeshHeader(ObjectNode* objectNode, Utility::ConfigurationGro
                         primitiveConfig = featureConfig->addGroup("primitive");
 
                         primitiveConfig->setValue("type", type);
-                        reloadFeature = true;
+                        reloadPrimitive = true;
                     }
                     if(isSelected) ImGui::SetItemDefaultFocus();
                 }
@@ -257,7 +257,7 @@ void Inspector::showMeshHeader(ObjectNode* objectNode, Utility::ConfigurationGro
                     Int rings = primitiveConfig->value<Int>("rings");
                     if(ImGui::DragInt("##Mesh.Primitive.Rings", &rings, 1.0f, 2, INT_MAX)) {
                         primitiveConfig->setValue("rings", rings);
-                        reloadFeature = true;
+                        reloadPrimitive = true;
                     }
                 }
 
@@ -266,13 +266,13 @@ void Inspector::showMeshHeader(ObjectNode* objectNode, Utility::ConfigurationGro
                     Int segments = primitiveConfig->value<Int>("segments");
                     if(ImGui::DragInt("##Mesh.Primitive.Segments", &segments, 1.0f, 3, INT_MAX)) {
                         primitiveConfig->setValue("segments", segments);
-                        reloadFeature = true;
+                        reloadPrimitive = true;
                     }
                 }
             }
         }
 
-        if(ImGui::TreeNodeEx("Material", nodeFlags)) {
+        if(primitiveConfig && ImGui::TreeNodeEx("Material", nodeFlags)) {
             Utility::ConfigurationGroup* materialConfig = featureConfig->group("material");
 
             ImGui::Text("Ambient color");
@@ -284,6 +284,35 @@ void Inspector::showMeshHeader(ObjectNode* objectNode, Utility::ConfigurationGro
                 mesh->setAmbientColor(ambientColor);
             }
 
+            if(primitiveConfig->value("type") != "cube") {
+                Themer::setNextItemRightAlign("Ambient texture", _spacing);
+                std::string ambientTexturePath;
+                if(materialConfig) ambientTexturePath = materialConfig->value("ambient_texture");
+                ImGui::InputText("##Mesh.Material.AmbientTexture", &ambientTexturePath, ImGuiInputTextFlags_ReadOnly);
+                if(ImGui::BeginDragDropTarget()) {
+                    if(const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("FileNode.Image")) {
+                        IM_ASSERT(payload->DataSize == sizeof(FileNode*));
+                        const FileNode* fileNode = *static_cast<const FileNode**>(payload->Data);
+
+                        if(!materialConfig) materialConfig = featureConfig->addGroup("material");
+                        addResource(fileNode->resourcePath(), "Texture2D");
+                        materialConfig->setValue("ambient_texture", fileNode->resourcePath());
+
+                        Resource<GL::Texture2D> textureResource = _resourceManager.get<GL::Texture2D>(fileNode->resourcePath());
+                        if(!textureResource) {
+                            GL::Texture2D texture = _importer.loadTexture(Utility::Directory::read(fileNode->path()));
+                            _resourceManager.set(textureResource.key(), std::move(texture), ResourceDataState::Final, ResourcePolicy::ReferenceCounted);
+                        }
+
+                        mesh->setAmbientTexture(textureResource);
+                        _panel->updateShader(*mesh);
+
+                        reloadPrimitive = true;
+                    }
+                    ImGui::EndDragDropTarget();
+                }
+            }
+
             ImGui::Text("Diffuse color");
             ImGui::SetNextItemWidth(-1);
             Color4 diffuseColor = mesh->diffuseColor();
@@ -291,6 +320,62 @@ void Inspector::showMeshHeader(ObjectNode* objectNode, Utility::ConfigurationGro
                 if(!materialConfig) materialConfig = featureConfig->addGroup("material");
                 materialConfig->setValue("diffuse_color", diffuseColor);
                 mesh->setDiffuseColor(diffuseColor);
+            }
+
+            if(primitiveConfig->value("type") != "cube") {
+                Themer::setNextItemRightAlign("Diffuse texture", _spacing);
+                std::string diffuseTexturePath;
+                if(materialConfig) diffuseTexturePath = materialConfig->value("diffuse_texture");
+                ImGui::InputText("##Mesh.Material.DiffuseTexture", &diffuseTexturePath, ImGuiInputTextFlags_ReadOnly);
+                if(ImGui::BeginDragDropTarget()) {
+                    if(const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("FileNode.Image")) {
+                        IM_ASSERT(payload->DataSize == sizeof(FileNode*));
+                        const FileNode* fileNode = *static_cast<const FileNode**>(payload->Data);
+
+                        if(!materialConfig) materialConfig = featureConfig->addGroup("material");
+                        addResource(fileNode->resourcePath(), "Texture2D");
+                        materialConfig->setValue("diffuse_texture", fileNode->resourcePath());
+
+                        Resource<GL::Texture2D> textureResource = _resourceManager.get<GL::Texture2D>(fileNode->resourcePath());
+                        if(!textureResource) {
+                            GL::Texture2D texture = _importer.loadTexture(Utility::Directory::read(fileNode->path()));
+                            _resourceManager.set(textureResource.key(), std::move(texture), ResourceDataState::Final, ResourcePolicy::ReferenceCounted);
+                        }
+
+                        mesh->setDiffuseTexture(textureResource);
+                        _panel->updateShader(*mesh);
+
+                        reloadPrimitive = true;
+                    }
+                    ImGui::EndDragDropTarget();
+                }
+
+                Themer::setNextItemRightAlign("Normal texture", _spacing);
+                std::string normalTexturePath;
+                if(materialConfig) normalTexturePath = materialConfig->value("normal_texture");
+                ImGui::InputText("##Mesh.Material.NormalTexture", &normalTexturePath, ImGuiInputTextFlags_ReadOnly);
+                if(ImGui::BeginDragDropTarget()) {
+                    if(const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("FileNode.Image")) {
+                        IM_ASSERT(payload->DataSize == sizeof(FileNode*));
+                        const FileNode* fileNode = *static_cast<const FileNode**>(payload->Data);
+
+                        if(!materialConfig) materialConfig = featureConfig->addGroup("material");
+                        addResource(fileNode->resourcePath(), "Texture2D");
+                        materialConfig->setValue("normal_texture", fileNode->resourcePath());
+
+                        Resource<GL::Texture2D> textureResource = _resourceManager.get<GL::Texture2D>(fileNode->resourcePath());
+                        if(!textureResource) {
+                            GL::Texture2D texture = _importer.loadTexture(Utility::Directory::read(fileNode->path()));
+                            _resourceManager.set(textureResource.key(), std::move(texture), ResourceDataState::Final, ResourcePolicy::ReferenceCounted);
+                        }
+
+                        mesh->setNormalTexture(textureResource);
+                        _panel->updateShader(*mesh);
+
+                        reloadPrimitive = true;
+                    }
+                    ImGui::EndDragDropTarget();
+                }
             }
 
             ImGui::Text("Specular color");
@@ -302,6 +387,35 @@ void Inspector::showMeshHeader(ObjectNode* objectNode, Utility::ConfigurationGro
                 mesh->setSpecularColor(specularColor);
             }
 
+            if(primitiveConfig->value("type") != "cube") {
+                Themer::setNextItemRightAlign("Specular texture", _spacing);
+                std::string specularTexturePath;
+                if(materialConfig) specularTexturePath = materialConfig->value("specular_texture");
+                ImGui::InputText("##Mesh.Material.SpecularTexture", &specularTexturePath, ImGuiInputTextFlags_ReadOnly);
+                if(ImGui::BeginDragDropTarget()) {
+                    if(const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("FileNode.Image")) {
+                        IM_ASSERT(payload->DataSize == sizeof(FileNode*));
+                        const FileNode* fileNode = *static_cast<const FileNode**>(payload->Data);
+
+                        if(!materialConfig) materialConfig = featureConfig->addGroup("material");
+                        addResource(fileNode->resourcePath(), "Texture2D");
+                        materialConfig->setValue("specular_texture", fileNode->resourcePath());
+
+                        Resource<GL::Texture2D> textureResource = _resourceManager.get<GL::Texture2D>(fileNode->resourcePath());
+                        if(!textureResource) {
+                            GL::Texture2D texture = _importer.loadTexture(Utility::Directory::read(fileNode->path()));
+                            _resourceManager.set(textureResource.key(), std::move(texture), ResourceDataState::Final, ResourcePolicy::ReferenceCounted);
+                        }
+
+                        mesh->setSpecularTexture(textureResource);
+                        _panel->updateShader(*mesh);
+
+                        reloadPrimitive = true;
+                    }
+                    ImGui::EndDragDropTarget();
+                }
+            }
+
             Themer::setNextItemRightAlign("Shininess", _spacing);
             Float shininess = mesh->shininess();
             if(ImGui::DragFloat("##Mesh.Material.Shininess", &shininess, 0.1f, 1.0f, FLT_MAX)) {
@@ -310,14 +424,15 @@ void Inspector::showMeshHeader(ObjectNode* objectNode, Utility::ConfigurationGro
                 mesh->setShininess(shininess);
             }
         }
+
+        if(reloadPrimitive)
+            _importer.updateMeshPrimitive(*mesh, primitiveConfig);
     }
 
-    if(!headerIsOpen || reloadFeature) {
+    if(!headerIsOpen) {
         delete mesh;
+        objectNode->objectConfig()->removeGroup(featureConfig);
         _panel->removeDrawableNode(objectNode);
-
-        if(reloadFeature) _panel->addFeatureToObject(objectNode, featureConfig);
-        else objectNode->objectConfig()->removeGroup(featureConfig);
     }
 }
 
@@ -340,3 +455,24 @@ void Inspector::showScriptHeader(ObjectNode* objectNode, Utility::ConfigurationG
     }
 }
 
+void Inspector::addResource(const std::string& resourcePath, const std::string& resourceType) {
+    Utility::ConfigurationGroup* resourcesGroup = _panel->collectionConfig().group("external_resources");
+    if(!resourcesGroup)
+        resourcesGroup = _panel->collectionConfig().addGroup("external_resources");
+
+    bool resourceAlreadyDefined = false;
+
+    /* Check if the resource is already defined */
+    for(auto& r: resourcesGroup->groups("resource")) {
+        if(r->value("path") == resourcePath) {
+            resourceAlreadyDefined = true;
+            break;
+        }
+    }
+
+    if(!resourceAlreadyDefined) {
+        Utility::ConfigurationGroup* resourceGroup = resourcesGroup->addGroup("resource");
+        resourceGroup->addValue("path", resourcePath);
+        resourceGroup->addValue("type", resourceType);
+    }
+}

@@ -41,7 +41,8 @@
 EditorApplication::EditorApplication(const Arguments& arguments, const std::string& projectPath): Platform::Application{arguments,
     Configuration{}.setTitle("Oberon")
                    .setWindowFlags(Configuration::WindowFlag::Maximized|Configuration::WindowFlag::Resizable)},
-    _projectPath{projectPath}, _importer{_resourceManager}, _scriptManager{projectPath}, _explorer{projectPath}
+    _projectPath{projectPath}, _importer{_resourceManager}, _scriptManager{projectPath}, _explorer{projectPath},
+    _inspector{_resourceManager, _importer}
 {
     const GLFWvidmode* videoMode = glfwGetVideoMode(glfwGetPrimaryMonitor());
 
@@ -300,7 +301,7 @@ void EditorApplication::openFile(FileNode* fileNode) {
 
         if(extension == ".col") {
             _panels.push_back(Containers::pointer<CollectionPanel>(fileNode, _resourceManager,
-                _importer, _scriptManager, _screenResolution, _dpiScaleRatio));
+                _importer, _scriptManager, _screenResolution, _dpiScaleRatio, _projectPath));
             _collectionPanels.push_back(reinterpret_cast<CollectionPanel*>(_panels.back().get()));
         } else if(extension == ".oberon") {
             _panels.push_back(Containers::pointer<PropertiesPanel>(fileNode));
@@ -331,28 +332,31 @@ void EditorApplication::exportProject() {
     Utility::Directory::writeString(Utility::Directory::join(_projectPath, "build/modules/FindGLFW.cmake"), moduleText);
 
     /* Create resources configuration */
-    Utility::Configuration resourcesConf(Utility::Directory::join(_projectPath, "build/resources.conf"));
-    resourcesConf.addValue("group", "OberonApplication");
+    Utility::Configuration resourcesConfig{Utility::Directory::join(_projectPath, "build/resources.conf")};
+    resourcesConfig.addValue("group", "OberonApplication");
 
     /* Add the project settings into the resources */
-    Utility::ConfigurationGroup* projectFile = resourcesConf.addGroup("file");
+    Utility::ConfigurationGroup* projectFile = resourcesConfig.addGroup("file");
     projectFile->addValue("filename", "../project.oberon");
     projectFile->addValue("alias", "project.oberon");
 
-    /* Add all the remaining files */
-    auto directoryList = Utility::Directory::list(_projectPath,
-        Utility::Directory::Flag::SkipDotAndDotDot);
-    for(auto& filename: directoryList) {
-        std::string extension = Utility::Directory::splitExtension(filename).second;
-        if(extension == ".col") {
-            Utility::ConfigurationGroup* collectionFile = resourcesConf.addGroup("file");
-            collectionFile->addValue("filename", "../" + filename);
-            collectionFile->addValue("alias", filename);
-        }
+    /* Add the main collection into the resources */
+    Utility::Configuration projectConfig{Utility::Directory::join(_projectPath, "project.oberon")};
+    std::string mainCollection = projectConfig.value("main_collection");
+    Utility::ConfigurationGroup* mainCollectionFile = resourcesConfig.addGroup("file");
+    mainCollectionFile->addValue("filename", "../" + mainCollection);
+    mainCollectionFile->addValue("alias", mainCollection);
+
+    /* Add all the main collection resources */
+    Utility::Configuration mainCollectionConfig{Utility::Directory::join(_projectPath, mainCollection)};
+    for(Utility::ConfigurationGroup* resourceGroup: mainCollectionConfig.group("external_resources")->groups("resource")) {
+        Utility::ConfigurationGroup* resourceFile = resourcesConfig.addGroup("file");
+        resourceFile->addValue("filename", "../" + resourceGroup->value("path"));
+        resourceFile->addValue("alias", resourceGroup->value("path"));
     }
 
     /* Save the resources configuration */
-    resourcesConf.save();
+    resourcesConfig.save();
 
     /* Create the CMakeLists for the export */
     Utility::Directory::writeString(Utility::Directory::join(_projectPath, "build/CMakeLists.txt"), "\

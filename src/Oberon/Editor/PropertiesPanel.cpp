@@ -33,9 +33,8 @@
 #include "Themer.h"
 
 PropertiesPanel::PropertiesPanel(FileNode* fileNode):
-    _configuration{fileNode->path()}
+    AbstractPanel{fileNode}, _configuration{fileNode->path()}
 {
-    _fileNode = fileNode;
     _name = Utility::Directory::filename(_fileNode->path());
 }
 

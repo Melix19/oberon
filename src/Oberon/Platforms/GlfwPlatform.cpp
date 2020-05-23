@@ -26,7 +26,6 @@
 
 #include <sstream>
 #include <Corrade/Utility/Configuration.h>
-#include <Corrade/Utility/Directory.h>
 #include <Corrade/Utility/Resource.h>
 #include <Magnum/GL/DefaultFramebuffer.h>
 #include <Magnum/GL/Mesh.h>
@@ -72,11 +71,13 @@ GlfwPlatform::GlfwPlatform(const Arguments& arguments): Platform::Application{ar
 
     std::string mainCollection = projectConfiguration.value("main_collection");
     std::istringstream collectionStream(resources.get(mainCollection));
-    Utility::Configuration collection(collectionStream);
-    Utility::ConfigurationGroup* sceneConfiguration = collection.group("scene");
+    Utility::Configuration collectionConfig{collectionStream};
+    Utility::ConfigurationGroup* sceneConfig = collectionConfig.group("scene");
 
     Importer importer{_resourceManager};
-    importer.loadChildrenObject(sceneConfiguration, &_scene, &_drawables, &_scripts, &_lights);
+    loadCompiledReources(collectionConfig, resources, importer);
+
+    importer.loadChildrenObject(sceneConfig, &_scene, &_drawables, &_scripts, &_lights);
     importer.createShaders(&_drawables, _lights.size(), shaderKeys);
 
     _scriptManager.loadScripts(_scripts);
@@ -98,6 +99,21 @@ void GlfwPlatform::drawEvent() {
     redraw();
 
     _timeline.nextFrame();
+}
+
+void GlfwPlatform::loadCompiledReources(Utility::Configuration& collectionConfig, Utility::Resource& resources, Importer& importer) {
+    if(!collectionConfig.hasGroup("external_resources"))
+        return;
+
+    for(Utility::ConfigurationGroup* resource: collectionConfig.group("external_resources")->groups("resource")) {
+        std::string resourceType = resource->value("type");
+        std::string resourcePath = resource->value("path");
+
+        if(resourceType == "Texture2D") {
+            GL::Texture2D texture = importer.loadTexture(resources.getRaw(resourcePath));
+            _resourceManager.set(resourcePath, std::move(texture), ResourceDataState::Final, ResourcePolicy::ReferenceCounted);
+        }
+    }
 }
 
 MAGNUM_APPLICATION_MAIN(GlfwPlatform)

@@ -25,6 +25,7 @@
 #pragma once
 
 #include <Corrade/Containers/Pointer.h>
+#include <Corrade/Utility/Configuration.h>
 #include <Magnum/GL/Framebuffer.h>
 #include <Magnum/GL/Renderbuffer.h>
 #include <Magnum/GL/Texture.h>
@@ -37,11 +38,15 @@
 
 class CollectionPanel: public AbstractPanel {
     public:
-        CollectionPanel(FileNode* fileNode, OberonResourceManager& resourceManager, Importer& importer, ScriptManager& scriptManager, const Vector2i& viewportTextureSize, const Vector2& dpiScaleRatio);
+        CollectionPanel(FileNode* fileNode, OberonResourceManager& resourceManager, Importer& importer, ScriptManager& scriptManager, const Vector2i& viewportTextureSize, const Vector2& dpiScaleRatio, const std::string& projectPath);
         void drawViewport(Float deltaTime);
         void newFrame() override;
 
+        Utility::Configuration& collectionConfig() { return _collectionConfig; }
+
     private:
+        Utility::Configuration _collectionConfig;
+
         OberonResourceManager& _resourceManager;
         Importer& _importer;
         ScriptManager& _scriptManager;
@@ -69,6 +74,7 @@ class CollectionPanel: public AbstractPanel {
 
         std::vector<ObjectNode*>& selectedNodes() { return _selectedNodes; }
 
+        void updateShader(Mesh& mesh);
         void recreateShaders();
         void resetLightsId();
 
@@ -77,13 +83,15 @@ class CollectionPanel: public AbstractPanel {
         void resetDrawablesId();
 
     private:
+        void loadResources();
         void updateObjectNodeChildren(ObjectNode* node);
         void createGrid();
+
+        std::string _projectPath;
 
         Vector2 _viewportPos;
         Vector2 _viewportSize;
 
-        Containers::Pointer<Utility::Configuration> _collectionConfig;
         Containers::Pointer<ObjectNode> _rootNode;
         std::vector<ObjectNode*> _selectedNodes;
 
