@@ -249,8 +249,11 @@ void Importer::createShaders(SceneGraph::DrawableGroup3D* drawables, UnsignedInt
 }
 
 GL::Texture2D Importer::loadTexture(Containers::ArrayView<const char> data) {
-    _pngImporter.openData(data);
-    Containers::Optional<Trade::ImageData2D> image = _pngImporter.image2D(0);
+    Containers::Pointer<Trade::AbstractImporter> importer =
+        _importerManager.loadAndInstantiate("AnyImageImporter");
+
+    importer->openData(data);
+    Containers::Optional<Trade::ImageData2D> image = importer->image2D(0);
     CORRADE_INTERNAL_ASSERT(image);
 
     GL::Texture2D texture;

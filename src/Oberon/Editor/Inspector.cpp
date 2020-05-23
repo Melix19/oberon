@@ -28,6 +28,7 @@
 #include <climits>
 #include <imgui.h>
 #include <misc/cpp/imgui_stdlib.h>
+#include <Corrade/Containers/Array.h>
 #include <Corrade/Utility/ConfigurationGroup.h>
 #include <Corrade/Utility/Directory.h>
 #include <Magnum/GL/Mesh.h>

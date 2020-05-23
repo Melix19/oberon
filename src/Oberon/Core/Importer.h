@@ -24,7 +24,8 @@
 
 #pragma once
 
-#include <MagnumPlugins/PngImporter/PngImporter.h>
+#include <Corrade/PluginManager/Manager.h>
+#include <Magnum/Trade/AbstractImporter.h>
 
 #include "SceneShader.h"
 
@@ -50,5 +51,5 @@ class Importer {
 
     private:
         OberonResourceManager& _resourceManager;
-        Trade::PngImporter _pngImporter;
+        PluginManager::Manager<Trade::AbstractImporter> _importerManager;
 };
