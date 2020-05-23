@@ -29,11 +29,14 @@
 #  OpenGexImporter              - OpenGEX importer
 #  PngImageConverter            - PNG image converter
 #  PngImporter                  - PNG importer
+#  PrimitiveImporter            - Primitive importer
 #  StanfordImporter             - Stanford PLY importer
+#  StanfordSceneConverter       - Stanford PLY converter
 #  StbImageConverter            - Image converter using stb_image_write
 #  StbImageImporter             - Image importer using stb_image
 #  StbTrueTypeFont              - TrueType font using stb_truetype
 #  StbVorbisAudioImporter       - OGG audio importer using stb_vorbis
+#  StlImporter                  - STL importer
 #  TinyGltfImporter             - GLTF importer using tiny_gltf
 #
 # Some plugins expose their internal state through separate libraries. The
@@ -97,7 +100,7 @@ set(_MAGNUMPLUGINS_DEPENDENCIES )
 foreach(_component ${MagnumPlugins_FIND_COMPONENTS})
     if(_component MATCHES ".+AudioImporter$")
         set(_MAGNUMPLUGINS_${_component}_MAGNUM_DEPENDENCIES Audio)
-    elseif(_component MATCHES ".+(Importer|ImageConverter)")
+    elseif(_component MATCHES ".+(Importer|ImageConverter|SceneConverter)")
         set(_MAGNUMPLUGINS_${_component}_MAGNUM_DEPENDENCIES Trade)
     elseif(_component MATCHES ".+(Font|FontConverter)$")
         set(_MAGNUMPLUGINS_${_component}_MAGNUM_DEPENDENCIES Text)
@@ -107,6 +110,12 @@ foreach(_component ${MagnumPlugins_FIND_COMPONENTS})
         list(APPEND _MAGNUMPLUGINS_${_component}_MAGNUM_DEPENDENCIES AnyImageImporter)
     elseif(_component STREQUAL OpenGexImporter)
         list(APPEND _MAGNUMPLUGINS_${_component}_MAGNUM_DEPENDENCIES AnyImageImporter)
+    elseif(_component STREQUAL PrimitiveImporter)
+        list(APPEND _MAGNUMPLUGINS_${_component}_MAGNUM_DEPENDENCIES Primitives)
+    elseif(_component STREQUAL StanfordImporter)
+        list(APPEND _MAGNUMPLUGINS_${_component}_MAGNUM_DEPENDENCIES MeshTools)
+    elseif(_component STREQUAL StanfordSceneConverter)
+        list(APPEND _MAGNUMPLUGINS_${_component}_MAGNUM_DEPENDENCIES MeshTools)
     elseif(_component STREQUAL TinyGltfImporter)
         list(APPEND _MAGNUMPLUGINS_${_component}_MAGNUM_DEPENDENCIES AnyImageImporter)
     endif()
@@ -124,12 +133,12 @@ mark_as_advanced(MAGNUMPLUGINS_INCLUDE_DIR)
 # components from other repositories)
 set(_MAGNUMPLUGINS_LIBRARY_COMPONENT_LIST OpenDdl)
 set(_MAGNUMPLUGINS_PLUGIN_COMPONENT_LIST
-    AssimpImporter BasisImageConverter BasisImporter DdsImporter DevIlImageImporter
-    DrFlacAudioImporter DrMp3AudioImporter DrWavAudioImporter Faad2AudioImporter
-    FreeTypeFont HarfBuzzFont JpegImageConverter JpegImporter
-    MiniExrImageConverter OpenGexImporter PngImageConverter PngImporter
-    StanfordImporter StbImageConverter StbImageImporter StbTrueTypeFont
-    StbVorbisAudioImporter TinyGltfImporter)
+    AssimpImporter BasisImageConverter BasisImporter DdsImporter
+    DevIlImageImporter DrFlacAudioImporter DrMp3AudioImporter
+    DrWavAudioImporter Faad2AudioImporter FreeTypeFont HarfBuzzFont
+    JpegImageConverter JpegImporter MiniExrImageConverter OpenGexImporter
+    PngImageConverter PngImporter PrimitiveImporter StanfordImporter
+    StanfordSceneConverter StbImageConverter StbImageImporter StbTrueTypeFont StbVorbisAudioImporter StlImporter TinyGltfImporter)
 
 # Inter-component dependencies
 set(_MAGNUMPLUGINS_HarfBuzzFont_DEPENDENCIES FreeTypeFont)
@@ -212,6 +221,10 @@ foreach(_component ${MagnumPlugins_FIND_COMPONENTS})
             # ImageConverter plugin specific name suffixes
             elseif(_component MATCHES ".+ImageConverter$")
                 set(_MAGNUMPLUGINS_${_COMPONENT}_PATH_SUFFIX imageconverters)
+
+            # SceneConverter plugin specific name suffixes
+            elseif(_component MATCHES ".+SceneConverter$")
+                set(_MAGNUMPLUGINS_${_COMPONENT}_PATH_SUFFIX sceneconverters)
 
             # FontConverter plugin specific name suffixes
             elseif(_component MATCHES ".+FontConverter$")
@@ -379,11 +392,14 @@ foreach(_component ${MagnumPlugins_FIND_COMPONENTS})
             endif()
         endif()
 
+        # PrimitiveImporter has no dependencies
         # StanfordImporter has no dependencies
+        # StanfordSceneConverter has no dependencies
         # StbImageConverter has no dependencies
         # StbImageImporter has no dependencies
         # StbTrueTypeFont has no dependencies
         # StbVorbisAudioImporter has no dependencies
+        # StlImporter has no dependencies
         # TinyGltfImporter has no dependencies
 
         # Find plugin/library includes
