@@ -22,11 +22,16 @@
 #   SOFTWARE.
 #
 
-find_package(Magnum REQUIRED GlfwApplication)
+find_package(Magnum REQUIRED GlfwApplication Sdl2Application)
 
 set_directory_properties(PROPERTIES CORRADE_USE_PEDANTIC_FLAGS ON)
 
-add_library(OberonGlfwPlatform GlfwPlatform.cpp GlfwPlatform.h)
+add_library(OberonGlfwPlatform AbstractPlatform.cpp AbstractPlatform.h GlfwPlatform.cpp GlfwPlatform.h)
 target_link_libraries(OberonGlfwPlatform PRIVATE
-    Magnum::Application
+    Magnum::GlfwApplication
+    Oberon::Core)
+
+add_library(OberonSdl2Platform AbstractPlatform.cpp AbstractPlatform.h Sdl2Platform.cpp Sdl2Platform.h)
+target_link_libraries(OberonSdl2Platform PRIVATE
+    Magnum::Sdl2Application
     Oberon::Core)

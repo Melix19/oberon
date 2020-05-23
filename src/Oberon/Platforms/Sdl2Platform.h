@@ -24,13 +24,13 @@
 
 #pragma once
 
-#include <Magnum/Platform/GlfwApplication.h>
+#include <Magnum/Platform/Sdl2Application.h>
 
 #include "AbstractPlatform.h"
 
-class GlfwPlatform: public Platform::Application, AbstractPlatform {
+class Sdl2Platform: public Platform::Application, AbstractPlatform {
     public:
-        explicit GlfwPlatform(const Arguments& arguments);
+        explicit Sdl2Platform(const Arguments& arguments);
 
     private:
         void drawEvent() override;

@@ -24,14 +24,30 @@
 
 #pragma once
 
-#include <Magnum/Platform/GlfwApplication.h>
+#include <Magnum/ResourceManager.h>
+#include <Magnum/Timeline.h>
+#include <Magnum/SceneGraph/Drawable.h>
+#include <Magnum/SceneGraph/Scene.h>
+#include <Magnum/SceneGraph/TranslationRotationScalingTransformation3D.h>
+#include <Oberon/Core/SceneShader.h>
+#include <Oberon/Core/ScriptManager.h>
 
-#include "AbstractPlatform.h"
+class AbstractPlatform {
+    protected:
+        AbstractPlatform();
+        void loadCompiledReources(Utility::Configuration& collectionConfig, Utility::Resource& resources, Importer& importer);
 
-class GlfwPlatform: public Platform::Application, AbstractPlatform {
-    public:
-        explicit GlfwPlatform(const Arguments& arguments);
+        Scene3D _scene;
+        Object3D* _cameraObject;
+        SceneGraph::Camera3D* _camera;
 
-    private:
-        void drawEvent() override;
+        Timeline _timeline;
+        ScriptManager _scriptManager;
+
+        SceneGraph::DrawableGroup3D _drawables;
+        ScriptGroup _scripts;
+        LightGroup _lights;
+
+        OberonResourceManager _resourceManager;
+        std::vector<std::pair<std::string, SceneShader::Flags>> shaderKeys;
 };

@@ -24,66 +24,15 @@
 
 #include "GlfwPlatform.h"
 
-#include <sstream>
-#include <Corrade/Utility/Configuration.h>
-#include <Corrade/Utility/Resource.h>
 #include <Magnum/GL/DefaultFramebuffer.h>
 #include <Magnum/GL/Mesh.h>
-#include <Magnum/GL/Renderer.h>
 #include <Magnum/GL/Texture.h>
-#include <Magnum/SceneGraph/Camera.h>
-#include <Oberon/Core/Importer.h>
 #include <Oberon/Core/Light.h>
 #include <Oberon/Core/Script.h>
 
-static void importApplicationResources() {
-    CORRADE_RESOURCE_INITIALIZE(OberonApplication_RCS)
-}
-
 GlfwPlatform::GlfwPlatform(const Arguments& arguments): Platform::Application{arguments,
     Configuration{}.setTitle("Application")
-                   .setSize({1024, 576})}
-{
-    GL::Renderer::enable(GL::Renderer::Feature::Blending);
-    GL::Renderer::enable(GL::Renderer::Feature::DepthTest);
-    GL::Renderer::enable(GL::Renderer::Feature::FaceCulling);
-
-    GL::Renderer::setBlendEquation(GL::Renderer::BlendEquation::Add,
-        GL::Renderer::BlendEquation::Add);
-    GL::Renderer::setBlendFunction(GL::Renderer::BlendFunction::SourceAlpha,
-        GL::Renderer::BlendFunction::OneMinusSourceAlpha);
-
-    using namespace Math::Literals;
-
-    _cameraObject = new Object3D{&_scene};
-    _camera = new SceneGraph::Camera3D{*_cameraObject};
-    _camera->setAspectRatioPolicy(SceneGraph::AspectRatioPolicy::Extend)
-        .setProjectionMatrix(Matrix4::perspectiveProjection(35.0_degf, 4.0f/3.0f, 0.001f, 100.0f))
-        .setViewport(GL::defaultFramebuffer.viewport().size());
-
-    if(!Utility::Resource::hasGroup("OberonApplication"))
-        importApplicationResources();
-
-    Utility::Resource resources("OberonApplication");
-
-    std::istringstream projectConfigurationStream(resources.get("project.oberon"));
-    Utility::Configuration projectConfiguration(projectConfigurationStream);
-
-    std::string mainCollection = projectConfiguration.value("main_collection");
-    std::istringstream collectionStream(resources.get(mainCollection));
-    Utility::Configuration collectionConfig{collectionStream};
-    Utility::ConfigurationGroup* sceneConfig = collectionConfig.group("scene");
-
-    Importer importer{_resourceManager};
-    loadCompiledReources(collectionConfig, resources, importer);
-
-    importer.loadChildrenObject(sceneConfig, &_scene, &_drawables, &_scripts, &_lights);
-    importer.createShaders(&_drawables, _lights.size(), shaderKeys);
-
-    _scriptManager.loadScripts(_scripts);
-
-    _timeline.start();
-}
+                   .setSize({1024, 576})} {}
 
 void GlfwPlatform::drawEvent() {
     GL::defaultFramebuffer.clear(GL::FramebufferClear::Color|GL::FramebufferClear::Depth);
@@ -99,21 +48,6 @@ void GlfwPlatform::drawEvent() {
     redraw();
 
     _timeline.nextFrame();
-}
-
-void GlfwPlatform::loadCompiledReources(Utility::Configuration& collectionConfig, Utility::Resource& resources, Importer& importer) {
-    if(!collectionConfig.hasGroup("external_resources"))
-        return;
-
-    for(Utility::ConfigurationGroup* resource: collectionConfig.group("external_resources")->groups("resource")) {
-        std::string resourceType = resource->value("type");
-        std::string resourcePath = resource->value("path");
-
-        if(resourceType == "Texture2D") {
-            GL::Texture2D texture = importer.loadTexture(resources.getRaw(resourcePath));
-            _resourceManager.set(resourcePath, std::move(texture), ResourceDataState::Final, ResourcePolicy::ReferenceCounted);
-        }
-    }
 }
 
 MAGNUM_APPLICATION_MAIN(GlfwPlatform)

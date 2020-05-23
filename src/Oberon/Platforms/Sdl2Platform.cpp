@@ -22,16 +22,32 @@
     SOFTWARE.
 */
 
-#pragma once
+#include "Sdl2Platform.h"
 
-#include <Magnum/Platform/GlfwApplication.h>
+#include <Magnum/GL/DefaultFramebuffer.h>
+#include <Magnum/GL/Mesh.h>
+#include <Magnum/GL/Texture.h>
+#include <Oberon/Core/Light.h>
+#include <Oberon/Core/Script.h>
 
-#include "AbstractPlatform.h"
+Sdl2Platform::Sdl2Platform(const Arguments& arguments): Platform::Application{arguments,
+    Configuration{}.setTitle("Application")
+                   .setSize({1024, 576})} {}
 
-class GlfwPlatform: public Platform::Application, AbstractPlatform {
-    public:
-        explicit GlfwPlatform(const Arguments& arguments);
+void Sdl2Platform::drawEvent() {
+    GL::defaultFramebuffer.clear(GL::FramebufferClear::Color|GL::FramebufferClear::Depth);
 
-    private:
-        void drawEvent() override;
-};
+    _scriptManager.update(_timeline.previousFrameDuration());
+
+    for(std::size_t i = 0; i != _lights.size(); ++i)
+        _lights[i].updateShader(*_camera, shaderKeys);
+
+    _camera->draw(_drawables);
+
+    swapBuffers();
+    redraw();
+
+    _timeline.nextFrame();
+}
+
+MAGNUM_APPLICATION_MAIN(Sdl2Platform)

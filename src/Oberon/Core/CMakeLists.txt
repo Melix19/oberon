@@ -59,6 +59,7 @@ target_include_directories(OberonCore PUBLIC
     ${PROJECT_BINARY_DIR}/src)
 
 target_link_libraries(OberonCore PRIVATE
+    Magnum::Magnum
     Magnum::MeshTools
     Magnum::Primitives
     Magnum::SceneGraph
