@@ -245,10 +245,11 @@ SceneShader& SceneShader::setProjectionMatrix(const Matrix4& matrix) {
 SceneShader& SceneShader::setPointLight(UnsignedInt id, const Vector3& position, const Color4& color, Float constant, Float linear, Float quadratic) {
     CORRADE_ASSERT(id < _lightCount,
         "SceneShader::setPointLight(): light ID" << id << "is out of bounds for" << _lightCount << "lights", *this);
-    setUniform(_pointLightsUniform + id, position);
-    setUniform(_pointLightsUniform + id + 1, color);
-    setUniform(_pointLightsUniform + id + 2, constant);
-    setUniform(_pointLightsUniform + id + 3, linear);
-    setUniform(_pointLightsUniform + id + 4, quadratic);
+    const UnsignedByte attributeCount = 5;
+    setUniform(_pointLightsUniform + id*attributeCount, position);
+    setUniform(_pointLightsUniform + id*attributeCount + 1, color);
+    setUniform(_pointLightsUniform + id*attributeCount + 2, constant);
+    setUniform(_pointLightsUniform + id*attributeCount + 3, linear);
+    setUniform(_pointLightsUniform + id*attributeCount + 4, quadratic);
     return *this;
 }
