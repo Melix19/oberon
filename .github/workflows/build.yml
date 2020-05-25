@@ -34,6 +34,7 @@ jobs:
           -DCMAKE_INSTALL_PREFIX=$GITHUB_WORKSPACE/deps \
           -DCMAKE_BUILD_TYPE=Release \
           -DBUILD_STATIC=ON \
+          -DBUILD_PLUGINS_STATIC=ON \
           -DWITH_DEBUGTOOLS=OFF \
           -DWITH_TEXT=OFF \
           -DWITH_TEXTURETOOLS=OFF \
@@ -113,6 +114,7 @@ jobs:
           -DCMAKE_INSTALL_PREFIX=$GITHUB_WORKSPACE/deps \
           -DCMAKE_BUILD_TYPE=Release \
           -DBUILD_STATIC=ON \
+          -DBUILD_PLUGINS_STATIC=ON \
           -DWITH_DEBUGTOOLS=OFF \
           -DWITH_TEXT=OFF \
           -DWITH_TEXTURETOOLS=OFF \
@@ -193,6 +195,7 @@ jobs:
           -DVCPKG_TARGET_TRIPLET=x64-windows-static \
           -DCMAKE_INSTALL_PREFIX=$GITHUB_WORKSPACE/deps \
           -DBUILD_STATIC=ON \
+          -DBUILD_PLUGINS_STATIC=ON \
           -DWITH_DEBUGTOOLS=OFF \
           -DWITH_TEXT=OFF \
           -DWITH_TEXTURETOOLS=OFF \
