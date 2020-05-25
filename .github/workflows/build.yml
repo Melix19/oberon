@@ -39,7 +39,7 @@ jobs:
           -DWITH_TEXTURETOOLS=OFF \
           -DWITH_GLFWAPPLICATION=ON \
           -DWITH_SDL2APPLICATION=ON \
-          -DWITH_ANYIMAGEIMPORTER = ON
+          -DWITH_ANYIMAGEIMPORTER=ON
         cmake --build . --target install
 
         cd $GITHUB_WORKSPACE
@@ -118,7 +118,7 @@ jobs:
           -DWITH_TEXTURETOOLS=OFF \
           -DWITH_GLFWAPPLICATION=ON \
           -DWITH_SDL2APPLICATION=ON \
-          -DWITH_ANYIMAGEIMPORTER = ON
+          -DWITH_ANYIMAGEIMPORTER=ON
         cmake --build . --target install
 
         cd $GITHUB_WORKSPACE
@@ -198,7 +198,7 @@ jobs:
           -DWITH_TEXTURETOOLS=OFF \
           -DWITH_GLFWAPPLICATION=ON \
           -DWITH_SDL2APPLICATION=ON \
-          -DWITH_ANYIMAGEIMPORTER = ON
+          -DWITH_ANYIMAGEIMPORTER=ON
         cmake --build . --config Release --target install
 
         cd $GITHUB_WORKSPACE
