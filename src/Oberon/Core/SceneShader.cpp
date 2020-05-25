@@ -34,9 +34,15 @@
 #include <Magnum/Math/Color.h>
 #include <Magnum/Math/Matrix4.h>
 
-static void importCoreResources() {
+static void importOberonCoreResources() {
     CORRADE_RESOURCE_INITIALIZE(OberonCore_RCS)
 }
+
+#if defined(MAGNUM_BUILD_STATIC)
+static void importMagnumShadersResources() {
+    CORRADE_RESOURCE_INITIALIZE(MagnumShaders_RCS)
+}
+#endif
 
 namespace {
 
@@ -79,7 +85,12 @@ enum: Int {
 
 SceneShader::SceneShader(const Flags flags, const UnsignedInt lightCount): _flags{flags}, _lightCount{lightCount} {
     if(!Utility::Resource::hasGroup("OberonCore"))
-        importCoreResources();
+        importOberonCoreResources();
+
+    #if defined(MAGNUM_BUILD_STATIC)
+    if(!Utility::Resource::hasGroup("MagnumShaders"))
+        importMagnumShadersResources();
+    #endif
 
     Utility::Resource rs("OberonCore");
     Utility::Resource magnumRs("MagnumShaders");
