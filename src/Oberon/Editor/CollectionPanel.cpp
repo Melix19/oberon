@@ -168,17 +168,17 @@ void CollectionPanel::save() {
 }
 
 void CollectionPanel::loadResources() {
-    if(!_collectionConfig.hasGroup("external_resources"))
+    Utility::ConfigurationGroup* resourcesGroup = _collectionConfig.group(
+        "external_resources");
+    if(!resourcesGroup)
         return;
 
-    for(Utility::ConfigurationGroup* resource: _collectionConfig.group("external_resources")->groups("resource")) {
+    for(Utility::ConfigurationGroup* resource: resourcesGroup->groups("resource")) {
         std::string resourceType = resource->value("type");
         std::string resourcePath = resource->value("path");
 
-        if(resourceType == "Texture2D") {
-            GL::Texture2D texture = _importer.loadTexture(Utility::Directory::read(Utility::Directory::join(_projectPath, resourcePath)));
-            _resourceManager.set(resourcePath, std::move(texture), ResourceDataState::Final, ResourcePolicy::ReferenceCounted);
-        }
+        if(resourceType == "Texture2D")
+            _importer.loadTexture(resourcePath, _projectPath);
     }
 }
 
@@ -211,7 +211,7 @@ void CollectionPanel::createGrid() {
     Resource<GL::Mesh> meshResource = _resourceManager.get<GL::Mesh>("grid");
     if(!meshResource) {
         GL::Mesh glMesh = MeshTools::compile(Primitives::grid3DWireframe({size - 1, size - 1}));
-        _resourceManager.set(meshResource.key(), std::move(glMesh), ResourceDataState::Final, ResourcePolicy::ReferenceCounted);
+        _resourceManager.set(meshResource.key(), std::move(glMesh));
     }
 
     Mesh& mesh = _gridObject->addFeature<Mesh>(&_editorDrawables);

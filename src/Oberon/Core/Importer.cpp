@@ -27,6 +27,7 @@
 #include <Corrade/Containers/Optional.h>
 #include <Corrade/Utility/ConfigurationGroup.h>
 #include <Corrade/Utility/Directory.h>
+#include <Corrade/Utility/Resource.h>
 #include <Magnum/ImageView.h>
 #include <Magnum/GL/Mesh.h>
 #include <Magnum/GL/Texture.h>
@@ -214,7 +215,7 @@ void Importer::updateMeshPrimitive(Mesh& mesh, Utility::ConfigurationGroup* prim
             glMesh = MeshTools::compile(Primitives::uvSphereSolid(rings, segments, flags));
         }
 
-        _resourceManager.set(meshResource.key(), std::move(glMesh), ResourceDataState::Final, ResourcePolicy::ReferenceCounted);
+        _resourceManager.set(meshResource.key(), std::move(glMesh));
     }
 
     mesh.setMesh(meshResource);
@@ -248,7 +249,20 @@ void Importer::createShaders(SceneGraph::DrawableGroup3D* drawables, UnsignedInt
     }
 }
 
-GL::Texture2D Importer::loadTexture(Containers::ArrayView<const char> data) {
+Resource<GL::Texture2D> Importer::loadTexture(const std::string& resourcePath, Utility::Resource& resources) {
+    return loadTexture(resourcePath, resources.getRaw(resourcePath));
+}
+
+Resource<GL::Texture2D> Importer::loadTexture(const std::string& resourcePath, const std::string& rootPath) {
+    return loadTexture(resourcePath, Utility::Directory::mapRead(
+        Utility::Directory::join(rootPath, resourcePath)));
+}
+
+Resource<GL::Texture2D> Importer::loadTexture(const std::string& resourcePath, Containers::ArrayView<const char> data) {
+    Resource<GL::Texture2D> textureResource = _resourceManager.get<GL::Texture2D>(resourcePath);
+    if(textureResource)
+        return textureResource;
+
     Containers::Pointer<Trade::AbstractImporter> importer =
         _importerManager.loadAndInstantiate("AnyImageImporter");
 
@@ -262,7 +276,9 @@ GL::Texture2D Importer::loadTexture(Containers::ArrayView<const char> data) {
         .setMinificationFilter(GL::SamplerFilter::Linear)
         .setStorage(1, GL::textureFormat(image->format()), image->size())
         .setSubImage(0, {}, *image);
-    return texture;
+
+    _resourceManager.set(textureResource.key(), std::move(texture));
+    return textureResource;
 }
 
 std::pair<std::string, SceneShader::Flags> Importer::calculateShaderKey(Mesh& mesh, bool useObjectId) {

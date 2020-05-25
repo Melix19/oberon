@@ -82,16 +82,15 @@ AbstractPlatform::AbstractPlatform() {
 }
 
 void AbstractPlatform::loadCompiledReources(Utility::Configuration& collectionConfig, Utility::Resource& resources, Importer& importer) {
-    if(!collectionConfig.hasGroup("external_resources"))
+    Utility::ConfigurationGroup* resourcesGroup = collectionConfig.group("external_resources");
+    if(!resourcesGroup)
         return;
 
-    for(Utility::ConfigurationGroup* resource: collectionConfig.group("external_resources")->groups("resource")) {
+    for(Utility::ConfigurationGroup* resource: resourcesGroup->groups("resource")) {
         std::string resourceType = resource->value("type");
         std::string resourcePath = resource->value("path");
 
-        if(resourceType == "Texture2D") {
-            GL::Texture2D texture = importer.loadTexture(resources.getRaw(resourcePath));
-            _resourceManager.set(resourcePath, std::move(texture), ResourceDataState::Final, ResourcePolicy::ReferenceCounted);
-        }
+        if(resourceType == "Texture2D")
+            importer.loadTexture(resourcePath, resources);
     }
 }

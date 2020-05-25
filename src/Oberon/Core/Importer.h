@@ -44,9 +44,11 @@ class Importer {
         Resource<GL::AbstractShaderProgram, SceneShader> createShader(Mesh& mesh, UnsignedInt lightCount, std::vector<std::pair<std::string, SceneShader::Flags>>& shaderKeys, bool useObjectId);
         void createShaders(SceneGraph::DrawableGroup3D* drawables, UnsignedInt lightCount, std::vector<std::pair<std::string, SceneShader::Flags>>& shaderKeys, bool useObjectId = false);
 
-        GL::Texture2D loadTexture(Containers::ArrayView<const char> data);
+        Resource<GL::Texture2D> loadTexture(const std::string& resourcePath, Utility::Resource& resources);
+        Resource<GL::Texture2D> loadTexture(const std::string& resourcePath, const std::string& rootPath);
 
     private:
+        Resource<GL::Texture2D> loadTexture(const std::string& resourcePath, Containers::ArrayView<const char> data);
         std::pair<std::string, SceneShader::Flags> calculateShaderKey(Mesh& mesh, bool useObjectId);
 
     private:

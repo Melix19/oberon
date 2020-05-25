@@ -30,7 +30,7 @@
 
 class Inspector {
     public:
-        Inspector(OberonResourceManager& resourceManager, Importer& importer): _resourceManager(resourceManager), _importer(importer) {}
+        Inspector(const std::string& projectPath, Importer& importer): _projectPath(projectPath), _importer(importer) {}
 
         void newFrame();
 
@@ -48,7 +48,7 @@ class Inspector {
         void addResource(const std::string& resourcePath, const std::string& resourceType);
 
     private:
-        OberonResourceManager& _resourceManager;
+        std::string _projectPath;
         Importer& _importer;
 
         Float _spacing;

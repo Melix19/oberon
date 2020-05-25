@@ -42,7 +42,7 @@ EditorApplication::EditorApplication(const Arguments& arguments, const std::stri
     Configuration{}.setTitle("Oberon")
                    .setWindowFlags(Configuration::WindowFlag::Maximized|Configuration::WindowFlag::Resizable)},
     _projectPath{projectPath}, _importer{_resourceManager}, _scriptManager{projectPath}, _explorer{projectPath},
-    _inspector{_resourceManager, _importer}
+    _inspector{_projectPath, _importer}
 {
     const GLFWvidmode* videoMode = glfwGetVideoMode(glfwGetPrimaryMonitor());
 
