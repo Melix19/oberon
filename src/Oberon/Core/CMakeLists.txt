@@ -23,6 +23,7 @@
 #
 
 find_package(Magnum REQUIRED
+    AnyImageImporter
     MeshTools
     Primitives
     SceneGraph
@@ -59,6 +60,7 @@ target_include_directories(OberonCore PUBLIC
     ${PROJECT_BINARY_DIR}/src)
 
 target_link_libraries(OberonCore PRIVATE
+    Magnum::AnyImageImporter
     Magnum::Magnum
     Magnum::MeshTools
     Magnum::Primitives
