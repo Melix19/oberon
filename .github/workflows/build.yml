@@ -14,7 +14,7 @@ jobs:
     - name: Install dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y libglfw3-dev libpng-dev libsdl2-dev
+        sudo apt-get install -y libpng-dev libsdl2-dev
 
         cd $GITHUB_WORKSPACE
         git clone --depth 1 https://github.com/mosra/corrade.git
@@ -38,7 +38,6 @@ jobs:
           -DWITH_DEBUGTOOLS=OFF \
           -DWITH_TEXT=OFF \
           -DWITH_TEXTURETOOLS=OFF \
-          -DWITH_GLFWAPPLICATION=ON \
           -DWITH_SDL2APPLICATION=ON \
           -DWITH_ANYIMAGEIMPORTER=ON
         cmake --build . --target install
@@ -94,7 +93,7 @@ jobs:
 
     - name: Install dependencies
       run: |
-        brew install glfw3 libpng sdl2
+        brew install libpng sdl2
 
         cd $GITHUB_WORKSPACE
         git clone --depth 1 https://github.com/mosra/corrade.git
@@ -118,7 +117,6 @@ jobs:
           -DWITH_DEBUGTOOLS=OFF \
           -DWITH_TEXT=OFF \
           -DWITH_TEXTURETOOLS=OFF \
-          -DWITH_GLFWAPPLICATION=ON \
           -DWITH_SDL2APPLICATION=ON \
           -DWITH_ANYIMAGEIMPORTER=ON
         cmake --build . --target install
@@ -175,7 +173,7 @@ jobs:
     - name: Install dependencies
       shell: bash
       run: |
-        vcpkg install glfw3 libpng sdl2 --triplet x64-windows-static
+        vcpkg install libpng sdl2 --triplet x64-windows-static
 
         cd $GITHUB_WORKSPACE
         git clone --depth 1 https://github.com/mosra/corrade.git
@@ -199,7 +197,6 @@ jobs:
           -DWITH_DEBUGTOOLS=OFF \
           -DWITH_TEXT=OFF \
           -DWITH_TEXTURETOOLS=OFF \
-          -DWITH_GLFWAPPLICATION=ON \
           -DWITH_SDL2APPLICATION=ON \
           -DWITH_ANYIMAGEIMPORTER=ON
         cmake --build . --config Release --target install
