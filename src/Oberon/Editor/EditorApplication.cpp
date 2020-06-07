@@ -44,9 +44,11 @@ EditorApplication::EditorApplication(const Arguments& arguments, const std::stri
     _projectPath{projectPath}, _importer{_resourceManager}, _scriptManager{projectPath}, _explorer{projectPath},
     _inspector{_projectPath, _importer}
 {
-    const GLFWvidmode* videoMode = glfwGetVideoMode(glfwGetPrimaryMonitor());
+    /* Get screen resolution to be used in the CollectionPanel viewport */
+    SDL_DisplayMode dm;
+    SDL_GetDesktopDisplayMode(0, &dm);
 
-    _screenResolution = Vector2i{videoMode->width, videoMode->height};
+    _screenResolution = Vector2i{dm.w, dm.h};
     _dpiScaleRatio = Vector2{framebufferSize()}/(Vector2{windowSize()}/dpiScaling());
 
     ImGui::CreateContext();

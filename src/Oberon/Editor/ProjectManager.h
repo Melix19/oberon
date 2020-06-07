@@ -25,7 +25,7 @@
 #pragma once
 
 #include <Magnum/ImGuiIntegration/Context.hpp>
-#include <Magnum/Platform/GlfwApplication.h>
+#include <Magnum/Platform/Sdl2Application.h>
 
 #include "Editor.h"
 
