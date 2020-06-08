@@ -103,7 +103,7 @@ void CollectionPanel::newFrame() {
 
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
     _isVisible = ImGui::Begin(_name.c_str(), &_isOpen, ImGuiWindowFlags_NoScrollbar |
-        ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_MenuBar);
+        ImGuiWindowFlags_NoScrollWithMouse);
     ImGui::PopStyleVar();
 
     _isFocused = ImGui::IsWindowFocused();
@@ -115,31 +115,6 @@ void CollectionPanel::newFrame() {
         return;
     }
 
-    if(ImGui::BeginMenuBar()) {
-        const char* projections[] = {"Orthographic", "Perspective"};
-        const char* currentProjection = projections[!_isOrthographicCamera];
-
-        ImGui::PushItemWidth(120);
-        if(ImGui::BeginCombo("##CameraProjection", currentProjection)) {
-            for(auto& projection: projections) {
-                bool isSelected = (currentProjection == projection);
-
-                if(ImGui::Selectable(projection, isSelected)) {
-                    _isOrthographicCamera = !_isOrthographicCamera;
-
-                    Matrix4 currentCameraTransformation = _cameraObject->transformation();
-                    _cameraObject->setTransformation(_prevCameraTransformation);
-                    _prevCameraTransformation = currentCameraTransformation;
-                }
-                if(isSelected) ImGui::SetItemDefaultFocus();
-            }
-
-            ImGui::EndCombo();
-        }
-
-        ImGui::EndMenuBar();
-    }
-
     const ImVec2 windowPos = ImGui::GetWindowPos();
     const ImVec2 windowSize = ImGui::GetWindowSize();
 
@@ -147,8 +122,7 @@ void CollectionPanel::newFrame() {
     ImGui::GetWindowDrawList()->AddImage(static_cast<ImTextureID>(&_viewportTexture), ImVec2(_viewportPos),
         ImVec2(_viewportPos + Vector2{_viewportTextureSize}), ImVec2(0, 1), ImVec2(1, 0));
 
-    _viewportSize = {ImGui::GetWindowContentRegionMax().x - ImGui::GetWindowContentRegionMin().x,
-        ImGui::GetWindowContentRegionMax().y - ImGui::GetWindowContentRegionMin().y};
+    _viewportSize = Vector2{ImGui::GetContentRegionAvail()};
 
     _framebuffer.setViewport({{}, Vector2i{_viewportSize*_dpiScaleRatio}});
 
@@ -159,6 +133,32 @@ void CollectionPanel::newFrame() {
             0.05, 500.0f));
 
     _camera->setViewport(Vector2i{_viewportSize});
+
+    /* Simulate window padding. We need this because we have to set the real ImGui's WindowPadding
+       to 0 because of the viewport. */
+    ImGui::SetCursorPos(ImVec2(ImGui::GetCursorPos().x + ImGui::GetStyle().WindowPadding.x,
+        ImGui::GetCursorPos().y + ImGui::GetStyle().WindowPadding.y));
+
+    const char* projections[] = {"Orthographic", "Perspective"};
+    const char* currentProjection = projections[!_isOrthographicCamera];
+
+    ImGui::PushItemWidth(120);
+    if(ImGui::BeginCombo("##CameraProjection", currentProjection)) {
+        for(auto& projection: projections) {
+            bool isSelected = (currentProjection == projection);
+
+            if(ImGui::Selectable(projection, isSelected)) {
+                _isOrthographicCamera = !_isOrthographicCamera;
+
+                Matrix4 currentCameraTransformation = _cameraObject->transformation();
+                _cameraObject->setTransformation(_prevCameraTransformation);
+                _prevCameraTransformation = currentCameraTransformation;
+            }
+            if(isSelected) ImGui::SetItemDefaultFocus();
+        }
+
+        ImGui::EndCombo();
+    }
 
     ImGui::End();
 }
