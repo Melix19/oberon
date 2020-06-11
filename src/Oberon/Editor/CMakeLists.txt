@@ -75,7 +75,7 @@ target_link_libraries(OberonEditor PRIVATE
 if(CORRADE_TARGET_APPLE)
     set_target_properties(OberonEditor PROPERTIES
         MACOSX_BUNDLE ON
-        MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/Resources/MacOSXBundleInfo.plist.in
+        MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/MacOSXBundleInfo.plist.in
         XCODE_ATTRIBUTE_CODE_SIGNING_REQUIRED "YES")
 endif()
 
