@@ -26,8 +26,6 @@ find_package(ImGui REQUIRED SourcesMiscCpp)
 find_package(Magnum REQUIRED Sdl2Application)
 find_package(MagnumIntegration REQUIRED ImGui)
 
-set_directory_properties(PROPERTIES CORRADE_USE_PEDANTIC_FLAGS ON)
-
 corrade_add_resource(OberonEditor_RCS resources.conf)
 
 set(OberonEditor_SRCS
@@ -36,11 +34,11 @@ set(OberonEditor_SRCS
     EditorApplication.cpp
     Explorer.cpp
     Inspector.cpp
-    OberonMain.cpp
     Outliner.cpp
     ProjectManager.cpp
     PropertiesPanel.cpp
     Themer.cpp
+    main.cpp
 
     ${OberonEditor_RCS})
 
@@ -60,19 +58,22 @@ set(OberonEditor_HEADERS
     PropertiesPanel.h
     Themer.h)
 
-add_executable(Oberon MACOSX_BUNDLE
+add_executable(OberonEditor MACOSX_BUNDLE
     ${OberonEditor_SRCS}
     ${OberonEditor_HEADERS})
 
-target_link_libraries(Oberon PRIVATE
+set_target_properties(OberonEditor PROPERTIES
+    OUTPUT_NAME "Oberon")
+
+target_link_libraries(OberonEditor PRIVATE
+    Oberon
     ImGui::SourcesMiscCpp
     Magnum::Application
     MagnumIntegration::ImGui
-    Oberon::Core
     portable_file_dialogs)
 
 if(CORRADE_TARGET_APPLE)
-    set_target_properties(Oberon PROPERTIES
+    set_target_properties(OberonEditor PROPERTIES
         MACOSX_BUNDLE ON
         MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/Resources/MacOSXBundleInfo.plist.in
         XCODE_ATTRIBUTE_CODE_SIGNING_REQUIRED "YES")

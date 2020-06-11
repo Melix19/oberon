@@ -33,11 +33,11 @@
 #include <Magnum/MeshTools/Compile.h>
 #include <Magnum/Primitives/Grid.h>
 #include <Magnum/Trade/MeshData.h>
-#include <Oberon/Core/Importer.h>
-#include <Oberon/Core/Light.h>
-#include <Oberon/Core/Mesh.h>
-#include <Oberon/Core/Script.h>
-#include <Oberon/Core/ScriptManager.h>
+#include <Oberon/Importer.h>
+#include <Oberon/Light.h>
+#include <Oberon/Mesh.h>
+#include <Oberon/Script.h>
+#include <Oberon/ScriptManager.h>
 
 #include "FileNode.h"
 #include "ObjectNode.h"

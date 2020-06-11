@@ -27,8 +27,8 @@
 #include <Magnum/ResourceManager.h>
 #include <Magnum/ImGuiIntegration/Context.hpp>
 #include <Magnum/Platform/Sdl2Application.h>
-#include <Oberon/Core/Importer.h>
-#include <Oberon/Core/ScriptManager.h>
+#include <Oberon/Importer.h>
+#include <Oberon/ScriptManager.h>
 
 #include "Console.h"
 #include "Explorer.h"

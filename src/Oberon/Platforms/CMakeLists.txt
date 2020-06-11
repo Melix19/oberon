@@ -24,9 +24,7 @@
 
 find_package(Magnum REQUIRED Sdl2Application)
 
-set_directory_properties(PROPERTIES CORRADE_USE_PEDANTIC_FLAGS ON)
-
 add_library(OberonSdl2Platform AbstractPlatform.cpp AbstractPlatform.h Sdl2Platform.cpp Sdl2Platform.h)
 target_link_libraries(OberonSdl2Platform PRIVATE
-    Magnum::Sdl2Application
-    Oberon::Core)
+    Oberon
+    Magnum::Sdl2Application)

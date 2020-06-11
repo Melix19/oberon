@@ -27,8 +27,8 @@
 #include <Magnum/GL/DefaultFramebuffer.h>
 #include <Magnum/GL/Mesh.h>
 #include <Magnum/GL/Texture.h>
-#include <Oberon/Core/Light.h>
-#include <Oberon/Core/Script.h>
+#include <Oberon/Light.h>
+#include <Oberon/Script.h>
 
 Sdl2Platform::Sdl2Platform(const Arguments& arguments): Platform::Application{arguments,
     Configuration{}.setTitle("Application")

@@ -31,9 +31,9 @@
 #include <Magnum/GL/Mesh.h>
 #include <Magnum/GL/Renderer.h>
 #include <Magnum/GL/Texture.h>
-#include <Oberon/Core/Importer.h>
-#include <Oberon/Core/Light.h>
-#include <Oberon/Core/Script.h>
+#include <Oberon/Importer.h>
+#include <Oberon/Light.h>
+#include <Oberon/Script.h>
 
 static void importApplicationResources() {
     CORRADE_RESOURCE_INITIALIZE(OberonApplication_RCS)

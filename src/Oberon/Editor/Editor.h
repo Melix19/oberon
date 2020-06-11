@@ -24,7 +24,7 @@
 
 #pragma once
 
-#include <Oberon/Core/Core.h>
+#include <Oberon/Oberon.h>
 
 class AbstractPanel;
 class CollectionPanel;

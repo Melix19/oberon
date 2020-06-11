@@ -30,8 +30,8 @@
 #include <Corrade/Utility/Directory.h>
 #include <Magnum/GL/DefaultFramebuffer.h>
 #include <Magnum/GL/Renderer.h>
-#include <Oberon/Core/Light.h>
-#include <Oberon/Core/Script.h>
+#include <Oberon/Light.h>
+#include <Oberon/Script.h>
 
 #include "CollectionPanel.hpp"
 #include "FileNode.h"
@@ -330,8 +330,8 @@ void EditorApplication::exportProject() {
 
     /* Add required modules for finding the platform */
     Utility::Directory::mkpath(Utility::Directory::join(_projectPath, "build/modules"));
-    std::string moduleText = Utility::Resource("OberonEditor").get("FindGLFW.cmake");
-    Utility::Directory::writeString(Utility::Directory::join(_projectPath, "build/modules/FindGLFW.cmake"), moduleText);
+    std::string moduleText = Utility::Resource("OberonEditor").get("FindSDL2.cmake");
+    Utility::Directory::writeString(Utility::Directory::join(_projectPath, "build/modules/FindSDL2.cmake"), moduleText);
 
     /* Create resources configuration */
     Utility::Configuration resourcesConfig{Utility::Directory::join(_projectPath, "build/resources.conf")};
@@ -368,7 +368,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY " + exportPath + ")\n\
 set(CMAKE_MODULE_PATH \"${PROJECT_SOURCE_DIR}/modules/\" ${CMAKE_MODULE_PATH})\n\
 link_directories(" + libFolderPath + ")\n\
 find_package(Magnum REQUIRED\n\
-    GlfwApplication\n\
+    Sdl2Application\n\
     MeshTools\n\
     Primitives\n\
     SceneGraph\n\
@@ -376,7 +376,7 @@ find_package(Magnum REQUIRED\n\
 find_package(MagnumPlugins REQUIRED PngImporter)\n\
 corrade_add_resource(OberonApplication_RCS resources.conf)\n\
 add_executable(Application MACOSX_BUNDLE ${OberonApplication_RCS})\n\
-target_link_libraries(Application PRIVATE OberonGlfwPlatform OberonCore\n\
+target_link_libraries(Application PRIVATE Oberon OberonSdl2Platform\n\
     Magnum::Application\n\
     Magnum::MeshTools\n\
     Magnum::Primitives\n\

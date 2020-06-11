@@ -22,7 +22,49 @@
 #   SOFTWARE.
 #
 
-add_subdirectory(Core)
+find_package(Magnum REQUIRED
+    AnyImageImporter
+    MeshTools
+    Primitives
+    SceneGraph
+    Shaders)
+find_package(MagnumPlugins REQUIRED PngImporter)
+
+corrade_add_resource(Oberon_RCS resources.conf)
+
+set(Oberon_SRCS
+    Importer.cpp
+    SceneShader.cpp
+    ScriptManager.cpp
+
+    ${Oberon_RCS})
+
+set(Oberon_HEADERS
+    AbstractScript.h
+    Importer.h
+    Light.h
+    Mesh.h
+    Oberon.h
+    SceneShader.h
+    Script.h
+    ScriptManager.h)
+
+add_library(Oberon
+    ${Oberon_SRCS}
+    ${Oberon_HEADERS})
+
+target_include_directories(Oberon PUBLIC
+    ${PROJECT_SOURCE_DIR}/src
+    ${PROJECT_BINARY_DIR}/src)
+
+target_link_libraries(Oberon PRIVATE
+    Magnum::AnyImageImporter
+    Magnum::Magnum
+    Magnum::MeshTools
+    Magnum::Primitives
+    Magnum::SceneGraph
+    Magnum::Shaders
+    MagnumPlugins::PngImporter)
 
 if(WITH_EDITOR)
     add_subdirectory(Editor)
@@ -31,3 +73,6 @@ endif()
 if(WITH_PLATFORMS)
     add_subdirectory(Platforms)
 endif()
+
+# Oberon library target alias for superprojects
+add_library(Oberon::Oberon ALIAS Oberon)

@@ -22,8 +22,9 @@
 #   SOFTWARE.
 #
 
-if(WITH_EDITOR)
-    add_subdirectory(OberonExternal)
-endif()
+set_directory_properties(PROPERTIES
+    CORRADE_CXX_STANDARD 11
+    CORRADE_USE_PEDANTIC_FLAGS ON)
 
+add_subdirectory(OberonExternal)
 add_subdirectory(Oberon)

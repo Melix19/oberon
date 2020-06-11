@@ -32,10 +32,10 @@
 #include <Corrade/Utility/ConfigurationGroup.h>
 #include <Magnum/GL/Mesh.h>
 #include <Magnum/Math/ConfigurationValue.h>
-#include <Oberon/Core/Importer.h>
-#include <Oberon/Core/Light.h>
-#include <Oberon/Core/Mesh.h>
-#include <Oberon/Core/Script.h>
+#include <Oberon/Importer.h>
+#include <Oberon/Light.h>
+#include <Oberon/Mesh.h>
+#include <Oberon/Script.h>
 
 #include "CollectionPanel.h"
 #include "FileNode.h"

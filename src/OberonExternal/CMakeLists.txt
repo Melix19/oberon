@@ -22,4 +22,6 @@
 #   SOFTWARE.
 #
 
-add_subdirectory(portable-file-dialogs)
+if(WITH_EDITOR)
+    add_subdirectory(portable-file-dialogs)
+endif()

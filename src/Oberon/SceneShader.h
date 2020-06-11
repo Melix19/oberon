@@ -27,7 +27,7 @@
 #include <Magnum/GL/AbstractShaderProgram.h>
 #include <Magnum/Shaders/Generic.h>
 
-#include "Core.h"
+#include "Oberon.h"
 
 class SceneShader: public GL::AbstractShaderProgram {
     public:

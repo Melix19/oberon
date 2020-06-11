@@ -27,7 +27,7 @@
 #include <Corrade/Containers/Array.h>
 #include <Corrade/PluginManager/Manager.h>
 
-#include "Core.h"
+#include "Oberon.h"
 
 class ScriptManager {
     public:

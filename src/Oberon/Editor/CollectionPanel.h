@@ -32,7 +32,7 @@
 #include <Magnum/SceneGraph/Drawable.h>
 #include <Magnum/SceneGraph/Scene.h>
 #include <Magnum/SceneGraph/TranslationRotationScalingTransformation3D.h>
-#include <Oberon/Core/SceneShader.h>
+#include <Oberon/SceneShader.h>
 
 #include "AbstractPanel.h"
 

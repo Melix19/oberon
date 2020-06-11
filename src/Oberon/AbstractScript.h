@@ -24,22 +24,22 @@
 
 #pragma once
 
-#include <Magnum/SceneGraph/AbstractGroupedFeature.h>
+#include <Corrade/PluginManager/AbstractPlugin.h>
 
-#include "Core.h"
+#include "Oberon.h"
 
-class Script: public SceneGraph::AbstractGroupedFeature3D<Script> {
+class AbstractScript: public PluginManager::AbstractPlugin {
     public:
-        explicit Script(SceneGraph::AbstractObject3D& object, ScriptGroup* scripts, const std::string& name):
-            SceneGraph::AbstractGroupedFeature3D<Script>{object, scripts}, _name(name) {}
-
-        std::string name() const { return _name; }
-
-        Script& setName(const std::string& name) {
-            _name = name;
-            return *this;
+        static std::string pluginInterface() {
+            return "Oberon.AbstractScript/1.0";
         }
 
-    private:
-        std::string _name;
+        static std::vector<std::string> pluginSearchPaths() {
+            return {""};
+        }
+
+        explicit AbstractScript(PluginManager::AbstractManager& manager, const std::string& plugin):
+            AbstractPlugin{manager, plugin} {}
+
+        virtual void update(Object3D* object, Float deltaTime) = 0;
 };
