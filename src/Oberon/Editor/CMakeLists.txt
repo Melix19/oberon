@@ -62,8 +62,13 @@ add_executable(OberonEditor MACOSX_BUNDLE
     ${OberonEditor_SRCS}
     ${OberonEditor_HEADERS})
 
-set_target_properties(OberonEditor PROPERTIES
-    OUTPUT_NAME "Oberon")
+set_target_properties(OberonEditor PROPERTIES OUTPUT_NAME "Oberon")
+
+# Windows generates import libraries that will result in the same name
+# as the Oberon library so we output them in a different directory
+if(CORRADE_TARGET_WINDOWS)
+    set_target_properties(OberonEditor PROPERTIES ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/$<CONFIG>/temp)
+endif()
 
 target_link_libraries(OberonEditor PRIVATE
     Oberon
