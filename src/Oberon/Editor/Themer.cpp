@@ -39,6 +39,7 @@ void commonStyle() {
     style.FrameRounding = 4.0f;
     style.GrabRounding = 4.0f;
     style.PopupRounding = 4.0f;
+    style.ScrollbarSize = 10.0f;
 }
 
 }
@@ -56,6 +57,7 @@ void styleColorsDark() {
 
     ImVec4 windowColor(0.16f, 0.16f, 0.16f, 1.0f);
     style.Colors[ImGuiCol_MenuBarBg] = windowColor;
+    style.Colors[ImGuiCol_ScrollbarBg] = windowColor;
     style.Colors[ImGuiCol_TabActive] = windowColor;
     style.Colors[ImGuiCol_TabHovered] = windowColor;
     style.Colors[ImGuiCol_TabUnfocusedActive] = windowColor;
@@ -98,6 +100,7 @@ void styleColorsLight() {
 
     ImVec4 windowColor(1.0f, 1.0f, 1.0f, 1.0f);
     style.Colors[ImGuiCol_MenuBarBg] = windowColor;
+    style.Colors[ImGuiCol_ScrollbarBg] = windowColor;
     style.Colors[ImGuiCol_TabActive] = windowColor;
     style.Colors[ImGuiCol_TabHovered] = windowColor;
     style.Colors[ImGuiCol_TabUnfocusedActive] = windowColor;
