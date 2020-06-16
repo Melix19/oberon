@@ -26,6 +26,7 @@
 
 #include "CollectionPanel.h"
 
+#include <Corrade/Containers/StridedArrayView.h>
 #include <Magnum/Image.h>
 #include <Magnum/PixelFormat.h>
 
@@ -72,7 +73,7 @@ template<class MouseEvent> void CollectionPanel::handleMouseReleaseEvent(MouseEv
         Image2D data = _framebuffer.read(Range2Di::fromSize(fbMouseViewportPos, {1, 1}),
             {PixelFormat::R32UI});
 
-        UnsignedInt id = Containers::arrayCast<UnsignedInt>(data.data())[0];
+        UnsignedInt id = data.pixels<UnsignedInt>()[0][0];
 
         const bool altPressed = event.modifiers() >= MouseEvent::Modifier::Alt;
         const bool ctrlPressed = event.modifiers() >= MouseEvent::Modifier::Ctrl;
