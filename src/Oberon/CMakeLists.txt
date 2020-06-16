@@ -35,19 +35,15 @@ corrade_add_resource(Oberon_RCS resources.conf)
 set(Oberon_SRCS
     Importer.cpp
     SceneShader.cpp
-    ScriptManager.cpp
 
     ${Oberon_RCS})
 
 set(Oberon_HEADERS
-    AbstractScript.h
     Importer.h
     Light.h
     Mesh.h
     Oberon.h
-    SceneShader.h
-    Script.h
-    ScriptManager.h)
+    SceneShader.h)
 
 add_library(Oberon
     ${Oberon_SRCS}

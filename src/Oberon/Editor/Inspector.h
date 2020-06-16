@@ -43,7 +43,6 @@ class Inspector {
         void showTransformationHeader(ObjectNode* objectNode);
         void showLightHeader(ObjectNode* objectNode, Utility::ConfigurationGroup* featureConfig);
         void showMeshHeader(ObjectNode* objectNode, Utility::ConfigurationGroup* featureConfig);
-        void showScriptHeader(ObjectNode* objectNode, Utility::ConfigurationGroup* featureConfig);
 
         void addResource(const std::string& resourcePath, const std::string& resourceType);
 

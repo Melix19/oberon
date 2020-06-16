@@ -28,7 +28,6 @@
 #include <Magnum/GL/Mesh.h>
 #include <Magnum/GL/Texture.h>
 #include <Oberon/Light.h>
-#include <Oberon/Script.h>
 
 Sdl2Platform::Sdl2Platform(const Arguments& arguments): Platform::Application{arguments,
     Configuration{}.setTitle("Application")
@@ -36,8 +35,6 @@ Sdl2Platform::Sdl2Platform(const Arguments& arguments): Platform::Application{ar
 
 void Sdl2Platform::drawEvent() {
     GL::defaultFramebuffer.clear(GL::FramebufferClear::Color|GL::FramebufferClear::Depth);
-
-    _scriptManager.update(_timeline.previousFrameDuration());
 
     for(std::size_t i = 0; i != _lights.size(); ++i)
         _lights[i].updateShader(*_camera, shaderKeys);

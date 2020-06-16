@@ -31,7 +31,6 @@
 #include <Magnum/GL/DefaultFramebuffer.h>
 #include <Magnum/GL/Renderer.h>
 #include <Oberon/Light.h>
-#include <Oberon/Script.h>
 
 #include "CollectionPanel.hpp"
 #include "FileNode.h"
@@ -41,7 +40,7 @@
 EditorApplication::EditorApplication(const Arguments& arguments, const std::string& projectPath): Platform::Application{arguments,
     Configuration{}.setTitle("Oberon")
                    .setWindowFlags(Configuration::WindowFlag::Maximized|Configuration::WindowFlag::Resizable)},
-    _projectPath{projectPath}, _importer{_resourceManager}, _scriptManager{projectPath}, _explorer{projectPath},
+    _projectPath{projectPath}, _importer{_resourceManager}, _explorer{projectPath},
     _inspector{_projectPath, _importer}
 {
     /* Get screen resolution to be used in the CollectionPanel viewport */
@@ -303,7 +302,7 @@ void EditorApplication::openFile(FileNode* fileNode) {
 
         if(extension == ".col") {
             _panels.push_back(Containers::pointer<CollectionPanel>(fileNode, _resourceManager,
-                _importer, _scriptManager, _screenResolution, _dpiScaleRatio, _projectPath));
+                _importer, _screenResolution, _dpiScaleRatio, _projectPath));
             _collectionPanels.push_back(reinterpret_cast<CollectionPanel*>(_panels.back().get()));
         } else if(extension == ".oberon") {
             _panels.push_back(Containers::pointer<PropertiesPanel>(fileNode));

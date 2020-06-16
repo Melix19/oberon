@@ -33,7 +33,6 @@
 #include <Magnum/GL/Texture.h>
 #include <Oberon/Importer.h>
 #include <Oberon/Light.h>
-#include <Oberon/Script.h>
 
 static void importApplicationResources() {
     CORRADE_RESOURCE_INITIALIZE(OberonApplication_RCS)
@@ -73,10 +72,8 @@ AbstractPlatform::AbstractPlatform() {
     Importer importer{_resourceManager};
     loadCompiledReources(collectionConfig, resources, importer);
 
-    importer.loadChildrenObject(sceneConfig, &_scene, &_drawables, &_scripts, &_lights);
+    importer.loadChildrenObject(sceneConfig, &_scene, &_drawables, &_lights);
     importer.createShaders(&_drawables, _lights.size(), shaderKeys);
-
-    _scriptManager.loadScripts(_scripts);
 
     _timeline.start();
 }

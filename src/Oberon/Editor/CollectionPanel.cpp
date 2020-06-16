@@ -36,14 +36,12 @@
 #include <Oberon/Importer.h>
 #include <Oberon/Light.h>
 #include <Oberon/Mesh.h>
-#include <Oberon/Script.h>
-#include <Oberon/ScriptManager.h>
 
 #include "FileNode.h"
 #include "ObjectNode.h"
 
-CollectionPanel::CollectionPanel(FileNode* fileNode, OberonResourceManager& resourceManager, Importer& importer, ScriptManager& scriptManager, const Vector2i& viewportTextureSize, const Vector2& dpiScaleRatio, const std::string& projectPath):
-    AbstractPanel{fileNode}, _collectionConfig{fileNode->path()}, _resourceManager{resourceManager}, _importer{importer}, _scriptManager{scriptManager}, _viewportTextureSize{viewportTextureSize}, _dpiScaleRatio{dpiScaleRatio}, _projectPath(projectPath)
+CollectionPanel::CollectionPanel(FileNode* fileNode, OberonResourceManager& resourceManager, Importer& importer, const Vector2i& viewportTextureSize, const Vector2& dpiScaleRatio, const std::string& projectPath):
+    AbstractPanel{fileNode}, _collectionConfig{fileNode->path()}, _resourceManager{resourceManager}, _importer{importer}, _viewportTextureSize{viewportTextureSize}, _dpiScaleRatio{dpiScaleRatio}, _projectPath(projectPath)
 {
     _name = Utility::Directory::filename(_fileNode->path());
 
@@ -87,8 +85,6 @@ void CollectionPanel::drawViewport(Float deltaTime) {
         .clearColor(1, Vector4ui{0})
         .clearDepth(1.0f)
         .bind();
-
-    if(_isSimulating) _scriptManager.update(deltaTime);
 
     for(std::size_t i = 0; i != _lights.size(); ++i)
         _lights[i].updateShader(*_camera, shaderKeys);
@@ -185,7 +181,7 @@ void CollectionPanel::loadResources() {
 void CollectionPanel::updateObjectNodeChildren(ObjectNode* node) {
     for(auto childConfig: node->objectConfig()->groups("child")) {
         Object3D* child = _importer.loadObject(childConfig, node->object(),
-            &_drawables, &_scripts, &_lights);
+            &_drawables, &_lights);
         ObjectNode* childNode = node->addChild(child, childConfig);
 
         if(!_drawables.isEmpty() && child == &_drawables[_drawables.size() - 1].object())
@@ -246,7 +242,7 @@ void CollectionPanel::resetLightsId() {
 }
 
 void CollectionPanel::addFeatureToObject(ObjectNode* objectNode, Utility::ConfigurationGroup* featureConfig) {
-    SceneGraph::AbstractFeature3D* newFeature = _importer.loadFeature(featureConfig, objectNode->object(), &_drawables, &_scripts, &_lights);
+    SceneGraph::AbstractFeature3D* newFeature = _importer.loadFeature(featureConfig, objectNode->object(), &_drawables, &_lights);
 
     if(featureConfig->value("type") == "light")
         recreateShaders();
@@ -274,12 +270,10 @@ void CollectionPanel::resetDrawablesId() {
 }
 
 void CollectionPanel::startSimulation() {
-    _scriptManager.loadScripts(_scripts);
     _isSimulating = true;
 }
 
 void CollectionPanel::stopSimulation() {
-    _scriptManager.unloadScripts();
     resetObjectAndChildren(_rootNode.get());
     _isSimulating = false;
 }

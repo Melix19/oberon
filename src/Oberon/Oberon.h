@@ -35,7 +35,6 @@ typedef SceneGraph::Scene<SceneGraph::TranslationRotationScalingTransformation3D
 
 typedef ResourceManager<GL::AbstractShaderProgram, GL::Mesh, GL::Texture2D> OberonResourceManager;
 
-class AbstractScript;
 class Importer;
 
 class Light;
@@ -43,8 +42,3 @@ typedef SceneGraph::FeatureGroup3D<Light> LightGroup;
 
 class Mesh;
 class SceneShader;
-
-class Script;
-typedef SceneGraph::FeatureGroup3D<Script> ScriptGroup;
-
-class ScriptManager;

@@ -33,10 +33,10 @@ class Importer {
     public:
         Importer(OberonResourceManager& resourceManager): _resourceManager(resourceManager) {}
 
-        Object3D* loadObject(Utility::ConfigurationGroup* objectConfig, Object3D* parent, SceneGraph::DrawableGroup3D* drawables, ScriptGroup* scripts, LightGroup* lights);
-        Object3D* loadChildrenObject(Utility::ConfigurationGroup* parentConfig, Object3D* parent, SceneGraph::DrawableGroup3D* drawables, ScriptGroup* scripts, LightGroup* lights);
+        Object3D* loadObject(Utility::ConfigurationGroup* objectConfig, Object3D* parent, SceneGraph::DrawableGroup3D* drawables, LightGroup* lights);
+        Object3D* loadChildrenObject(Utility::ConfigurationGroup* parentConfig, Object3D* parent, SceneGraph::DrawableGroup3D* drawables, LightGroup* lights);
 
-        SceneGraph::AbstractFeature3D* loadFeature(Utility::ConfigurationGroup* featureConfig, Object3D* object, SceneGraph::DrawableGroup3D* drawables, ScriptGroup* scripts, LightGroup* lights);
+        SceneGraph::AbstractFeature3D* loadFeature(Utility::ConfigurationGroup* featureConfig, Object3D* object, SceneGraph::DrawableGroup3D* drawables, LightGroup* lights);
         void resetObject(Object3D* object, Utility::ConfigurationGroup* objectConfig);
 
         void updateMeshPrimitive(Mesh& mesh, Utility::ConfigurationGroup* primitiveConfig);

@@ -44,9 +44,8 @@
 
 #include "Light.h"
 #include "Mesh.h"
-#include "Script.h"
 
-Object3D* Importer::loadObject(Utility::ConfigurationGroup* objectConfig, Object3D* parent, SceneGraph::DrawableGroup3D* drawables, ScriptGroup* scripts, LightGroup* lights) {
+Object3D* Importer::loadObject(Utility::ConfigurationGroup* objectConfig, Object3D* parent, SceneGraph::DrawableGroup3D* drawables, LightGroup* lights) {
     Object3D* object = new Object3D{parent};
 
     /* Transformation */
@@ -56,23 +55,23 @@ Object3D* Importer::loadObject(Utility::ConfigurationGroup* objectConfig, Object
     }
 
     for(auto& featureConfig: objectConfig->groups("feature"))
-        loadFeature(featureConfig, object, drawables, scripts, lights);
+        loadFeature(featureConfig, object, drawables, lights);
 
     return object;
 }
 
-Object3D* Importer::loadChildrenObject(Utility::ConfigurationGroup* parentConfig, Object3D* parent, SceneGraph::DrawableGroup3D* drawables, ScriptGroup* scripts, LightGroup* lights) {
+Object3D* Importer::loadChildrenObject(Utility::ConfigurationGroup* parentConfig, Object3D* parent, SceneGraph::DrawableGroup3D* drawables, LightGroup* lights) {
     for(auto& childConfig: parentConfig->groups("child")) {
-        Object3D* child = loadObject(childConfig, parent, drawables, scripts, lights);
+        Object3D* child = loadObject(childConfig, parent, drawables, lights);
 
         if(childConfig->hasGroup("child"))
-            loadChildrenObject(childConfig, child, drawables, scripts, lights);
+            loadChildrenObject(childConfig, child, drawables, lights);
     }
 
     return parent;
 }
 
-SceneGraph::AbstractFeature3D* Importer::loadFeature(Utility::ConfigurationGroup* featureConfig, Object3D* object, SceneGraph::DrawableGroup3D* drawables, ScriptGroup* scripts, LightGroup* lights) {
+SceneGraph::AbstractFeature3D* Importer::loadFeature(Utility::ConfigurationGroup* featureConfig, Object3D* object, SceneGraph::DrawableGroup3D* drawables, LightGroup* lights) {
     std::string type = featureConfig->value("type");
     SceneGraph::AbstractFeature3D* newFeature;
 
@@ -149,13 +148,6 @@ SceneGraph::AbstractFeature3D* Importer::loadFeature(Utility::ConfigurationGroup
             Float quadratic = featureConfig->value<Float>("quadratic");
             light.setQuadratic(quadratic);
         }
-    } else if(type == "script") {
-        /* Class name */
-        std::string name = featureConfig->value("name");
-
-        /* Script */
-        Script& script = object->addFeature<Script>(scripts, name);
-        newFeature = &script;
     }
 
     return newFeature;

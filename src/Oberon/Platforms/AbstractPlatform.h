@@ -30,7 +30,6 @@
 #include <Magnum/SceneGraph/Scene.h>
 #include <Magnum/SceneGraph/TranslationRotationScalingTransformation3D.h>
 #include <Oberon/SceneShader.h>
-#include <Oberon/ScriptManager.h>
 
 class AbstractPlatform {
     protected:
@@ -42,10 +41,8 @@ class AbstractPlatform {
         SceneGraph::Camera3D* _camera;
 
         Timeline _timeline;
-        ScriptManager _scriptManager;
 
         SceneGraph::DrawableGroup3D _drawables;
-        ScriptGroup _scripts;
         LightGroup _lights;
 
         OberonResourceManager _resourceManager;

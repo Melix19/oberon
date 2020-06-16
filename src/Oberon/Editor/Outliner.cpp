@@ -30,7 +30,6 @@
 #include <Corrade/Utility/ConfigurationGroup.h>
 #include <Magnum/GL/Mesh.h>
 #include <Oberon/Light.h>
-#include <Oberon/Script.h>
 
 #include "CollectionPanel.h"
 #include "ObjectNode.h"

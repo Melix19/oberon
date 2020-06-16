@@ -35,7 +35,6 @@
 #include <Oberon/Importer.h>
 #include <Oberon/Light.h>
 #include <Oberon/Mesh.h>
-#include <Oberon/Script.h>
 
 #include "CollectionPanel.h"
 #include "FileNode.h"
@@ -87,7 +86,6 @@ void Inspector::newFrame() {
         std::string type = featureConfig->value("type");
         if(type == "light") showLightHeader(objectNode, featureConfig);
         else if(type == "mesh") showMeshHeader(objectNode, featureConfig);
-        else if(type == "script") showScriptHeader(objectNode, featureConfig);
 
         ImGui::Dummy(ImVec2(0.0f, 5.0f));
     }
@@ -103,7 +101,7 @@ void Inspector::newFrame() {
         ImGui::OpenPopup("FeaturePopup");
 
     if(ImGui::BeginPopup("FeaturePopup")) {
-        const char* features[] = {"light", "mesh", "script"};
+        const char* features[] = {"light", "mesh"};
         for(const char* feature: features) {
             if(ImGui::Selectable(snakeCaseToPhrase(feature).c_str())) {
                 bool featureAlreadyPresent = false;
@@ -413,25 +411,6 @@ void Inspector::showMeshHeader(ObjectNode* objectNode, Utility::ConfigurationGro
         delete mesh;
         objectNode->objectConfig()->removeGroup(featureConfig);
         _panel->removeDrawableNode(objectNode);
-    }
-}
-
-void Inspector::showScriptHeader(ObjectNode* objectNode, Utility::ConfigurationGroup* featureConfig) {
-    Script* script = getObjectFeature<Script>(objectNode->object());
-    bool headerIsOpen = true;
-
-    if(ImGui::CollapsingHeader("Script", &headerIsOpen, ImGuiTreeNodeFlags_DefaultOpen)) {
-        Themer::setNextItemRightAlign("Name", _spacing);
-        std::string name = script->name();
-        if(ImGui::InputText("##Script.Name", &name, ImGuiInputTextFlags_EnterReturnsTrue)) {
-            script->setName(name);
-            featureConfig->setValue("name", name);
-        }
-    }
-
-    if(!headerIsOpen) {
-        delete script;
-        objectNode->objectConfig()->removeGroup(featureConfig);
     }
 }
 

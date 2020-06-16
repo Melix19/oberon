@@ -28,7 +28,6 @@
 #include <Magnum/ImGuiIntegration/Context.hpp>
 #include <Magnum/Platform/Sdl2Application.h>
 #include <Oberon/Importer.h>
-#include <Oberon/ScriptManager.h>
 
 #include "Console.h"
 #include "Explorer.h"
@@ -66,7 +65,6 @@ class EditorApplication: public Platform::Application {
         ImGuiIntegration::Context _imgui{NoCreate};
         OberonResourceManager _resourceManager;
         Importer _importer;
-        ScriptManager _scriptManager;
 
         Console _console;
         Explorer _explorer;
