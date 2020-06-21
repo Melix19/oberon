@@ -29,6 +29,8 @@
 
 #include "Editor.h"
 
+namespace Oberon { namespace Editor {
+
 class ProjectManager: public Platform::Application {
     public:
         explicit ProjectManager(const Arguments& arguments);
@@ -55,3 +57,5 @@ class ProjectManager: public Platform::Application {
 
         std::string _projectPath;
 };
+
+}}

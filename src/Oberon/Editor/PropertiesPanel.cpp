@@ -32,6 +32,8 @@
 #include "FileNode.h"
 #include "Themer.h"
 
+namespace Oberon { namespace Editor {
+
 PropertiesPanel::PropertiesPanel(FileNode* fileNode):
     AbstractPanel{fileNode}, _configuration{fileNode->path()}
 {
@@ -67,3 +69,5 @@ void PropertiesPanel::newFrame() {
 
     ImGui::End();
 }
+
+}}

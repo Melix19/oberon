@@ -28,6 +28,9 @@
 #include <Magnum/GL/GL.h>
 #include <Magnum/SceneGraph/SceneGraph.h>
 
+namespace Oberon {
+
+/* Bring whole Magnum namespace */
 using namespace Magnum;
 
 typedef SceneGraph::Object<SceneGraph::TranslationRotationScalingTransformation3D> Object3D;
@@ -41,4 +44,7 @@ class Light;
 typedef SceneGraph::FeatureGroup3D<Light> LightGroup;
 
 class Mesh;
+
 class SceneShader;
+
+}

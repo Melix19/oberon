@@ -27,6 +27,8 @@
 #include <imgui.h>
 #include <Corrade/Containers/GrowableArray.h>
 
+namespace Oberon { namespace Editor {
+
 void Console::newFrame() {
     ImGui::Begin("Console");
 
@@ -46,3 +48,5 @@ void Console::addString(const std::string& s) {
 void Console::resetStrings() {
     Containers::arrayResize(_strings, 0);
 }
+
+}}

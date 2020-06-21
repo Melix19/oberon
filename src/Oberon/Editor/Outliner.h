@@ -28,6 +28,8 @@
 
 #include "Editor.h"
 
+namespace Oberon { namespace Editor {
+
 class Outliner {
     public:
         void newFrame();
@@ -66,3 +68,5 @@ class Outliner {
         std::string _editNodeText;
         bool _editNodeNeedsFocus;
 };
+
+}}

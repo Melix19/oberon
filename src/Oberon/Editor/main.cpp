@@ -25,6 +25,8 @@
 #include "EditorApplication.h"
 #include "ProjectManager.h"
 
+using namespace Oberon::Editor;
+
 int main(int argc, char** argv) {
     int exitCode;
     std::string projectPath;

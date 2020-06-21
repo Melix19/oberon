@@ -26,14 +26,28 @@
 
 #include <Oberon/Oberon.h>
 
+namespace Oberon { namespace Editor {
+
 class AbstractPanel;
+
 class CollectionPanel;
+
 class Console;
+
 class EditorApplication;
+
 class Explorer;
+
 class FileNode;
+
 class Inspector;
+
 class ObjectNode;
+
 class Outliner;
+
 class ProjectManager;
+
 class PropertiesPanel;
+
+}}

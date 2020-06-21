@@ -32,6 +32,8 @@
 
 #include "ObjectNode.h"
 
+namespace Oberon { namespace Editor {
+
 template<class KeyEvent> void CollectionPanel::handleKeyPressEvent(KeyEvent& event) {
     if(_isDragging && !_isOrthographicCamera) {
         Float speed = 0.1f;
@@ -124,3 +126,5 @@ template<class MouseMoveEvent> void CollectionPanel::handleMouseMoveEvent(MouseM
         _previousMousePosition = event.position();
     }
 }
+
+}}

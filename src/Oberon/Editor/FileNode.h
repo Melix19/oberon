@@ -30,6 +30,8 @@
 
 #include "Editor.h"
 
+namespace Oberon { namespace Editor {
+
 class FileNode {
     public:
         FileNode(const std::string& path, const std::string& resourcePath = ""):
@@ -73,3 +75,5 @@ class FileNode {
         FileNode* _parent;
         std::vector<Containers::Pointer<FileNode>> _children;
 };
+
+}}

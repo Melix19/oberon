@@ -31,6 +31,8 @@
 
 #include "FileNode.h"
 
+namespace Oberon { namespace Editor {
+
 namespace {
 
 bool sortFileNodes(const Containers::Pointer<FileNode>& a, const Containers::Pointer<FileNode>& b) {
@@ -339,3 +341,5 @@ void Explorer::deleteSelectedNodes() {
         _selectedNodes.clear();
     }
 }
+
+}}

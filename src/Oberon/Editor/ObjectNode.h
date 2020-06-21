@@ -30,6 +30,8 @@
 
 #include "Editor.h"
 
+namespace Oberon { namespace Editor {
+
 class ObjectNode {
     public:
         ObjectNode(Object3D* object, Utility::ConfigurationGroup* objectConfig):
@@ -81,3 +83,5 @@ class ObjectNode {
         ObjectNode* _parent;
         std::vector<Containers::Pointer<ObjectNode>> _children;
 };
+
+}}

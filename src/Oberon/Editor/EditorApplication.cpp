@@ -37,6 +37,8 @@
 #include "PropertiesPanel.h"
 #include "Themer.h"
 
+namespace Oberon { namespace Editor {
+
 EditorApplication::EditorApplication(const Arguments& arguments, const std::string& projectPath): Platform::Application{arguments,
     Configuration{}.setTitle("Oberon")
                    .setWindowFlags(Configuration::WindowFlag::Maximized|Configuration::WindowFlag::Resizable)},
@@ -460,3 +462,5 @@ void EditorApplication::mouseScrollEvent(MouseScrollEvent& event) {
 void EditorApplication::textInputEvent(TextInputEvent& event) {
     _imgui.handleTextInputEvent(event);
 }
+
+}}

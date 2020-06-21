@@ -26,6 +26,8 @@
 
 #include "Editor.h"
 
+namespace Oberon { namespace Editor {
+
 class AbstractPanel {
     public:
         AbstractPanel(FileNode* fileNode): _fileNode(fileNode) {}
@@ -55,3 +57,5 @@ class AbstractPanel {
         bool _isFocused{false};
         bool _needsDocking{true};
 };
+
+}}

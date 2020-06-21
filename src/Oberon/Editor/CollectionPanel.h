@@ -36,6 +36,8 @@
 
 #include "AbstractPanel.h"
 
+namespace Oberon { namespace Editor {
+
 class CollectionPanel: public AbstractPanel {
     public:
         CollectionPanel(FileNode* fileNode, OberonResourceManager& resourceManager, Importer& importer, const Vector2i& viewportTextureSize, const Vector2& dpiScaleRatio, const std::string& projectPath);
@@ -122,3 +124,5 @@ class CollectionPanel: public AbstractPanel {
     private:
         bool _isSimulating{false};
 };
+
+}}

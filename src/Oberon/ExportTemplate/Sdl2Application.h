@@ -28,6 +28,8 @@
 
 #include "AbstractApplication.h"
 
+namespace Oberon { namespace ExportTemplate {
+
 class Sdl2Application: public Platform::Application, AbstractApplication {
     public:
         explicit Sdl2Application(const Arguments& arguments);
@@ -35,3 +37,5 @@ class Sdl2Application: public Platform::Application, AbstractApplication {
     private:
         void drawEvent() override;
 };
+
+}}

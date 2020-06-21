@@ -29,6 +29,8 @@
 
 #include "SceneShader.h"
 
+namespace Oberon {
+
 class Importer {
     public:
         Importer(OberonResourceManager& resourceManager): _resourceManager(resourceManager) {}
@@ -55,3 +57,5 @@ class Importer {
         OberonResourceManager& _resourceManager;
         PluginManager::Manager<Trade::AbstractImporter> _importerManager;
 };
+
+}

@@ -24,10 +24,12 @@
 
 #pragma once
 
+namespace Oberon { namespace Editor {
+
 namespace Themer {
 
 void styleColorsDark();
 void styleColorsLight();
 void setNextItemRightAlign(const char* label, float spacing);
 
-}
+}}}

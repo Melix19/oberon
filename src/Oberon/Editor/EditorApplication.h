@@ -34,6 +34,8 @@
 #include "Inspector.h"
 #include "Outliner.h"
 
+namespace Oberon { namespace Editor {
+
 class EditorApplication: public Platform::Application {
     public:
         explicit EditorApplication(const Arguments& arguments, const std::string& projectPath);
@@ -75,3 +77,5 @@ class EditorApplication: public Platform::Application {
         std::vector<CollectionPanel*> _collectionPanels;
         AbstractPanel* _activePanel{nullptr};
 };
+
+}}

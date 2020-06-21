@@ -29,6 +29,8 @@
 #include <Magnum/GL/Texture.h>
 #include <Oberon/Light.h>
 
+namespace Oberon { namespace ExportTemplate {
+
 Sdl2Application::Sdl2Application(const Arguments& arguments): Platform::Application{arguments,
     Configuration{}.setTitle("Application")
                    .setSize({1024, 576})} {}
@@ -47,4 +49,6 @@ void Sdl2Application::drawEvent() {
     _timeline.nextFrame();
 }
 
-MAGNUM_APPLICATION_MAIN(Sdl2Application)
+}}
+
+MAGNUM_APPLICATION_MAIN(Oberon::ExportTemplate::Sdl2Application)

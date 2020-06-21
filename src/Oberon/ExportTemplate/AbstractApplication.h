@@ -31,6 +31,8 @@
 #include <Magnum/SceneGraph/TranslationRotationScalingTransformation3D.h>
 #include <Oberon/SceneShader.h>
 
+namespace Oberon { namespace ExportTemplate {
+
 class AbstractApplication {
     protected:
         AbstractApplication();
@@ -48,3 +50,5 @@ class AbstractApplication {
         OberonResourceManager _resourceManager;
         std::vector<std::pair<std::string, SceneShader::Flags>> shaderKeys;
 };
+
+}}

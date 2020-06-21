@@ -40,6 +40,8 @@
 #include "FileNode.h"
 #include "ObjectNode.h"
 
+namespace Oberon { namespace Editor {
+
 CollectionPanel::CollectionPanel(FileNode* fileNode, OberonResourceManager& resourceManager, Importer& importer, const Vector2i& viewportTextureSize, const Vector2& dpiScaleRatio, const std::string& projectPath):
     AbstractPanel{fileNode}, _collectionConfig{fileNode->path()}, _resourceManager{resourceManager}, _importer{importer}, _viewportTextureSize{viewportTextureSize}, _dpiScaleRatio{dpiScaleRatio}, _projectPath(projectPath)
 {
@@ -277,3 +279,5 @@ void CollectionPanel::stopSimulation() {
     resetObjectAndChildren(_rootNode.get());
     _isSimulating = false;
 }
+
+}}

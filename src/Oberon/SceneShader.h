@@ -29,6 +29,8 @@
 
 #include "Oberon.h"
 
+namespace Oberon {
+
 class SceneShader: public GL::AbstractShaderProgram {
     public:
         typedef Shaders::Generic3D::Position Position;
@@ -108,3 +110,5 @@ class SceneShader: public GL::AbstractShaderProgram {
 };
 
 CORRADE_ENUMSET_OPERATORS(SceneShader::Flags)
+
+}

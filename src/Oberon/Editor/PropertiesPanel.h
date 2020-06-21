@@ -28,6 +28,8 @@
 
 #include "AbstractPanel.h"
 
+namespace Oberon { namespace Editor {
+
 class PropertiesPanel: public AbstractPanel {
     public:
         PropertiesPanel(FileNode* fileNode);
@@ -36,3 +38,5 @@ class PropertiesPanel: public AbstractPanel {
     private:
         Utility::Configuration _configuration;
 };
+
+}}

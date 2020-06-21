@@ -31,6 +31,8 @@
 
 #include "SceneShader.h"
 
+namespace Oberon {
+
 class Light: public SceneGraph::AbstractGroupedFeature3D<Light> {
     public:
         explicit Light(SceneGraph::AbstractObject3D& object, LightGroup* lights, OberonResourceManager& resourceManager):
@@ -86,3 +88,5 @@ class Light: public SceneGraph::AbstractGroupedFeature3D<Light> {
         Float _linear{0.09f};
         Float _quadratic{0.032f};
 };
+
+}

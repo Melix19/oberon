@@ -45,6 +45,8 @@
 #include "Light.h"
 #include "Mesh.h"
 
+namespace Oberon {
+
 Object3D* Importer::loadObject(Utility::ConfigurationGroup* objectConfig, Object3D* parent, SceneGraph::DrawableGroup3D* drawables, LightGroup* lights) {
     Object3D* object = new Object3D{parent};
 
@@ -299,4 +301,6 @@ std::pair<std::string, SceneShader::Flags> Importer::calculateShaderKey(Mesh& me
     }
 
     return std::make_pair(shaderKey, flags);
+}
+
 }

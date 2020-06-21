@@ -32,6 +32,8 @@
 
 #include "Themer.h"
 
+namespace Oberon { namespace Editor {
+
 ProjectManager::ProjectManager(const Arguments& arguments): Platform::Application{arguments,
     Configuration{}.setTitle("Oberon - Project Manager")
                    .setSize({1024, 576})
@@ -193,3 +195,5 @@ void ProjectManager::mouseScrollEvent(MouseScrollEvent& event) {
 void ProjectManager::textInputEvent(TextInputEvent& event) {
     _imgui.handleTextInputEvent(event);
 }
+
+}}

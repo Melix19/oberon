@@ -29,6 +29,8 @@
 
 #include "Editor.h"
 
+namespace Oberon { namespace Editor {
+
 class Console {
     public:
         void newFrame();
@@ -38,3 +40,5 @@ class Console {
     private:
         Containers::Array<std::string> _strings;
 };
+
+}}

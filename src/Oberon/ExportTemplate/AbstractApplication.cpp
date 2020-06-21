@@ -38,6 +38,8 @@ static void importApplicationResources() {
     CORRADE_RESOURCE_INITIALIZE(OberonApplication_RCS)
 }
 
+namespace Oberon { namespace ExportTemplate {
+
 AbstractApplication::AbstractApplication() {
     GL::Renderer::enable(GL::Renderer::Feature::Blending);
     GL::Renderer::enable(GL::Renderer::Feature::DepthTest);
@@ -91,3 +93,5 @@ void AbstractApplication::loadCompiledReources(Utility::Configuration& collectio
             importer.loadTexture(resourcePath, resources);
     }
 }
+
+}}

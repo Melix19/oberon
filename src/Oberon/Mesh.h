@@ -31,6 +31,8 @@
 
 #include "SceneShader.h"
 
+namespace Oberon {
+
 class Mesh: public SceneGraph::Drawable3D {
     public:
         explicit Mesh(SceneGraph::AbstractObject3D& object, SceneGraph::DrawableGroup3D* drawables):
@@ -155,3 +157,5 @@ class Mesh: public SceneGraph::Drawable3D {
 
         Float _shininess{80.0f};
 };
+
+}

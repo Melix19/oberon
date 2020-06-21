@@ -30,6 +30,8 @@
 
 #include "Editor.h"
 
+namespace Oberon { namespace Editor {
+
 class Explorer {
     public:
         Explorer(const std::string& projectPath);
@@ -70,3 +72,5 @@ class Explorer {
         std::string _editNodeText;
         bool _editNodeNeedsFocus;
 };
+
+}}

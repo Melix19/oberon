@@ -26,6 +26,8 @@
 
 #include <imgui.h>
 
+namespace Oberon { namespace Editor {
+
 namespace Themer {
 
 namespace {
@@ -137,4 +139,4 @@ void setNextItemRightAlign(const char* label, float spacing) {
     ImGui::SetNextItemWidth(-1);
 }
 
-}
+}}}

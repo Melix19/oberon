@@ -41,6 +41,8 @@
 #include "ObjectNode.h"
 #include "Themer.h"
 
+namespace Oberon { namespace Editor {
+
 namespace {
 
 template<class T> T* getObjectFeature(Object3D* object) {
@@ -435,3 +437,5 @@ void Inspector::addResource(const std::string& resourcePath, const std::string& 
         resourceGroup->addValue("type", resourceType);
     }
 }
+
+}}

@@ -44,6 +44,8 @@ static void importMagnumShadersResources() {
 }
 #endif
 
+namespace Oberon {
+
 namespace {
 
 inline GL::Shader createCompatibilityShader(const Utility::Resource& rs, GL::Version version, GL::Shader::Type type) {
@@ -263,4 +265,6 @@ SceneShader& SceneShader::setPointLight(UnsignedInt id, const Vector3& position,
     setUniform(_pointLightsUniform + id*attributeCount + 3, linear);
     setUniform(_pointLightsUniform + id*attributeCount + 4, quadratic);
     return *this;
+}
+
 }

@@ -34,6 +34,8 @@
 #include "CollectionPanel.h"
 #include "ObjectNode.h"
 
+namespace Oberon { namespace Editor {
+
 namespace {
 
 Utility::ConfigurationGroup* moveObjectConfig(ObjectNode* source, ObjectNode* target) {
@@ -258,3 +260,5 @@ void Outliner::deleteSelectedNodes() {
         selectedNodes.clear();
     }
 }
+
+}}
