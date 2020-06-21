@@ -24,7 +24,7 @@
 
 find_package(Magnum REQUIRED Sdl2Application)
 
-add_library(OberonSdl2Platform AbstractPlatform.cpp AbstractPlatform.h Sdl2Platform.cpp Sdl2Platform.h)
-target_link_libraries(OberonSdl2Platform PRIVATE
+add_library(OberonSdl2Application AbstractApplication.cpp AbstractApplication.h Sdl2Application.cpp Sdl2Application.h)
+target_link_libraries(OberonSdl2Application PRIVATE
     Oberon
     Magnum::Sdl2Application)

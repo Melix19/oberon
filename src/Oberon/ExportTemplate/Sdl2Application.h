@@ -24,27 +24,14 @@
 
 #pragma once
 
-#include <Magnum/ResourceManager.h>
-#include <Magnum/Timeline.h>
-#include <Magnum/SceneGraph/Drawable.h>
-#include <Magnum/SceneGraph/Scene.h>
-#include <Magnum/SceneGraph/TranslationRotationScalingTransformation3D.h>
-#include <Oberon/SceneShader.h>
+#include <Magnum/Platform/Sdl2Application.h>
 
-class AbstractPlatform {
-    protected:
-        AbstractPlatform();
-        void loadCompiledReources(Utility::Configuration& collectionConfig, Utility::Resource& resources, Importer& importer);
+#include "AbstractApplication.h"
 
-        Scene3D _scene;
-        Object3D* _cameraObject;
-        SceneGraph::Camera3D* _camera;
+class Sdl2Application: public Platform::Application, AbstractApplication {
+    public:
+        explicit Sdl2Application(const Arguments& arguments);
 
-        Timeline _timeline;
-
-        SceneGraph::DrawableGroup3D _drawables;
-        LightGroup _lights;
-
-        OberonResourceManager _resourceManager;
-        std::vector<std::pair<std::string, SceneShader::Flags>> shaderKeys;
+    private:
+        void drawEvent() override;
 };

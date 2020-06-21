@@ -375,7 +375,7 @@ find_package(Magnum REQUIRED\n\
 find_package(MagnumPlugins REQUIRED PngImporter)\n\
 corrade_add_resource(OberonApplication_RCS resources.conf)\n\
 add_executable(Application MACOSX_BUNDLE ${OberonApplication_RCS})\n\
-target_link_libraries(Application PRIVATE Oberon OberonSdl2Platform\n\
+target_link_libraries(Application PRIVATE Oberon OberonSdl2Application\n\
     Magnum::Application\n\
     Magnum::MeshTools\n\
     Magnum::Primitives\n\

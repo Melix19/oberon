@@ -22,7 +22,7 @@
     SOFTWARE.
 */
 
-#include "AbstractPlatform.h"
+#include "AbstractApplication.h"
 
 #include <sstream>
 #include <Corrade/Utility/Configuration.h>
@@ -38,7 +38,7 @@ static void importApplicationResources() {
     CORRADE_RESOURCE_INITIALIZE(OberonApplication_RCS)
 }
 
-AbstractPlatform::AbstractPlatform() {
+AbstractApplication::AbstractApplication() {
     GL::Renderer::enable(GL::Renderer::Feature::Blending);
     GL::Renderer::enable(GL::Renderer::Feature::DepthTest);
     GL::Renderer::enable(GL::Renderer::Feature::FaceCulling);
@@ -78,7 +78,7 @@ AbstractPlatform::AbstractPlatform() {
     _timeline.start();
 }
 
-void AbstractPlatform::loadCompiledReources(Utility::Configuration& collectionConfig, Utility::Resource& resources, Importer& importer) {
+void AbstractApplication::loadCompiledReources(Utility::Configuration& collectionConfig, Utility::Resource& resources, Importer& importer) {
     Utility::ConfigurationGroup* resourcesGroup = collectionConfig.group("external_resources");
     if(!resourcesGroup)
         return;

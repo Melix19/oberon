@@ -22,18 +22,18 @@
     SOFTWARE.
 */
 
-#include "Sdl2Platform.h"
+#include "Sdl2Application.h"
 
 #include <Magnum/GL/DefaultFramebuffer.h>
 #include <Magnum/GL/Mesh.h>
 #include <Magnum/GL/Texture.h>
 #include <Oberon/Light.h>
 
-Sdl2Platform::Sdl2Platform(const Arguments& arguments): Platform::Application{arguments,
+Sdl2Application::Sdl2Application(const Arguments& arguments): Platform::Application{arguments,
     Configuration{}.setTitle("Application")
                    .setSize({1024, 576})} {}
 
-void Sdl2Platform::drawEvent() {
+void Sdl2Application::drawEvent() {
     GL::defaultFramebuffer.clear(GL::FramebufferClear::Color|GL::FramebufferClear::Depth);
 
     for(std::size_t i = 0; i != _lights.size(); ++i)
@@ -47,4 +47,4 @@ void Sdl2Platform::drawEvent() {
     _timeline.nextFrame();
 }
 
-MAGNUM_APPLICATION_MAIN(Sdl2Platform)
+MAGNUM_APPLICATION_MAIN(Sdl2Application)

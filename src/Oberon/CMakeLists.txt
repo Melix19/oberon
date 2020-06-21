@@ -66,8 +66,8 @@ if(WITH_EDITOR)
     add_subdirectory(Editor)
 endif()
 
-if(WITH_PLATFORMS)
-    add_subdirectory(Platforms)
+if(WITH_EXPORT_TEMPLATE)
+    add_subdirectory(ExportTemplate)
 endif()
 
 # Oberon library target alias for superprojects
