@@ -15,3 +15,5 @@ This project requires the following libraries and tools to be built:
 - Magnum >=2020.0a
 - Magnum Plugins >=2020.0a
 - Magnum Integration >=2020.0a built with ImGui (docking branch)
+- MiniZip
+- PhysicsFS

@@ -35,10 +35,13 @@ namespace Oberon { namespace ExportTemplate {
 
 class AbstractApplication {
     protected:
-        AbstractApplication();
-        void loadCompiledReources(Utility::Configuration& collectionConfig, Utility::Resource& resources, Importer& importer);
+        AbstractApplication(const char* argv0);
+
+        ~AbstractApplication();
 
         Scene3D _scene;
+        Object3D* _collectionObject;
+
         Object3D* _cameraObject;
         SceneGraph::Camera3D* _camera;
 
@@ -48,7 +51,7 @@ class AbstractApplication {
         LightGroup _lights;
 
         OberonResourceManager _resourceManager;
-        std::vector<std::pair<std::string, SceneShader::Flags>> shaderKeys;
+        std::vector<std::pair<std::string, SceneShader::Flags>> _shaderKeys;
 };
 
 }}

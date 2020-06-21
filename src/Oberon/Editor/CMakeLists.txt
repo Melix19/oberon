@@ -25,6 +25,7 @@
 find_package(ImGui REQUIRED SourcesMiscCpp)
 find_package(Magnum REQUIRED Sdl2Application)
 find_package(MagnumIntegration REQUIRED ImGui)
+find_package(MiniZip REQUIRED)
 
 corrade_add_resource(OberonEditor_RCS resources.conf)
 
@@ -33,6 +34,7 @@ set(OberonEditor_SRCS
     Console.cpp
     EditorApplication.cpp
     Explorer.cpp
+    Export.cpp
     Inspector.cpp
     Outliner.cpp
     ProjectManager.cpp
@@ -50,6 +52,7 @@ set(OberonEditor_HEADERS
     Editor.h
     EditorApplication.h
     Explorer.h
+    Export.h
     FileNode.h
     Inspector.h
     ObjectNode.h
@@ -75,6 +78,7 @@ target_link_libraries(OberonEditor PRIVATE
     ImGui::SourcesMiscCpp
     Magnum::Application
     MagnumIntegration::ImGui
+    MiniZip::MiniZip
     portable_file_dialogs)
 
 if(CORRADE_TARGET_APPLE)

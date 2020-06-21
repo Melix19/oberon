@@ -33,6 +33,7 @@
 #include <Oberon/Light.h>
 
 #include "CollectionPanel.hpp"
+#include "Export.h"
 #include "FileNode.h"
 #include "PropertiesPanel.h"
 #include "Themer.h"
@@ -118,8 +119,14 @@ void EditorApplication::drawEvent() {
         ImGui::PopStyleVar();
 
         if(ImGui::BeginMenu("Project")) {
-            if(ImGui::MenuItem("Export"))
-                exportProject();
+            if(ImGui::MenuItem("Export")) {
+                std::string exportPath = Utility::Directory::fromNativeSeparators(pfd::select_folder("Select export directory").result());
+                if(!exportPath.empty()) {
+                    std::string exportTemplatesPath = Utility::Directory::fromNativeSeparators(pfd::select_folder("Select export templates directory").result());
+                    if(!exportTemplatesPath.empty())
+                        Export::exportProject(_projectPath, exportPath, exportTemplatesPath);
+                }
+            }
 
             ImGui::EndMenu();
         }
@@ -317,80 +324,6 @@ void EditorApplication::openFile(FileNode* fileNode) {
             system(command.c_str());
         }
     }
-}
-
-void EditorApplication::exportProject() {
-    /* Get the libraries and export path */
-    std::string libFolderPath = Utility::Directory::fromNativeSeparators(pfd::select_folder("").result());
-    std::string exportPath = Utility::Directory::fromNativeSeparators(pfd::select_folder("").result());
-    if(libFolderPath.empty() || exportPath.empty())
-        return;
-
-    /* Create build directory */
-    Utility::Directory::mkpath(Utility::Directory::join(_projectPath, "build"));
-
-    /* Add required modules for finding the platform */
-    Utility::Directory::mkpath(Utility::Directory::join(_projectPath, "build/modules"));
-    std::string moduleText = Utility::Resource("OberonEditor").get("FindSDL2.cmake");
-    Utility::Directory::writeString(Utility::Directory::join(_projectPath, "build/modules/FindSDL2.cmake"), moduleText);
-
-    /* Create resources configuration */
-    Utility::Configuration resourcesConfig{Utility::Directory::join(_projectPath, "build/resources.conf")};
-    resourcesConfig.addValue("group", "OberonApplication");
-
-    /* Add the project settings into the resources */
-    Utility::ConfigurationGroup* projectFile = resourcesConfig.addGroup("file");
-    projectFile->addValue("filename", "../project.oberon");
-    projectFile->addValue("alias", "project.oberon");
-
-    /* Add the main collection into the resources */
-    Utility::Configuration projectConfig{Utility::Directory::join(_projectPath, "project.oberon")};
-    std::string mainCollection = projectConfig.value("main_collection");
-    Utility::ConfigurationGroup* mainCollectionFile = resourcesConfig.addGroup("file");
-    mainCollectionFile->addValue("filename", "../" + mainCollection);
-    mainCollectionFile->addValue("alias", mainCollection);
-
-    /* Add all the main collection resources */
-    Utility::Configuration mainCollectionConfig{Utility::Directory::join(_projectPath, mainCollection)};
-    for(Utility::ConfigurationGroup* resourceGroup: mainCollectionConfig.group("external_resources")->groups("resource")) {
-        Utility::ConfigurationGroup* resourceFile = resourcesConfig.addGroup("file");
-        resourceFile->addValue("filename", "../" + resourceGroup->value("path"));
-        resourceFile->addValue("alias", resourceGroup->value("path"));
-    }
-
-    /* Save the resources configuration */
-    resourcesConfig.save();
-
-    /* Create the CMakeLists for the export */
-    Utility::Directory::writeString(Utility::Directory::join(_projectPath, "build/CMakeLists.txt"), "\
-cmake_minimum_required(VERSION 3.4)\n\
-project(Application CXX)\n\
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY " + exportPath + ")\n\
-set(CMAKE_MODULE_PATH \"${PROJECT_SOURCE_DIR}/modules/\" ${CMAKE_MODULE_PATH})\n\
-link_directories(" + libFolderPath + ")\n\
-find_package(Magnum REQUIRED\n\
-    Sdl2Application\n\
-    MeshTools\n\
-    Primitives\n\
-    SceneGraph\n\
-    Shaders)\n\
-find_package(MagnumPlugins REQUIRED PngImporter)\n\
-corrade_add_resource(OberonApplication_RCS resources.conf)\n\
-add_executable(Application MACOSX_BUNDLE ${OberonApplication_RCS})\n\
-target_link_libraries(Application PRIVATE Oberon OberonSdl2Application\n\
-    Magnum::Application\n\
-    Magnum::MeshTools\n\
-    Magnum::Primitives\n\
-    Magnum::SceneGraph\n\
-    Magnum::Shaders\n\
-    MagnumPlugins::PngImporter)"
-    );
-
-    /* Execute the command to export */
-    std::string command = "cd \"";
-    command.append(Utility::Directory::join(_projectPath, "build"));
-    command.append("\" && cmake . && cmake --build .");
-    system(command.c_str());
 }
 
 void EditorApplication::viewportEvent(ViewportEvent& event) {

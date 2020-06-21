@@ -243,15 +243,6 @@ void Importer::createShaders(SceneGraph::DrawableGroup3D* drawables, UnsignedInt
     }
 }
 
-Resource<GL::Texture2D> Importer::loadTexture(const std::string& resourcePath, Utility::Resource& resources) {
-    return loadTexture(resourcePath, resources.getRaw(resourcePath));
-}
-
-Resource<GL::Texture2D> Importer::loadTexture(const std::string& resourcePath, const std::string& rootPath) {
-    return loadTexture(resourcePath, Utility::Directory::mapRead(
-        Utility::Directory::join(rootPath, resourcePath)));
-}
-
 Resource<GL::Texture2D> Importer::loadTexture(const std::string& resourcePath, Containers::ArrayView<const char> data) {
     Resource<GL::Texture2D> textureResource = _resourceManager.get<GL::Texture2D>(resourcePath);
     if(textureResource)

@@ -22,33 +22,16 @@
     SOFTWARE.
 */
 
-#include "Sdl2Application.h"
+#pragma once
 
-#include <Magnum/GL/DefaultFramebuffer.h>
-#include <Magnum/GL/Mesh.h>
-#include <Magnum/GL/Texture.h>
-#include <Oberon/Light.h>
+#include "Editor.h"
 
-namespace Oberon { namespace ExportTemplate {
+#include <string>
 
-Sdl2Application::Sdl2Application(const Arguments& arguments): Platform::Application{arguments,
-    Configuration{}.setTitle("Application")
-                   .setSize({1024, 576})}, AbstractApplication{arguments.argv[0]} {}
+namespace Oberon { namespace Editor {
 
-void Sdl2Application::drawEvent() {
-    GL::defaultFramebuffer.clear(GL::FramebufferClear::Color|GL::FramebufferClear::Depth);
+namespace Export {
 
-    for(std::size_t i = 0; i != _lights.size(); ++i)
-        _lights[i].updateShader(*_camera, _shaderKeys);
+void exportProject(const std::string& projectPath, const std::string& exportPath, const std::string& exportTemplatesPath);
 
-    _camera->draw(_drawables);
-
-    swapBuffers();
-    redraw();
-
-    _timeline.nextFrame();
-}
-
-}}
-
-MAGNUM_APPLICATION_MAIN(Oberon::ExportTemplate::Sdl2Application)
+}}}

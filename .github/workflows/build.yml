@@ -1,246 +1,248 @@
-name: build
-
+name: Build and publish
 on: [push, pull_request]
 
 jobs:
-  Linux:
+  build-linux:
+    name: Linux
     runs-on: ubuntu-latest
-
     steps:
-    - uses: actions/checkout@v2
-      with:
-        fetch-depth: 1
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 1
 
-    - name: Install dependencies
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y libpng-dev libsdl2-dev
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install libminizip-dev libphysfs-dev libsdl2-dev
 
-        cd $GITHUB_WORKSPACE
-        git clone --depth 1 https://github.com/mosra/corrade.git
-        cd corrade && mkdir build && cd build
-        cmake .. \
-          -DCMAKE_INSTALL_PREFIX=$GITHUB_WORKSPACE/deps \
-          -DCMAKE_BUILD_TYPE=Release \
-          -DBUILD_STATIC=ON \
-          -DWITH_INTERCONNECT=OFF \
-          -DWITH_TESTSUITE=OFF
-        cmake --build . --target install
+          cd $GITHUB_WORKSPACE
+          git clone --depth 1 https://github.com/mosra/corrade.git
+          cd corrade && mkdir build && cd build
+          cmake .. \
+            -DCMAKE_INSTALL_PREFIX=$GITHUB_WORKSPACE/deps \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DBUILD_STATIC=ON \
+            -DWITH_INTERCONNECT=OFF \
+            -DWITH_TESTSUITE=OFF
+          cmake --build . --target install
 
-        cd $GITHUB_WORKSPACE
-        git clone --depth 1 https://github.com/mosra/magnum.git
-        cd magnum && mkdir build && cd build
-        cmake .. \
-          -DCMAKE_INSTALL_PREFIX=$GITHUB_WORKSPACE/deps \
-          -DCMAKE_BUILD_TYPE=Release \
-          -DBUILD_STATIC=ON \
-          -DBUILD_PLUGINS_STATIC=ON \
-          -DWITH_DEBUGTOOLS=OFF \
-          -DWITH_TEXT=OFF \
-          -DWITH_TEXTURETOOLS=OFF \
-          -DWITH_SDL2APPLICATION=ON \
-          -DWITH_ANYIMAGEIMPORTER=ON
-        cmake --build . --target install
+          cd $GITHUB_WORKSPACE
+          git clone --depth 1 https://github.com/mosra/magnum.git
+          cd magnum && mkdir build && cd build
+          cmake .. \
+            -DCMAKE_INSTALL_PREFIX=$GITHUB_WORKSPACE/deps \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DBUILD_STATIC=ON \
+            -DBUILD_PLUGINS_STATIC=ON \
+            -DWITH_DEBUGTOOLS=OFF \
+            -DWITH_TEXT=OFF \
+            -DWITH_TEXTURETOOLS=OFF \
+            -DWITH_SDL2APPLICATION=ON \
+            -DWITH_ANYIMAGEIMPORTER=ON
+          cmake --build . --target install
 
-        cd $GITHUB_WORKSPACE
-        git clone --depth 1 https://github.com/mosra/magnum-plugins.git
-        cd magnum-plugins && mkdir build && cd build
-        cmake .. \
-          -DCMAKE_INSTALL_PREFIX=$GITHUB_WORKSPACE/deps \
-          -DCMAKE_BUILD_TYPE=Release \
-          -DBUILD_PLUGINS_STATIC=ON \
-          -DWITH_PNGIMPORTER=ON
-        cmake --build . --target install
+          cd $GITHUB_WORKSPACE
+          git clone --depth 1 https://github.com/mosra/magnum-plugins.git
+          cd magnum-plugins && mkdir build && cd build
+          cmake .. \
+            -DCMAKE_INSTALL_PREFIX=$GITHUB_WORKSPACE/deps \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DBUILD_PLUGINS_STATIC=ON \
+            -DWITH_PNGIMPORTER=ON
+          cmake --build . --target install
 
-        cd $GITHUB_WORKSPACE
-        git clone --depth 1 --branch docking https://github.com/ocornut/imgui.git
-        git clone --depth 1 https://github.com/mosra/magnum-integration.git
-        cd magnum-integration && mkdir build && cd build
-        cmake .. \
-          -DCMAKE_INSTALL_PREFIX=$GITHUB_WORKSPACE/deps \
-          -DCMAKE_BUILD_TYPE=Release \
-          -DBUILD_STATIC=ON \
-          -DWITH_IMGUI=ON \
-          -DIMGUI_DIR=$GITHUB_WORKSPACE/imgui
-        cmake --build . --target install
+          cd $GITHUB_WORKSPACE
+          git clone --depth 1 --branch docking https://github.com/ocornut/imgui.git
+          git clone --depth 1 https://github.com/mosra/magnum-integration.git
+          cd magnum-integration && mkdir build && cd build
+          cmake .. \
+            -DCMAKE_INSTALL_PREFIX=$GITHUB_WORKSPACE/deps \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DBUILD_STATIC=ON \
+            -DWITH_IMGUI=ON \
+            -DIMGUI_DIR=$GITHUB_WORKSPACE/imgui
+          cmake --build . --target install
 
-    - name: Configure
-      run: |
-        mkdir build && cd build
-        cmake .. \
-          -DCMAKE_PREFIX_PATH=$GITHUB_WORKSPACE/deps \
-          -DCMAKE_BUILD_TYPE=Release \
-          -DIMGUI_DIR=$GITHUB_WORKSPACE/imgui
+      - name: Configure
+        run: |
+          mkdir build && cd build
+          cmake .. \
+            -DCMAKE_PREFIX_PATH=$GITHUB_WORKSPACE/deps \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DIMGUI_DIR=$GITHUB_WORKSPACE/imgui
 
-    - name: Build
-      run: |
-        cd build
-        cmake --build .
+      - name: Build
+        run: |
+          cd build
+          cmake --build .
 
-    - name: Upload artifact
-      uses: actions/upload-artifact@v1
-      with:
-        name: Oberon-Linux
-        path: build/Release/bin
+      - name: Upload artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: Oberon-Linux
+          path: build/Release/bin
 
-  macOS:
+  build-macos:
+    name: macOS
     runs-on: macOS-latest
-
     steps:
-    - uses: actions/checkout@v2
-      with:
-        fetch-depth: 1
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 1
 
-    - name: Install dependencies
-      run: |
-        brew install libpng sdl2
+      - name: Install dependencies
+        run: |
+          brew install minizip physfs sdl2
 
-        cd $GITHUB_WORKSPACE
-        git clone --depth 1 https://github.com/mosra/corrade.git
-        cd corrade && mkdir build && cd build
-        cmake .. \
-          -DCMAKE_INSTALL_PREFIX=$GITHUB_WORKSPACE/deps \
-          -DCMAKE_BUILD_TYPE=Release \
-          -DBUILD_STATIC=ON \
-          -DWITH_INTERCONNECT=OFF \
-          -DWITH_TESTSUITE=OFF
-        cmake --build . --target install
+          cd $GITHUB_WORKSPACE
+          git clone --depth 1 https://github.com/mosra/corrade.git
+          cd corrade && mkdir build && cd build
+          cmake .. \
+            -DCMAKE_INSTALL_PREFIX=$GITHUB_WORKSPACE/deps \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DBUILD_STATIC=ON \
+            -DWITH_INTERCONNECT=OFF \
+            -DWITH_TESTSUITE=OFF
+          cmake --build . --target install
 
-        cd $GITHUB_WORKSPACE
-        git clone --depth 1 https://github.com/mosra/magnum.git
-        cd magnum && mkdir build && cd build
-        cmake .. \
-          -DCMAKE_INSTALL_PREFIX=$GITHUB_WORKSPACE/deps \
-          -DCMAKE_BUILD_TYPE=Release \
-          -DBUILD_STATIC=ON \
-          -DBUILD_PLUGINS_STATIC=ON \
-          -DWITH_DEBUGTOOLS=OFF \
-          -DWITH_TEXT=OFF \
-          -DWITH_TEXTURETOOLS=OFF \
-          -DWITH_SDL2APPLICATION=ON \
-          -DWITH_ANYIMAGEIMPORTER=ON
-        cmake --build . --target install
+          cd $GITHUB_WORKSPACE
+          git clone --depth 1 https://github.com/mosra/magnum.git
+          cd magnum && mkdir build && cd build
+          cmake .. \
+            -DCMAKE_INSTALL_PREFIX=$GITHUB_WORKSPACE/deps \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DBUILD_STATIC=ON \
+            -DBUILD_PLUGINS_STATIC=ON \
+            -DWITH_DEBUGTOOLS=OFF \
+            -DWITH_TEXT=OFF \
+            -DWITH_TEXTURETOOLS=OFF \
+            -DWITH_SDL2APPLICATION=ON \
+            -DWITH_ANYIMAGEIMPORTER=ON
+          cmake --build . --target install
 
-        cd $GITHUB_WORKSPACE
-        git clone --depth 1 https://github.com/mosra/magnum-plugins.git
-        cd magnum-plugins && mkdir build && cd build
-        cmake .. \
-          -DCMAKE_INSTALL_PREFIX=$GITHUB_WORKSPACE/deps \
-          -DCMAKE_BUILD_TYPE=Release \
-          -DBUILD_PLUGINS_STATIC=ON \
-          -DWITH_PNGIMPORTER=ON
-        cmake --build . --target install
+          cd $GITHUB_WORKSPACE
+          git clone --depth 1 https://github.com/mosra/magnum-plugins.git
+          cd magnum-plugins && mkdir build && cd build
+          cmake .. \
+            -DCMAKE_INSTALL_PREFIX=$GITHUB_WORKSPACE/deps \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DBUILD_PLUGINS_STATIC=ON \
+            -DWITH_PNGIMPORTER=ON
+          cmake --build . --target install
 
-        cd $GITHUB_WORKSPACE
-        git clone --depth 1 --branch docking https://github.com/ocornut/imgui.git
-        git clone --depth 1 https://github.com/mosra/magnum-integration.git
-        cd magnum-integration && mkdir build && cd build
-        cmake .. \
-          -DCMAKE_INSTALL_PREFIX=$GITHUB_WORKSPACE/deps \
-          -DCMAKE_BUILD_TYPE=Release \
-          -DBUILD_STATIC=ON \
-          -DWITH_IMGUI=ON \
-          -DIMGUI_DIR=$GITHUB_WORKSPACE/imgui
-        cmake --build . --target install
+          cd $GITHUB_WORKSPACE
+          git clone --depth 1 --branch docking https://github.com/ocornut/imgui.git
+          git clone --depth 1 https://github.com/mosra/magnum-integration.git
+          cd magnum-integration && mkdir build && cd build
+          cmake .. \
+            -DCMAKE_INSTALL_PREFIX=$GITHUB_WORKSPACE/deps \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DBUILD_STATIC=ON \
+            -DWITH_IMGUI=ON \
+            -DIMGUI_DIR=$GITHUB_WORKSPACE/imgui
+          cmake --build . --target install
 
-    - name: Configure
-      run: |
-        mkdir build && cd build
-        cmake .. \
-          -DCMAKE_PREFIX_PATH=$GITHUB_WORKSPACE/deps \
-          -DCMAKE_BUILD_TYPE=Release \
-          -DIMGUI_DIR=$GITHUB_WORKSPACE/imgui
+      - name: Configure
+        run: |
+          mkdir build && cd build
+          cmake .. \
+            -DCMAKE_PREFIX_PATH=$GITHUB_WORKSPACE/deps \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DIMGUI_DIR=$GITHUB_WORKSPACE/imgui
 
-    - name: Build
-      run: |
-        cd build
-        cmake --build .
+      - name: Build
+        run: |
+          cd build
+          cmake --build .
 
-    - name: Upload artifact
-      uses: actions/upload-artifact@v1
-      with:
-        name: Oberon-macOS
-        path: build/Release/bin
+      - name: Upload artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: Oberon-macOS
+          path: build/Release/bin
 
-  Windows:
+  build-windows:
+    name: Windows
     runs-on: windows-latest
-
     steps:
-    - uses: actions/checkout@v2
-      with:
-        fetch-depth: 1
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 1
 
-    - name: Install dependencies
-      shell: bash
-      run: |
-        vcpkg install libpng sdl2 --triplet x64-windows-static
+      - name: Install dependencies
+        shell: bash
+        run: |
+          vcpkg install libpng minizip physfs sdl2 --triplet x64-windows
 
-        cd $GITHUB_WORKSPACE
-        git clone --depth 1 https://github.com/mosra/corrade.git
-        cd corrade && mkdir build && cd build
-        cmake .. \
-          -DCMAKE_INSTALL_PREFIX=$GITHUB_WORKSPACE/deps \
-          -DBUILD_STATIC=ON \
-          -DWITH_INTERCONNECT=OFF \
-          -DWITH_TESTSUITE=OFF
-        cmake --build . --config Release --target install
+          cd $GITHUB_WORKSPACE
+          git clone --depth 1 https://github.com/mosra/corrade.git
+          cd corrade && mkdir build && cd build
+          cmake .. \
+            -DCMAKE_INSTALL_PREFIX=$GITHUB_WORKSPACE/deps \
+            -DBUILD_STATIC=ON \
+            -DWITH_INTERCONNECT=OFF \
+            -DWITH_TESTSUITE=OFF
+          cmake --build . --config Release --target install
 
-        cd $GITHUB_WORKSPACE
-        git clone --depth 1 https://github.com/mosra/magnum.git
-        cd magnum && mkdir build && cd build
-        cmake .. \
-          -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake \
-          -DVCPKG_TARGET_TRIPLET=x64-windows-static \
-          -DCMAKE_INSTALL_PREFIX=$GITHUB_WORKSPACE/deps \
-          -DBUILD_STATIC=ON \
-          -DBUILD_PLUGINS_STATIC=ON \
-          -DWITH_DEBUGTOOLS=OFF \
-          -DWITH_TEXT=OFF \
-          -DWITH_TEXTURETOOLS=OFF \
-          -DWITH_SDL2APPLICATION=ON \
-          -DWITH_ANYIMAGEIMPORTER=ON
-        cmake --build . --config Release --target install
+          cd $GITHUB_WORKSPACE
+          git clone --depth 1 https://github.com/mosra/magnum.git
+          cd magnum && mkdir build && cd build
+          cmake .. \
+            -DCMAKE_TOOLCHAIN_FILE=$VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake \
+            -DVCPKG_TARGET_TRIPLET=x64-windows \
+            -DCMAKE_INSTALL_PREFIX=$GITHUB_WORKSPACE/deps \
+            -DBUILD_STATIC=ON \
+            -DBUILD_PLUGINS_STATIC=ON \
+            -DWITH_DEBUGTOOLS=OFF \
+            -DWITH_TEXT=OFF \
+            -DWITH_TEXTURETOOLS=OFF \
+            -DWITH_SDL2APPLICATION=ON \
+            -DWITH_ANYIMAGEIMPORTER=ON
+          cmake --build . --config Release --target install
 
-        cd $GITHUB_WORKSPACE
-        git clone --depth 1 https://github.com/mosra/magnum-plugins.git
-        cd magnum-plugins && mkdir build && cd build
-        cmake .. \
-          -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake \
-          -DVCPKG_TARGET_TRIPLET=x64-windows-static \
-          -DCMAKE_INSTALL_PREFIX=$GITHUB_WORKSPACE/deps \
-          -DBUILD_PLUGINS_STATIC=ON \
-          -DWITH_PNGIMPORTER=ON
-        cmake --build . --config Release --target install
+          cd $GITHUB_WORKSPACE
+          git clone --depth 1 https://github.com/mosra/magnum-plugins.git
+          cd magnum-plugins && mkdir build && cd build
+          cmake .. \
+            -DCMAKE_TOOLCHAIN_FILE=$VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake \
+            -DVCPKG_TARGET_TRIPLET=x64-windows \
+            -DCMAKE_INSTALL_PREFIX=$GITHUB_WORKSPACE/deps \
+            -DBUILD_PLUGINS_STATIC=ON \
+            -DWITH_PNGIMPORTER=ON
+          cmake --build . --config Release --target install
 
-        cd $GITHUB_WORKSPACE
-        git clone --depth 1 --branch docking https://github.com/ocornut/imgui.git
-        git clone --depth 1 https://github.com/mosra/magnum-integration.git
-        cd magnum-integration && mkdir build && cd build
-        cmake .. \
-          -DCMAKE_INSTALL_PREFIX=$GITHUB_WORKSPACE/deps \
-          -DBUILD_STATIC=ON \
-          -DWITH_IMGUI=ON \
-          -DIMGUI_DIR=$GITHUB_WORKSPACE/imgui
-        cmake --build . --config Release --target install
+          cd $GITHUB_WORKSPACE
+          git clone --depth 1 --branch docking https://github.com/ocornut/imgui.git
+          git clone --depth 1 https://github.com/mosra/magnum-integration.git
+          cd magnum-integration && mkdir build && cd build
+          cmake .. \
+            -DCMAKE_INSTALL_PREFIX=$GITHUB_WORKSPACE/deps \
+            -DBUILD_STATIC=ON \
+            -DWITH_IMGUI=ON \
+            -DIMGUI_DIR=$GITHUB_WORKSPACE/imgui
+          cmake --build . --config Release --target install
 
-    - name: Configure
-      shell: bash
-      run: |
-        mkdir build && cd build
-        cmake .. \
-          -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake \
-          -DVCPKG_TARGET_TRIPLET=x64-windows-static \
-          -DCMAKE_PREFIX_PATH=$GITHUB_WORKSPACE/deps \
-          -DIMGUI_DIR=$GITHUB_WORKSPACE/imgui
+      - name: Configure
+        shell: bash
+        run: |
+          mkdir build && cd build
+          cmake .. \
+            -DCMAKE_TOOLCHAIN_FILE=$VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake \
+            -DVCPKG_TARGET_TRIPLET=x64-windows \
+            -DCMAKE_PREFIX_PATH=$GITHUB_WORKSPACE/deps \
+            -DIMGUI_DIR=$GITHUB_WORKSPACE/imgui
 
-    - name: Build
-      shell: bash
-      run: |
-        cd build
-        cmake --build . --config Release
+      - name: Build
+        shell: bash
+        run: |
+          cd build
+          cmake --build . --config Release
 
-    - name: Upload artifact
-      uses: actions/upload-artifact@v1
-      with:
-        name: Oberon-Windows
-        path: build\Release\bin
+      - name: Upload artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: Oberon-Windows
+          path: build/Release/bin

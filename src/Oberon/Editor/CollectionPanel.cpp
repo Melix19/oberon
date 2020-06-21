@@ -175,8 +175,10 @@ void CollectionPanel::loadResources() {
         std::string resourceType = resource->value("type");
         std::string resourcePath = resource->value("path");
 
-        if(resourceType == "Texture2D")
-            _importer.loadTexture(resourcePath, _projectPath);
+        if(resourceType == "Texture2D") {
+            Containers::Array<char> data = Utility::Directory::read(Utility::Directory::join(_projectPath, resourcePath));
+            _importer.loadTexture(resourcePath, data);
+        }
     }
 }
 

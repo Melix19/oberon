@@ -45,7 +45,6 @@ class EditorApplication: public Platform::Application {
 
         void showPanels(ImGuiID dockSpaceId);
         void openFile(FileNode* fileNode);
-        void exportProject();
 
         void viewportEvent(ViewportEvent& event) override;
 

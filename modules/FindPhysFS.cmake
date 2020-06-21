@@ -1,3 +1,18 @@
+#.rst:
+# Find PhysFS
+# ---------
+#
+# Finds the PhysFS library. This module defines:
+#
+#  PhysFS_FOUND                 - True if PhysFS library is found
+#  PhysFS::PhysFS               - PhysFS imported target
+#
+# Additionally these variables are defined for internal usage:
+#
+#  PHYSFS_LIBRARY               - PhysFS library, if found
+#  PHYSFS_INCLUDE_DIR           - Root include dir
+#
+
 #
 #   This file is part of Oberon.
 #
@@ -22,11 +37,25 @@
 #   SOFTWARE.
 #
 
-find_package(Magnum REQUIRED Sdl2Application)
-find_package(PhysFS REQUIRED)
+find_library(PHYSFS_LIBRARY
+    NAMES physfs)
 
-add_executable(OberonSdl2Application AbstractApplication.cpp AbstractApplication.h Sdl2Application.cpp Sdl2Application.h)
-target_link_libraries(OberonSdl2Application PRIVATE
-    Oberon
-    Magnum::Sdl2Application
-    PhysFS::PhysFS)
+# Include dir
+find_path(PHYSFS_INCLUDE_DIR
+    NAMES physfs.h)
+
+include(FindPackageHandleStandardArgs)
+find_package_handle_standard_args(PhysFS DEFAULT_MSG
+    PHYSFS_LIBRARY
+    PHYSFS_INCLUDE_DIR)
+
+if(NOT TARGET PhysFS::PhysFS)
+    add_library(PhysFS::PhysFS UNKNOWN IMPORTED)
+
+    set_property(TARGET PhysFS::PhysFS PROPERTY IMPORTED_LOCATION ${PHYSFS_LIBRARY})
+
+    set_property(TARGET PhysFS::PhysFS PROPERTY
+        INTERFACE_INCLUDE_DIRECTORIES ${PHYSFS_INCLUDE_DIR})
+endif()
+
+mark_as_advanced(PHYSFS_LIBRARY PHYSFS_INCLUDE_DIR)

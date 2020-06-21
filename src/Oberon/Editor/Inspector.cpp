@@ -30,6 +30,7 @@
 #include <misc/cpp/imgui_stdlib.h>
 #include <Corrade/Containers/Array.h>
 #include <Corrade/Utility/ConfigurationGroup.h>
+#include <Corrade/Utility/Directory.h>
 #include <Magnum/GL/Mesh.h>
 #include <Magnum/Math/ConfigurationValue.h>
 #include <Oberon/Importer.h>
@@ -298,7 +299,8 @@ void Inspector::showMeshHeader(ObjectNode* objectNode, Utility::ConfigurationGro
                         addResource(fileNode->resourcePath(), "Texture2D");
                         materialConfig->setValue("ambient_texture", fileNode->resourcePath());
 
-                        Resource<GL::Texture2D> textureResource = _importer.loadTexture(fileNode->resourcePath(), _projectPath);
+                        Containers::Array<char> data = Utility::Directory::read(Utility::Directory::join(_projectPath, fileNode->resourcePath()));
+                        Resource<GL::Texture2D> textureResource = _importer.loadTexture(fileNode->resourcePath(), data);
                         mesh->setAmbientTexture(textureResource);
                         _panel->updateShader(*mesh);
 
@@ -331,7 +333,8 @@ void Inspector::showMeshHeader(ObjectNode* objectNode, Utility::ConfigurationGro
                         addResource(fileNode->resourcePath(), "Texture2D");
                         materialConfig->setValue("diffuse_texture", fileNode->resourcePath());
 
-                        Resource<GL::Texture2D> textureResource = _importer.loadTexture(fileNode->resourcePath(), _projectPath);
+                        Containers::Array<char> data = Utility::Directory::read(Utility::Directory::join(_projectPath, fileNode->resourcePath()));
+                        Resource<GL::Texture2D> textureResource = _importer.loadTexture(fileNode->resourcePath(), data);
                         mesh->setDiffuseTexture(textureResource);
                         _panel->updateShader(*mesh);
 
@@ -353,7 +356,8 @@ void Inspector::showMeshHeader(ObjectNode* objectNode, Utility::ConfigurationGro
                         addResource(fileNode->resourcePath(), "Texture2D");
                         materialConfig->setValue("normal_texture", fileNode->resourcePath());
 
-                        Resource<GL::Texture2D> textureResource = _importer.loadTexture(fileNode->resourcePath(), _projectPath);
+                        Containers::Array<char> data = Utility::Directory::read(Utility::Directory::join(_projectPath, fileNode->resourcePath()));
+                        Resource<GL::Texture2D> textureResource = _importer.loadTexture(fileNode->resourcePath(), data);
                         mesh->setNormalTexture(textureResource);
                         _panel->updateShader(*mesh);
 
@@ -386,7 +390,8 @@ void Inspector::showMeshHeader(ObjectNode* objectNode, Utility::ConfigurationGro
                         addResource(fileNode->resourcePath(), "Texture2D");
                         materialConfig->setValue("specular_texture", fileNode->resourcePath());
 
-                        Resource<GL::Texture2D> textureResource = _importer.loadTexture(fileNode->resourcePath(), _projectPath);
+                        Containers::Array<char> data = Utility::Directory::read(Utility::Directory::join(_projectPath, fileNode->resourcePath()));
+                        Resource<GL::Texture2D> textureResource = _importer.loadTexture(fileNode->resourcePath(), data);
                         mesh->setSpecularTexture(textureResource);
                         _panel->updateShader(*mesh);
 

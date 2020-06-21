@@ -25,8 +25,10 @@
 #include "AbstractApplication.h"
 
 #include <sstream>
+#include <physfs.h>
+#include <Corrade/Containers/Array.h>
 #include <Corrade/Utility/Configuration.h>
-#include <Corrade/Utility/Resource.h>
+#include <Corrade/Utility/Directory.h>
 #include <Magnum/GL/DefaultFramebuffer.h>
 #include <Magnum/GL/Mesh.h>
 #include <Magnum/GL/Renderer.h>
@@ -34,13 +36,77 @@
 #include <Oberon/Importer.h>
 #include <Oberon/Light.h>
 
-static void importApplicationResources() {
-    CORRADE_RESOURCE_INITIALIZE(OberonApplication_RCS)
-}
-
 namespace Oberon { namespace ExportTemplate {
 
-AbstractApplication::AbstractApplication() {
+namespace {
+
+Containers::Array<char> read(const std::string& filename) {
+    PHYSFS_File* file = PHYSFS_openRead(filename.c_str());
+    std::size_t fileLength = PHYSFS_fileLength(file);
+    Containers::Array<char> data{fileLength};
+
+    PHYSFS_readBytes(file, data, data.size());
+    return data;
+}
+
+std::string readString(const std::string& filename) {
+    PHYSFS_File* file = PHYSFS_openRead(filename.c_str());
+    std::size_t fileLength = PHYSFS_fileLength(file);
+    Containers::Array<char> data{fileLength + 1};
+
+    PHYSFS_readBytes(file, data, data.size());
+    /* Insert final null character */
+    data[data.size() - 1] = 0;
+    return std::string(data);
+}
+
+void loadCollectionResources(Utility::Configuration& collectionConfiguration, Importer& importer) {
+    Utility::ConfigurationGroup* resourcesGroup = collectionConfiguration.group("external_resources");
+    if(!resourcesGroup)
+        return;
+
+    for(Utility::ConfigurationGroup* resourceGroup: resourcesGroup->groups("resource")) {
+        const std::string resourceType = resourceGroup->value("type");
+        const std::string resourcePath = resourceGroup->value("path");
+
+        if(resourceType == "Texture2D") {
+            Containers::Array<char> data = read(resourcePath);
+            importer.loadTexture(resourcePath, data);
+        }
+    }
+}
+
+}
+
+AbstractApplication::AbstractApplication(const char* argv0) {
+    const std::string executableLocation = Utility::Directory::executableLocation();
+    const std::string executableParentPath = Utility::Directory::path(executableLocation);
+    const std::string executableName = Utility::Directory::filename(executableLocation);
+    const std::string dataPath = Utility::Directory::join(executableParentPath, executableName + "-data.zip");
+
+    PHYSFS_init(argv0);
+    PHYSFS_mount(dataPath.c_str(), nullptr, 1);
+
+    /* Load project configuration */
+    std::istringstream projectConfigurationStream(readString("project.oberon"));
+    Utility::Configuration projectConfiguration{projectConfigurationStream};
+    std::string mainCollection = projectConfiguration.value("main_collection");
+
+    /* Load main collection configuration */
+    std::istringstream collectionConfigurationStream(readString(mainCollection));
+    Utility::Configuration collectionConfiguration{collectionConfigurationStream};
+
+    /* Load main collection resources */
+    Importer importer{_resourceManager};
+    loadCollectionResources(collectionConfiguration, importer);
+
+    PHYSFS_deinit();
+
+    /* Load scene */
+    _collectionObject = new Object3D{&_scene};
+    Utility::ConfigurationGroup* sceneGroup = collectionConfiguration.group("scene");
+    importer.loadChildrenObject(sceneGroup, _collectionObject, &_drawables, &_lights);
+
     GL::Renderer::enable(GL::Renderer::Feature::Blending);
     GL::Renderer::enable(GL::Renderer::Feature::DepthTest);
     GL::Renderer::enable(GL::Renderer::Feature::FaceCulling);
@@ -50,48 +116,22 @@ AbstractApplication::AbstractApplication() {
     GL::Renderer::setBlendFunction(GL::Renderer::BlendFunction::SourceAlpha,
         GL::Renderer::BlendFunction::OneMinusSourceAlpha);
 
-    using namespace Math::Literals;
-
-    _cameraObject = new Object3D{&_scene};
+    _cameraObject = new Object3D{_collectionObject};
     _camera = new SceneGraph::Camera3D{*_cameraObject};
     _camera->setAspectRatioPolicy(SceneGraph::AspectRatioPolicy::Extend)
-        .setProjectionMatrix(Matrix4::perspectiveProjection(35.0_degf, 4.0f/3.0f, 0.001f, 100.0f))
+        .setProjectionMatrix(Matrix4::perspectiveProjection(Deg{90.0f}, 4.0f/3.0f, 0.001f, 100.0f))
         .setViewport(GL::defaultFramebuffer.viewport().size());
 
-    if(!Utility::Resource::hasGroup("OberonApplication"))
-        importApplicationResources();
-
-    Utility::Resource resources("OberonApplication");
-
-    std::istringstream projectConfigurationStream(resources.get("project.oberon"));
-    Utility::Configuration projectConfiguration(projectConfigurationStream);
-
-    std::string mainCollection = projectConfiguration.value("main_collection");
-    std::istringstream collectionStream(resources.get(mainCollection));
-    Utility::Configuration collectionConfig{collectionStream};
-    Utility::ConfigurationGroup* sceneConfig = collectionConfig.group("scene");
-
-    Importer importer{_resourceManager};
-    loadCompiledReources(collectionConfig, resources, importer);
-
-    importer.loadChildrenObject(sceneConfig, &_scene, &_drawables, &_lights);
-    importer.createShaders(&_drawables, _lights.size(), shaderKeys);
+    importer.createShaders(&_drawables, _lights.size(), _shaderKeys);
 
     _timeline.start();
 }
 
-void AbstractApplication::loadCompiledReources(Utility::Configuration& collectionConfig, Utility::Resource& resources, Importer& importer) {
-    Utility::ConfigurationGroup* resourcesGroup = collectionConfig.group("external_resources");
-    if(!resourcesGroup)
-        return;
-
-    for(Utility::ConfigurationGroup* resource: resourcesGroup->groups("resource")) {
-        std::string resourceType = resource->value("type");
-        std::string resourcePath = resource->value("path");
-
-        if(resourceType == "Texture2D")
-            importer.loadTexture(resourcePath, resources);
-    }
+AbstractApplication::~AbstractApplication() {
+    /* Needed to destroy all the referenced resources so the ResourceManager
+       does not complain that it's been destroyed while there are referenced
+       data. */
+    delete _collectionObject;
 }
 
 }}

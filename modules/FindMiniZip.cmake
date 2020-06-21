@@ -1,3 +1,18 @@
+#.rst:
+# Find MiniZip
+# ---------
+#
+# Finds the MiniZip library. This module defines:
+#
+#  MiniZip_FOUND                - True if MiniZip library is found
+#  MiniZip::MiniZip             - MiniZip imported target
+#
+# Additionally these variables are defined for internal usage:
+#
+#  MINIZIP_LIBRARY              - MiniZip library, if found
+#  MINIZIP_INCLUDE_DIR          - Root include dir
+#
+
 #
 #   This file is part of Oberon.
 #
@@ -22,11 +37,25 @@
 #   SOFTWARE.
 #
 
-find_package(Magnum REQUIRED Sdl2Application)
-find_package(PhysFS REQUIRED)
+find_library(MINIZIP_LIBRARY
+    NAMES minizip)
 
-add_executable(OberonSdl2Application AbstractApplication.cpp AbstractApplication.h Sdl2Application.cpp Sdl2Application.h)
-target_link_libraries(OberonSdl2Application PRIVATE
-    Oberon
-    Magnum::Sdl2Application
-    PhysFS::PhysFS)
+# Include dir
+find_path(MINIZIP_INCLUDE_DIR
+    NAMES minizip/zip.h)
+
+include(FindPackageHandleStandardArgs)
+find_package_handle_standard_args(MiniZip DEFAULT_MSG
+    MINIZIP_LIBRARY
+    MINIZIP_INCLUDE_DIR)
+
+if(NOT TARGET MiniZip::MiniZip)
+    add_library(MiniZip::MiniZip UNKNOWN IMPORTED)
+
+    set_property(TARGET MiniZip::MiniZip PROPERTY IMPORTED_LOCATION ${MINIZIP_LIBRARY})
+
+    set_property(TARGET MiniZip::MiniZip PROPERTY
+        INTERFACE_INCLUDE_DIRECTORIES ${MINIZIP_INCLUDE_DIR})
+endif()
+
+mark_as_advanced(MINIZIP_LIBRARY MINIZIP_INCLUDE_DIR)
