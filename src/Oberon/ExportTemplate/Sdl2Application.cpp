@@ -24,16 +24,20 @@
 
 #include "Sdl2Application.h"
 
+#include <sstream>
+#include <Corrade/Utility/Configuration.h>
 #include <Magnum/GL/DefaultFramebuffer.h>
 #include <Magnum/GL/Mesh.h>
 #include <Magnum/GL/Texture.h>
+#include <Magnum/Math/ConfigurationValue.h>
 #include <Oberon/Light.h>
+
+#include "PackingUtility.h"
 
 namespace Oberon { namespace ExportTemplate {
 
-Sdl2Application::Sdl2Application(const Arguments& arguments): Platform::Application{arguments,
-    Configuration{}.setTitle("Application")
-                   .setSize({1024, 576})}, AbstractApplication{arguments.argv[0]} {}
+Sdl2Application::Sdl2Application(const Arguments& arguments, const Configuration& configuration, const Utility::Configuration& projectConfiguration):
+    Platform::Application{arguments, configuration}, AbstractApplication{projectConfiguration} {}
 
 void Sdl2Application::drawEvent() {
     GL::defaultFramebuffer.clear(GL::FramebufferClear::Color|GL::FramebufferClear::Depth);
@@ -51,4 +55,27 @@ void Sdl2Application::drawEvent() {
 
 }}
 
-MAGNUM_APPLICATION_MAIN(Oberon::ExportTemplate::Sdl2Application)
+using namespace Corrade;
+using namespace Magnum;
+using namespace Oberon::ExportTemplate;
+
+int main(int argc, char** argv) {
+    PackingUtility::initialize(argv[0]);
+
+    /* Load project configuration */
+    std::istringstream projectConfigurationStream(PackingUtility::readString("project.oberon"));
+    const Utility::Configuration projectConfiguration{projectConfigurationStream};
+    const std::string title = projectConfiguration.value("name");
+    const Vector2i windowSize = projectConfiguration.value<Vector2i>("window_size");
+
+    Platform::Application::Configuration configuration{};
+    configuration
+        .setTitle(title)
+        .setSize(windowSize);
+
+    Sdl2Application app({argc, argv}, configuration, projectConfiguration);
+
+    PackingUtility::deinitialize();
+
+    return app.exec();
+}

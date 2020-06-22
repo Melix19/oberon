@@ -32,7 +32,7 @@ namespace Oberon { namespace ExportTemplate {
 
 class Sdl2Application: public Platform::Application, AbstractApplication {
     public:
-        explicit Sdl2Application(const Arguments& arguments);
+        explicit Sdl2Application(const Arguments& arguments, const Configuration& configuration, const Utility::Configuration& projectConfiguration);
 
     private:
         void drawEvent() override;

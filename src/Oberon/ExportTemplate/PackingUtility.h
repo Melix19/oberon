@@ -22,36 +22,15 @@
     SOFTWARE.
 */
 
-#pragma once
+#include <string>
+#include <Oberon/Oberon.h>
 
-#include <Magnum/ResourceManager.h>
-#include <Magnum/Timeline.h>
-#include <Magnum/SceneGraph/Drawable.h>
-#include <Magnum/SceneGraph/Scene.h>
-#include <Magnum/SceneGraph/TranslationRotationScalingTransformation3D.h>
-#include <Oberon/SceneShader.h>
+namespace Oberon { namespace ExportTemplate { namespace PackingUtility {
 
-namespace Oberon { namespace ExportTemplate {
+void initialize(char* argv0);
+void deinitialize();
 
-class AbstractApplication {
-    protected:
-        AbstractApplication(const Utility::Configuration& projectConfiguration);
+Containers::Array<char> read(const std::string& filename);
+std::string readString(const std::string& filename);
 
-        ~AbstractApplication();
-
-        Scene3D _scene;
-        Object3D* _collectionObject;
-
-        Object3D* _cameraObject;
-        SceneGraph::Camera3D* _camera;
-
-        Timeline _timeline;
-
-        SceneGraph::DrawableGroup3D _drawables;
-        LightGroup _lights;
-
-        OberonResourceManager _resourceManager;
-        std::vector<std::pair<std::string, SceneShader::Flags>> _shaderKeys;
-};
-
-}}
+}}}

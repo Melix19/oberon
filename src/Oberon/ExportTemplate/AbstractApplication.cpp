@@ -25,10 +25,8 @@
 #include "AbstractApplication.h"
 
 #include <sstream>
-#include <physfs.h>
 #include <Corrade/Containers/Array.h>
 #include <Corrade/Utility/Configuration.h>
-#include <Corrade/Utility/Directory.h>
 #include <Magnum/GL/DefaultFramebuffer.h>
 #include <Magnum/GL/Mesh.h>
 #include <Magnum/GL/Renderer.h>
@@ -36,29 +34,11 @@
 #include <Oberon/Importer.h>
 #include <Oberon/Light.h>
 
+#include "PackingUtility.h"
+
 namespace Oberon { namespace ExportTemplate {
 
 namespace {
-
-Containers::Array<char> read(const std::string& filename) {
-    PHYSFS_File* file = PHYSFS_openRead(filename.c_str());
-    std::size_t fileLength = PHYSFS_fileLength(file);
-    Containers::Array<char> data{fileLength};
-
-    PHYSFS_readBytes(file, data, data.size());
-    return data;
-}
-
-std::string readString(const std::string& filename) {
-    PHYSFS_File* file = PHYSFS_openRead(filename.c_str());
-    std::size_t fileLength = PHYSFS_fileLength(file);
-    Containers::Array<char> data{fileLength + 1};
-
-    PHYSFS_readBytes(file, data, data.size());
-    /* Insert final null character */
-    data[data.size() - 1] = 0;
-    return std::string(data);
-}
 
 void loadCollectionResources(Utility::Configuration& collectionConfiguration, Importer& importer) {
     Utility::ConfigurationGroup* resourcesGroup = collectionConfiguration.group("external_resources");
@@ -70,7 +50,7 @@ void loadCollectionResources(Utility::Configuration& collectionConfiguration, Im
         const std::string resourcePath = resourceGroup->value("path");
 
         if(resourceType == "Texture2D") {
-            Containers::Array<char> data = read(resourcePath);
+            Containers::Array<char> data = PackingUtility::read(resourcePath);
             importer.loadTexture(resourcePath, data);
         }
     }
@@ -78,29 +58,15 @@ void loadCollectionResources(Utility::Configuration& collectionConfiguration, Im
 
 }
 
-AbstractApplication::AbstractApplication(const char* argv0) {
-    const std::string executableLocation = Utility::Directory::executableLocation();
-    const std::string executableParentPath = Utility::Directory::path(executableLocation);
-    const std::string executableName = Utility::Directory::filename(executableLocation);
-    const std::string dataPath = Utility::Directory::join(executableParentPath, executableName + "-data.zip");
-
-    PHYSFS_init(argv0);
-    PHYSFS_mount(dataPath.c_str(), nullptr, 1);
-
-    /* Load project configuration */
-    std::istringstream projectConfigurationStream(readString("project.oberon"));
-    Utility::Configuration projectConfiguration{projectConfigurationStream};
-    std::string mainCollection = projectConfiguration.value("main_collection");
-
+AbstractApplication::AbstractApplication(const Utility::Configuration& projectConfiguration) {
     /* Load main collection configuration */
-    std::istringstream collectionConfigurationStream(readString(mainCollection));
+    std::string mainCollection = projectConfiguration.value("main_collection");
+    std::istringstream collectionConfigurationStream(PackingUtility::readString(mainCollection));
     Utility::Configuration collectionConfiguration{collectionConfigurationStream};
 
     /* Load main collection resources */
     Importer importer{_resourceManager};
     loadCollectionResources(collectionConfiguration, importer);
-
-    PHYSFS_deinit();
 
     /* Load scene */
     _collectionObject = new Object3D{&_scene};
