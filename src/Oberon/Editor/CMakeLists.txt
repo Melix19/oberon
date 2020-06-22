@@ -25,7 +25,7 @@
 find_package(ImGui REQUIRED SourcesMiscCpp)
 find_package(Magnum REQUIRED Sdl2Application)
 find_package(MagnumIntegration REQUIRED ImGui)
-find_package(MiniZip REQUIRED)
+find_package(LibZip REQUIRED)
 
 corrade_add_resource(OberonEditor_RCS resources.conf)
 
@@ -75,10 +75,10 @@ endif()
 
 target_link_libraries(OberonEditor PRIVATE
     Oberon
-    ImGui::SourcesMiscCpp
     Magnum::Application
     MagnumIntegration::ImGui
-    MiniZip::MiniZip
+    ImGui::SourcesMiscCpp
+    LibZip::LibZip
     portable_file_dialogs)
 
 if(CORRADE_TARGET_APPLE)

@@ -24,7 +24,7 @@
 
 #include "Export.h"
 
-#include <minizip/zip.h>
+#include <zip.h>
 #include <Corrade/Containers/Array.h>
 #include <Corrade/Utility/Configuration.h>
 #include <Corrade/Utility/Directory.h>
@@ -35,13 +35,9 @@ namespace Export {
 
 namespace {
 
-void addFileToZip(const zipFile& zf, const std::string& path, const std::string& localPath) {
-    const Containers::Array<char> data = Utility::Directory::read(path);
-
-    zipOpenNewFileInZip(zf, localPath.c_str(), nullptr, nullptr, 0, nullptr, 0, nullptr,
-        Z_DEFLATED, Z_DEFAULT_COMPRESSION);
-    zipWriteInFileInZip(zf, data, data.size());
-    zipCloseFileInZip(zf);
+void addFileToPack(zip_t* pack, const std::string& path, const std::string& localPath) {
+    zip_source_t* source = zip_source_file(pack, path.c_str(), 0, 0);
+    zip_file_add(pack, localPath.c_str(), source, 0);
 }
 
 }
@@ -61,30 +57,30 @@ void exportProject(const std::string& projectPath, const std::string& exportPath
     /* Copy the export template to the export path */
     Utility::Directory::copy(exportTemplatePath, applicationExportPath);
 
-    /* Create the data pack to be used to pack the resources */
-    const std::string dataPath = Utility::Directory::join(exportPath, applicationName + "-data.zip");
-    const zipFile zf = zipOpen(dataPath.c_str(), APPEND_STATUS_CREATE);
-
     /* Get the main collection to know which resources should be packed */
     const std::string mainCollection = projectConfiguration.value("main_collection");
     const std::string mainCollectionPath = Utility::Directory::join(projectPath, mainCollection);
     const Utility::Configuration collectionConfiguration{mainCollectionPath};
     const Utility::ConfigurationGroup* resourcesGroup = collectionConfiguration.group("external_resources");
 
+    /* Create the data pack to be used to pack the resources */
+    const std::string packPath = Utility::Directory::join(exportPath, applicationName + "-data.zip");
+    zip_t* pack = zip_open(packPath.c_str(), ZIP_CREATE | ZIP_EXCL, nullptr);
+    if(!pack) return;
+
     /* Add the project configuration file and the main collection to the data pack */
-    addFileToZip(zf, projectConfigurationPath, "project.oberon");
-    addFileToZip(zf, mainCollectionPath, mainCollection);
+    addFileToPack(pack, projectConfigurationPath, "project.oberon");
+    addFileToPack(pack, mainCollectionPath, mainCollection);
 
     /* Add all the main collection external resources to the data pack */
     for(const Utility::ConfigurationGroup* resourceGroup: resourcesGroup->groups("resource")) {
         const std::string resourceLocalPath = resourceGroup->value("path");
         const std::string resourcePath = Utility::Directory::join(projectPath, resourceLocalPath);
-
-        addFileToZip(zf, resourcePath, resourceLocalPath);
+        addFileToPack(pack, resourcePath, resourceLocalPath);
     }
 
     /* Close the data pack */
-    zipClose(zf, NULL);
+    zip_close(pack);
 }
 
 }}}

@@ -23,12 +23,10 @@
 #
 
 find_package(Magnum REQUIRED
-    AnyImageImporter
     MeshTools
     Primitives
     SceneGraph
     Shaders)
-find_package(MagnumPlugins REQUIRED PngImporter)
 
 corrade_add_resource(Oberon_RCS resources.conf)
 
@@ -54,13 +52,11 @@ target_include_directories(Oberon PUBLIC
     ${PROJECT_BINARY_DIR}/src)
 
 target_link_libraries(Oberon PRIVATE
-    Magnum::AnyImageImporter
     Magnum::Magnum
     Magnum::MeshTools
     Magnum::Primitives
     Magnum::SceneGraph
-    Magnum::Shaders
-    MagnumPlugins::PngImporter)
+    Magnum::Shaders)
 
 if(WITH_EDITOR)
     add_subdirectory(Editor)

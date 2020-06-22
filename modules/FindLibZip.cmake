@@ -1,16 +1,16 @@
 #.rst:
-# Find MiniZip
+# Find LibZip
 # ---------
 #
-# Finds the MiniZip library. This module defines:
+# Finds the LibZip library. This module defines:
 #
-#  MiniZip_FOUND                - True if MiniZip library is found
-#  MiniZip::MiniZip             - MiniZip imported target
+#  LibZip_FOUND                 - True if LibZip library is found
+#  LibZip::LibZip               - LibZip imported target
 #
 # Additionally these variables are defined for internal usage:
 #
-#  MINIZIP_LIBRARY              - MiniZip library, if found
-#  MINIZIP_INCLUDE_DIR          - Root include dir
+#  LIBZIP_LIBRARY               - LibZip library, if found
+#  LIBZIP_INCLUDE_DIR           - Root include dir
 #
 
 #
@@ -37,25 +37,25 @@
 #   SOFTWARE.
 #
 
-find_library(MINIZIP_LIBRARY
-    NAMES minizip)
+find_library(LIBZIP_LIBRARY
+    NAMES zip)
 
 # Include dir
-find_path(MINIZIP_INCLUDE_DIR
-    NAMES minizip/zip.h)
+find_path(LIBZIP_INCLUDE_DIR
+    NAMES zip.h)
 
 include(FindPackageHandleStandardArgs)
-find_package_handle_standard_args(MiniZip DEFAULT_MSG
-    MINIZIP_LIBRARY
-    MINIZIP_INCLUDE_DIR)
+find_package_handle_standard_args(LibZip DEFAULT_MSG
+    LIBZIP_LIBRARY
+    LIBZIP_INCLUDE_DIR)
 
-if(NOT TARGET MiniZip::MiniZip)
-    add_library(MiniZip::MiniZip UNKNOWN IMPORTED)
+if(NOT TARGET LibZip::LibZip)
+    add_library(LibZip::LibZip UNKNOWN IMPORTED)
 
-    set_property(TARGET MiniZip::MiniZip PROPERTY IMPORTED_LOCATION ${MINIZIP_LIBRARY})
+    set_property(TARGET LibZip::LibZip PROPERTY IMPORTED_LOCATION ${LIBZIP_LIBRARY})
 
-    set_property(TARGET MiniZip::MiniZip PROPERTY
-        INTERFACE_INCLUDE_DIRECTORIES ${MINIZIP_INCLUDE_DIR})
+    set_property(TARGET LibZip::LibZip PROPERTY
+        INTERFACE_INCLUDE_DIRECTORIES ${LIBZIP_INCLUDE_DIR})
 endif()
 
-mark_as_advanced(MINIZIP_LIBRARY MINIZIP_INCLUDE_DIR)
+mark_as_advanced(LIBZIP_LIBRARY LIBZIP_INCLUDE_DIR)
