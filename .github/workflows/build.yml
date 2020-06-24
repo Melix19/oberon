@@ -37,8 +37,7 @@ jobs:
             -DWITH_DEBUGTOOLS=OFF \
             -DWITH_TEXT=OFF \
             -DWITH_TEXTURETOOLS=OFF \
-            -DWITH_SDL2APPLICATION=ON \
-            -DWITH_ANYIMAGEIMPORTER=ON
+            -DWITH_SDL2APPLICATION=ON
           cmake --build . --target install
 
           cd $GITHUB_WORKSPACE
@@ -47,7 +46,7 @@ jobs:
           cmake .. \
             -DCMAKE_INSTALL_PREFIX=$GITHUB_WORKSPACE/deps \
             -DCMAKE_BUILD_TYPE=Release \
-            -DWITH_PNGIMPORTER=ON
+            -DWITH_STBIMAGEIMPORTER=ON
           cmake --build . --target install
 
           cd $GITHUB_WORKSPACE
@@ -115,8 +114,7 @@ jobs:
             -DWITH_DEBUGTOOLS=OFF \
             -DWITH_TEXT=OFF \
             -DWITH_TEXTURETOOLS=OFF \
-            -DWITH_SDL2APPLICATION=ON \
-            -DWITH_ANYIMAGEIMPORTER=ON
+            -DWITH_SDL2APPLICATION=ON
           cmake --build . --target install
 
           cd $GITHUB_WORKSPACE
@@ -125,7 +123,7 @@ jobs:
           cmake .. \
             -DCMAKE_INSTALL_PREFIX=$GITHUB_WORKSPACE/deps \
             -DCMAKE_BUILD_TYPE=Release \
-            -DWITH_PNGIMPORTER=ON
+            -DWITH_STBIMAGEIMPORTER=ON
           cmake --build . --target install
 
           cd $GITHUB_WORKSPACE
@@ -173,7 +171,7 @@ jobs:
       - name: Install dependencies
         shell: bash
         run: |
-          vcpkg install libpng physfs sdl2 libzip
+          vcpkg install physfs sdl2 libzip
 
           cd $GITHUB_WORKSPACE
           git clone --depth 1 https://github.com/mosra/corrade.git
@@ -195,8 +193,7 @@ jobs:
             -DWITH_DEBUGTOOLS=OFF \
             -DWITH_TEXT=OFF \
             -DWITH_TEXTURETOOLS=OFF \
-            -DWITH_SDL2APPLICATION=ON \
-            -DWITH_ANYIMAGEIMPORTER=ON
+            -DWITH_SDL2APPLICATION=ON
           cmake --build . --config Release --target install
 
           cd $GITHUB_WORKSPACE
@@ -205,7 +202,7 @@ jobs:
           cmake .. \
             -DCMAKE_TOOLCHAIN_FILE=$VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake \
             -DCMAKE_INSTALL_PREFIX=$GITHUB_WORKSPACE/deps \
-            -DWITH_PNGIMPORTER=ON
+            -DWITH_STBIMAGEIMPORTER=ON
           cmake --build . --config Release --target install
 
           cd $GITHUB_WORKSPACE
@@ -233,6 +230,7 @@ jobs:
         run: |
           cd build
           cmake --build . --config Release
+          cp -r $GITHUB_WORKSPACE/deps/bin/magnum $GITHUB_WORKSPACE/build/Release/bin
 
       - name: Upload artifact
         uses: actions/upload-artifact@v2

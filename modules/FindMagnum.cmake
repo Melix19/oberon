@@ -195,8 +195,8 @@
 #
 #   This file is part of Magnum.
 #
-#   Copyright © 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019
-#             Vladimír Vondruš <mosra@centrum.cz>
+#   Copyright © 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019,
+#               2020 Vladimír Vondruš <mosra@centrum.cz>
 #
 #   Permission is hereby granted, free of charge, to any person obtaining a
 #   copy of this software and associated documentation files (the "Software"),
@@ -416,7 +416,11 @@ elseif(CORRADE_TARGET_WINDOWS)
     endif()
 endif()
 
-set(_MAGNUM_Primitives_DEPENDENCIES Trade)
+set(_MAGNUM_Primitives_DEPENDENCIES MeshTools Trade)
+if(MAGNUM_TARGET_GL)
+    # GL not required by Primitives themselves, but transitively by MeshTools
+    list(APPEND _MAGNUM_Primitives_DEPENDENCIES GL)
+endif()
 set(_MAGNUM_SceneGraph_DEPENDENCIES )
 set(_MAGNUM_Shaders_DEPENDENCIES GL)
 set(_MAGNUM_Text_DEPENDENCIES TextureTools)
@@ -813,9 +817,7 @@ foreach(_component ${Magnum_FIND_COMPONENTS})
         elseif(_component STREQUAL Audio)
             find_package(OpenAL)
             set_property(TARGET Magnum::${_component} APPEND PROPERTY
-                INTERFACE_INCLUDE_DIRECTORIES ${OPENAL_INCLUDE_DIR})
-            set_property(TARGET Magnum::${_component} APPEND PROPERTY
-                INTERFACE_LINK_LIBRARIES ${OPENAL_LIBRARY} Corrade::PluginManager)
+                INTERFACE_LINK_LIBRARIES Corrade::PluginManager OpenAL::OpenAL)
 
         # No special setup for DebugTools library
 

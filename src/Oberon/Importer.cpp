@@ -249,7 +249,7 @@ Resource<GL::Texture2D> Importer::loadTexture(const std::string& resourcePath, C
         return textureResource;
 
     Containers::Pointer<Trade::AbstractImporter> importer =
-        _importerManager.loadAndInstantiate("AnyImageImporter");
+        _importerManager.loadAndInstantiate("StbImageImporter");
 
     importer->openData(data);
     Containers::Optional<Trade::ImageData2D> image = importer->image2D(0);
