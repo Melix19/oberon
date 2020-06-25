@@ -32,6 +32,7 @@
 #include <Magnum/SceneGraph/Drawable.h>
 #include <Magnum/SceneGraph/Scene.h>
 #include <Magnum/SceneGraph/TranslationRotationScalingTransformation3D.h>
+#include <Oberon/GameData.h>
 #include <Oberon/SceneShader.h>
 
 #include "AbstractPanel.h"
@@ -41,7 +42,7 @@ namespace Oberon { namespace Editor {
 class CollectionPanel: public AbstractPanel {
     public:
         CollectionPanel(FileNode* fileNode, OberonResourceManager& resourceManager, Importer& importer, const Vector2i& viewportTextureSize, const Vector2& dpiScaleRatio, const std::string& projectPath);
-        void drawViewport(Float deltaTime);
+        void drawViewport();
         void newFrame() override;
 
         Utility::Configuration& collectionConfig() { return _collectionConfig; }
@@ -104,16 +105,15 @@ class CollectionPanel: public AbstractPanel {
         GL::Renderbuffer _depth;
         GL::Renderbuffer _objectId;
 
-        SceneGraph::DrawableGroup3D _drawables;
         SceneGraph::DrawableGroup3D _editorDrawables;
         std::vector<ObjectNode*> _drawablesNodes;
-        LightGroup _lights;
-        std::vector<std::pair<std::string, SceneShader::Flags>> shaderKeys;
 
         Scene3D _scene;
         Object3D* _cameraObject;
         Object3D* _gridObject;
         SceneGraph::Camera3D* _camera;
+
+        GameData _gameData;
 
     public:
         bool isSimulating() const { return _isSimulating; }

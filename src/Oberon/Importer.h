@@ -35,16 +35,16 @@ class Importer {
     public:
         Importer(OberonResourceManager& resourceManager): _resourceManager(resourceManager) {}
 
-        Object3D* loadObject(Utility::ConfigurationGroup* objectConfig, Object3D* parent, SceneGraph::DrawableGroup3D* drawables, LightGroup* lights);
-        Object3D* loadChildrenObject(Utility::ConfigurationGroup* parentConfig, Object3D* parent, SceneGraph::DrawableGroup3D* drawables, LightGroup* lights);
+        Object3D* loadObject(Utility::ConfigurationGroup* objectConfig, Object3D* parent, GameData& gameData);
+        Object3D* loadChildrenObject(Utility::ConfigurationGroup* parentConfig, Object3D* parent, GameData& gameData);
 
-        SceneGraph::AbstractFeature3D* loadFeature(Utility::ConfigurationGroup* featureConfig, Object3D* object, SceneGraph::DrawableGroup3D* drawables, LightGroup* lights);
+        SceneGraph::AbstractFeature3D* loadFeature(Utility::ConfigurationGroup* featureConfig, Object3D* object, GameData& gameData);
         void resetObject(Object3D* object, Utility::ConfigurationGroup* objectConfig);
 
         void updateMeshPrimitive(Mesh& mesh, Utility::ConfigurationGroup* primitiveConfig);
 
-        Resource<GL::AbstractShaderProgram, SceneShader> createShader(Mesh& mesh, UnsignedInt lightCount, std::vector<std::pair<std::string, SceneShader::Flags>>& shaderKeys, bool useObjectId);
-        void createShaders(SceneGraph::DrawableGroup3D* drawables, UnsignedInt lightCount, std::vector<std::pair<std::string, SceneShader::Flags>>& shaderKeys, bool useObjectId = false);
+        Resource<GL::AbstractShaderProgram, SceneShader> createShader(Mesh& mesh, GameData& gameData, bool useObjectId);
+        void createShaders(GameData& gameData, bool useObjectId = false);
 
         Resource<GL::Texture2D> loadTexture(const std::string& resourcePath, Containers::ArrayView<const char> data);
 

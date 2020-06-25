@@ -95,7 +95,7 @@ void EditorApplication::drawEvent() {
     GL::Renderer::enable(GL::Renderer::Feature::FaceCulling);
 
     for(auto& collectionPanel: _collectionPanels)
-        collectionPanel->drawViewport(_timeline.previousFrameDuration());
+        collectionPanel->drawViewport();
 
     GL::Renderer::disable(GL::Renderer::Feature::FaceCulling);
     GL::Renderer::disable(GL::Renderer::Feature::DepthTest);

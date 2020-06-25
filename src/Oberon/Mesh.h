@@ -35,8 +35,8 @@ namespace Oberon {
 
 class Mesh: public SceneGraph::Drawable3D {
     public:
-        explicit Mesh(SceneGraph::AbstractObject3D& object, SceneGraph::DrawableGroup3D* drawables):
-            SceneGraph::Drawable3D{object, drawables} {}
+        explicit Mesh(SceneGraph::AbstractObject3D& object, SceneGraph::DrawableGroup3D& drawables):
+            SceneGraph::Drawable3D{object, &drawables} {}
 
         Mesh& setMesh(const Resource<GL::Mesh>& mesh) {
             _mesh = mesh;

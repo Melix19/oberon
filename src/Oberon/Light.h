@@ -35,8 +35,8 @@ namespace Oberon {
 
 class Light: public SceneGraph::AbstractGroupedFeature3D<Light> {
     public:
-        explicit Light(SceneGraph::AbstractObject3D& object, LightGroup* lights, OberonResourceManager& resourceManager):
-            SceneGraph::AbstractGroupedFeature3D<Light>{object, lights}, _resourceManager{resourceManager}, _id(lights->size() - 1) {}
+        explicit Light(SceneGraph::AbstractObject3D& object, LightGroup& lights, OberonResourceManager& resourceManager):
+            SceneGraph::AbstractGroupedFeature3D<Light>{object, &lights}, _resourceManager{resourceManager}, _id(lights.size() - 1) {}
 
         void updateShader(SceneGraph::Camera3D& camera, std::vector<std::pair<std::string, SceneShader::Flags>>& shaderKeys) {
             for(auto it = shaderKeys.begin(); it != shaderKeys.end();) {

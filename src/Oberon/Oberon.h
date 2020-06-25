@@ -38,6 +38,8 @@ typedef SceneGraph::Scene<SceneGraph::TranslationRotationScalingTransformation3D
 
 typedef ResourceManager<GL::AbstractShaderProgram, GL::Mesh, GL::Texture2D> OberonResourceManager;
 
+class GameData;
+
 class Importer;
 
 class Light;

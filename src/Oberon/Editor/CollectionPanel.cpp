@@ -74,10 +74,10 @@ CollectionPanel::CollectionPanel(FileNode* fileNode, OberonResourceManager& reso
     updateObjectNodeChildren(_rootNode.get());
     resetDrawablesId();
 
-    _importer.createShaders(&_drawables, _lights.size(), shaderKeys, true);
+    _importer.createShaders(_gameData, true);
 }
 
-void CollectionPanel::drawViewport(Float deltaTime) {
+void CollectionPanel::drawViewport() {
     /* If the window is not visible, end the method here. */
     if(!_isVisible || !_isOpen)
         return;
@@ -88,10 +88,10 @@ void CollectionPanel::drawViewport(Float deltaTime) {
         .clearDepth(1.0f)
         .bind();
 
-    for(std::size_t i = 0; i != _lights.size(); ++i)
-        _lights[i].updateShader(*_camera, shaderKeys);
+    for(std::size_t i = 0; i != _gameData.lights().size(); ++i)
+        _gameData.lights()[i].updateShader(*_camera, _gameData.shaderKeys());
 
-    _camera->draw(_drawables);
+    _camera->draw(_gameData.drawables());
     _camera->draw(_editorDrawables);
 }
 
@@ -184,11 +184,10 @@ void CollectionPanel::loadResources() {
 
 void CollectionPanel::updateObjectNodeChildren(ObjectNode* node) {
     for(auto childConfig: node->objectConfig()->groups("child")) {
-        Object3D* child = _importer.loadObject(childConfig, node->object(),
-            &_drawables, &_lights);
+        Object3D* child = _importer.loadObject(childConfig, node->object(), _gameData);
         ObjectNode* childNode = node->addChild(child, childConfig);
 
-        if(!_drawables.isEmpty() && child == &_drawables[_drawables.size() - 1].object())
+        if(!_gameData.drawables().isEmpty() && child == &_gameData.drawables()[_gameData.drawables().size() - 1].object())
             _drawablesNodes.push_back(childNode);
 
         Math::Vector3<Rad> rotationRadians = child->rotation().toEuler();
@@ -214,7 +213,7 @@ void CollectionPanel::createGrid() {
         _resourceManager.set(meshResource.key(), std::move(glMesh));
     }
 
-    Mesh& mesh = _gridObject->addFeature<Mesh>(&_editorDrawables);
+    Mesh& mesh = _gridObject->addFeature<Mesh>(_editorDrawables);
     mesh.setMesh(meshResource);
     mesh.setShader(shaderResource);
     mesh.setSize({size, size, size});
@@ -229,31 +228,31 @@ void CollectionPanel::resetObjectAndChildren(ObjectNode* node) {
 }
 
 void CollectionPanel::updateShader(Mesh& mesh) {
-    Resource<Magnum::GL::AbstractShaderProgram, SceneShader> shaderResource = _importer.createShader(mesh, _lights.size(), shaderKeys, true);
+    Resource<Magnum::GL::AbstractShaderProgram, SceneShader> shaderResource = _importer.createShader(mesh, _gameData, true);
     mesh.setShader(shaderResource);
 }
 
 void CollectionPanel::recreateShaders() {
-    for(std::pair<std::string, SceneShader::Flags>& key: shaderKeys) {
-        _resourceManager.set<GL::AbstractShaderProgram>(key.first, new SceneShader{key.second, UnsignedInt(_lights.size())},
+    for(std::pair<std::string, SceneShader::Flags>& key: _gameData.shaderKeys()) {
+        _resourceManager.set<GL::AbstractShaderProgram>(key.first, new SceneShader{key.second, UnsignedInt(_gameData.lights().size())},
             ResourceDataState::Mutable, ResourcePolicy::ReferenceCounted);
     }
 }
 
 void CollectionPanel::resetLightsId() {
-    for(std::size_t i = 0; i != _lights.size(); ++i)
-        _lights[i].setId(i);
+    for(std::size_t i = 0; i != _gameData.lights().size(); ++i)
+        _gameData.lights()[i].setId(i);
 }
 
 void CollectionPanel::addFeatureToObject(ObjectNode* objectNode, Utility::ConfigurationGroup* featureConfig) {
-    SceneGraph::AbstractFeature3D* newFeature = _importer.loadFeature(featureConfig, objectNode->object(), &_drawables, &_lights);
+    SceneGraph::AbstractFeature3D* newFeature = _importer.loadFeature(featureConfig, objectNode->object(), _gameData);
 
     if(featureConfig->value("type") == "light")
         recreateShaders();
     else if(featureConfig->value("type") == "mesh") {
         Mesh& mesh = reinterpret_cast<Mesh&>(*newFeature);
-        Resource<GL::AbstractShaderProgram, SceneShader> shaderResource = _importer.createShader(mesh, _lights.size(), shaderKeys, true);
-        mesh.setObjectId(_drawables.size());
+        Resource<GL::AbstractShaderProgram, SceneShader> shaderResource = _importer.createShader(mesh, _gameData, true);
+        mesh.setObjectId(_gameData.drawables().size());
         mesh.setShader(shaderResource);
         _drawablesNodes.push_back(objectNode);
     }
@@ -267,8 +266,8 @@ void CollectionPanel::removeDrawableNode(ObjectNode* objectNode) {
 }
 
 void CollectionPanel::resetDrawablesId() {
-    for(std::size_t i = 0; i != _drawables.size(); ++i) {
-        Mesh* mesh = dynamic_cast<Mesh*>(&_drawables[i]);
+    for(std::size_t i = 0; i != _gameData.drawables().size(); ++i) {
+        Mesh* mesh = dynamic_cast<Mesh*>(&_gameData.drawables()[i]);
         if(mesh) { mesh->setObjectId(i + 1); }
     }
 }

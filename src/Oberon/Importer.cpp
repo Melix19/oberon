@@ -42,12 +42,12 @@
 #include <Magnum/Trade/ImageData.h>
 #include <Magnum/Trade/MeshData.h>
 
-#include "Light.h"
+#include "GameData.h"
 #include "Mesh.h"
 
 namespace Oberon {
 
-Object3D* Importer::loadObject(Utility::ConfigurationGroup* objectConfig, Object3D* parent, SceneGraph::DrawableGroup3D* drawables, LightGroup* lights) {
+Object3D* Importer::loadObject(Utility::ConfigurationGroup* objectConfig, Object3D* parent, GameData& gameData) {
     Object3D* object = new Object3D{parent};
 
     /* Transformation */
@@ -57,29 +57,29 @@ Object3D* Importer::loadObject(Utility::ConfigurationGroup* objectConfig, Object
     }
 
     for(auto& featureConfig: objectConfig->groups("feature"))
-        loadFeature(featureConfig, object, drawables, lights);
+        loadFeature(featureConfig, object, gameData);
 
     return object;
 }
 
-Object3D* Importer::loadChildrenObject(Utility::ConfigurationGroup* parentConfig, Object3D* parent, SceneGraph::DrawableGroup3D* drawables, LightGroup* lights) {
+Object3D* Importer::loadChildrenObject(Utility::ConfigurationGroup* parentConfig, Object3D* parent, GameData& gameData) {
     for(auto& childConfig: parentConfig->groups("child")) {
-        Object3D* child = loadObject(childConfig, parent, drawables, lights);
+        Object3D* child = loadObject(childConfig, parent, gameData);
 
         if(childConfig->hasGroup("child"))
-            loadChildrenObject(childConfig, child, drawables, lights);
+            loadChildrenObject(childConfig, child, gameData);
     }
 
     return parent;
 }
 
-SceneGraph::AbstractFeature3D* Importer::loadFeature(Utility::ConfigurationGroup* featureConfig, Object3D* object, SceneGraph::DrawableGroup3D* drawables, LightGroup* lights) {
+SceneGraph::AbstractFeature3D* Importer::loadFeature(Utility::ConfigurationGroup* featureConfig, Object3D* object, GameData& gameData) {
     std::string type = featureConfig->value("type");
     SceneGraph::AbstractFeature3D* newFeature;
 
     if(type == "mesh") {
         /* Mesh */
-        Mesh& mesh = object->addFeature<Mesh>(drawables);
+        Mesh& mesh = object->addFeature<Mesh>(gameData.drawables());
         newFeature = &mesh;
 
         /* Material */
@@ -131,7 +131,7 @@ SceneGraph::AbstractFeature3D* Importer::loadFeature(Utility::ConfigurationGroup
         }
     } else if(type == "light") {
         /* Light */
-        Light& light = object->addFeature<Light>(lights, _resourceManager);
+        Light& light = object->addFeature<Light>(gameData.lights(), _resourceManager);
         newFeature = &light;
 
         if(featureConfig->hasValue("color")) {
@@ -220,24 +220,24 @@ void Importer::updateMeshPrimitive(Mesh& mesh, Utility::ConfigurationGroup* prim
     }
 }
 
-Resource<GL::AbstractShaderProgram, SceneShader> Importer::createShader(Mesh& mesh, UnsignedInt lightCount, std::vector<std::pair<std::string, SceneShader::Flags>>& shaderKeys, bool useObjectId) {
+Resource<GL::AbstractShaderProgram, SceneShader> Importer::createShader(Mesh& mesh, GameData& gameData, bool useObjectId) {
     std::pair<std::string, SceneShader::Flags> shaderKey = calculateShaderKey(mesh, useObjectId);
     Resource<GL::AbstractShaderProgram, SceneShader> shaderResource = _resourceManager.get<GL::AbstractShaderProgram, SceneShader>(shaderKey.first);
 
     if(!shaderResource) {
-        _resourceManager.set<GL::AbstractShaderProgram>(shaderResource.key(), new SceneShader{shaderKey.second, lightCount},
+        _resourceManager.set<GL::AbstractShaderProgram>(shaderResource.key(), new SceneShader{shaderKey.second, UnsignedInt(gameData.lights().size())},
             ResourceDataState::Mutable, ResourcePolicy::ReferenceCounted);
-        shaderKeys.push_back(shaderKey);
+        gameData.shaderKeys().push_back(shaderKey);
     }
 
     return shaderResource;
 }
 
-void Importer::createShaders(SceneGraph::DrawableGroup3D* drawables, UnsignedInt lightCount, std::vector<std::pair<std::string, SceneShader::Flags>>& shaderKeys, bool useObjectId) {
-    for(std::size_t i = 0; i != drawables->size(); ++i) {
-        Mesh* mesh = dynamic_cast<Mesh*>(&(*drawables)[i]);
+void Importer::createShaders(GameData& gameData, bool useObjectId) {
+    for(std::size_t i = 0; i != gameData.drawables().size(); ++i) {
+        Mesh* mesh = dynamic_cast<Mesh*>(&gameData.drawables()[i]);
         if(mesh) {
-            Resource<GL::AbstractShaderProgram, SceneShader> shaderResource = createShader(*mesh, lightCount, shaderKeys, useObjectId);
+            Resource<GL::AbstractShaderProgram, SceneShader> shaderResource = createShader(*mesh, gameData, useObjectId);
             mesh->setShader(shaderResource);
         }
     }

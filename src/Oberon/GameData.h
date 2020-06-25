@@ -24,31 +24,28 @@
 
 #pragma once
 
-#include <Magnum/ResourceManager.h>
-#include <Magnum/Timeline.h>
-#include <Magnum/Platform/Sdl2Application.h>
-#include <Magnum/SceneGraph/Drawable.h>
-#include <Magnum/SceneGraph/Scene.h>
-#include <Magnum/SceneGraph/TranslationRotationScalingTransformation3D.h>
-#include <Oberon/GameData.h>
+#include "Light.h"
 
-namespace Oberon { namespace ExportTemplate {
+namespace Oberon {
 
-class Application: public Platform::Application {
+class GameData {
     public:
-        explicit Application(const Arguments& arguments, const Configuration& configuration, const Utility::Configuration& projectConfiguration);
+        SceneGraph::Camera3D* camera() { return _camera; }
+        GameData& setCamera(SceneGraph::Camera3D* camera) {
+            _camera = camera;
+            return *this;
+        }
 
-        ~Application();
+        std::vector<std::pair<std::string, SceneShader::Flags>>& shaderKeys() { return _shaderKeys; }
+        SceneGraph::DrawableGroup3D& drawables() { return _drawables; }
+        LightGroup& lights() { return _lights; }
 
     private:
-        void drawEvent() override;
+        SceneGraph::Camera3D* _camera;
 
-        Scene3D _scene;
-        Object3D* _collectionObject;
-
-        OberonResourceManager _resourceManager;
-        Timeline _timeline;
-        GameData _gameData;
+        std::vector<std::pair<std::string, SceneShader::Flags>> _shaderKeys;
+        SceneGraph::DrawableGroup3D _drawables;
+        LightGroup _lights;
 };
 
-}}
+}

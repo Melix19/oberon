@@ -74,7 +74,7 @@ Application::Application(const Arguments& arguments, const Configuration& config
     /* Load scene */
     _collectionObject = new Object3D{&_scene};
     Utility::ConfigurationGroup* sceneGroup = collectionConfiguration.group("scene");
-    importer.loadChildrenObject(sceneGroup, _collectionObject, &_drawables, &_lights);
+    importer.loadChildrenObject(sceneGroup, _collectionObject, _gameData);
 
     GL::Renderer::enable(GL::Renderer::Feature::Blending);
     GL::Renderer::enable(GL::Renderer::Feature::DepthTest);
@@ -85,13 +85,15 @@ Application::Application(const Arguments& arguments, const Configuration& config
     GL::Renderer::setBlendFunction(GL::Renderer::BlendFunction::SourceAlpha,
         GL::Renderer::BlendFunction::OneMinusSourceAlpha);
 
-    _cameraObject = new Object3D{_collectionObject};
-    _camera = new SceneGraph::Camera3D{*_cameraObject};
-    _camera->setAspectRatioPolicy(SceneGraph::AspectRatioPolicy::Extend)
+    Object3D* cameraObject = new Object3D{_collectionObject};
+    SceneGraph::Camera3D* camera = new SceneGraph::Camera3D{*cameraObject};
+    camera->setAspectRatioPolicy(SceneGraph::AspectRatioPolicy::Extend)
         .setProjectionMatrix(Matrix4::perspectiveProjection(Deg{90.0f}, 4.0f/3.0f, 0.001f, 100.0f))
         .setViewport(GL::defaultFramebuffer.viewport().size());
 
-    importer.createShaders(&_drawables, _lights.size(), _shaderKeys);
+    _gameData.setCamera(camera);
+
+    importer.createShaders(_gameData);
 
     _timeline.start();
 }
@@ -106,10 +108,10 @@ Application::~Application() {
 void Application::drawEvent() {
     GL::defaultFramebuffer.clear(GL::FramebufferClear::Color|GL::FramebufferClear::Depth);
 
-    for(std::size_t i = 0; i != _lights.size(); ++i)
-        _lights[i].updateShader(*_camera, _shaderKeys);
+    for(std::size_t i = 0; i != _gameData.lights().size(); ++i)
+        _gameData.lights()[i].updateShader(*_gameData.camera(), _gameData.shaderKeys());
 
-    _camera->draw(_drawables);
+    _gameData.camera()->draw(_gameData.drawables());
 
     swapBuffers();
     redraw();
