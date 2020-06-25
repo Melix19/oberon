@@ -33,7 +33,6 @@ namespace Oberon { namespace Editor {
 class Inspector {
     public:
         Inspector(const std::string& projectPath, Importer& importer): _projectPath(projectPath), _importer(importer) {}
-
         void newFrame();
 
         Inspector& setPanel(CollectionPanel* panel) {
@@ -52,8 +51,8 @@ class Inspector {
         std::string _projectPath;
         Importer& _importer;
 
-        Float _spacing;
         CollectionPanel* _panel{nullptr};
+        Float _spacing;
 };
 
 }}

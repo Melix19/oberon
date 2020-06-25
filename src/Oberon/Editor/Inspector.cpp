@@ -66,51 +66,57 @@ std::string snakeCaseToPhrase(const std::string& snakeCase) {
 }
 
 void Inspector::newFrame() {
-    bool isVisible = ImGui::Begin("Inspector");
+    const bool isVisible = ImGui::Begin("Inspector");
 
-    std::vector<ObjectNode*>& selectedNodes = _panel->selectedNodes();
+    /* Get the first selected node in the CollectionPanel, if it exists */
     ObjectNode* objectNode = nullptr;
+    if(_panel) {
+        const std::vector<ObjectNode*>& selectedNodes = _panel->selectedNodes();
+        if(!selectedNodes.empty()) objectNode = selectedNodes.front();
+    }
 
-    if(_panel && !selectedNodes.empty())
-        objectNode = selectedNodes.front();
-
-    /* If the window is not visible or the object node is the root, end the method here. */
-    if(!isVisible || !_panel || selectedNodes.empty() || objectNode == _panel->rootNode()) {
+    /* If the window is not visible or there is no object node or the object
+       node is the root node, end the method here */
+    if(!isVisible || !objectNode || objectNode == _panel->rootNode()) {
         ImGui::End();
         return;
     }
 
+    /* Calculate spacing for the inputs in the headers */
     _spacing = ImGui::GetWindowWidth()/2;
 
+    /* Transformation header */
     showTransformationHeader(objectNode);
     ImGui::Dummy(ImVec2(0.0f, 5.0f));
 
+    /* Feature headers */
     for(Utility::ConfigurationGroup* featureConfig: objectNode->objectConfig()->groups("feature")) {
-        std::string type = featureConfig->value("type");
+        const std::string type = featureConfig->value("type");
         if(type == "light") showLightHeader(objectNode, featureConfig);
         else if(type == "mesh") showMeshHeader(objectNode, featureConfig);
 
         ImGui::Dummy(ImVec2(0.0f, 5.0f));
     }
 
+    /* Separator */
     ImGui::Separator();
     ImGui::Dummy(ImVec2(0.0f, 5.0f));
 
-    /* Add feature button */
+    /* "Add feature" button with dynamic width */
     const Float addFeatureButtonWidth = ImGui::GetWindowWidth()/2;
     ImGui::SetCursorPosX(ImGui::GetWindowWidth()/2 - addFeatureButtonWidth/2);
-
     if(ImGui::Button("Add feature", ImVec2(addFeatureButtonWidth, 0)))
-        ImGui::OpenPopup("FeaturePopup");
+        ImGui::OpenPopup("FeaturesPopup");
 
-    if(ImGui::BeginPopup("FeaturePopup")) {
+    /* Features popup */
+    if(ImGui::BeginPopup("FeaturesPopup")) {
         const char* features[] = {"light", "mesh"};
         for(const char* feature: features) {
             if(ImGui::Selectable(snakeCaseToPhrase(feature).c_str())) {
                 bool featureAlreadyPresent = false;
 
                 for(Utility::ConfigurationGroup* featureConfig: objectNode->objectConfig()->groups("feature")) {
-                    std::string type = featureConfig->value("type");
+                    const std::string type = featureConfig->value("type");
                     if(type == feature) {
                         featureAlreadyPresent = true;
                         break;
@@ -142,7 +148,7 @@ void Inspector::showTransformationHeader(ObjectNode* objectNode) {
             objectNode->objectConfig()->setValue("transformation", objectNode->object()->transformation());
         }
 
-        /* Rotation */
+        /* Rotation (degrees) */
         ImGui::Text("Rotation");
         ImGui::SetNextItemWidth(-1);
         Vector3 rotationDegree = objectNode->rotationDegree();
@@ -205,7 +211,9 @@ void Inspector::showLightHeader(ObjectNode* objectNode, Utility::ConfigurationGr
         delete light;
         objectNode->objectConfig()->removeGroup(featureConfig);
 
+        /* A light is removed so the shaders have to be recreated */
         _panel->recreateShaders();
+        /* Also reset all the other lights id so all the ids are sequential */
         _panel->resetLightsId();
     }
 }
@@ -216,7 +224,7 @@ void Inspector::showMeshHeader(ObjectNode* objectNode, Utility::ConfigurationGro
 
     if(ImGui::CollapsingHeader("Mesh", &headerIsOpen, ImGuiTreeNodeFlags_DefaultOpen)) {
         Utility::ConfigurationGroup* primitiveConfig = featureConfig->group("primitive");
-        ImGuiTreeNodeFlags nodeFlags = ImGuiTreeNodeFlags_FramePadding |
+        const ImGuiTreeNodeFlags nodeFlags = ImGuiTreeNodeFlags_FramePadding |
             ImGuiTreeNodeFlags_NoTreePushOnOpen | ImGuiTreeNodeFlags_SpanFullWidth;
         bool reloadPrimitive = false;
 
@@ -417,6 +425,9 @@ void Inspector::showMeshHeader(ObjectNode* objectNode, Utility::ConfigurationGro
     if(!headerIsOpen) {
         delete mesh;
         objectNode->objectConfig()->removeGroup(featureConfig);
+
+        /* A drawable is removed so let's tell the CollectionPanel to remove the node to
+           make the picking work */
         _panel->removeDrawableNode(objectNode);
     }
 }
@@ -426,9 +437,8 @@ void Inspector::addResource(const std::string& resourcePath, const std::string& 
     if(!resourcesGroup)
         resourcesGroup = _panel->collectionConfig().addGroup("external_resources");
 
-    bool resourceAlreadyDefined = false;
-
     /* Check if the resource is already defined */
+    bool resourceAlreadyDefined = false;
     for(auto& r: resourcesGroup->groups("resource")) {
         if(r->value("path") == resourcePath) {
             resourceAlreadyDefined = true;
