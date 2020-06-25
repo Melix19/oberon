@@ -26,6 +26,7 @@
 
 #include <Magnum/ResourceManager.h>
 #include <Magnum/Timeline.h>
+#include <Magnum/Platform/Sdl2Application.h>
 #include <Magnum/SceneGraph/Drawable.h>
 #include <Magnum/SceneGraph/Scene.h>
 #include <Magnum/SceneGraph/TranslationRotationScalingTransformation3D.h>
@@ -33,11 +34,14 @@
 
 namespace Oberon { namespace ExportTemplate {
 
-class AbstractApplication {
-    protected:
-        AbstractApplication(const Utility::Configuration& projectConfiguration);
+class Application: public Platform::Application {
+    public:
+        explicit Application(const Arguments& arguments, const Configuration& configuration, const Utility::Configuration& projectConfiguration);
 
-        ~AbstractApplication();
+        ~Application();
+
+    private:
+        void drawEvent() override;
 
         Scene3D _scene;
         Object3D* _collectionObject;

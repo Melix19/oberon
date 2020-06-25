@@ -22,7 +22,7 @@
     SOFTWARE.
 */
 
-#include "AbstractApplication.h"
+#include "Application.h"
 
 #include <sstream>
 #include <Corrade/Containers/Array.h>
@@ -31,6 +31,7 @@
 #include <Magnum/GL/Mesh.h>
 #include <Magnum/GL/Renderer.h>
 #include <Magnum/GL/Texture.h>
+#include <Magnum/Math/ConfigurationValue.h>
 #include <Oberon/Importer.h>
 #include <Oberon/Light.h>
 
@@ -58,7 +59,9 @@ void loadCollectionResources(Utility::Configuration& collectionConfiguration, Im
 
 }
 
-AbstractApplication::AbstractApplication(const Utility::Configuration& projectConfiguration) {
+Application::Application(const Arguments& arguments, const Configuration& configuration, const Utility::Configuration& projectConfiguration):
+    Platform::Application{arguments, configuration}
+{
     /* Load main collection configuration */
     std::string mainCollection = projectConfiguration.value("main_collection");
     std::istringstream collectionConfigurationStream(PackingUtility::readString(mainCollection));
@@ -93,11 +96,49 @@ AbstractApplication::AbstractApplication(const Utility::Configuration& projectCo
     _timeline.start();
 }
 
-AbstractApplication::~AbstractApplication() {
+Application::~Application() {
     /* Needed to destroy all the referenced resources so the ResourceManager
        does not complain that it's been destroyed while there are referenced
        data. */
     delete _collectionObject;
 }
 
+void Application::drawEvent() {
+    GL::defaultFramebuffer.clear(GL::FramebufferClear::Color|GL::FramebufferClear::Depth);
+
+    for(std::size_t i = 0; i != _lights.size(); ++i)
+        _lights[i].updateShader(*_camera, _shaderKeys);
+
+    _camera->draw(_drawables);
+
+    swapBuffers();
+    redraw();
+
+    _timeline.nextFrame();
+}
+
 }}
+
+using namespace Magnum;
+using namespace Oberon::ExportTemplate;
+
+int main(int argc, char** argv) {
+    PackingUtility::initialize(argv[0]);
+
+    /* Load project configuration */
+    std::istringstream projectConfigurationStream(PackingUtility::readString("project.oberon"));
+    const Utility::Configuration projectConfiguration{projectConfigurationStream};
+    const std::string title = projectConfiguration.value("name");
+    const Vector2i windowSize = projectConfiguration.value<Vector2i>("window_size");
+
+    Platform::Application::Configuration configuration{};
+    configuration
+        .setTitle(title)
+        .setSize(windowSize);
+
+    Application app({argc, argv}, configuration, projectConfiguration);
+
+    PackingUtility::deinitialize();
+
+    return app.exec();
+}

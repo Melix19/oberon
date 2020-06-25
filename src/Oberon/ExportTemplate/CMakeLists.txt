@@ -26,17 +26,16 @@ find_package(Magnum REQUIRED Sdl2Application)
 find_package(PhysFS REQUIRED)
 
 set(OberonExportTemplate_SRCS
-    AbstractApplication.cpp
+    Application.cpp
     PackingUtility.cpp)
 
 set(OberonExportTemplate_HEADERS
-    AbstractApplication.h
+    Application.h
     PackingUtility.h)
 
 add_executable(OberonSdl2Application
     ${OberonExportTemplate_SRCS}
-    ${OberonExportTemplate_HEADERS}
-    Sdl2Application.cpp Sdl2Application.h)
+    ${OberonExportTemplate_HEADERS})
 target_link_libraries(OberonSdl2Application PRIVATE
     Oberon
     Magnum::Sdl2Application
