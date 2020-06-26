@@ -39,7 +39,7 @@ set(OberonEditor_SRCS
     Outliner.cpp
     ProjectManager.cpp
     PropertiesPanel.cpp
-    Themer.cpp
+    Theme.cpp
     main.cpp
 
     ${OberonEditor_RCS})
@@ -59,7 +59,7 @@ set(OberonEditor_HEADERS
     Outliner.h
     ProjectManager.h
     PropertiesPanel.h
-    Themer.h)
+    Theme.h)
 
 add_executable(OberonEditor MACOSX_BUNDLE
     ${OberonEditor_SRCS}

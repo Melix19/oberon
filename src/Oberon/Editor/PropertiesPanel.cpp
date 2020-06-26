@@ -30,7 +30,7 @@
 #include <Magnum/Math/ConfigurationValue.h>
 
 #include "FileNode.h"
-#include "Themer.h"
+#include "Theme.h"
 
 namespace Oberon { namespace Editor {
 
@@ -52,17 +52,17 @@ void PropertiesPanel::newFrame() {
 
     const Float spacing = ImGui::GetWindowWidth()/2;
 
-    Themer::setNextItemRightAlign("Name", spacing);
+    Theme::setNextItemRightAlign("Name", spacing);
     std::string name = _configuration.value("name");
     if(ImGui::InputText("##Project.Name", &name))
         _configuration.setValue("name", name);
 
-    Themer::setNextItemRightAlign("Window size", spacing);
+    Theme::setNextItemRightAlign("Window size", spacing);
     Vector2i windowSize = _configuration.value<Vector2i>("window_size");
     if(ImGui::DragInt2("##Project.WindowSize", windowSize.data()))
         _configuration.setValue<Vector2i>("window_size", windowSize);
 
-    Themer::setNextItemRightAlign("Main collection", spacing);
+    Theme::setNextItemRightAlign("Main collection", spacing);
     std::string mainCollection = _configuration.value("main_collection");
     if(ImGui::InputText("##Project.MainCollection", &mainCollection))
         _configuration.setValue("main_collection", mainCollection);

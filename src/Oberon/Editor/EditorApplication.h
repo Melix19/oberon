@@ -33,6 +33,7 @@
 #include "Explorer.h"
 #include "Inspector.h"
 #include "Outliner.h"
+#include "Theme.h"
 
 namespace Oberon { namespace Editor {
 
@@ -62,6 +63,7 @@ class EditorApplication: public Platform::Application {
         Timeline _timeline;
 
         std::string _projectPath;
+        Theme::Color _themeColor{Theme::Color::Dark};
 
         ImGuiIntegration::Context _imgui{NoCreate};
         OberonResourceManager _resourceManager;

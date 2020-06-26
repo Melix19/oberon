@@ -36,7 +36,6 @@
 #include "Export.h"
 #include "FileNode.h"
 #include "PropertiesPanel.h"
-#include "Themer.h"
 
 namespace Oberon { namespace Editor {
 
@@ -54,7 +53,9 @@ EditorApplication::EditorApplication(const Arguments& arguments, const std::stri
     _dpiScaleRatio = Vector2{framebufferSize()}/(Vector2{windowSize()}/dpiScaling());
 
     ImGui::CreateContext();
-    Themer::styleColorsDark();
+
+    Theme::setStyle();
+    Theme::setStyleColor(_themeColor);
 
     const Vector2 size = Vector2{windowSize()}/dpiScaling();
 
@@ -132,6 +133,20 @@ void EditorApplication::drawEvent() {
         }
 
         if(ImGui::BeginMenu("Editor")) {
+            if(ImGui::BeginMenu("Theme")) {
+                if(ImGui::MenuItem("Dark", nullptr, _themeColor == Theme::Color::Dark)) {
+                    _themeColor = Theme::Color::Dark;
+                    Theme::setStyleColor(_themeColor);
+                }
+
+                if(ImGui::MenuItem("Light", nullptr, _themeColor == Theme::Color::Light)) {
+                    _themeColor = Theme::Color::Light;
+                    Theme::setStyleColor(_themeColor);
+                }
+
+                ImGui::EndMenu();
+            }
+
             if(ImGui::MenuItem("Reset layout"))
                 ImGui::DockBuilderRemoveNode(dockSpaceId);
 

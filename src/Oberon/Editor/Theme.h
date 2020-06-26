@@ -24,12 +24,19 @@
 
 #pragma once
 
+#include <Oberon/Oberon.h>
+
 namespace Oberon { namespace Editor {
 
-namespace Themer {
+namespace Theme {
 
-void styleColorsDark();
-void styleColorsLight();
-void setNextItemRightAlign(const char* label, float spacing);
+enum class Color: UnsignedByte {
+    Dark,
+    Light
+};
+
+void setStyle();
+void setStyleColor(Color color);
+void setNextItemRightAlign(const char* label, Float spacing);
 
 }}}

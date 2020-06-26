@@ -22,34 +22,53 @@
     SOFTWARE.
 */
 
-#include "Themer.h"
+#include "Theme.h"
 
 #include <imgui.h>
 
 namespace Oberon { namespace Editor {
 
-namespace Themer {
+namespace Theme {
 
-namespace {
-
-void commonStyle() {
+void setStyle() {
     ImGuiStyle& style = ImGui::GetStyle();
 
     style.ItemSpacing.y = 5.0f;
     style.ItemInnerSpacing.x = 5.0f;
-    style.ChildRounding = 4.0f;
     style.FrameRounding = 4.0f;
     style.GrabRounding = 4.0f;
-    style.PopupRounding = 4.0f;
     style.ScrollbarSize = 10.0f;
 }
 
-}
-
-void styleColorsDark() {
+void setStyleColor(Color color) {
     ImGuiStyle& style = ImGui::GetStyle();
 
-    ImVec4 titleBarColor(0.12f, 0.12f, 0.12f, 1.0f);
+    ImVec4 titleBarColor;
+    ImVec4 windowColor;
+    ImVec4 widgetColor;
+    ImVec4 hoveredColor;
+    ImVec4 activeColor;
+    ImVec4 textColor;
+
+    switch(color) {
+        case Color::Dark: {
+            titleBarColor = ImVec4(0.12f, 0.12f, 0.12f, 1.0f);
+            windowColor = ImVec4(0.16f, 0.16f, 0.16f, 1.0f);
+            widgetColor = ImVec4(0.25f, 0.25f, 0.25f, 1.0f);
+            hoveredColor = ImVec4(0.35f, 0.35f, 0.35f, 0.8f);
+            activeColor = ImVec4(0.2f, 0.5f, 0.9f, 0.8f);
+            textColor = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);
+        } break;
+        case Color::Light: {
+            titleBarColor = ImVec4(0.9f, 0.9f, 0.9f, 1.0f);
+            windowColor = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);
+            widgetColor = ImVec4(0.9f, 0.9f, 0.9f, 1.0f);
+            hoveredColor = ImVec4(0.75f, 0.75f, 0.75f, 0.8f);
+            activeColor = ImVec4(0.2f, 0.5f, 0.9f, 0.8f);
+            textColor = ImVec4(0.0f, 0.0f, 0.0f, 1.0f);
+        } break;
+    }
+
     style.Colors[ImGuiCol_PopupBg] = titleBarColor;
     style.Colors[ImGuiCol_TabUnfocused] = titleBarColor;
     style.Colors[ImGuiCol_Tab] = titleBarColor;
@@ -57,7 +76,6 @@ void styleColorsDark() {
     style.Colors[ImGuiCol_TitleBgActive] = titleBarColor;
     style.Colors[ImGuiCol_TitleBgCollapsed] = titleBarColor;
 
-    ImVec4 windowColor(0.16f, 0.16f, 0.16f, 1.0f);
     style.Colors[ImGuiCol_MenuBarBg] = windowColor;
     style.Colors[ImGuiCol_ScrollbarBg] = windowColor;
     style.Colors[ImGuiCol_TabActive] = windowColor;
@@ -65,74 +83,25 @@ void styleColorsDark() {
     style.Colors[ImGuiCol_TabUnfocusedActive] = windowColor;
     style.Colors[ImGuiCol_WindowBg] = windowColor;
 
-    ImVec4 widgetColor(0.25f, 0.25f, 0.25f, 1.0f);
     style.Colors[ImGuiCol_Button] = widgetColor;
     style.Colors[ImGuiCol_FrameBg] = widgetColor;
     style.Colors[ImGuiCol_Separator] = widgetColor;
 
-    ImVec4 hoveredColor(0.35f, 0.35f, 0.35f, 0.8f);
     style.Colors[ImGuiCol_ButtonHovered] = hoveredColor;
     style.Colors[ImGuiCol_FrameBgHovered] = hoveredColor;
     style.Colors[ImGuiCol_HeaderHovered] = hoveredColor;
     style.Colors[ImGuiCol_SeparatorHovered] = hoveredColor;
 
-    ImVec4 activeColor(0.2f, 0.5f, 0.9f, 0.8f);
     style.Colors[ImGuiCol_ButtonActive] = activeColor;
     style.Colors[ImGuiCol_FrameBgActive] = activeColor;
     style.Colors[ImGuiCol_Header] = activeColor;
     style.Colors[ImGuiCol_HeaderActive] = activeColor;
     style.Colors[ImGuiCol_SeparatorActive] = activeColor;
 
-    ImVec4 textColor(1.0f, 1.0f, 1.0f, 1.0f);
     style.Colors[ImGuiCol_Text] = textColor;
-
-    commonStyle();
 }
 
-void styleColorsLight() {
-    ImGuiStyle& style = ImGui::GetStyle();
-
-    ImVec4 titleBarColor(0.9f, 0.9f, 0.9f, 1.0f);
-    style.Colors[ImGuiCol_PopupBg] = titleBarColor;
-    style.Colors[ImGuiCol_TabUnfocused] = titleBarColor;
-    style.Colors[ImGuiCol_Tab] = titleBarColor;
-    style.Colors[ImGuiCol_TitleBg] = titleBarColor;
-    style.Colors[ImGuiCol_TitleBgActive] = titleBarColor;
-    style.Colors[ImGuiCol_TitleBgCollapsed] = titleBarColor;
-
-    ImVec4 windowColor(1.0f, 1.0f, 1.0f, 1.0f);
-    style.Colors[ImGuiCol_MenuBarBg] = windowColor;
-    style.Colors[ImGuiCol_ScrollbarBg] = windowColor;
-    style.Colors[ImGuiCol_TabActive] = windowColor;
-    style.Colors[ImGuiCol_TabHovered] = windowColor;
-    style.Colors[ImGuiCol_TabUnfocusedActive] = windowColor;
-    style.Colors[ImGuiCol_WindowBg] = windowColor;
-
-    ImVec4 widgetColor(0.9f, 0.9f, 0.9f, 1.0f);
-    style.Colors[ImGuiCol_Button] = widgetColor;
-    style.Colors[ImGuiCol_FrameBg] = widgetColor;
-    style.Colors[ImGuiCol_Separator] = widgetColor;
-
-    ImVec4 hoveredColor(0.75f, 0.75f, 0.75f, 0.8f);
-    style.Colors[ImGuiCol_ButtonHovered] = hoveredColor;
-    style.Colors[ImGuiCol_FrameBgHovered] = hoveredColor;
-    style.Colors[ImGuiCol_HeaderHovered] = hoveredColor;
-    style.Colors[ImGuiCol_SeparatorHovered] = hoveredColor;
-
-    ImVec4 activeColor(0.2f, 0.5f, 0.9f, 0.8f);
-    style.Colors[ImGuiCol_ButtonActive] = activeColor;
-    style.Colors[ImGuiCol_FrameBgActive] = activeColor;
-    style.Colors[ImGuiCol_Header] = activeColor;
-    style.Colors[ImGuiCol_HeaderActive] = activeColor;
-    style.Colors[ImGuiCol_SeparatorActive] = activeColor;
-
-    ImVec4 textColor(0.0f, 0.0f, 0.0f, 1.0f);
-    style.Colors[ImGuiCol_Text] = textColor;
-
-    commonStyle();
-}
-
-void setNextItemRightAlign(const char* label, float spacing) {
+void setNextItemRightAlign(const char* label, Float spacing) {
     ImGui::AlignTextToFramePadding();
     ImGui::Text(label);
     ImGui::SameLine(spacing);

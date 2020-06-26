@@ -30,7 +30,7 @@
 #include <Magnum/GL/DefaultFramebuffer.h>
 #include <Magnum/GL/Renderer.h>
 
-#include "Themer.h"
+#include "Theme.h"
 
 namespace Oberon { namespace Editor {
 
@@ -40,7 +40,9 @@ ProjectManager::ProjectManager(const Arguments& arguments): Platform::Applicatio
                    .setWindowFlags(Configuration::WindowFlag::Resizable)}
 {
     ImGui::CreateContext();
-    Themer::styleColorsDark();
+
+    Theme::setStyle();
+    Theme::setStyleColor(Theme::Color::Dark);
 
     const Vector2 size = Vector2{windowSize()}/dpiScaling();
 

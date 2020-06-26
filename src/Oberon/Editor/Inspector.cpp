@@ -40,7 +40,7 @@
 #include "CollectionPanel.h"
 #include "FileNode.h"
 #include "ObjectNode.h"
-#include "Themer.h"
+#include "Theme.h"
 
 namespace Oberon { namespace Editor {
 
@@ -185,21 +185,21 @@ void Inspector::showLightHeader(ObjectNode* objectNode, Utility::ConfigurationGr
             featureConfig->setValue("color", color);
         }
 
-        Themer::setNextItemRightAlign("Constant", _spacing);
+        Theme::setNextItemRightAlign("Constant", _spacing);
         Float constant = light->constant();
         if(ImGui::DragFloat("##Light.Contant", &constant, 0.0001f, 0.0f, 0.0f, "%f")) {
             light->setConstant(constant);
             featureConfig->setValue("constant", constant);
         }
 
-        Themer::setNextItemRightAlign("Linear", _spacing);
+        Theme::setNextItemRightAlign("Linear", _spacing);
         Float linear = light->linear();
         if(ImGui::DragFloat("##Light.Linear", &linear, 0.0001f, 0.0f, 0.0f, "%f")) {
             light->setLinear(linear);
             featureConfig->setValue("linear", linear);
         }
 
-        Themer::setNextItemRightAlign("Quadratic", _spacing);
+        Theme::setNextItemRightAlign("Quadratic", _spacing);
         Float quadratic = light->quadratic();
         if(ImGui::DragFloat("##Light.Quadratic", &quadratic, 0.0001f, 0.0f, 0.0f, "%f")) {
             light->setQuadratic(quadratic);
@@ -232,7 +232,7 @@ void Inspector::showMeshHeader(ObjectNode* objectNode, Utility::ConfigurationGro
             std::string primitiveType = "none";
             if(primitiveConfig) primitiveType = primitiveConfig->value("type");
 
-            Themer::setNextItemRightAlign("Type", _spacing);
+            Theme::setNextItemRightAlign("Type", _spacing);
             if(ImGui::BeginCombo("##Mesh.Primitive.Type", snakeCaseToPhrase(primitiveType).c_str())) {
                 const char* primitives[] = {"circle", "cube", "plane", "sphere"};
                 for(const char* type: primitives) {
@@ -262,7 +262,7 @@ void Inspector::showMeshHeader(ObjectNode* objectNode, Utility::ConfigurationGro
                 }
 
                 if(primitiveType == "sphere") {
-                    Themer::setNextItemRightAlign("Rings", _spacing);
+                    Theme::setNextItemRightAlign("Rings", _spacing);
                     Int rings = primitiveConfig->value<Int>("rings");
                     if(ImGui::DragInt("##Mesh.Primitive.Rings", &rings, 1.0f, 2, INT_MAX)) {
                         primitiveConfig->setValue("rings", rings);
@@ -271,7 +271,7 @@ void Inspector::showMeshHeader(ObjectNode* objectNode, Utility::ConfigurationGro
                 }
 
                 if(primitiveType == "circle" || primitiveType == "sphere") {
-                    Themer::setNextItemRightAlign("Segments", _spacing);
+                    Theme::setNextItemRightAlign("Segments", _spacing);
                     Int segments = primitiveConfig->value<Int>("segments");
                     if(ImGui::DragInt("##Mesh.Primitive.Segments", &segments, 1.0f, 3, INT_MAX)) {
                         primitiveConfig->setValue("segments", segments);
@@ -294,7 +294,7 @@ void Inspector::showMeshHeader(ObjectNode* objectNode, Utility::ConfigurationGro
             }
 
             if(primitiveConfig->value("type") != "cube") {
-                Themer::setNextItemRightAlign("Ambient texture", _spacing);
+                Theme::setNextItemRightAlign("Ambient texture", _spacing);
                 std::string ambientTexturePath;
                 if(materialConfig) ambientTexturePath = materialConfig->value("ambient_texture");
                 ImGui::InputText("##Mesh.Material.AmbientTexture", &ambientTexturePath, ImGuiInputTextFlags_ReadOnly);
@@ -328,7 +328,7 @@ void Inspector::showMeshHeader(ObjectNode* objectNode, Utility::ConfigurationGro
             }
 
             if(primitiveConfig->value("type") != "cube") {
-                Themer::setNextItemRightAlign("Diffuse texture", _spacing);
+                Theme::setNextItemRightAlign("Diffuse texture", _spacing);
                 std::string diffuseTexturePath;
                 if(materialConfig) diffuseTexturePath = materialConfig->value("diffuse_texture");
                 ImGui::InputText("##Mesh.Material.DiffuseTexture", &diffuseTexturePath, ImGuiInputTextFlags_ReadOnly);
@@ -351,7 +351,7 @@ void Inspector::showMeshHeader(ObjectNode* objectNode, Utility::ConfigurationGro
                     ImGui::EndDragDropTarget();
                 }
 
-                Themer::setNextItemRightAlign("Normal texture", _spacing);
+                Theme::setNextItemRightAlign("Normal texture", _spacing);
                 std::string normalTexturePath;
                 if(materialConfig) normalTexturePath = materialConfig->value("normal_texture");
                 ImGui::InputText("##Mesh.Material.NormalTexture", &normalTexturePath, ImGuiInputTextFlags_ReadOnly);
@@ -385,7 +385,7 @@ void Inspector::showMeshHeader(ObjectNode* objectNode, Utility::ConfigurationGro
             }
 
             if(primitiveConfig->value("type") != "cube") {
-                Themer::setNextItemRightAlign("Specular texture", _spacing);
+                Theme::setNextItemRightAlign("Specular texture", _spacing);
                 std::string specularTexturePath;
                 if(materialConfig) specularTexturePath = materialConfig->value("specular_texture");
                 ImGui::InputText("##Mesh.Material.SpecularTexture", &specularTexturePath, ImGuiInputTextFlags_ReadOnly);
@@ -409,7 +409,7 @@ void Inspector::showMeshHeader(ObjectNode* objectNode, Utility::ConfigurationGro
                 }
             }
 
-            Themer::setNextItemRightAlign("Shininess", _spacing);
+            Theme::setNextItemRightAlign("Shininess", _spacing);
             Float shininess = mesh->shininess();
             if(ImGui::DragFloat("##Mesh.Material.Shininess", &shininess, 0.1f, 1.0f, FLT_MAX)) {
                 if(!materialConfig) materialConfig = featureConfig->addGroup("material");
