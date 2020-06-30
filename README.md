@@ -11,9 +11,9 @@ This project requires the following libraries and tools to be built:
 
 - C++ compiler with C++11 support
 - CMake >=3.4
-- Corrade >=2020.0a
-- Magnum >=2020.0a
-- Magnum Plugins >=2020.0a
-- Magnum Integration >=2020.0a built with ImGui (docking branch)
+- Corrade 2020.06
+- Magnum 2020.06
+- Magnum Plugins 2020.06
+- Magnum Integration 2020.06 built with ImGui (docking branch)
 - LibZip
 - PhysicsFS
