@@ -25,7 +25,6 @@
 #include "PropertiesPanel.h"
 
 #include <imgui.h>
-#include <misc/cpp/imgui_stdlib.h>
 #include <Corrade/Utility/Directory.h>
 #include <Magnum/Math/ConfigurationValue.h>
 
@@ -50,21 +49,16 @@ void PropertiesPanel::newFrame() {
         return;
     }
 
-    const Float spacing = ImGui::GetWindowWidth()/2;
-
-    Theme::setNextItemRightAlign("Name", spacing);
     std::string name = _configuration.value("name");
-    if(ImGui::InputText("##Project.Name", &name))
+    if(Theme::inputText("Name", "##Project.Name", name))
         _configuration.setValue("name", name);
 
-    Theme::setNextItemRightAlign("Window size", spacing);
     Vector2i windowSize = _configuration.value<Vector2i>("window_size");
-    if(ImGui::DragInt2("##Project.WindowSize", windowSize.data()))
+    if(Theme::dragInt2("Window size", "##Project.WindowSize", windowSize))
         _configuration.setValue<Vector2i>("window_size", windowSize);
 
-    Theme::setNextItemRightAlign("Main collection", spacing);
     std::string mainCollection = _configuration.value("main_collection");
-    if(ImGui::InputText("##Project.MainCollection", &mainCollection))
+    if(Theme::inputText("Main collection", "##Project.MainCollection", mainCollection))
         _configuration.setValue("main_collection", mainCollection);
 
     ImGui::End();

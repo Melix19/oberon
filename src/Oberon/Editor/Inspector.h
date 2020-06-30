@@ -52,7 +52,6 @@ class Inspector {
         Importer& _importer;
 
         CollectionPanel* _panel{nullptr};
-        Float _spacing;
 };
 
 }}

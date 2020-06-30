@@ -24,6 +24,7 @@
 
 #pragma once
 
+#include <string>
 #include <Oberon/Oberon.h>
 
 namespace Oberon { namespace Editor {
@@ -37,6 +38,17 @@ enum class Color: UnsignedByte {
 
 void setStyle();
 void setStyleColor(Color color);
-void setNextItemRightAlign(const char* label, Float spacing);
+
+bool inputText(const std::string& label, const std::string& id, std::string& text);
+
+bool dragFloat(const std::string& label, const std::string& id, Float& value, Float speed = 1.0f, Float min = 0.0f, Float max = 0.0f, const std::string& format = "%.3f");
+bool dragFloat3(const std::string& label, const std::string& id, Vector3& value, Float speed = 1.0f, Float min = 0.0f, Float max = 0.0f, const std::string& format = "%.3f");
+
+bool colorEdit4(const std::string& label, const std::string& id, Color4& value);
+
+bool dragInt(const std::string& label, const std::string& id, Int& value, Float speed = 1.0f, Int min = 0, Int max = 0, const std::string& format = "%d");
+bool dragInt2(const std::string& label, const std::string& id, Vector2i& value, Float speed = 1.0f, Int min = 0, Int max = 0, const std::string& format = "%d");
+
+bool beginCombo(const std::string& label, const std::string& id, const std::string& value);
 
 }}}

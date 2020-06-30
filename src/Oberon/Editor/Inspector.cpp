@@ -27,7 +27,6 @@
 #include <algorithm>
 #include <climits>
 #include <imgui.h>
-#include <misc/cpp/imgui_stdlib.h>
 #include <Corrade/Containers/Array.h>
 #include <Corrade/Utility/ConfigurationGroup.h>
 #include <Corrade/Utility/Directory.h>
@@ -81,9 +80,6 @@ void Inspector::newFrame() {
         ImGui::End();
         return;
     }
-
-    /* Calculate spacing for the inputs in the headers */
-    _spacing = ImGui::GetWindowWidth()/2;
 
     /* Transformation header */
     showTransformationHeader(objectNode);
@@ -140,19 +136,15 @@ void Inspector::newFrame() {
 void Inspector::showTransformationHeader(ObjectNode* objectNode) {
     if(ImGui::CollapsingHeader("Transformation", ImGuiTreeNodeFlags_DefaultOpen)) {
         /* Translation */
-        ImGui::Text("Translation");
-        ImGui::SetNextItemWidth(-1);
         Vector3 translation = objectNode->object()->translation();
-        if(ImGui::DragFloat3("##Transformation.Translation", translation.data(), 0.005f)) {
+        if(Theme::dragFloat3("Translation", "Transformation.Translation", translation, 0.005f)) {
             objectNode->object()->setTranslation(translation);
             objectNode->objectConfig()->setValue("transformation", objectNode->object()->transformation());
         }
 
         /* Rotation (degrees) */
-        ImGui::Text("Rotation");
-        ImGui::SetNextItemWidth(-1);
         Vector3 rotationDegree = objectNode->rotationDegree();
-        if(ImGui::DragFloat3("##Transformation.Rotation", rotationDegree.data(), 0.1f)) {
+        if(Theme::dragFloat3("Rotation", "Transformation.Rotation", rotationDegree, 0.1f)) {
             objectNode->object()->setRotation(
                 Quaternion::rotation(Rad{Deg{rotationDegree.z()}}, Vector3::zAxis())*
                 Quaternion::rotation(Rad{Deg{rotationDegree.y()}}, Vector3::yAxis())*
@@ -162,10 +154,8 @@ void Inspector::showTransformationHeader(ObjectNode* objectNode) {
         }
 
         /* Scaling */
-        ImGui::Text("Scaling");
-        ImGui::SetNextItemWidth(-1);
         Vector3 scaling = objectNode->object()->scaling();
-        if(ImGui::DragFloat3("##Transformation.Scaling", scaling.data(), 0.002f)) {
+        if(Theme::dragFloat3("Scaling", "Transformation.Scaling", scaling, 0.002f)) {
             objectNode->object()->setScaling(scaling);
             objectNode->objectConfig()->setValue("transformation", objectNode->object()->transformation());
         }
@@ -177,31 +167,26 @@ void Inspector::showLightHeader(ObjectNode* objectNode, Utility::ConfigurationGr
     bool headerIsOpen = true;
 
     if(ImGui::CollapsingHeader("Light", &headerIsOpen, ImGuiTreeNodeFlags_DefaultOpen)) {
-        ImGui::Text("Color");
-        ImGui::SetNextItemWidth(-1);
         Color4 color = light->color();
-        if(ImGui::ColorEdit4("##Light.Color", color.data())) {
+        if(Theme::colorEdit4("Color", "##Light.Color", color)) {
             light->setColor(color);
             featureConfig->setValue("color", color);
         }
 
-        Theme::setNextItemRightAlign("Constant", _spacing);
         Float constant = light->constant();
-        if(ImGui::DragFloat("##Light.Contant", &constant, 0.0001f, 0.0f, 0.0f, "%f")) {
+        if(Theme::dragFloat("Contant", "Light.Contant", constant, 0.0001f, 0.0f, 0.0f, "%f")) {
             light->setConstant(constant);
             featureConfig->setValue("constant", constant);
         }
 
-        Theme::setNextItemRightAlign("Linear", _spacing);
         Float linear = light->linear();
-        if(ImGui::DragFloat("##Light.Linear", &linear, 0.0001f, 0.0f, 0.0f, "%f")) {
+        if(Theme::dragFloat("Linear", "Light.Linear", linear, 0.0001f, 0.0f, 0.0f, "%f")) {
             light->setLinear(linear);
             featureConfig->setValue("linear", linear);
         }
 
-        Theme::setNextItemRightAlign("Quadratic", _spacing);
         Float quadratic = light->quadratic();
-        if(ImGui::DragFloat("##Light.Quadratic", &quadratic, 0.0001f, 0.0f, 0.0f, "%f")) {
+        if(Theme::dragFloat("Quadratic", "Light.Quadratic", quadratic, 0.0001f, 0.0f, 0.0f, "%f")) {
             light->setQuadratic(quadratic);
             featureConfig->setValue("quadratic", quadratic);
         }
@@ -232,8 +217,7 @@ void Inspector::showMeshHeader(ObjectNode* objectNode, Utility::ConfigurationGro
             std::string primitiveType = "none";
             if(primitiveConfig) primitiveType = primitiveConfig->value("type");
 
-            Theme::setNextItemRightAlign("Type", _spacing);
-            if(ImGui::BeginCombo("##Mesh.Primitive.Type", snakeCaseToPhrase(primitiveType).c_str())) {
+            if(Theme::beginCombo("Type", "##Mesh.Primitive.Type", snakeCaseToPhrase(primitiveType))) {
                 const char* primitives[] = {"circle", "cube", "plane", "sphere"};
                 for(const char* type: primitives) {
                     bool isSelected = false;
@@ -253,27 +237,23 @@ void Inspector::showMeshHeader(ObjectNode* objectNode, Utility::ConfigurationGro
             }
 
             if(primitiveConfig) {
-                ImGui::Text("Size");
-                ImGui::SetNextItemWidth(-1);
                 Vector3 size = mesh->size();
-                if(ImGui::DragFloat3("##Mesh.Primitive.Size", size.data(), 0.002f)) {
+                if(Theme::dragFloat3("Size", "##Mesh.Primitive.Size", size, 0.002f)) {
                     mesh->setSize(size);
                     primitiveConfig->setValue("size", size);
                 }
 
                 if(primitiveType == "sphere") {
-                    Theme::setNextItemRightAlign("Rings", _spacing);
                     Int rings = primitiveConfig->value<Int>("rings");
-                    if(ImGui::DragInt("##Mesh.Primitive.Rings", &rings, 1.0f, 2, INT_MAX)) {
+                    if(Theme::dragInt("Rings", "##Mesh.Primitive.Rings", rings, 1.0f, 2, INT_MAX)) {
                         primitiveConfig->setValue("rings", rings);
                         reloadPrimitive = true;
                     }
                 }
 
                 if(primitiveType == "circle" || primitiveType == "sphere") {
-                    Theme::setNextItemRightAlign("Segments", _spacing);
                     Int segments = primitiveConfig->value<Int>("segments");
-                    if(ImGui::DragInt("##Mesh.Primitive.Segments", &segments, 1.0f, 3, INT_MAX)) {
+                    if(Theme::dragInt("Segments", "##Mesh.Primitive.Segments", segments, 1.0f, 3, INT_MAX)) {
                         primitiveConfig->setValue("segments", segments);
                         reloadPrimitive = true;
                     }
@@ -284,20 +264,17 @@ void Inspector::showMeshHeader(ObjectNode* objectNode, Utility::ConfigurationGro
         if(primitiveConfig && ImGui::TreeNodeEx("Material", nodeFlags)) {
             Utility::ConfigurationGroup* materialConfig = featureConfig->group("material");
 
-            ImGui::Text("Ambient color");
-            ImGui::SetNextItemWidth(-1);
             Color4 ambientColor = mesh->ambientColor();
-            if(ImGui::ColorEdit4("##Mesh.Material.AmbientColor", ambientColor.data())) {
+            if(Theme::colorEdit4("Ambient color", "##Mesh.Material.AmbientColor", ambientColor)) {
                 if(!materialConfig) materialConfig = featureConfig->addGroup("material");
                 materialConfig->setValue("ambient_color", ambientColor);
                 mesh->setAmbientColor(ambientColor);
             }
 
             if(primitiveConfig->value("type") != "cube") {
-                Theme::setNextItemRightAlign("Ambient texture", _spacing);
                 std::string ambientTexturePath;
                 if(materialConfig) ambientTexturePath = materialConfig->value("ambient_texture");
-                ImGui::InputText("##Mesh.Material.AmbientTexture", &ambientTexturePath, ImGuiInputTextFlags_ReadOnly);
+                Theme::inputText("Ambient texture", "##Mesh.Material.AmbientTexture", ambientTexturePath);
                 if(ImGui::BeginDragDropTarget()) {
                     if(const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("FileNode.Image")) {
                         IM_ASSERT(payload->DataSize == sizeof(FileNode*));
@@ -318,20 +295,17 @@ void Inspector::showMeshHeader(ObjectNode* objectNode, Utility::ConfigurationGro
                 }
             }
 
-            ImGui::Text("Diffuse color");
-            ImGui::SetNextItemWidth(-1);
             Color4 diffuseColor = mesh->diffuseColor();
-            if(ImGui::ColorEdit4("##Mesh.Material.DiffuseColor", diffuseColor.data())) {
+            if(Theme::colorEdit4("Diffuse color", "##Mesh.Material.DiffuseColor", diffuseColor)) {
                 if(!materialConfig) materialConfig = featureConfig->addGroup("material");
                 materialConfig->setValue("diffuse_color", diffuseColor);
                 mesh->setDiffuseColor(diffuseColor);
             }
 
             if(primitiveConfig->value("type") != "cube") {
-                Theme::setNextItemRightAlign("Diffuse texture", _spacing);
                 std::string diffuseTexturePath;
                 if(materialConfig) diffuseTexturePath = materialConfig->value("diffuse_texture");
-                ImGui::InputText("##Mesh.Material.DiffuseTexture", &diffuseTexturePath, ImGuiInputTextFlags_ReadOnly);
+                Theme::inputText("Diffuse texture", "##Mesh.Material.DiffuseTexture", diffuseTexturePath);
                 if(ImGui::BeginDragDropTarget()) {
                     if(const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("FileNode.Image")) {
                         IM_ASSERT(payload->DataSize == sizeof(FileNode*));
@@ -351,10 +325,9 @@ void Inspector::showMeshHeader(ObjectNode* objectNode, Utility::ConfigurationGro
                     ImGui::EndDragDropTarget();
                 }
 
-                Theme::setNextItemRightAlign("Normal texture", _spacing);
                 std::string normalTexturePath;
                 if(materialConfig) normalTexturePath = materialConfig->value("normal_texture");
-                ImGui::InputText("##Mesh.Material.NormalTexture", &normalTexturePath, ImGuiInputTextFlags_ReadOnly);
+                Theme::inputText("Normal texture", "##Mesh.Material.NormalTexture", normalTexturePath);
                 if(ImGui::BeginDragDropTarget()) {
                     if(const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("FileNode.Image")) {
                         IM_ASSERT(payload->DataSize == sizeof(FileNode*));
@@ -375,20 +348,17 @@ void Inspector::showMeshHeader(ObjectNode* objectNode, Utility::ConfigurationGro
                 }
             }
 
-            ImGui::Text("Specular color");
-            ImGui::SetNextItemWidth(-1);
             Color4 specularColor = mesh->specularColor();
-            if(ImGui::ColorEdit4("##Mesh.Material.SpecularColor", specularColor.data())) {
+            if(Theme::colorEdit4("Specular color", "##Mesh.Material.SpecularColor", specularColor)) {
                 if(!materialConfig) materialConfig = featureConfig->addGroup("material");
                 materialConfig->setValue("specular_color", specularColor);
                 mesh->setSpecularColor(specularColor);
             }
 
             if(primitiveConfig->value("type") != "cube") {
-                Theme::setNextItemRightAlign("Specular texture", _spacing);
                 std::string specularTexturePath;
                 if(materialConfig) specularTexturePath = materialConfig->value("specular_texture");
-                ImGui::InputText("##Mesh.Material.SpecularTexture", &specularTexturePath, ImGuiInputTextFlags_ReadOnly);
+                Theme::inputText("Specular texture", "##Mesh.Material.SpecularTexture", specularTexturePath);
                 if(ImGui::BeginDragDropTarget()) {
                     if(const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("FileNode.Image")) {
                         IM_ASSERT(payload->DataSize == sizeof(FileNode*));
@@ -409,9 +379,8 @@ void Inspector::showMeshHeader(ObjectNode* objectNode, Utility::ConfigurationGro
                 }
             }
 
-            Theme::setNextItemRightAlign("Shininess", _spacing);
             Float shininess = mesh->shininess();
-            if(ImGui::DragFloat("##Mesh.Material.Shininess", &shininess, 0.1f, 1.0f, FLT_MAX)) {
+            if(Theme::dragFloat("Shininess", "Mesh.Material.Shininess", shininess, 0.1f, 1.0f, FLT_MAX)) {
                 if(!materialConfig) materialConfig = featureConfig->addGroup("material");
                 materialConfig->setValue("shininess", shininess);
                 mesh->setShininess(shininess);

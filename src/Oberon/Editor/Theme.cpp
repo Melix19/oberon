@@ -25,10 +25,24 @@
 #include "Theme.h"
 
 #include <imgui.h>
+#include <misc/cpp/imgui_stdlib.h>
+#include <Magnum/Math/Color.h>
+#include <Magnum/Math/Vector.h>
 
 namespace Oberon { namespace Editor {
 
 namespace Theme {
+
+namespace {
+
+void setNextItemRightAlign(const std::string& label, Float spacing) {
+    ImGui::AlignTextToFramePadding();
+    ImGui::Text(label.c_str());
+    ImGui::SameLine(spacing);
+    ImGui::SetNextItemWidth(-1);
+}
+
+}
 
 void setStyle() {
     ImGuiStyle& style = ImGui::GetStyle();
@@ -101,11 +115,46 @@ void setStyleColor(Color color) {
     style.Colors[ImGuiCol_Text] = textColor;
 }
 
-void setNextItemRightAlign(const char* label, Float spacing) {
-    ImGui::AlignTextToFramePadding();
-    ImGui::Text(label);
-    ImGui::SameLine(spacing);
+bool inputText(const std::string& label, const std::string& id, std::string& text) {
+    const Float spacing = ImGui::GetWindowWidth()/2;
+    setNextItemRightAlign(label, spacing);
+    return ImGui::InputText(("##" + id).c_str(), &text);
+}
+
+bool dragFloat(const std::string& label, const std::string& id, Float& value, Float speed, Float min, Float max, const std::string& format) {
+    const Float spacing = ImGui::GetWindowWidth()/2;
+    setNextItemRightAlign(label, spacing);
+    return ImGui::DragFloat(("##" + id).c_str(), &value, speed, min, max, format.c_str());
+}
+
+bool dragFloat3(const std::string& label, const std::string& id, Vector3& value, Float speed, Float min, Float max, const std::string& format) {
+    ImGui::Text(label.c_str());
     ImGui::SetNextItemWidth(-1);
+    return ImGui::DragFloat3(("##" + id).c_str(), value.data(), speed, min, max, format.c_str());
+}
+
+bool colorEdit4(const std::string& label, const std::string& id, Color4& value) {
+    ImGui::Text(label.c_str());
+    ImGui::SetNextItemWidth(-1);
+    return ImGui::ColorEdit4(("##" + id).c_str(), value.data());
+}
+
+bool dragInt(const std::string& label, const std::string& id, Int& value, Float speed, Int min, Int max, const std::string& format) {
+    const Float spacing = ImGui::GetWindowWidth()/2;
+    setNextItemRightAlign(label, spacing);
+    return ImGui::DragInt(("##" + id).c_str(), &value, speed, min, max, format.c_str());
+}
+
+bool dragInt2(const std::string& label, const std::string& id, Vector2i& value, Float speed, Int min, Int max, const std::string& format) {
+    const Float spacing = ImGui::GetWindowWidth()/2;
+    setNextItemRightAlign(label, spacing);
+    return ImGui::DragInt2(("##" + id).c_str(), value.data(), speed, min, max, format.c_str());
+}
+
+bool beginCombo(const std::string& label, const std::string& id, const std::string& value) {
+    const Float spacing = ImGui::GetWindowWidth()/2;
+    setNextItemRightAlign(label, spacing);
+    return ImGui::BeginCombo(("##" + id).c_str(), value.c_str());
 }
 
 }}}
