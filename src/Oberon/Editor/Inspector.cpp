@@ -174,7 +174,7 @@ void Inspector::showLightHeader(ObjectNode* objectNode, Utility::ConfigurationGr
         }
 
         Float constant = light->constant();
-        if(Theme::dragFloat("Contant", "Light.Contant", constant, 0.0001f, 0.0f, 0.0f, "%f")) {
+        if(Theme::dragFloat("Constant", "Light.Constant", constant, 0.0001f, 0.0f, 0.0f, "%f")) {
             light->setConstant(constant);
             featureConfig->setValue("constant", constant);
         }
