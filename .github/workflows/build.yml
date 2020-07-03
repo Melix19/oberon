@@ -14,7 +14,7 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install libphysfs-dev libsdl2-dev libzip-dev
+          sudo apt-get install libphysfs-dev libsdl2-dev libzip-dev ninja-build
 
           cd $GITHUB_WORKSPACE
           git clone --branch v2020.06 --depth 1 https://github.com/mosra/corrade.git
@@ -24,7 +24,8 @@ jobs:
             -DCMAKE_BUILD_TYPE=Release \
             -DBUILD_STATIC=ON \
             -DWITH_INTERCONNECT=OFF \
-            -DWITH_TESTSUITE=OFF
+            -DWITH_TESTSUITE=OFF \
+            -G Ninja
           cmake --build . --target install
 
           cd $GITHUB_WORKSPACE
@@ -37,7 +38,8 @@ jobs:
             -DWITH_DEBUGTOOLS=OFF \
             -DWITH_TEXT=OFF \
             -DWITH_TEXTURETOOLS=OFF \
-            -DWITH_SDL2APPLICATION=ON
+            -DWITH_SDL2APPLICATION=ON \
+            -G Ninja
           cmake --build . --target install
 
           cd $GITHUB_WORKSPACE
@@ -46,7 +48,8 @@ jobs:
           cmake .. \
             -DCMAKE_INSTALL_PREFIX=$GITHUB_WORKSPACE/deps \
             -DCMAKE_BUILD_TYPE=Release \
-            -DWITH_STBIMAGEIMPORTER=ON
+            -DWITH_STBIMAGEIMPORTER=ON \
+            -G Ninja
           cmake --build . --target install
 
           cd $GITHUB_WORKSPACE
@@ -58,7 +61,8 @@ jobs:
             -DCMAKE_BUILD_TYPE=Release \
             -DBUILD_STATIC=ON \
             -DWITH_IMGUI=ON \
-            -DIMGUI_DIR=$GITHUB_WORKSPACE/imgui
+            -DIMGUI_DIR=$GITHUB_WORKSPACE/imgui \
+            -G Ninja
           cmake --build . --target install
 
       - name: Configure
@@ -67,7 +71,8 @@ jobs:
           cmake .. \
             -DCMAKE_PREFIX_PATH=$GITHUB_WORKSPACE/deps \
             -DCMAKE_BUILD_TYPE=Release \
-            -DIMGUI_DIR=$GITHUB_WORKSPACE/imgui
+            -DIMGUI_DIR=$GITHUB_WORKSPACE/imgui \
+            -G Ninja
 
       - name: Build
         run: |
@@ -91,7 +96,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          brew install physfs sdl2 libzip
+          brew install physfs sdl2 libzip ninja
 
           cd $GITHUB_WORKSPACE
           git clone --branch v2020.06 --depth 1 https://github.com/mosra/corrade.git
@@ -101,7 +106,8 @@ jobs:
             -DCMAKE_BUILD_TYPE=Release \
             -DBUILD_STATIC=ON \
             -DWITH_INTERCONNECT=OFF \
-            -DWITH_TESTSUITE=OFF
+            -DWITH_TESTSUITE=OFF \
+            -G Ninja
           cmake --build . --target install
 
           cd $GITHUB_WORKSPACE
@@ -114,7 +120,8 @@ jobs:
             -DWITH_DEBUGTOOLS=OFF \
             -DWITH_TEXT=OFF \
             -DWITH_TEXTURETOOLS=OFF \
-            -DWITH_SDL2APPLICATION=ON
+            -DWITH_SDL2APPLICATION=ON \
+            -G Ninja
           cmake --build . --target install
 
           cd $GITHUB_WORKSPACE
@@ -123,7 +130,8 @@ jobs:
           cmake .. \
             -DCMAKE_INSTALL_PREFIX=$GITHUB_WORKSPACE/deps \
             -DCMAKE_BUILD_TYPE=Release \
-            -DWITH_STBIMAGEIMPORTER=ON
+            -DWITH_STBIMAGEIMPORTER=ON \
+            -G Ninja
           cmake --build . --target install
 
           cd $GITHUB_WORKSPACE
@@ -135,7 +143,8 @@ jobs:
             -DCMAKE_BUILD_TYPE=Release \
             -DBUILD_STATIC=ON \
             -DWITH_IMGUI=ON \
-            -DIMGUI_DIR=$GITHUB_WORKSPACE/imgui
+            -DIMGUI_DIR=$GITHUB_WORKSPACE/imgui \
+            -G Ninja
           cmake --build . --target install
 
       - name: Configure
@@ -144,7 +153,8 @@ jobs:
           cmake .. \
             -DCMAKE_PREFIX_PATH=$GITHUB_WORKSPACE/deps \
             -DCMAKE_BUILD_TYPE=Release \
-            -DIMGUI_DIR=$GITHUB_WORKSPACE/imgui
+            -DIMGUI_DIR=$GITHUB_WORKSPACE/imgui \
+            -G Ninja
 
       - name: Build
         run: |
