@@ -45,7 +45,7 @@ class Importer;
 class Light;
 typedef SceneGraph::FeatureGroup3D<Light> LightGroup;
 
-class Mesh;
+class MeshRenderer;
 
 class SceneShader;
 

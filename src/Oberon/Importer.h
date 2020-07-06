@@ -41,15 +41,15 @@ class Importer {
         SceneGraph::AbstractFeature3D* loadFeature(Utility::ConfigurationGroup* featureConfig, Object3D* object, GameData& gameData);
         void resetObject(Object3D* object, Utility::ConfigurationGroup* objectConfig);
 
-        void updateMeshPrimitive(Mesh& mesh, Utility::ConfigurationGroup* primitiveConfig);
+        void generateMeshPrimitive(MeshRenderer& meshRenderer, Utility::ConfigurationGroup* meshConfiguration);
 
-        Resource<GL::AbstractShaderProgram, SceneShader> createShader(Mesh& mesh, GameData& gameData, bool useObjectId);
+        Resource<GL::AbstractShaderProgram, SceneShader> createShader(MeshRenderer& meshRenderer, GameData& gameData, bool useObjectId);
         void createShaders(GameData& gameData, bool useObjectId = false);
 
         Resource<GL::Texture2D> loadTexture(const std::string& resourcePath, Containers::ArrayView<const char> data);
 
     private:
-        std::pair<std::string, SceneShader::Flags> calculateShaderKey(Mesh& mesh, bool useObjectId);
+        std::pair<std::string, SceneShader::Flags> calculateShaderKey(MeshRenderer& meshRenderer, bool useObjectId);
 
     private:
         OberonResourceManager& _resourceManager;

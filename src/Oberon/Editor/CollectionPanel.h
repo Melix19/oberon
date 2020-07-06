@@ -76,7 +76,7 @@ class CollectionPanel: public AbstractPanel {
 
         std::vector<ObjectNode*>& selectedNodes() { return _selectedNodes; }
 
-        void updateShader(Mesh& mesh);
+        void updateShader(MeshRenderer& meshRenderer);
         void recreateShaders();
         void resetLightsId();
 

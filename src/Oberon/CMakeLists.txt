@@ -32,6 +32,8 @@ corrade_add_resource(Oberon_RCS resources.conf)
 
 set(Oberon_SRCS
     Importer.cpp
+    MeshPrimitives.cpp
+    MeshRenderer.cpp
     SceneShader.cpp
 
     ${Oberon_RCS})
@@ -39,7 +41,8 @@ set(Oberon_SRCS
 set(Oberon_HEADERS
     Importer.h
     Light.h
-    Mesh.h
+    MeshPrimitives.h
+    MeshRenderer.h
     Oberon.h
     SceneShader.h)
 

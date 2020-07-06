@@ -22,36 +22,37 @@
     SOFTWARE.
 */
 
-#pragma once
+#include "MeshRenderer.h"
 
-#include <string>
+#include <Magnum/GL/Mesh.h>
+#include <Magnum/GL/Texture.h>
+#include <Magnum/SceneGraph/Camera.h>
 
-#include "Editor.h"
+#include "SceneShader.h"
 
-namespace Oberon { namespace Editor {
+namespace Oberon {
 
-class Inspector {
-    public:
-        Inspector(const std::string& projectPath, Importer& importer): _projectPath(projectPath), _importer(importer) {}
-        void newFrame();
+MeshRenderer::MeshRenderer(SceneGraph::AbstractObject3D& object, SceneGraph::DrawableGroup3D& drawables):
+    SceneGraph::Drawable3D{object, &drawables} {}
 
-        Inspector& setPanel(CollectionPanel* panel) {
-            _panel = panel;
-            return *this;
-        }
+void MeshRenderer::draw(const Matrix4& transformationMatrix, SceneGraph::Camera3D& camera) {
+    if(!_mesh || !_shader) return;
 
-    private:
-        void showTransformationHeader(ObjectNode* objectNode);
-        void showLightHeader(ObjectNode* objectNode, Utility::ConfigurationGroup* featureConfig);
-        void showMeshRendererHeader(ObjectNode* objectNode, Utility::ConfigurationGroup* featureConfig);
+    _shader->setTransformationMatrix(transformationMatrix)
+        .setNormalMatrix(transformationMatrix.normalMatrix())
+        .setProjectionMatrix(camera.projectionMatrix())
+        .setAmbientColor(_ambientColor)
+        .setDiffuseColor(_diffuseColor)
+        .setSpecularColor(_specularColor)
+        .setShininess(_shininess);
 
-        void addResource(const std::string& resourcePath, const std::string& resourceType);
+    if(_id) _shader->setObjectId(_id);
+    if(_ambientTexture) _shader->bindAmbientTexture(*_ambientTexture);
+    if(_diffuseTexture) _shader->bindDiffuseTexture(*_diffuseTexture);
+    if(_normalTexture) _shader->bindNormalTexture(*_normalTexture);
+    if(_specularTexture) _shader->bindSpecularTexture(*_specularTexture);
 
-    private:
-        std::string _projectPath;
-        Importer& _importer;
+    _shader->draw(*_mesh);
+}
 
-        CollectionPanel* _panel{nullptr};
-};
-
-}}
+}

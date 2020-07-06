@@ -34,7 +34,7 @@
 #include <Magnum/Math/ConfigurationValue.h>
 #include <Oberon/Importer.h>
 #include <Oberon/Light.h>
-#include <Oberon/Mesh.h>
+#include <Oberon/MeshRenderer.h>
 
 #include "CollectionPanel.h"
 #include "FileNode.h"
@@ -89,7 +89,7 @@ void Inspector::newFrame() {
     for(Utility::ConfigurationGroup* featureConfig: objectNode->objectConfig()->groups("feature")) {
         const std::string type = featureConfig->value("type");
         if(type == "light") showLightHeader(objectNode, featureConfig);
-        else if(type == "mesh") showMeshHeader(objectNode, featureConfig);
+        else if(type == "mesh_renderer") showMeshRendererHeader(objectNode, featureConfig);
 
         ImGui::Dummy(ImVec2(0.0f, 5.0f));
     }
@@ -106,7 +106,7 @@ void Inspector::newFrame() {
 
     /* Features popup */
     if(ImGui::BeginPopup("FeaturesPopup")) {
-        const char* features[] = {"light", "mesh"};
+        const char* features[] = {"light", "mesh_renderer"};
         for(const char* feature: features) {
             if(ImGui::Selectable(snakeCaseToPhrase(feature).c_str())) {
                 bool featureAlreadyPresent = false;
@@ -168,7 +168,7 @@ void Inspector::showLightHeader(ObjectNode* objectNode, Utility::ConfigurationGr
 
     if(ImGui::CollapsingHeader("Light", &headerIsOpen, ImGuiTreeNodeFlags_DefaultOpen)) {
         Color4 color = light->color();
-        if(Theme::colorEdit4("Color", "##Light.Color", color)) {
+        if(Theme::colorEdit4("Color", "Light.Color", color)) {
             light->setColor(color);
             featureConfig->setValue("color", color);
         }
@@ -203,32 +203,62 @@ void Inspector::showLightHeader(ObjectNode* objectNode, Utility::ConfigurationGr
     }
 }
 
-void Inspector::showMeshHeader(ObjectNode* objectNode, Utility::ConfigurationGroup* featureConfig) {
-    Mesh* mesh = getObjectFeature<Mesh>(objectNode->object());
+void Inspector::showMeshRendererHeader(ObjectNode* objectNode, Utility::ConfigurationGroup* featureConfig) {
+    MeshRenderer* meshRenderer = getObjectFeature<MeshRenderer>(objectNode->object());
     bool headerIsOpen = true;
 
-    if(ImGui::CollapsingHeader("Mesh", &headerIsOpen, ImGuiTreeNodeFlags_DefaultOpen)) {
-        Utility::ConfigurationGroup* primitiveConfig = featureConfig->group("primitive");
+    if(ImGui::CollapsingHeader("Mesh renderer", &headerIsOpen, ImGuiTreeNodeFlags_DefaultOpen)) {
+        Utility::ConfigurationGroup* meshConfiguration = featureConfig->group("mesh");
         const ImGuiTreeNodeFlags nodeFlags = ImGuiTreeNodeFlags_FramePadding |
             ImGuiTreeNodeFlags_NoTreePushOnOpen | ImGuiTreeNodeFlags_SpanFullWidth;
-        bool reloadPrimitive = false;
 
-        if(ImGui::TreeNodeEx("Primitive", nodeFlags)) {
-            std::string primitiveType = "none";
-            if(primitiveConfig) primitiveType = primitiveConfig->value("type");
+        if(ImGui::TreeNodeEx("Mesh", nodeFlags)) {
+            std::string primitiveType = meshConfiguration ? meshConfiguration->value("type") : "none";
+            bool updatePrimitive = false;
 
-            if(Theme::beginCombo("Type", "##Mesh.Primitive.Type", snakeCaseToPhrase(primitiveType))) {
-                const char* primitives[] = {"circle", "cube", "plane", "sphere"};
+            if(Theme::beginCombo("Type", "MeshRenderer.Mesh.Type", snakeCaseToPhrase(primitiveType))) {
+                const char* primitives[] = {"capsule", "circle", "cone", "cylinder", "plane", "sphere"};
                 for(const char* type: primitives) {
                     bool isSelected = false;
 
                     if(ImGui::Selectable(snakeCaseToPhrase(type).c_str(), isSelected)) {
-                        /* Recreate the group to remove superfluous values */
-                        featureConfig->removeGroup("primitive");
-                        primitiveConfig = featureConfig->addGroup("primitive");
+                        primitiveType = type;
 
-                        primitiveConfig->setValue("type", type);
-                        reloadPrimitive = true;
+                        /* Recreate the group to remove superfluous values */
+                        featureConfig->removeGroup("mesh");
+                        meshConfiguration = featureConfig->addGroup("mesh");
+                        meshConfiguration->setValue("type", primitiveType);
+
+                        if(primitiveType == "capsule") {
+                            meshConfiguration->setValue("radius", 1.0f);
+                            meshConfiguration->setValue("length", 2.0f);
+                            meshConfiguration->setValue("hemisphereRings", 8);
+                            meshConfiguration->setValue("cylinderRings", 4);
+                            meshConfiguration->setValue("segments", 64);
+                        } else if(primitiveType == "circle") {
+                            meshConfiguration->setValue("radius", 1.0f);
+                            meshConfiguration->setValue("segments", 64);
+                        } else if(primitiveType == "cone") {
+                            meshConfiguration->setValue("radius", 1.0f);
+                            meshConfiguration->setValue("length", 2.0f);
+                            meshConfiguration->setValue("rings", 4);
+                            meshConfiguration->setValue("segments", 64);
+                            meshConfiguration->setValue("capEnd", true);
+                        } else if(primitiveType == "cylinder") {
+                            meshConfiguration->setValue("radius", 1.0f);
+                            meshConfiguration->setValue("length", 2.0f);
+                            meshConfiguration->setValue("rings", 4);
+                            meshConfiguration->setValue("segments", 64);
+                            meshConfiguration->setValue("capEnds", true);
+                        } else if(primitiveType == "plane") {
+                            meshConfiguration->setValue("size", Vector2{2.0f});
+                        } else if(primitiveType == "sphere") {
+                            meshConfiguration->setValue("radius", 1.0f);
+                            meshConfiguration->setValue("rings", 32);
+                            meshConfiguration->setValue("segments", 64);
+                        }
+
+                        updatePrimitive = true;
                     }
                     if(isSelected) ImGui::SetItemDefaultFocus();
                 }
@@ -236,98 +266,196 @@ void Inspector::showMeshHeader(ObjectNode* objectNode, Utility::ConfigurationGro
                 ImGui::EndCombo();
             }
 
-            if(primitiveConfig) {
-                Vector3 size = mesh->size();
-                if(Theme::dragFloat3("Size", "##Mesh.Primitive.Size", size, 0.002f)) {
-                    mesh->setSize(size);
-                    primitiveConfig->setValue("size", size);
+            if(primitiveType == "capsule") {
+                Float radius = meshConfiguration->value<Float>("radius");
+                if(Theme::dragFloat("Radius", "MeshRenderer.Mesh.Radius", radius, 0.001f, 0.0f, FLT_MAX)) {
+                    meshConfiguration->setValue("radius", radius);
+                    updatePrimitive = true;
                 }
 
-                if(primitiveType == "sphere") {
-                    Int rings = primitiveConfig->value<Int>("rings");
-                    if(Theme::dragInt("Rings", "##Mesh.Primitive.Rings", rings, 1.0f, 2, INT_MAX)) {
-                        primitiveConfig->setValue("rings", rings);
-                        reloadPrimitive = true;
-                    }
+                Float length = meshConfiguration->value<Float>("length");
+                if(Theme::dragFloat("Length", "MeshRenderer.Mesh.Length", length, 0.001f, 0.0f, FLT_MAX)) {
+                    meshConfiguration->setValue("length", length);
+                    updatePrimitive = true;
                 }
 
-                if(primitiveType == "circle" || primitiveType == "sphere") {
-                    Int segments = primitiveConfig->value<Int>("segments");
-                    if(Theme::dragInt("Segments", "##Mesh.Primitive.Segments", segments, 1.0f, 3, INT_MAX)) {
-                        primitiveConfig->setValue("segments", segments);
-                        reloadPrimitive = true;
-                    }
+                Int hemisphereRings = meshConfiguration->value<Int>("hemisphereRings");
+                if(Theme::dragInt("Hemisphere rings", "MeshRenderer.Mesh.HemisphereRings", hemisphereRings, 1.0f, 1, INT_MAX)) {
+                    meshConfiguration->setValue("hemisphereRings", hemisphereRings);
+                    updatePrimitive = true;
+                }
+
+                Int cylinderRings = meshConfiguration->value<Int>("cylinderRings");
+                if(Theme::dragInt("Cylinder rings", "MeshRenderer.Mesh.CylinderRings", cylinderRings, 1.0f, 1, INT_MAX)) {
+                    meshConfiguration->setValue("cylinderRings", cylinderRings);
+                    updatePrimitive = true;
+                }
+
+                Int segments = meshConfiguration->value<Int>("segments");
+                if(Theme::dragInt("Segments", "MeshRenderer.Mesh.Segments", segments, 1.0f, 3, INT_MAX)) {
+                    meshConfiguration->setValue("segments", segments);
+                    updatePrimitive = true;
+                }
+            } else if(primitiveType == "circle") {
+                Float radius = meshConfiguration->value<Float>("radius");
+                if(Theme::dragFloat("Radius", "MeshRenderer.Mesh.Radius", radius, 0.001f, 0.0f, FLT_MAX)) {
+                    meshConfiguration->setValue("radius", radius);
+                    updatePrimitive = true;
+                }
+
+                Int segments = meshConfiguration->value<Int>("segments");
+                if(Theme::dragInt("Segments", "MeshRenderer.Mesh.Segments", segments, 1.0f, 3, INT_MAX)) {
+                    meshConfiguration->setValue("segments", segments);
+                    updatePrimitive = true;
+                }
+            } else if(primitiveType == "cone") {
+                Float radius = meshConfiguration->value<Float>("radius");
+                if(Theme::dragFloat("Radius", "MeshRenderer.Mesh.Radius", radius, 0.001f, 0.0f, FLT_MAX)) {
+                    meshConfiguration->setValue("radius", radius);
+                    updatePrimitive = true;
+                }
+
+                Float length = meshConfiguration->value<Float>("length");
+                if(Theme::dragFloat("Length", "MeshRenderer.Mesh.Length", length, 0.001f, 0.0f, FLT_MAX)) {
+                    meshConfiguration->setValue("length", length);
+                    updatePrimitive = true;
+                }
+
+                Int rings = meshConfiguration->value<Int>("rings");
+                if(Theme::dragInt("Rings", "MeshRenderer.Mesh.Rings", rings, 1.0f, 1, INT_MAX)) {
+                    meshConfiguration->setValue("rings", rings);
+                    updatePrimitive = true;
+                }
+
+                Int segments = meshConfiguration->value<Int>("segments");
+                if(Theme::dragInt("Segments", "MeshRenderer.Mesh.Segments", segments, 1.0f, 3, INT_MAX)) {
+                    meshConfiguration->setValue("segments", segments);
+                    updatePrimitive = true;
+                }
+
+                bool capEnd = meshConfiguration->value<bool>("capEnd");
+                if(Theme::checkbox("Cap end", "MeshRenderer.Mesh.CapEnd", capEnd)) {
+                    meshConfiguration->setValue("capEnd", capEnd);
+                    updatePrimitive = true;
+                }
+            } else if(primitiveType == "cylinder") {
+                Float radius = meshConfiguration->value<Float>("radius");
+                if(Theme::dragFloat("Radius", "MeshRenderer.Mesh.Radius", radius, 0.001f, 0.0f, FLT_MAX)) {
+                    meshConfiguration->setValue("radius", radius);
+                    updatePrimitive = true;
+                }
+
+                Float length = meshConfiguration->value<Float>("length");
+                if(Theme::dragFloat("Length", "MeshRenderer.Mesh.Length", length, 0.001f, 0.0f, FLT_MAX)) {
+                    meshConfiguration->setValue("length", length);
+                    updatePrimitive = true;
+                }
+
+                Int rings = meshConfiguration->value<Int>("rings");
+                if(Theme::dragInt("Rings", "MeshRenderer.Mesh.Rings", rings, 1.0f, 1, INT_MAX)) {
+                    meshConfiguration->setValue("rings", rings);
+                    updatePrimitive = true;
+                }
+
+                Int segments = meshConfiguration->value<Int>("segments");
+                if(Theme::dragInt("Segments", "MeshRenderer.Mesh.Segments", segments, 1.0f, 3, INT_MAX)) {
+                    meshConfiguration->setValue("segments", segments);
+                    updatePrimitive = true;
+                }
+
+                bool capEnds = meshConfiguration->value<bool>("capEnds");
+                if(Theme::checkbox("Cap ends", "MeshRenderer.Mesh.CapEnds", capEnds)) {
+                    meshConfiguration->setValue("capEnds", capEnds);
+                    updatePrimitive = true;
+                }
+            } else if(primitiveType == "plane") {
+                Vector2 size = meshConfiguration->value<Vector2>("size");
+                if(Theme::dragFloat2("Size", "MeshRenderer.Mesh.Size", size, 0.001f)) {
+                    meshConfiguration->setValue("size", size);
+                    updatePrimitive = true;
+                }
+            } else if(primitiveType == "sphere") {
+                Float radius = meshConfiguration->value<Float>("radius");
+                if(Theme::dragFloat("Radius", "MeshRenderer.Mesh.Radius", radius, 0.001f, 0.0f, FLT_MAX)) {
+                    meshConfiguration->setValue("radius", radius);
+                    updatePrimitive = true;
+                }
+
+                Int rings = meshConfiguration->value<Int>("rings");
+                if(Theme::dragInt("Rings", "MeshRenderer.Mesh.Rings", rings, 1.0f, 2, INT_MAX)) {
+                    meshConfiguration->setValue("rings", rings);
+                    updatePrimitive = true;
+                }
+
+                Int segments = meshConfiguration->value<Int>("segments");
+                if(Theme::dragInt("Segments", "MeshRenderer.Mesh.Segments", segments, 1.0f, 3, INT_MAX)) {
+                    meshConfiguration->setValue("segments", segments);
+                    updatePrimitive = true;
                 }
             }
+
+            if(updatePrimitive) _importer.generateMeshPrimitive(*meshRenderer, meshConfiguration);
         }
 
-        if(primitiveConfig && ImGui::TreeNodeEx("Material", nodeFlags)) {
+        if(meshConfiguration && ImGui::TreeNodeEx("Material", nodeFlags)) {
             Utility::ConfigurationGroup* materialConfig = featureConfig->group("material");
 
-            Color4 ambientColor = mesh->ambientColor();
-            if(Theme::colorEdit4("Ambient color", "##Mesh.Material.AmbientColor", ambientColor)) {
+            Color4 ambientColor = meshRenderer->ambientColor();
+            if(Theme::colorEdit4("Ambient color", "MeshRenderer.Material.AmbientColor", ambientColor)) {
                 if(!materialConfig) materialConfig = featureConfig->addGroup("material");
                 materialConfig->setValue("ambient_color", ambientColor);
-                mesh->setAmbientColor(ambientColor);
+                meshRenderer->setAmbientColor(ambientColor);
             }
 
-            if(primitiveConfig->value("type") != "cube") {
-                std::string ambientTexturePath;
-                if(materialConfig) ambientTexturePath = materialConfig->value("ambient_texture");
-                Theme::inputText("Ambient texture", "##Mesh.Material.AmbientTexture", ambientTexturePath);
-                if(ImGui::BeginDragDropTarget()) {
-                    if(const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("FileNode.Image")) {
-                        IM_ASSERT(payload->DataSize == sizeof(FileNode*));
-                        const FileNode* fileNode = *static_cast<const FileNode**>(payload->Data);
+            std::string ambientTexturePath;
+            if(materialConfig) ambientTexturePath = materialConfig->value("ambient_texture");
+            Theme::inputText("Ambient texture", "MeshRenderer.Material.AmbientTexture", ambientTexturePath);
+            if(ImGui::BeginDragDropTarget()) {
+                if(const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("FileNode.Image")) {
+                    IM_ASSERT(payload->DataSize == sizeof(FileNode*));
+                    const FileNode* fileNode = *static_cast<const FileNode**>(payload->Data);
 
-                        if(!materialConfig) materialConfig = featureConfig->addGroup("material");
-                        addResource(fileNode->resourcePath(), "Texture2D");
-                        materialConfig->setValue("ambient_texture", fileNode->resourcePath());
+                    if(!materialConfig) materialConfig = featureConfig->addGroup("material");
+                    addResource(fileNode->resourcePath(), "Texture2D");
+                    materialConfig->setValue("ambient_texture", fileNode->resourcePath());
 
-                        Containers::Array<char> data = Utility::Directory::read(Utility::Directory::join(_projectPath, fileNode->resourcePath()));
-                        Resource<GL::Texture2D> textureResource = _importer.loadTexture(fileNode->resourcePath(), data);
-                        mesh->setAmbientTexture(textureResource);
-                        _panel->updateShader(*mesh);
-
-                        reloadPrimitive = true;
-                    }
-                    ImGui::EndDragDropTarget();
+                    Containers::Array<char> data = Utility::Directory::read(Utility::Directory::join(_projectPath, fileNode->resourcePath()));
+                    Resource<GL::Texture2D> textureResource = _importer.loadTexture(fileNode->resourcePath(), data);
+                    meshRenderer->setAmbientTexture(textureResource);
+                    _panel->updateShader(*meshRenderer);
                 }
+                ImGui::EndDragDropTarget();
             }
 
-            Color4 diffuseColor = mesh->diffuseColor();
-            if(Theme::colorEdit4("Diffuse color", "##Mesh.Material.DiffuseColor", diffuseColor)) {
+            Color4 diffuseColor = meshRenderer->diffuseColor();
+            if(Theme::colorEdit4("Diffuse color", "MeshRenderer.Material.DiffuseColor", diffuseColor)) {
                 if(!materialConfig) materialConfig = featureConfig->addGroup("material");
                 materialConfig->setValue("diffuse_color", diffuseColor);
-                mesh->setDiffuseColor(diffuseColor);
+                meshRenderer->setDiffuseColor(diffuseColor);
             }
 
-            if(primitiveConfig->value("type") != "cube") {
-                std::string diffuseTexturePath;
-                if(materialConfig) diffuseTexturePath = materialConfig->value("diffuse_texture");
-                Theme::inputText("Diffuse texture", "##Mesh.Material.DiffuseTexture", diffuseTexturePath);
-                if(ImGui::BeginDragDropTarget()) {
-                    if(const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("FileNode.Image")) {
-                        IM_ASSERT(payload->DataSize == sizeof(FileNode*));
-                        const FileNode* fileNode = *static_cast<const FileNode**>(payload->Data);
+            std::string diffuseTexturePath;
+            if(materialConfig) diffuseTexturePath = materialConfig->value("diffuse_texture");
+            Theme::inputText("Diffuse texture", "MeshRenderer.Material.DiffuseTexture", diffuseTexturePath);
+            if(ImGui::BeginDragDropTarget()) {
+                if(const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("FileNode.Image")) {
+                    IM_ASSERT(payload->DataSize == sizeof(FileNode*));
+                    const FileNode* fileNode = *static_cast<const FileNode**>(payload->Data);
 
-                        if(!materialConfig) materialConfig = featureConfig->addGroup("material");
-                        addResource(fileNode->resourcePath(), "Texture2D");
-                        materialConfig->setValue("diffuse_texture", fileNode->resourcePath());
+                    if(!materialConfig) materialConfig = featureConfig->addGroup("material");
+                    addResource(fileNode->resourcePath(), "Texture2D");
+                    materialConfig->setValue("diffuse_texture", fileNode->resourcePath());
 
-                        Containers::Array<char> data = Utility::Directory::read(Utility::Directory::join(_projectPath, fileNode->resourcePath()));
-                        Resource<GL::Texture2D> textureResource = _importer.loadTexture(fileNode->resourcePath(), data);
-                        mesh->setDiffuseTexture(textureResource);
-                        _panel->updateShader(*mesh);
-
-                        reloadPrimitive = true;
-                    }
-                    ImGui::EndDragDropTarget();
+                    Containers::Array<char> data = Utility::Directory::read(Utility::Directory::join(_projectPath, fileNode->resourcePath()));
+                    Resource<GL::Texture2D> textureResource = _importer.loadTexture(fileNode->resourcePath(), data);
+                    meshRenderer->setDiffuseTexture(textureResource);
+                    _panel->updateShader(*meshRenderer);
                 }
+                ImGui::EndDragDropTarget();
 
                 std::string normalTexturePath;
                 if(materialConfig) normalTexturePath = materialConfig->value("normal_texture");
-                Theme::inputText("Normal texture", "##Mesh.Material.NormalTexture", normalTexturePath);
+                Theme::inputText("Normal texture", "MeshRenderer.Material.NormalTexture", normalTexturePath);
                 if(ImGui::BeginDragDropTarget()) {
                     if(const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("FileNode.Image")) {
                         IM_ASSERT(payload->DataSize == sizeof(FileNode*));
@@ -339,60 +467,51 @@ void Inspector::showMeshHeader(ObjectNode* objectNode, Utility::ConfigurationGro
 
                         Containers::Array<char> data = Utility::Directory::read(Utility::Directory::join(_projectPath, fileNode->resourcePath()));
                         Resource<GL::Texture2D> textureResource = _importer.loadTexture(fileNode->resourcePath(), data);
-                        mesh->setNormalTexture(textureResource);
-                        _panel->updateShader(*mesh);
-
-                        reloadPrimitive = true;
+                        meshRenderer->setNormalTexture(textureResource);
+                        _panel->updateShader(*meshRenderer);
                     }
                     ImGui::EndDragDropTarget();
                 }
             }
 
-            Color4 specularColor = mesh->specularColor();
-            if(Theme::colorEdit4("Specular color", "##Mesh.Material.SpecularColor", specularColor)) {
+            Color4 specularColor = meshRenderer->specularColor();
+            if(Theme::colorEdit4("Specular color", "MeshRenderer.Material.SpecularColor", specularColor)) {
                 if(!materialConfig) materialConfig = featureConfig->addGroup("material");
                 materialConfig->setValue("specular_color", specularColor);
-                mesh->setSpecularColor(specularColor);
+                meshRenderer->setSpecularColor(specularColor);
             }
 
-            if(primitiveConfig->value("type") != "cube") {
-                std::string specularTexturePath;
-                if(materialConfig) specularTexturePath = materialConfig->value("specular_texture");
-                Theme::inputText("Specular texture", "##Mesh.Material.SpecularTexture", specularTexturePath);
-                if(ImGui::BeginDragDropTarget()) {
-                    if(const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("FileNode.Image")) {
-                        IM_ASSERT(payload->DataSize == sizeof(FileNode*));
-                        const FileNode* fileNode = *static_cast<const FileNode**>(payload->Data);
+            std::string specularTexturePath;
+            if(materialConfig) specularTexturePath = materialConfig->value("specular_texture");
+            Theme::inputText("Specular texture", "MeshRenderer.Material.SpecularTexture", specularTexturePath);
+            if(ImGui::BeginDragDropTarget()) {
+                if(const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("FileNode.Image")) {
+                    IM_ASSERT(payload->DataSize == sizeof(FileNode*));
+                    const FileNode* fileNode = *static_cast<const FileNode**>(payload->Data);
 
-                        if(!materialConfig) materialConfig = featureConfig->addGroup("material");
-                        addResource(fileNode->resourcePath(), "Texture2D");
-                        materialConfig->setValue("specular_texture", fileNode->resourcePath());
+                    if(!materialConfig) materialConfig = featureConfig->addGroup("material");
+                    addResource(fileNode->resourcePath(), "Texture2D");
+                    materialConfig->setValue("specular_texture", fileNode->resourcePath());
 
-                        Containers::Array<char> data = Utility::Directory::read(Utility::Directory::join(_projectPath, fileNode->resourcePath()));
-                        Resource<GL::Texture2D> textureResource = _importer.loadTexture(fileNode->resourcePath(), data);
-                        mesh->setSpecularTexture(textureResource);
-                        _panel->updateShader(*mesh);
-
-                        reloadPrimitive = true;
-                    }
-                    ImGui::EndDragDropTarget();
+                    Containers::Array<char> data = Utility::Directory::read(Utility::Directory::join(_projectPath, fileNode->resourcePath()));
+                    Resource<GL::Texture2D> textureResource = _importer.loadTexture(fileNode->resourcePath(), data);
+                    meshRenderer->setSpecularTexture(textureResource);
+                    _panel->updateShader(*meshRenderer);
                 }
+                ImGui::EndDragDropTarget();
             }
 
-            Float shininess = mesh->shininess();
-            if(Theme::dragFloat("Shininess", "Mesh.Material.Shininess", shininess, 0.1f, 1.0f, FLT_MAX)) {
+            Float shininess = meshRenderer->shininess();
+            if(Theme::dragFloat("Shininess", "MeshRenderer.Material.Shininess", shininess, 0.1f, 1.0f, FLT_MAX)) {
                 if(!materialConfig) materialConfig = featureConfig->addGroup("material");
                 materialConfig->setValue("shininess", shininess);
-                mesh->setShininess(shininess);
+                meshRenderer->setShininess(shininess);
             }
         }
-
-        if(reloadPrimitive)
-            _importer.updateMeshPrimitive(*mesh, primitiveConfig);
     }
 
     if(!headerIsOpen) {
-        delete mesh;
+        delete meshRenderer;
         objectNode->objectConfig()->removeGroup(featureConfig);
 
         /* A drawable is removed so let's tell the CollectionPanel to remove the node to

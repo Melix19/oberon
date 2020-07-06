@@ -31,11 +31,12 @@
 #include <Magnum/GL/TextureFormat.h>
 #include <Magnum/ImGuiIntegration/Integration.h>
 #include <Magnum/MeshTools/Compile.h>
+#include <Magnum/MeshTools/Transform.h>
 #include <Magnum/Primitives/Grid.h>
 #include <Magnum/Trade/MeshData.h>
 #include <Oberon/Importer.h>
 #include <Oberon/Light.h>
-#include <Oberon/Mesh.h>
+#include <Oberon/MeshRenderer.h>
 
 #include "FileNode.h"
 #include "ObjectNode.h"
@@ -209,15 +210,18 @@ void CollectionPanel::createGrid() {
 
     Resource<GL::Mesh> meshResource = _resourceManager.get<GL::Mesh>("grid");
     if(!meshResource) {
-        GL::Mesh glMesh = MeshTools::compile(Primitives::grid3DWireframe({size - 1, size - 1}));
-        _resourceManager.set(meshResource.key(), std::move(glMesh));
+        Trade::MeshData grid = Primitives::grid3DWireframe({size - 1, size - 1});
+        MeshTools::transformPointsInPlace(Matrix4::scaling({size/2, size/2, 0.0f}),
+            grid.mutableAttribute<Vector3>(Trade::MeshAttribute::Position));
+
+        GL::Mesh mesh = MeshTools::compile(grid);
+        _resourceManager.set(meshResource.key(), std::move(mesh));
     }
 
-    Mesh& mesh = _gridObject->addFeature<Mesh>(_editorDrawables);
-    mesh.setMesh(meshResource);
-    mesh.setShader(shaderResource);
-    mesh.setSize({size, size, size});
-    mesh.setAmbientColor(Color3{0.3f});
+    MeshRenderer& meshRenderer = _gridObject->addFeature<MeshRenderer>(_editorDrawables);
+    meshRenderer.setMesh(meshResource);
+    meshRenderer.setShader(shaderResource);
+    meshRenderer.setAmbientColor(Color3{0.3f});
 }
 
 void CollectionPanel::resetObjectAndChildren(ObjectNode* node) {
@@ -227,9 +231,9 @@ void CollectionPanel::resetObjectAndChildren(ObjectNode* node) {
         resetObjectAndChildren(child.get());
 }
 
-void CollectionPanel::updateShader(Mesh& mesh) {
-    Resource<Magnum::GL::AbstractShaderProgram, SceneShader> shaderResource = _importer.createShader(mesh, _gameData, true);
-    mesh.setShader(shaderResource);
+void CollectionPanel::updateShader(MeshRenderer& meshRenderer) {
+    Resource<Magnum::GL::AbstractShaderProgram, SceneShader> shaderResource = _importer.createShader(meshRenderer, _gameData, true);
+    meshRenderer.setShader(shaderResource);
 }
 
 void CollectionPanel::recreateShaders() {
@@ -249,11 +253,11 @@ void CollectionPanel::addFeatureToObject(ObjectNode* objectNode, Utility::Config
 
     if(featureConfig->value("type") == "light")
         recreateShaders();
-    else if(featureConfig->value("type") == "mesh") {
-        Mesh& mesh = reinterpret_cast<Mesh&>(*newFeature);
-        Resource<GL::AbstractShaderProgram, SceneShader> shaderResource = _importer.createShader(mesh, _gameData, true);
-        mesh.setObjectId(_gameData.drawables().size());
-        mesh.setShader(shaderResource);
+    else if(featureConfig->value("type") == "mesh_renderer") {
+        MeshRenderer& meshRenderer = reinterpret_cast<MeshRenderer&>(*newFeature);
+        Resource<GL::AbstractShaderProgram, SceneShader> shaderResource = _importer.createShader(meshRenderer, _gameData, true);
+        meshRenderer.setObjectId(_gameData.drawables().size());
+        meshRenderer.setShader(shaderResource);
         _drawablesNodes.push_back(objectNode);
     }
 }
@@ -267,8 +271,8 @@ void CollectionPanel::removeDrawableNode(ObjectNode* objectNode) {
 
 void CollectionPanel::resetDrawablesId() {
     for(std::size_t i = 0; i != _gameData.drawables().size(); ++i) {
-        Mesh* mesh = dynamic_cast<Mesh*>(&_gameData.drawables()[i]);
-        if(mesh) { mesh->setObjectId(i + 1); }
+        MeshRenderer* meshRenderer = dynamic_cast<MeshRenderer*>(&_gameData.drawables()[i]);
+        if(meshRenderer) { meshRenderer->setObjectId(i + 1); }
     }
 }
 

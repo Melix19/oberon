@@ -121,10 +121,22 @@ bool inputText(const std::string& label, const std::string& id, std::string& tex
     return ImGui::InputText(("##" + id).c_str(), &text);
 }
 
+bool checkbox(const std::string& label, const std::string& id, bool& value) {
+    const Float spacing = ImGui::GetWindowWidth()/2;
+    setNextItemRightAlign(label, spacing);
+    return ImGui::Checkbox(("##" + id).c_str(), &value);
+}
+
 bool dragFloat(const std::string& label, const std::string& id, Float& value, Float speed, Float min, Float max, const std::string& format) {
     const Float spacing = ImGui::GetWindowWidth()/2;
     setNextItemRightAlign(label, spacing);
     return ImGui::DragFloat(("##" + id).c_str(), &value, speed, min, max, format.c_str());
+}
+
+bool dragFloat2(const std::string& label, const std::string& id, Vector2& value, Float speed, Float min, Float max, const std::string& format) {
+    ImGui::Text(label.c_str());
+    ImGui::SetNextItemWidth(-1);
+    return ImGui::DragFloat2(("##" + id).c_str(), value.data(), speed, min, max, format.c_str());
 }
 
 bool dragFloat3(const std::string& label, const std::string& id, Vector3& value, Float speed, Float min, Float max, const std::string& format) {

@@ -24,34 +24,21 @@
 
 #pragma once
 
-#include <string>
+#include <Magnum/Resource.h>
 
-#include "Editor.h"
+#include "Oberon.h"
 
-namespace Oberon { namespace Editor {
+namespace Oberon {
 
-class Inspector {
-    public:
-        Inspector(const std::string& projectPath, Importer& importer): _projectPath(projectPath), _importer(importer) {}
-        void newFrame();
+namespace MeshPrimitives {
 
-        Inspector& setPanel(CollectionPanel* panel) {
-            _panel = panel;
-            return *this;
-        }
+Resource<GL::Mesh> capsule(Float radius, Float length, UnsignedInt hemisphereRings, UnsignedInt cylinderRings, UnsignedInt segments, OberonResourceManager& resourceManager);
+Resource<GL::Mesh> circle(Float radius, UnsignedInt segments, OberonResourceManager& resourceManager);
+Resource<GL::Mesh> cone(Float radius, Float length, UnsignedInt rings, UnsignedInt segments, bool capEnd, OberonResourceManager& resourceManager);
+Resource<GL::Mesh> cylinder(Float radius, Float length, UnsignedInt rings, UnsignedInt segments, bool capEnds, OberonResourceManager& resourceManager);
+Resource<GL::Mesh> plane(Vector2 size, OberonResourceManager& resourceManager);
+Resource<GL::Mesh> sphere(Float radius, UnsignedInt rings, UnsignedInt segments, OberonResourceManager& resourceManager);
 
-    private:
-        void showTransformationHeader(ObjectNode* objectNode);
-        void showLightHeader(ObjectNode* objectNode, Utility::ConfigurationGroup* featureConfig);
-        void showMeshRendererHeader(ObjectNode* objectNode, Utility::ConfigurationGroup* featureConfig);
+}
 
-        void addResource(const std::string& resourcePath, const std::string& resourceType);
-
-    private:
-        std::string _projectPath;
-        Importer& _importer;
-
-        CollectionPanel* _panel{nullptr};
-};
-
-}}
+}

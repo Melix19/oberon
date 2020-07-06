@@ -41,7 +41,10 @@ void setStyleColor(Color color);
 
 bool inputText(const std::string& label, const std::string& id, std::string& text);
 
+bool checkbox(const std::string& label, const std::string& id, bool& value);
+
 bool dragFloat(const std::string& label, const std::string& id, Float& value, Float speed = 1.0f, Float min = 0.0f, Float max = 0.0f, const std::string& format = "%.3f");
+bool dragFloat2(const std::string& label, const std::string& id, Vector2& value, Float speed = 1.0f, Float min = 0.0f, Float max = 0.0f, const std::string& format = "%.3f");
 bool dragFloat3(const std::string& label, const std::string& id, Vector3& value, Float speed = 1.0f, Float min = 0.0f, Float max = 0.0f, const std::string& format = "%.3f");
 
 bool colorEdit4(const std::string& label, const std::string& id, Color4& value);

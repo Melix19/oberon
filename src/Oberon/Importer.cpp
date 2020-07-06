@@ -26,24 +26,17 @@
 
 #include <Corrade/Containers/Optional.h>
 #include <Corrade/Utility/ConfigurationGroup.h>
-#include <Corrade/Utility/Directory.h>
-#include <Corrade/Utility/Resource.h>
 #include <Magnum/ImageView.h>
 #include <Magnum/GL/Mesh.h>
 #include <Magnum/GL/Texture.h>
 #include <Magnum/GL/TextureFormat.h>
 #include <Magnum/Math/ConfigurationValue.h>
-#include <Magnum/MeshTools/Compile.h>
-#include <Magnum/Primitives/Circle.h>
-#include <Magnum/Primitives/Cube.h>
-#include <Magnum/Primitives/Plane.h>
-#include <Magnum/Primitives/UVSphere.h>
 #include <Magnum/SceneGraph/TranslationRotationScalingTransformation3D.h>
 #include <Magnum/Trade/ImageData.h>
-#include <Magnum/Trade/MeshData.h>
 
 #include "GameData.h"
-#include "Mesh.h"
+#include "MeshPrimitives.h"
+#include "MeshRenderer.h"
 
 namespace Oberon {
 
@@ -77,10 +70,16 @@ SceneGraph::AbstractFeature3D* Importer::loadFeature(Utility::ConfigurationGroup
     std::string type = featureConfig->value("type");
     SceneGraph::AbstractFeature3D* newFeature;
 
-    if(type == "mesh") {
+    if(type == "mesh_renderer") {
+        /* Mesh renderer */
+        MeshRenderer& meshRenderer = object->addFeature<MeshRenderer>(gameData.drawables());
+        newFeature = &meshRenderer;
+
         /* Mesh */
-        Mesh& mesh = object->addFeature<Mesh>(gameData.drawables());
-        newFeature = &mesh;
+        if(featureConfig->hasGroup("mesh")) {
+            Utility::ConfigurationGroup* meshConfiguration = featureConfig->group("mesh");
+            generateMeshPrimitive(meshRenderer, meshConfiguration);
+        }
 
         /* Material */
         if(featureConfig->hasGroup("material")) {
@@ -88,46 +87,40 @@ SceneGraph::AbstractFeature3D* Importer::loadFeature(Utility::ConfigurationGroup
 
             if(materialConfig->hasValue("ambient_color")) {
                 Color4 ambientColor = materialConfig->value<Color4>("ambient_color");
-                mesh.setAmbientColor(ambientColor);
+                meshRenderer.setAmbientColor(ambientColor);
             }
             if(materialConfig->hasValue("ambient_texture")) {
                 std::string ambientTexturePath = materialConfig->value("ambient_texture");
                 Resource<GL::Texture2D> ambientTexture = _resourceManager.get<GL::Texture2D>(ambientTexturePath);
-                mesh.setAmbientTexture(ambientTexture);
+                meshRenderer.setAmbientTexture(ambientTexture);
             }
             if(materialConfig->hasValue("diffuse_color")) {
                 Color4 diffuseColor = materialConfig->value<Color4>("diffuse_color");
-                mesh.setDiffuseColor(diffuseColor);
+                meshRenderer.setDiffuseColor(diffuseColor);
             }
             if(materialConfig->hasValue("diffuse_texture")) {
                 std::string diffuseTexturePath = materialConfig->value("diffuse_texture");
                 Resource<GL::Texture2D> diffuseTexture = _resourceManager.get<GL::Texture2D>(diffuseTexturePath);
-                mesh.setDiffuseTexture(diffuseTexture);
+                meshRenderer.setDiffuseTexture(diffuseTexture);
             }
             if(materialConfig->hasValue("normal_texture")) {
                 std::string normalTexturePath = materialConfig->value("normal_texture");
                 Resource<GL::Texture2D> normalTexture = _resourceManager.get<GL::Texture2D>(normalTexturePath);
-                mesh.setNormalTexture(normalTexture);
+                meshRenderer.setNormalTexture(normalTexture);
             }
             if(materialConfig->hasValue("specular_color")) {
                 Color4 specularColor = materialConfig->value<Color4>("specular_color");
-                mesh.setSpecularColor(specularColor);
+                meshRenderer.setSpecularColor(specularColor);
             }
             if(materialConfig->hasValue("specular_texture")) {
                 std::string specularTexturePath = materialConfig->value("specular_texture");
                 Resource<GL::Texture2D> specularTexture = _resourceManager.get<GL::Texture2D>(specularTexturePath);
-                mesh.setSpecularTexture(specularTexture);
+                meshRenderer.setSpecularTexture(specularTexture);
             }
             if(materialConfig->hasValue("shininess")) {
                 Float shininess = materialConfig->value<Float>("shininess");
-                mesh.setShininess(shininess);
+                meshRenderer.setShininess(shininess);
             }
-        }
-
-        /* Primitive */
-        if(featureConfig->hasGroup("primitive")) {
-            Utility::ConfigurationGroup* primitiveConfig = featureConfig->group("primitive");
-            updateMeshPrimitive(mesh, primitiveConfig);
         }
     } else if(type == "light") {
         /* Light */
@@ -161,67 +154,50 @@ void Importer::resetObject(Object3D* object, Utility::ConfigurationGroup* object
     object->setTransformation(transformation);
 }
 
-void Importer::updateMeshPrimitive(Mesh& mesh, Utility::ConfigurationGroup* primitiveConfig) {
-    std::string primitiveType = primitiveConfig->value("type");
-    std::string meshKey = primitiveType;
+void Importer::generateMeshPrimitive(MeshRenderer& meshRenderer, Utility::ConfigurationGroup* meshConfiguration) {
+    const std::string primitiveType = meshConfiguration->value("type");
+    Resource<GL::Mesh> meshResource;
 
-    if(primitiveConfig->hasValue("rings"))
-        meshKey.append("-rings=" + primitiveConfig->value("rings"));
-    if(primitiveConfig->hasValue("segments"))
-        meshKey.append("-segments=" + primitiveConfig->value("segments"));
-
-    bool needsTextureCoords = mesh.hasAmbientTexture() || mesh.hasDiffuseTexture() ||
-        mesh.hasNormalTexture() || mesh.hasSpecularTexture();
-    bool needsTangents = mesh.hasNormalTexture();
-    if(needsTextureCoords) meshKey.append("-textureCoordinates");
-    if(needsTangents) meshKey.append("-tangents");
-
-    Resource<GL::Mesh> meshResource = _resourceManager.get<GL::Mesh>(meshKey);
-    if(!meshResource) {
-        if(primitiveType == "sphere" && !primitiveConfig->hasValue("rings"))
-            primitiveConfig->setValue<UnsignedInt>("rings", 20);
-
-        if((primitiveType == "circle" || primitiveType == "sphere") &&
-            !primitiveConfig->hasValue("segments")) {
-            primitiveConfig->setValue<UnsignedInt>("segments", 20);
-        }
-
-        UnsignedInt segments = primitiveConfig->value<UnsignedInt>("segments");
-        UnsignedInt rings = primitiveConfig->value<UnsignedInt>("rings");
-        GL::Mesh glMesh{NoCreate};
-
-        if(primitiveType == "circle") {
-            Primitives::Circle3DFlags flags;
-            if(needsTextureCoords) flags |= Primitives::Circle3DFlag::TextureCoordinates;
-            if(needsTangents) flags |= Primitives::Circle3DFlag::Tangents;
-            glMesh = MeshTools::compile(Primitives::circle3DSolid(segments, flags));
-        } else if(primitiveType == "cube") {
-            glMesh = MeshTools::compile(Primitives::cubeSolid());
-        } else if(primitiveType == "plane") {
-            Primitives::PlaneFlags flags;
-            if(needsTextureCoords) flags |= Primitives::PlaneFlag::TextureCoordinates;
-            if(needsTangents) flags |= Primitives::PlaneFlag::Tangents;
-            glMesh = MeshTools::compile(Primitives::planeSolid(flags));
-        } else if(primitiveType == "sphere") {
-            Primitives::UVSphereFlags flags;
-            if(needsTextureCoords) flags |= Primitives::UVSphereFlag::TextureCoordinates;
-            if(needsTangents) flags |= Primitives::UVSphereFlag::Tangents;
-            glMesh = MeshTools::compile(Primitives::uvSphereSolid(rings, segments, flags));
-        }
-
-        _resourceManager.set(meshResource.key(), std::move(glMesh));
+    if(primitiveType == "capsule") {
+        const Float radius = meshConfiguration->value<Float>("radius");
+        const Float length = meshConfiguration->value<Float>("length");
+        const UnsignedInt hemisphereRings = meshConfiguration->value<UnsignedInt>("hemisphereRings");
+        const UnsignedInt cylinderRings = meshConfiguration->value<UnsignedInt>("cylinderRings");
+        const UnsignedInt segments = meshConfiguration->value<UnsignedInt>("segments");
+        meshResource = MeshPrimitives::capsule(radius, length, hemisphereRings, cylinderRings, segments, _resourceManager);
+    } else if(primitiveType == "circle") {
+        const Float radius = meshConfiguration->value<Float>("radius");
+        const UnsignedInt segments = meshConfiguration->value<UnsignedInt>("segments");
+        meshResource = MeshPrimitives::circle(radius, segments, _resourceManager);
+    } else if(primitiveType == "cone") {
+        const Float radius = meshConfiguration->value<Float>("radius");
+        const Float length = meshConfiguration->value<Float>("length");
+        const UnsignedInt rings = meshConfiguration->value<UnsignedInt>("rings");
+        const UnsignedInt segments = meshConfiguration->value<UnsignedInt>("segments");
+        const bool capEnd = meshConfiguration->value<bool>("capEnd");
+        meshResource = MeshPrimitives::cone(radius, length, rings, segments, capEnd, _resourceManager);
+    } else if(primitiveType == "cylinder") {
+        const Float radius = meshConfiguration->value<Float>("radius");
+        const Float length = meshConfiguration->value<Float>("length");
+        const UnsignedInt rings = meshConfiguration->value<UnsignedInt>("rings");
+        const UnsignedInt segments = meshConfiguration->value<UnsignedInt>("segments");
+        const bool capEnds = meshConfiguration->value<bool>("capEnds");
+        meshResource = MeshPrimitives::cylinder(radius, length, rings, segments, capEnds, _resourceManager);
+    } else if(primitiveType == "plane") {
+        const Vector2 size = meshConfiguration->value<Vector2>("size");
+        meshResource = MeshPrimitives::plane(size, _resourceManager);
+    } else if(primitiveType == "sphere") {
+        const Float radius = meshConfiguration->value<Float>("radius");
+        const UnsignedInt rings = meshConfiguration->value<UnsignedInt>("rings");
+        const UnsignedInt segments = meshConfiguration->value<UnsignedInt>("segments");
+        meshResource = MeshPrimitives::sphere(radius, rings, segments, _resourceManager);
     }
 
-    mesh.setMesh(meshResource);
-
-    if(primitiveConfig->hasValue("size")) {
-        Vector3 size = primitiveConfig->value<Vector3>("size");
-        mesh.setSize(size);
-    }
+    meshRenderer.setMesh(meshResource);
 }
 
-Resource<GL::AbstractShaderProgram, SceneShader> Importer::createShader(Mesh& mesh, GameData& gameData, bool useObjectId) {
-    std::pair<std::string, SceneShader::Flags> shaderKey = calculateShaderKey(mesh, useObjectId);
+Resource<GL::AbstractShaderProgram, SceneShader> Importer::createShader(MeshRenderer& meshRenderer, GameData& gameData, bool useObjectId) {
+    std::pair<std::string, SceneShader::Flags> shaderKey = calculateShaderKey(meshRenderer, useObjectId);
     Resource<GL::AbstractShaderProgram, SceneShader> shaderResource = _resourceManager.get<GL::AbstractShaderProgram, SceneShader>(shaderKey.first);
 
     if(!shaderResource) {
@@ -235,10 +211,10 @@ Resource<GL::AbstractShaderProgram, SceneShader> Importer::createShader(Mesh& me
 
 void Importer::createShaders(GameData& gameData, bool useObjectId) {
     for(std::size_t i = 0; i != gameData.drawables().size(); ++i) {
-        Mesh* mesh = dynamic_cast<Mesh*>(&gameData.drawables()[i]);
-        if(mesh) {
-            Resource<GL::AbstractShaderProgram, SceneShader> shaderResource = createShader(*mesh, gameData, useObjectId);
-            mesh->setShader(shaderResource);
+        MeshRenderer* meshRenderer = dynamic_cast<MeshRenderer*>(&gameData.drawables()[i]);
+        if(meshRenderer) {
+            Resource<GL::AbstractShaderProgram, SceneShader> shaderResource = createShader(*meshRenderer, gameData, useObjectId);
+            meshRenderer->setShader(shaderResource);
         }
     }
 }
@@ -266,23 +242,23 @@ Resource<GL::Texture2D> Importer::loadTexture(const std::string& resourcePath, C
     return textureResource;
 }
 
-std::pair<std::string, SceneShader::Flags> Importer::calculateShaderKey(Mesh& mesh, bool useObjectId) {
+std::pair<std::string, SceneShader::Flags> Importer::calculateShaderKey(MeshRenderer& meshRenderer, bool useObjectId) {
     std::string shaderKey = "scene";
     SceneShader::Flags flags;
 
-    if(mesh.hasAmbientTexture()) {
+    if(meshRenderer.hasAmbientTexture()) {
         shaderKey.append("-ambientTexture");
         flags |= SceneShader::Flag::AmbientTexture;
     }
-    if(mesh.hasDiffuseTexture()) {
+    if(meshRenderer.hasDiffuseTexture()) {
         shaderKey.append("-diffuseTexture");
         flags |= SceneShader::Flag::DiffuseTexture;
     }
-    if(mesh.hasSpecularTexture()) {
+    if(meshRenderer.hasSpecularTexture()) {
         shaderKey.append("-specularTexture");
         flags |= SceneShader::Flag::SpecularTexture;
     }
-    if(mesh.hasNormalTexture()) {
+    if(meshRenderer.hasNormalTexture()) {
         shaderKey.append("-normalTexture");
         flags |= SceneShader::Flag::NormalTexture;
     }
