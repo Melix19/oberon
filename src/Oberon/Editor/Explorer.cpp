@@ -28,6 +28,7 @@
 #include <imgui.h>
 #include <misc/cpp/imgui_stdlib.h>
 #include <Corrade/Utility/Directory.h>
+#include <Corrade/Utility/String.h>
 
 #include "FileNode.h"
 
@@ -140,10 +141,20 @@ void Explorer::displayFileNode(FileNode* node) {
     bool isOpen = ImGui::TreeNodeEx(nodeName.c_str(), nodeFlags);
 
     if(ImGui::BeginDragDropSource()) {
-        std::string extension = Utility::Directory::splitExtension(node->path()).second;
+        const std::string extension = Utility::String::lowercase(Utility::Directory::splitExtension(node->path()).second);
         std::string typeName = "FileNode.";
 
-        if(extension == ".png") typeName.append("Image");
+        if(extension == ".bmp" ||
+            extension == ".gif" ||
+            extension == ".hdr" ||
+            extension == ".jpg" || extension == ".jpe" || extension == ".jpeg" ||
+            extension == ".pgm" ||
+            extension == ".pic" ||
+            extension == ".png" ||
+            extension == ".ppm" ||
+            extension == ".psd" ||
+            extension == ".tga" || extension == ".vda" || extension == ".icb" || extension == ".vst")
+            typeName.append("Image");
         else typeName.append("Other");
 
         if(!_isDraggingNodes) {
