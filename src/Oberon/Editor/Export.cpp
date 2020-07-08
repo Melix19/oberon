@@ -61,7 +61,6 @@ void exportProject(const std::string& projectPath, const std::string& exportPath
     const std::string mainCollection = projectConfiguration.value("main_collection");
     const std::string mainCollectionPath = Utility::Directory::join(projectPath, mainCollection);
     const Utility::Configuration collectionConfiguration{mainCollectionPath};
-    const Utility::ConfigurationGroup* resourcesGroup = collectionConfiguration.group("external_resources");
 
     /* Create the data pack to be used to pack the resources */
     const std::string packPath = Utility::Directory::join(exportPath, applicationName + "-data.zip");
@@ -72,11 +71,14 @@ void exportProject(const std::string& projectPath, const std::string& exportPath
     addFileToPack(pack, projectConfigurationPath, "project.oberon");
     addFileToPack(pack, mainCollectionPath, mainCollection);
 
-    /* Add all the main collection external resources to the data pack */
-    for(const Utility::ConfigurationGroup* resourceGroup: resourcesGroup->groups("resource")) {
-        const std::string resourceLocalPath = resourceGroup->value("path");
-        const std::string resourcePath = Utility::Directory::join(projectPath, resourceLocalPath);
-        addFileToPack(pack, resourcePath, resourceLocalPath);
+    /* Add all the main collection external resources to the data pack, if any */
+    if(collectionConfiguration.hasGroup("external_resources")) {
+        const Utility::ConfigurationGroup* resourcesGroup = collectionConfiguration.group("external_resources");
+        for(const Utility::ConfigurationGroup* resourceGroup: resourcesGroup->groups("resource")) {
+            const std::string resourceLocalPath = resourceGroup->value("path");
+            const std::string resourcePath = Utility::Directory::join(projectPath, resourceLocalPath);
+            addFileToPack(pack, resourcePath, resourceLocalPath);
+        }
     }
 
     /* Close the data pack */
