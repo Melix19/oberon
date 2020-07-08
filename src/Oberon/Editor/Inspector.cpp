@@ -452,26 +452,26 @@ void Inspector::showMeshRendererHeader(ObjectNode* objectNode, Utility::Configur
                     _panel->updateShader(*meshRenderer);
                 }
                 ImGui::EndDragDropTarget();
+            }
 
-                std::string normalTexturePath;
-                if(materialConfig) normalTexturePath = materialConfig->value("normal_texture");
-                Theme::inputText("Normal texture", "MeshRenderer.Material.NormalTexture", normalTexturePath);
-                if(ImGui::BeginDragDropTarget()) {
-                    if(const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("FileNode.Image")) {
-                        IM_ASSERT(payload->DataSize == sizeof(FileNode*));
-                        const FileNode* fileNode = *static_cast<const FileNode**>(payload->Data);
+            std::string normalTexturePath;
+            if(materialConfig) normalTexturePath = materialConfig->value("normal_texture");
+            Theme::inputText("Normal texture", "MeshRenderer.Material.NormalTexture", normalTexturePath);
+            if(ImGui::BeginDragDropTarget()) {
+                if(const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("FileNode.Image")) {
+                    IM_ASSERT(payload->DataSize == sizeof(FileNode*));
+                    const FileNode* fileNode = *static_cast<const FileNode**>(payload->Data);
 
-                        if(!materialConfig) materialConfig = featureConfig->addGroup("material");
-                        addResource(fileNode->resourcePath(), "Texture2D");
-                        materialConfig->setValue("normal_texture", fileNode->resourcePath());
+                    if(!materialConfig) materialConfig = featureConfig->addGroup("material");
+                    addResource(fileNode->resourcePath(), "Texture2D");
+                    materialConfig->setValue("normal_texture", fileNode->resourcePath());
 
-                        Containers::Array<char> data = Utility::Directory::read(Utility::Directory::join(_projectPath, fileNode->resourcePath()));
-                        Resource<GL::Texture2D> textureResource = _importer.loadTexture(fileNode->resourcePath(), data);
-                        meshRenderer->setNormalTexture(textureResource);
-                        _panel->updateShader(*meshRenderer);
-                    }
-                    ImGui::EndDragDropTarget();
+                    Containers::Array<char> data = Utility::Directory::read(Utility::Directory::join(_projectPath, fileNode->resourcePath()));
+                    Resource<GL::Texture2D> textureResource = _importer.loadTexture(fileNode->resourcePath(), data);
+                    meshRenderer->setNormalTexture(textureResource);
+                    _panel->updateShader(*meshRenderer);
                 }
+                ImGui::EndDragDropTarget();
             }
 
             Color4 specularColor = meshRenderer->specularColor();
