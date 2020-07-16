@@ -1,7 +1,7 @@
 //
 //  Portable File Dialogs
 //
-//  Copyright © 2018—2019 Sam Hocevar <sam@hocevar.net>
+//  Copyright © 2018—2020 Sam Hocevar <sam@hocevar.net>
 //
 //  This library is free software. It comes without any warranty, to
 //  the extent permitted by applicable law. You can redistribute it
@@ -30,16 +30,19 @@
 #ifndef _POSIX_C_SOURCE
 #   define _POSIX_C_SOURCE 2 // for popen()
 #endif
-#include <cstdio>   // for popen()
-#include <cstdlib>  // for std::getenv()
-#include <fcntl.h>  // for fcntl()
-#include <unistd.h> // for read()
+#include <cstdio>     // popen()
+#include <cstdlib>    // std::getenv()
+#include <fcntl.h>    // fcntl()
+#include <unistd.h>   // read()
+#include <csignal>    // ::kill, std::signal
+#include <sys/wait.h> // waitpid()
 #endif
 
 #include <string>
 #include <memory>
 #include <iostream>
 #include <map>
+#include <unordered_set>
 #include <regex>
 #include <thread>
 #include <chrono>
@@ -144,13 +147,17 @@ public:
     // High level function to get the result of a command
     std::string result(int *exit_code = nullptr);
 
+    // High level function to abort
+    bool kill();
+
 #if _WIN32
-    void start(std::function<std::string(int *)> const &fun);
-#endif
-#if __EMSCRIPTEN__
+    void start_func(std::function<std::string(int *)> const &fun);
+    static BOOL CALLBACK enum_windows_callback(HWND hwnd, LPARAM lParam);
+#elif __EMSCRIPTEN__
     void start(int exit_code);
+#else
+    void start_process(std::vector<std::string> const &command);
 #endif
-    void start(std::string const &command);
 
     ~executor();
 
@@ -164,11 +171,14 @@ private:
     int m_exit_code = -1;
 #if _WIN32
     std::future<std::string> m_future;
-    PROCESS_INFORMATION m_pi;
+    std::unordered_set<HWND> m_windows;
+    std::condition_variable m_cond;
+    std::mutex m_mutex;
+    DWORD m_tid;
 #elif __EMSCRIPTEN__ || __NX__
     // FIXME: do something
 #else
-    FILE *m_stream = nullptr;
+    pid_t m_pid = 0;
     int m_fd = -1;
 #endif
 };
@@ -220,11 +230,12 @@ class dialog : protected settings, protected platform
 {
 public:
     bool ready(int timeout = default_wait_timeout);
+    bool kill();
 
 protected:
     explicit dialog();
 
-    std::string desktop_helper() const;
+    std::vector<std::string> desktop_helper() const;
     std::string buttons_to_name(choice _choice) const;
     std::string get_icon_name(icon _icon) const;
 
@@ -484,53 +495,113 @@ inline std::string internal::executor::result(int *exit_code /* = nullptr */)
     return m_stdout;
 }
 
-#if _WIN32
-inline void internal::executor::start(std::function<std::string(int *)> const &fun)
+inline bool internal::executor::kill()
 {
+#if _WIN32
+    if (m_future.valid())
+    {
+        // Close all windows that weren’t open when we started the future
+        auto previous_windows = m_windows;
+        EnumWindows(&enum_windows_callback, (LPARAM)this);
+        for (auto hwnd : m_windows)
+            if (previous_windows.find(hwnd) == previous_windows.end())
+                SendMessage(hwnd, WM_CLOSE, 0, 0);
+    }
+#elif __EMSCRIPTEN__ || __NX__
+    // FIXME: do something
+    (void)timeout;
+    return false; // cannot kill
+#else
+    ::kill(m_pid, SIGKILL);
+#endif
     stop();
-    m_future = std::async(fun, &m_exit_code);
-    m_running = true;
+    return true;
+}
+
+#if _WIN32
+inline BOOL CALLBACK internal::executor::enum_windows_callback(HWND hwnd, LPARAM lParam)
+{
+    auto that = (executor *)lParam;
+
+    DWORD pid;
+    auto tid = GetWindowThreadProcessId(hwnd, &pid);
+    if (tid == that->m_tid)
+        that->m_windows.insert(hwnd);
+    return TRUE;
 }
 #endif
 
-#if __EMSCRIPTEN__
+#if _WIN32
+inline void internal::executor::start_func(std::function<std::string(int *)> const &fun)
+{
+    stop();
+
+    auto trampoline = [fun, this]()
+    {
+        // Save our thread id so that the caller can cancel us
+        m_tid = GetCurrentThreadId();
+        EnumWindows(&enum_windows_callback, (LPARAM)this);
+        m_cond.notify_all();
+        return fun(&m_exit_code);
+    };
+
+    std::unique_lock<std::mutex> lock(m_mutex);
+    m_future = std::async(std::launch::async, trampoline);
+    m_cond.wait(lock);
+    m_running = true;
+}
+
+#elif __EMSCRIPTEN__
 inline void internal::executor::start(int exit_code)
 {
     m_exit_code = exit_code;
 }
-#endif
 
-inline void internal::executor::start(std::string const &command)
+#else
+inline void internal::executor::start_process(std::vector<std::string> const &command)
 {
     stop();
     m_stdout.clear();
     m_exit_code = -1;
 
-#if _WIN32
-    STARTUPINFOW si;
-
-    memset(&si, 0, sizeof(si));
-    si.cb = sizeof(si);
-    si.dwFlags = STARTF_USESHOWWINDOW;
-    si.wShowWindow = SW_HIDE;
-
-    std::wstring wcommand = str2wstr(command);
-    if (!CreateProcessW(nullptr, (LPWSTR)wcommand.c_str(), nullptr, nullptr,
-                        FALSE, CREATE_NEW_CONSOLE, nullptr, nullptr, &si, &m_pi))
-        return; /* TODO: GetLastError()? */
-    WaitForInputIdle(m_pi.hProcess, INFINITE);
-#elif __EMSCRIPTEN__ || __NX__
-    // FIXME: do something
-    (void)command;
-#else
-    m_stream = popen((command + " 2>/dev/null").c_str(), "r");
-    if (!m_stream)
+    int in[2], out[2];
+    if (pipe(in) != 0 || pipe(out) != 0)
         return;
-    m_fd = fileno(m_stream);
-    fcntl(m_fd, F_SETFL, O_NONBLOCK);
-#endif
+
+    m_pid = fork();
+    if (m_pid < 0)
+        return;
+
+    close(in[m_pid ? 0 : 1]);
+    close(out[m_pid ? 1 : 0]);
+
+    if (m_pid == 0)
+    {
+        dup2(in[0], STDIN_FILENO);
+        dup2(out[1], STDOUT_FILENO);
+
+        // Ignore stderr so that it doesn’t pollute the console (e.g. GTK+ errors from zenity)
+        int fd = open("/dev/null", O_WRONLY);
+        dup2(fd, STDERR_FILENO);
+        close(fd);
+
+        std::vector<char *> args;
+        std::transform(command.cbegin(), command.cend(), std::back_inserter(args),
+                       [](std::string const &s) { return const_cast<char *>(s.c_str()); });
+        args.push_back(nullptr); // null-terminate argv[]
+
+        execvp(args[0], args.data());
+        exit(1);
+    }
+
+    close(in[1]);
+    m_fd = out[0];
+    auto flags = fcntl(m_fd, F_GETFL);
+    fcntl(m_fd, F_SETFL, flags | O_NONBLOCK);
+
     m_running = true;
 }
+#endif
 
 inline internal::executor::~executor()
 {
@@ -547,20 +618,20 @@ inline bool internal::executor::ready(int timeout /* = default_wait_timeout */)
     {
         auto status = m_future.wait_for(std::chrono::milliseconds(timeout));
         if (status != std::future_status::ready)
+        {
+            // On Windows, we need to run the message pump. If the async
+            // thread uses a Windows API dialog, it may be attached to the
+            // main thread and waiting for messages that only we can dispatch.
+            MSG msg;
+            while (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE))
+            {
+                TranslateMessage(&msg);
+                DispatchMessage(&msg);
+            }
             return false;
+        }
 
         m_stdout = m_future.get();
-    }
-    else
-    {
-        if (WaitForSingleObject(m_pi.hProcess, timeout) == WAIT_TIMEOUT)
-            return false;
-
-        DWORD ret;
-        GetExitCodeProcess(m_pi.hProcess, &ret);
-        m_exit_code = (int)ret;
-        CloseHandle(m_pi.hThread);
-        CloseHandle(m_pi.hProcess);
     }
 #elif __EMSCRIPTEN__ || __NX__
     // FIXME: do something
@@ -568,18 +639,27 @@ inline bool internal::executor::ready(int timeout /* = default_wait_timeout */)
 #else
     char buf[BUFSIZ];
     ssize_t received = read(m_fd, buf, BUFSIZ - 1);
-    if (received == -1 && errno == EAGAIN)
-    {
-        // FIXME: this happens almost always at first iteration
-        std::this_thread::sleep_for(std::chrono::milliseconds(timeout));
-        return false;
-    }
     if (received > 0)
     {
         m_stdout += std::string(buf, received);
         return false;
     }
-    m_exit_code = pclose(m_stream);
+
+    // Reap child process if it is dead. It is possible that the system has already reaped it
+    // (this happens when the calling application handles or ignores SIG_CHLD) and results in
+    // waitpid() failing with ECHILD. Otherwise we assume the child is running and we sleep for
+    // a little while.
+    int status;
+    pid_t child = waitpid(m_pid, &status, WNOHANG);
+    if (child != m_pid && (child >= 0 || errno != ECHILD))
+    {
+        // FIXME: this happens almost always at first iteration
+        std::this_thread::sleep_for(std::chrono::milliseconds(timeout));
+        return false;
+    }
+
+    close(m_fd);
+    m_exit_code = WEXITSTATUS(status);
 #endif
 
     m_running = false;
@@ -590,19 +670,7 @@ inline void internal::executor::stop()
 {
     // Loop until the user closes the dialog
     while (!ready())
-    {
-#if _WIN32
-        // On Windows, we need to run the message pump. If the async
-        // thread uses a Windows API dialog, it may be attached to the
-        // main thread and waiting for messages that only we can dispatch.
-        MSG msg;
-        while (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE))
-        {
-            TranslateMessage(&msg);
-            DispatchMessage(&msg);
-        }
-#endif
-    }
+        ;
 }
 
 // dll implementation
@@ -672,6 +740,11 @@ inline bool internal::dialog::ready(int timeout /* = default_wait_timeout */)
     return m_async->ready(timeout);
 }
 
+inline bool internal::dialog::kill()
+{
+    return m_async->kill();
+}
+
 inline internal::dialog::dialog()
   : m_async(std::make_shared<executor>())
 {
@@ -699,16 +772,16 @@ inline internal::dialog::dialog()
     }
 }
 
-inline std::string internal::dialog::desktop_helper() const
+inline std::vector<std::string> internal::dialog::desktop_helper() const
 {
 #if __APPLE__
-    return "osascript";
+    return { "osascript" };
 #else
-    return flags(flag::has_zenity) ? "zenity"
-         : flags(flag::has_matedialog) ? "matedialog"
-         : flags(flag::has_qarma) ? "qarma"
-         : flags(flag::has_kdialog) ? "kdialog"
-         : "echo";
+    return { flags(flag::has_zenity) ? "zenity"
+           : flags(flag::has_matedialog) ? "matedialog"
+           : flags(flag::has_qarma) ? "qarma"
+           : flags(flag::has_kdialog) ? "kdialog"
+           : "echo" };
 #endif
 }
 
@@ -742,22 +815,34 @@ inline std::string internal::dialog::get_icon_name(icon _icon) const
     }
 }
 
+// THis is only used for debugging purposes
+inline std::ostream& operator <<(std::ostream &s, std::vector<std::string> const &v)
+{
+    int not_first = 0;
+    for (auto &e : v)
+        s << (not_first++ ? " " : "") << e;
+    return s;
+}
+
 // Properly quote a string for Powershell: replace ' or " with '' or ""
 // FIXME: we should probably get rid of newlines!
 // FIXME: the \" sequence seems unsafe, too!
+// XXX: this is no longer used but I would like to keep it around just in case
 inline std::string internal::dialog::powershell_quote(std::string const &str) const
 {
     return "'" + std::regex_replace(str, std::regex("['\"]"), "$&$&") + "'";
 }
 
-// Properly quote a string for osascript: replace ' with '\'' and \ or " with \\ or \"
+// Properly quote a string for osascript: replace \ or " with \\ or \"
+// XXX: this also used to replace ' with \' when popen was used, but it would be
+// smarter to do shell_quote(osascript_quote(...)) if this is needed again.
 inline std::string internal::dialog::osascript_quote(std::string const &str) const
 {
-    return "\"" + std::regex_replace(std::regex_replace(str,
-                      std::regex("[\\\\\"]"), "\\$&"), std::regex("'"), "'\\''") + "\"";
+    return "\"" + std::regex_replace(str, std::regex("[\\\\\"]"), "\\$&") + "\"";
 }
 
 // Properly quote a string for the shell: just replace ' with '\''
+// XXX: this is no longer used but I would like to keep it around just in case
 inline std::string internal::dialog::shell_quote(std::string const &str) const
 {
     return "'" + std::regex_replace(str, std::regex("'"), "'\\''") + "'";
@@ -769,9 +854,12 @@ inline bool internal::dialog::check_program(std::string const &program)
 #if _WIN32
     (void)program;
     return false;
+#elif __EMSCRIPTEN__
+    (void)program;
+    return false;
 #else
     int exit_code = -1;
-    m_async->start("which " + program + " 2>/dev/null");
+    m_async->start_process({"/bin/sh", "-c", "which " + program});
     m_async->result(&exit_code);
     return exit_code == 0;
 #endif
@@ -795,8 +883,8 @@ inline internal::file_dialog::file_dialog(type in_type,
     }
     filter_list += '\0';
 
-    m_async->start([this, in_type, title, default_path, filter_list,
-                    options](int *exit_code) -> std::string
+    m_async->start_func([this, in_type, title, default_path, filter_list,
+                         options](int *exit_code) -> std::string
     {
         (void)exit_code;
         m_wtitle = internal::str2wstr(title);
@@ -856,7 +944,7 @@ inline internal::file_dialog::file_dialog(type in_type,
         OPENFILENAMEW ofn;
         memset(&ofn, 0, sizeof(ofn));
         ofn.lStructSize = sizeof(OPENFILENAMEW);
-        ofn.hwndOwner = GetForegroundWindow();
+        ofn.hwndOwner = GetActiveWindow();
 
         ofn.lpstrFilter = wfilter_list.c_str();
 
@@ -934,25 +1022,25 @@ inline internal::file_dialog::file_dialog(type in_type,
 
     if (is_osascript())
     {
-        command += " -e 'set ret to choose";
+        std::string script = "set ret to choose";
         switch (in_type)
         {
             case type::save:
-                command += " file name";
+                script += " file name";
                 break;
             case type::open: default:
-                command += " file";
+                script += " file";
                 if (options & opt::multiselect)
-                    command += " with multiple selections allowed";
+                    script += " with multiple selections allowed";
                 break;
             case type::folder:
-                command += " folder";
+                script += " folder";
                 break;
         }
 
         if (default_path.size())
-            command += " default location " + osascript_quote(default_path);
-        command += " with prompt " + osascript_quote(title);
+            script += " default location " + osascript_quote(default_path);
+        script += " with prompt " + osascript_quote(title);
 
         if (in_type == type::open)
         {
@@ -979,62 +1067,74 @@ inline internal::file_dialog::file_dialog(type in_type,
                                    osascript_quote(pat.substr(2, pat.size() - 2));
             }
             if (has_filter && filter_list.size() > 0)
-                command += " of type {" + filter_list + "}";
+                script += " of type {" + filter_list + "}";
         }
 
         if (in_type == type::open && (options & opt::multiselect))
         {
-            command += "\nset s to \"\"";
-            command += "\nrepeat with i in ret";
-            command += "\n  set s to s & (POSIX path of i) & \"\\n\"";
-            command += "\nend repeat";
-            command += "\ncopy s to stdout'";
+            script += "\nset s to \"\"";
+            script += "\nrepeat with i in ret";
+            script += "\n  set s to s & (POSIX path of i) & \"\\n\"";
+            script += "\nend repeat";
+            script += "\ncopy s to stdout";
         }
         else
         {
-            command += "\nPOSIX path of ret'";
+            script += "\nPOSIX path of ret";
         }
+
+        command.push_back("-e");
+        command.push_back(script);
     }
     else if (is_zenity())
     {
-        command += " --file-selection --filename=" + shell_quote(default_path)
-                 + " --title " + shell_quote(title)
-                 + " --separator='\n'";
+        command.push_back("--file-selection");
+        command.push_back("--filename=" + default_path);
+        command.push_back("--title");
+        command.push_back(title);
+        command.push_back("--separator='\n'");
 
         for (size_t i = 0; i < filters.size() / 2; ++i)
-            command += " --file-filter " + shell_quote(filters[2 * i] + "|" + filters[2 * i + 1]);
+        {
+            command.push_back("--file-filter");
+            command.push_back(filters[2 * i] + "|" + filters[2 * i + 1]);
+        }
 
         if (in_type == type::save)
-            command += " --save";
+            command.push_back("--save");
         if (in_type == type::folder)
-            command += " --directory";
+            command.push_back("--directory");
         if (!(options & opt::force_overwrite))
-            command += " --confirm-overwrite";
+            command.push_back("--confirm-overwrite");
         if (options & opt::multiselect)
-            command += " --multiple";
+            command.push_back("--multiple");
     }
     else if (is_kdialog())
     {
         switch (in_type)
         {
-            case type::save: command += " --getsavefilename"; break;
-            case type::open: command += " --getopenfilename"; break;
-            case type::folder: command += " --getexistingdirectory"; break;
+            case type::save: command.push_back("--getsavefilename"); break;
+            case type::open: command.push_back("--getopenfilename"); break;
+            case type::folder: command.push_back("--getexistingdirectory"); break;
         }
-        command += " " + shell_quote(default_path);
+        if (options & opt::multiselect)
+            command.push_back(" --multiple");
+
+        command.push_back(default_path);
 
         std::string filter;
         for (size_t i = 0; i < filters.size() / 2; ++i)
             filter += (i == 0 ? "" : " | ") + filters[2 * i] + "(" + filters[2 * i + 1] + ")";
-        command += " " + shell_quote(filter);
+        command.push_back(filter);
 
-        command += " --title " + shell_quote(title);
+        command.push_back("--title");
+        command.push_back(title);
     }
 
     if (flags(flag::is_verbose))
         std::cerr << "pfd: " << command << std::endl;
 
-    m_async->start(command);
+    m_async->start_process(command);
 #endif
 }
 
@@ -1122,7 +1222,7 @@ inline std::string internal::file_dialog::select_folder_vista(IFileDialog *ifd, 
     ifd->SetOptions(FOS_PICKFOLDERS);
     ifd->SetTitle(m_wtitle.c_str());
 
-    hr = ifd->Show(GetForegroundWindow());
+    hr = ifd->Show(GetActiveWindow());
     if (SUCCEEDED(hr))
     {
         IShellItem* item;
@@ -1223,27 +1323,33 @@ inline notify::notify(std::string const &title,
 
     if (is_osascript())
     {
-        command += " -e 'display notification " + osascript_quote(message) +
-                   "     with title " + osascript_quote(title) + "'";
+        command.push_back("-e");
+        command.push_back("display notification " + osascript_quote(message) +
+                          " with title " + osascript_quote(title));
     }
     else if (is_zenity())
     {
-        command += " --notification"
-                   " --window-icon " + get_icon_name(_icon) +
-                   " --text " + shell_quote(title + "\n" + message);
+        command.push_back("--notification");
+        command.push_back("--window-icon");
+        command.push_back(get_icon_name(_icon));
+        command.push_back("--text");
+        command.push_back(title + "\n" + message);
     }
     else if (is_kdialog())
     {
-        command += " --icon " + get_icon_name(_icon) +
-                   " --title " + shell_quote(title) +
-                   " --passivepopup " + shell_quote(message) +
-                   " 5";
+        command.push_back("--icon");
+        command.push_back(get_icon_name(_icon));
+        command.push_back("--title");
+        command.push_back(title);
+        command.push_back("--passivepopup");
+        command.push_back(message);
+        command.push_back("5");
     }
 
     if (flags(flag::is_verbose))
         std::cerr << "pfd: " << command << std::endl;
 
-    m_async->start(command);
+    m_async->start_process(command);
 #endif
 }
 
@@ -1282,15 +1388,16 @@ inline message::message(std::string const &title,
     m_mappings[IDRETRY] = button::retry;
     m_mappings[IDIGNORE] = button::ignore;
 
-    m_async->start([text, title, style](int *exit_code) -> std::string
+    m_async->start_func([this, text, title, style](int* exit_code) -> std::string
     {
         auto wtext = internal::str2wstr(text);
         auto wtitle = internal::str2wstr(title);
         // using set context to apply new visual style (required for all windows versions)
         new_style_context ctx;
-        *exit_code = MessageBoxW(GetForegroundWindow(), wtext.c_str(), wtitle.c_str(), style);
+        *exit_code = MessageBoxW(GetActiveWindow(), wtext.c_str(), wtitle.c_str(), style);
         return "";
     });
+
 #elif __EMSCRIPTEN__
     std::string full_message;
     switch (_icon)
@@ -1317,89 +1424,91 @@ inline message::message(std::string const &title,
 
     if (is_osascript())
     {
-        command += " -e 'display dialog " + osascript_quote(text) +
-                   "     with title " + osascript_quote(title);
+        std::string script = "display dialog " + osascript_quote(text) +
+                             " with title " + osascript_quote(title);
         switch (_choice)
         {
             case choice::ok_cancel:
-                command += "buttons {\"OK\", \"Cancel\"} "
-                           "default button \"OK\" "
-                           "cancel button \"Cancel\"";
+                script += "buttons {\"OK\", \"Cancel\"}"
+                          " default button \"OK\""
+                          " cancel button \"Cancel\"";
                 m_mappings[256] = button::cancel;
                 break;
             case choice::yes_no:
-                command += "buttons {\"Yes\", \"No\"} "
-                           "default button \"Yes\" "
-                           "cancel button \"No\"";
+                script += "buttons {\"Yes\", \"No\"}"
+                          " default button \"Yes\""
+                          " cancel button \"No\"";
                 m_mappings[256] = button::no;
                 break;
             case choice::yes_no_cancel:
-                command += "buttons {\"Yes\", \"No\", \"Cancel\"} "
-                           "default button \"Yes\" "
-                           "cancel button \"Cancel\"";
+                script += "buttons {\"Yes\", \"No\", \"Cancel\"}"
+                          " default button \"Yes\""
+                          " cancel button \"Cancel\"";
                 m_mappings[256] = button::cancel;
                 break;
             case choice::retry_cancel:
-                command += "buttons {\"Retry\", \"Cancel\"} "
-                    "default button \"Retry\" "
-                    "cancel button \"Cancel\"";
+                script += "buttons {\"Retry\", \"Cancel\"}"
+                          " default button \"Retry\""
+                          " cancel button \"Cancel\"";
                 m_mappings[256] = button::cancel;
                 break;
             case choice::abort_retry_ignore:
-                command += "buttons {\"Abort\", \"Retry\", \"Ignore\"} "
-                    "default button \"Retry\" "
-                    "cancel button \"Retry\"";
+                script += "buttons {\"Abort\", \"Retry\", \"Ignore\"}"
+                          " default button \"Retry\""
+                          " cancel button \"Retry\"";
                 m_mappings[256] = button::cancel;
                 break;
             case choice::ok: default:
-                command += "buttons {\"OK\"} "
-                           "default button \"OK\" "
-                           "cancel button \"OK\"";
+                script += "buttons {\"OK\"}"
+                          " default button \"OK\""
+                          " cancel button \"OK\"";
                 m_mappings[256] = button::ok;
                 break;
         }
-        command += " with icon ";
+        script += " with icon ";
         switch (_icon)
         {
             #define PFD_OSX_ICON(n) "alias ((path to library folder from system domain) as text " \
                 "& \"CoreServices:CoreTypes.bundle:Contents:Resources:" n ".icns\")"
-            case icon::info: default: command += PFD_OSX_ICON("ToolBarInfo"); break;
-            case icon::warning: command += "caution"; break;
-            case icon::error: command += "stop"; break;
-            case icon::question: command += PFD_OSX_ICON("GenericQuestionMarkIcon"); break;
+            case icon::info: default: script += PFD_OSX_ICON("ToolBarInfo"); break;
+            case icon::warning: script += "caution"; break;
+            case icon::error: script += "stop"; break;
+            case icon::question: script += PFD_OSX_ICON("GenericQuestionMarkIcon"); break;
             #undef PFD_OSX_ICON
         }
-        command += "'";
+
+        command.push_back("-e");
+        command.push_back(script);
     }
     else if (is_zenity())
     {
         switch (_choice)
         {
             case choice::ok_cancel:
-                command += " --question --ok-label=OK --cancel-label=Cancel"; break;
+                command.insert(command.end(), { "--question", "--ok-label=OK", "--cancel-label=Cancel" }); break;
             case choice::yes_no:
                 // Do not use standard --question because it causes “No” to return -1,
                 // which is inconsistent with the “Yes/No/Cancel” mode below.
-                command += " --question --switch --extra-button No --extra-button Yes"; break;
+                command.insert(command.end(), { "--question", "--switch", "--extra-button", "No", "--extra-button", "Yes" }); break;
             case choice::yes_no_cancel:
-                command += " --question --switch --extra-button No --extra-button Yes --extra-button Cancel"; break;
+                command.insert(command.end(), { "--question", "--switch", "--extra-button", "No", "--extra-button", "Yes", "--extra-button", "Cancel" }); break;
             case choice::retry_cancel:
-                command += " --question --switch --extra-button Retry --extra-button Cancel"; break;
+                command.insert(command.end(), { "--question", "--switch", "--extra-button", "Retry", "--extra-button", "Cancel" }); break;
             case choice::abort_retry_ignore:
-                command += " --question --switch --extra-button Abort --extra-button Retry --extra-button Ignore"; break;
+                command.insert(command.end(), { "--question", "--switch", "--extra-button", "Abort", "--extra-button", "Retry", "--extra-button", "Ignore" }); break;
             default:
                 switch (_icon)
                 {
-                    case icon::error: command += " --error"; break;
-                    case icon::warning: command += " --warning"; break;
-                    default: command += " --info"; break;
+                    case icon::error: command.push_back("--error"); break;
+                    case icon::warning: command.push_back("--warning"); break;
+                    default: command.push_back("--info"); break;
                 }
         }
 
-        command += " --title " + shell_quote(title)
-                 + " --width 300 --height 0" // sensible defaults
-                 + " --text " + shell_quote(text)
-                 + " --icon-name=dialog-" + get_icon_name(_icon);
+        command.insert(command.end(), { "--title", title,
+                                        "--width", "300", "--height", "0", // sensible defaults
+                                        "--text", text,
+                                        "--icon-name=dialog-" + get_icon_name(_icon) });
     }
     else if (is_kdialog())
     {
@@ -1407,19 +1516,20 @@ inline message::message(std::string const &title,
         {
             switch (_icon)
             {
-                case icon::error: command += " --error"; break;
-                case icon::warning: command += " --sorry"; break;
-                default: command += " --msgbox"; break;
+                case icon::error: command.push_back("--error"); break;
+                case icon::warning: command.push_back("--sorry"); break;
+                default: command.push_back("--msgbox"); break;
             }
         }
         else
         {
-            command += " --";
+            std::string flag = "--";
             if (_icon == icon::warning || _icon == icon::error)
-                command += "warning";
-            command += "yesno";
+                flag += "warning";
+            flag += "yesno";
             if (_choice == choice::yes_no_cancel)
-                command += "cancel";
+                flag += "cancel";
+            command.push_back(flag);
             if (_choice == choice::yes_no || _choice == choice::yes_no_cancel)
             {
                 m_mappings[0] = button::yes;
@@ -1427,18 +1537,19 @@ inline message::message(std::string const &title,
             }
         }
 
-        command += " " + shell_quote(text)
-                 + " --title " + shell_quote(title);
+        command.push_back(text);
+        command.push_back("--title");
+        command.push_back(title);
 
         // Must be after the above part
         if (_choice == choice::ok_cancel)
-            command += " --yes-label OK --no-label Cancel";
+            command.insert(command.end(), { "--yes-label", "OK", "--no-label", "Cancel" });
     }
 
     if (flags(flag::is_verbose))
         std::cerr << "pfd: " << command << std::endl;
 
-    m_async->start(command);
+    m_async->start_process(command);
 #endif
 }
 
