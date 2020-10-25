@@ -63,4 +63,4 @@ target_link_libraries(OberonEditor PRIVATE
     ${GTKMM_LIBRARIES})
 
 # Make the executable a default target to build & run in Visual Studio
-set_property(DIRECTORY ${PROJECT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT MyApplication)
+set_property(DIRECTORY ${PROJECT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT OberonEditor)
