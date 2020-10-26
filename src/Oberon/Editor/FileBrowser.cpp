@@ -37,12 +37,20 @@ FileBrowser::FileBrowser(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builde
 }
 
 void FileBrowser::setRootFromPath(const std::string& path) {
+    /* Cancel any current async operation and then
+       reset its state */
+    _cancellable->cancel();
+    _cancellable->reset();
+
+    /* Clear the current tree */
+    _fileTree->clear();
+
     loadDirectory(Gio::File::create_for_path(path));
 }
 
 void FileBrowser::loadDirectory(const Glib::RefPtr<Gio::File>& directory) {
-    directory->enumerate_children_async(sigc::bind(sigc::mem_fun(*this, &FileBrowser::onDirectoryEnumerateChildren),
-        directory), _cancellable);
+    directory->enumerate_children_async(sigc::bind(sigc::mem_fun(*this,
+        &FileBrowser::onDirectoryEnumerateChildren), directory), _cancellable);
 }
 
 void FileBrowser::onDirectoryEnumerateChildren(const Glib::RefPtr<Gio::AsyncResult>& result, const Glib::RefPtr<Gio::File>& directory) {
