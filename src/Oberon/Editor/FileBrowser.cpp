@@ -25,56 +25,103 @@
 #include "FileBrowser.h"
 
 #include <giomm/file.h>
+#include <Corrade/Utility/Directory.h>
+
+#include "Oberon/Oberon.h"
 
 namespace Oberon { namespace Editor {
 
-FileBrowser::FileBrowser(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& builder): Gtk::TreeView(cobject) {
-    _fileTree = Gtk::TreeStore::create(_columns);
-    _cancellable = Gio::Cancellable::create();
+FileBrowser::FileBrowser(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& builder):
+    Gtk::TreeView(cobject)
+{
+    _treeStore = Gtk::TreeStore::create(_columns);
+    set_model(_treeStore);
 
-    set_model(_fileTree);
     append_column("", _columns.filename);
+
+    signal_row_expanded().connect(sigc::mem_fun(*this, &FileBrowser::onRowExpanded));
 }
 
-void FileBrowser::setRootFromPath(const std::string& path) {
-    /* Cancel any current async operation and then
-       reset its state */
-    _cancellable->cancel();
-    _cancellable->reset();
+void FileBrowser::setRootPath(const std::string& path) {
+    _rootPath = path;
 
     /* Clear the current tree */
-    _fileTree->clear();
+    _treeStore->clear();
 
-    loadDirectory(Gio::File::create_for_path(path));
+    /* Create root project node */
+    Glib::RefPtr<Gio::File> file = Gio::File::create_for_path(path);
+    Gtk::TreeModel::Row row = *(_treeStore->append());
+    row[_columns.filename] = file->get_basename();
+
+    /* Make the node expandable with a placeholder child node */
+    _treeStore->append(row->children());
 }
 
-void FileBrowser::loadDirectory(const Glib::RefPtr<Gio::File>& directory) {
+void FileBrowser::onRowExpanded(const Gtk::TreeModel::iterator& iter, const Gtk::TreeModel::Path& path) {
+    /* If the first node is the placeholder (empty node),
+       the directory needs to be loaded */
+    if(iter->children().begin()->get_value(_columns.filename).empty())
+        loadDirectory(*iter);
+}
+
+void FileBrowser::loadDirectory(const Gtk::TreeModel::Row& row) {
+    /* Get the directory path from the node */
+    std::string path = getPathFromRow(row);
+    Glib::RefPtr<Gio::File> directory = Gio::File::create_for_path(path);
+
     directory->enumerate_children_async(sigc::bind(sigc::mem_fun(*this,
-        &FileBrowser::onDirectoryEnumerateChildren), directory), _cancellable);
+        &FileBrowser::onEnumerateChildren), directory, row));
 }
 
-void FileBrowser::onDirectoryEnumerateChildren(const Glib::RefPtr<Gio::AsyncResult>& result, const Glib::RefPtr<Gio::File>& directory) {
+std::string FileBrowser::getPathFromRow(const Gtk::TreeModel::Row& row) {
+    std::string path;
+    Gtk::TreeModel::iterator iter{row};
+
+    /* Iterate with each parent except the root node */
+    for(; iter && iter->parent(); iter = iter->parent())
+        path = Utility::Directory::join(iter->get_value(_columns.filename), path);
+
+    /* Join with the root path after the node iteration is done */
+    path = Utility::Directory::join(_rootPath, path);
+
+    return path;
+}
+
+void FileBrowser::onEnumerateChildren(const Glib::RefPtr<Gio::AsyncResult>& result, const Glib::RefPtr<Gio::File>& directory, const Gtk::TreeModel::Row& row) {
     Glib::RefPtr<Gio::FileEnumerator> enumerator = directory->enumerate_children_finish(result);
-    requestNextFiles(directory, enumerator);
+    requestNextFiles(directory, enumerator, row);
 }
 
-void FileBrowser::requestNextFiles(const Glib::RefPtr<Gio::File>& directory, const Glib::RefPtr<Gio::FileEnumerator>& enumerator) {
-    enumerator->next_files_async(sigc::bind(sigc::mem_fun(*this, &FileBrowser::onDirectoryNextFiles),
-        directory, enumerator), _cancellable);
+void FileBrowser::requestNextFiles(const Glib::RefPtr<Gio::File>& directory, const Glib::RefPtr<Gio::FileEnumerator>& enumerator, const Gtk::TreeModel::Row& row) {
+    enumerator->next_files_async(sigc::bind(sigc::mem_fun(*this, &FileBrowser::onNextFiles),
+        directory, enumerator, row));
 }
 
-void FileBrowser::onDirectoryNextFiles(const Glib::RefPtr<Gio::AsyncResult>& result, const Glib::RefPtr<Gio::File>& directory, const Glib::RefPtr<Gio::FileEnumerator>& enumerator) {
+void FileBrowser::onNextFiles(const Glib::RefPtr<Gio::AsyncResult>& result, const Glib::RefPtr<Gio::File>& directory, const Glib::RefPtr<Gio::FileEnumerator>& enumerator, const Gtk::TreeModel::Row& row) {
     Glib::ListHandle<Glib::RefPtr<Gio::FileInfo>> listInfo = enumerator->next_files_finish(result);
 
-    if(listInfo.empty()) {
-        _cancellable->cancel();
+    if(listInfo.empty()) { /* If we're done with the loading */
+        /* Get the placeholder node (it's always the last children) */
+        Gtk::TreeModel::iterator placeholder = --(row.children().end());
+
+        /* If the folder only has 1 child it means that it's empty
+           (only the placeholder is present), so set it's child name
+           to "empty". Otherwise just remove the placeholder. */
+        if(row.children().size() == 1)
+            (*placeholder)[_columns.filename] = "(Empty)";
+        else
+            _treeStore->erase(placeholder);
     } else {
         for(Glib::RefPtr<Gio::FileInfo> info: listInfo) {
-            Gtk::TreeModel::Row row = *(_fileTree->append());
-            row[_columns.filename] = info->get_name();
+            Gtk::TreeModel::Row childRow = *(_treeStore->prepend(row.children()));
+            childRow[_columns.filename] = info->get_name();
+
+            /* Add a child placeholder if the file is a directory */
+            if(info->get_file_type() == Gio::FileType::FILE_TYPE_DIRECTORY)
+                _treeStore->append(childRow.children());
         }
 
-        requestNextFiles(directory, enumerator);
+        requestNextFiles(directory, enumerator, row);
     }
 }
 

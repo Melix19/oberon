@@ -35,26 +35,32 @@ class FileBrowser: public Gtk::TreeView {
     public:
         explicit FileBrowser(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& builder);
 
-        void setRootFromPath(const std::string& path);
+        void setRootPath(const std::string& path);
 
     private:
-        void loadDirectory(const Glib::RefPtr<Gio::File>& directory);
-        void onDirectoryEnumerateChildren(const Glib::RefPtr<Gio::AsyncResult>& result, const Glib::RefPtr<Gio::File>& directory);
+        void onRowExpanded(const Gtk::TreeModel::iterator& iter, const Gtk::TreeModel::Path& path);
 
-        void requestNextFiles(const Glib::RefPtr<Gio::File>& directory, const Glib::RefPtr<Gio::FileEnumerator>& enumerator);
-        void onDirectoryNextFiles(const Glib::RefPtr<Gio::AsyncResult>& result, const Glib::RefPtr<Gio::File>& directory, const Glib::RefPtr<Gio::FileEnumerator>& enumerator);
+        void loadDirectory(const Gtk::TreeModel::Row& row);
+
+        std::string getPathFromRow(const Gtk::TreeModel::Row& row);
+
+        void onEnumerateChildren(const Glib::RefPtr<Gio::AsyncResult>& result, const Glib::RefPtr<Gio::File>& directory, const Gtk::TreeModel::Row& row);
+
+        void requestNextFiles(const Glib::RefPtr<Gio::File>& directory, const Glib::RefPtr<Gio::FileEnumerator>& enumerator, const Gtk::TreeModel::Row& row);
+        void onNextFiles(const Glib::RefPtr<Gio::AsyncResult>& result, const Glib::RefPtr<Gio::File>& directory, const Glib::RefPtr<Gio::FileEnumerator>& enumerator, const Gtk::TreeModel::Row& row);
 
     private:
-        struct FileTreeColumns: public Gtk::TreeModel::ColumnRecord {
-            explicit FileTreeColumns() { add(filename); }
+        struct ModelColumns: public Gtk::TreeModel::ColumnRecord {
+            explicit ModelColumns() { add(filename); }
 
             Gtk::TreeModelColumn<Glib::ustring> filename;
         };
 
-        FileTreeColumns _columns;
+        ModelColumns _columns;
 
-        Glib::RefPtr<Gtk::TreeStore> _fileTree;
-        Glib::RefPtr<Gio::Cancellable> _cancellable;
+        Glib::RefPtr<Gtk::TreeStore> _treeStore;
+
+        std::string _rootPath;
 };
 
 }}

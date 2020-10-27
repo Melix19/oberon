@@ -53,7 +53,7 @@ void EditorWindow::onButtonOpen() {
 
     int result = dialog.run();
     if(result == Gtk::RESPONSE_OK)
-        _fileBrowser->setRootFromPath(dialog.get_filename());
+        _fileBrowser->setRootPath(dialog.get_filename());
 }
 
 }}
