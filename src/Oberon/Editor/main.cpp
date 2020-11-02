@@ -38,11 +38,11 @@ int main(int argc, char** argv) {
     Glib::RefPtr<Gtk::Builder> builder =
         Gtk::Builder::create_from_string(rs.get("EditorWindow.ui"));
 
-    Oberon::Editor::EditorWindow* window = nullptr;
-    builder->get_widget_derived("EditorWindow", window, context);
+    Oberon::Editor::FileBrowser* fileBrowser;
+    builder->get_widget_derived("FileBrowser", fileBrowser, context);
 
-    Oberon::Editor::FileBrowser* fileBrowser = nullptr;
-    builder->get_widget_derived("FileBrowser", fileBrowser);
+    Oberon::Editor::EditorWindow* editorWindow;
+    builder->get_widget_derived("EditorWindow", editorWindow, fileBrowser);
 
-    return app->run(*window);
+    return app->run(*editorWindow);
 }

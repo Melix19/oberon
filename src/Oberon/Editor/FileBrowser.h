@@ -26,23 +26,28 @@
 
 #include <giomm/fileenumerator.h>
 #include <gtkmm/builder.h>
+#include <gtkmm/notebook.h>
 #include <gtkmm/treestore.h>
 #include <gtkmm/treeview.h>
+#include <Magnum/Platform/Platform.h>
+
+#include "Oberon/Oberon.h"
 
 namespace Oberon { namespace Editor {
 
 class FileBrowser: public Gtk::TreeView {
     public:
-        explicit FileBrowser(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& builder);
+        explicit FileBrowser(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& builder, Platform::GLContext& context);
 
         void setRootPath(const std::string& path);
 
     private:
+        void onRowActivated(const Gtk::TreeModel::Path& path, Gtk::TreeViewColumn* column);
         void onRowExpanded(const Gtk::TreeModel::iterator& iter, const Gtk::TreeModel::Path& path);
 
         void loadDirectory(const Gtk::TreeModel::Row& row);
 
-        std::string getPathFromRow(const Gtk::TreeModel::Row& row);
+        std::string getPathFromRow(const Gtk::TreeModel::iterator& iter);
 
         void onEnumerateChildren(const Glib::RefPtr<Gio::AsyncResult>& result, const Glib::RefPtr<Gio::File>& directory, const Gtk::TreeModel::Row& row);
 
@@ -55,6 +60,10 @@ class FileBrowser: public Gtk::TreeView {
 
             Gtk::TreeModelColumn<Glib::ustring> filename;
         };
+
+        Platform::GLContext& _context;
+
+        Gtk::Notebook* _notebook;
 
         ModelColumns _columns;
 

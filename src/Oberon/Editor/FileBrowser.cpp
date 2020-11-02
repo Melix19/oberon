@@ -27,18 +27,21 @@
 #include <giomm/file.h>
 #include <Corrade/Utility/Directory.h>
 
-#include "Oberon/Oberon.h"
+#include "Oberon/Editor/Viewport.h"
 
 namespace Oberon { namespace Editor {
 
-FileBrowser::FileBrowser(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& builder):
-    Gtk::TreeView(cobject)
+FileBrowser::FileBrowser(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& builder, Platform::GLContext& context):
+    Gtk::TreeView(cobject), _context(context)
 {
+    builder->get_widget("notebook", _notebook);
+
     _treeStore = Gtk::TreeStore::create(_columns);
     set_model(_treeStore);
 
     append_column("", _columns.filename);
 
+    signal_row_activated().connect(sigc::mem_fun(*this, &FileBrowser::onRowActivated));
     signal_row_expanded().connect(sigc::mem_fun(*this, &FileBrowser::onRowExpanded));
 }
 
@@ -57,6 +60,17 @@ void FileBrowser::setRootPath(const std::string& path) {
     _treeStore->append(row->children());
 }
 
+void FileBrowser::onRowActivated(const Gtk::TreeModel::Path& path, Gtk::TreeViewColumn* column) {
+    Gtk::TreeModel::iterator iter = _treeStore->get_iter(path);
+    Gtk::Label* label = Gtk::make_managed<Gtk::Label>(iter->get_value(_columns.filename));
+    Viewport* viewport = Gtk::make_managed<Viewport>(_context);
+
+    label->show();
+    viewport->show();
+
+    _notebook->append_page(*viewport, *label);
+}
+
 void FileBrowser::onRowExpanded(const Gtk::TreeModel::iterator& iter, const Gtk::TreeModel::Path& path) {
     /* If the first node is the placeholder (empty node),
        the directory needs to be loaded */
@@ -66,20 +80,19 @@ void FileBrowser::onRowExpanded(const Gtk::TreeModel::iterator& iter, const Gtk:
 
 void FileBrowser::loadDirectory(const Gtk::TreeModel::Row& row) {
     /* Get the directory path from the node */
-    std::string path = getPathFromRow(row);
+    std::string path = getPathFromRow(Gtk::TreeModel::iterator(row));
     Glib::RefPtr<Gio::File> directory = Gio::File::create_for_path(path);
 
     directory->enumerate_children_async(sigc::bind(sigc::mem_fun(*this,
         &FileBrowser::onEnumerateChildren), directory, row));
 }
 
-std::string FileBrowser::getPathFromRow(const Gtk::TreeModel::Row& row) {
+std::string FileBrowser::getPathFromRow(const Gtk::TreeModel::iterator& iter) {
     std::string path;
-    Gtk::TreeModel::iterator iter{row};
 
     /* Iterate with each parent except the root node */
-    for(; iter && iter->parent(); iter = iter->parent())
-        path = Utility::Directory::join(iter->get_value(_columns.filename), path);
+    for(Gtk::TreeModel::iterator parentIter(iter); parentIter && parentIter->parent(); parentIter = parentIter->parent())
+        path = Utility::Directory::join(parentIter->get_value(_columns.filename), path);
 
     /* Join with the root path after the node iteration is done */
     path = Utility::Directory::join(_rootPath, path);

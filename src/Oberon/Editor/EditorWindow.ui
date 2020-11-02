@@ -62,7 +62,7 @@
           </packing>
         </child>
         <child>
-          <object class="GtkNotebook">
+          <object class="GtkNotebook" id="notebook">
             <property name="visible">True</property>
             <property name="can-focus">True</property>
             <property name="show-border">False</property>

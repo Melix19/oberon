@@ -31,12 +31,10 @@
 
 namespace Oberon { namespace Editor {
 
-EditorWindow::EditorWindow(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& builder, Platform::GLContext& context):
-    Gtk::Window(cobject), _context(context)
+EditorWindow::EditorWindow(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& builder, FileBrowser* fileBrowser):
+    Gtk::Window(cobject), _fileBrowser(fileBrowser)
 {
     maximize();
-
-    builder->get_widget_derived("FileBrowser", _fileBrowser);
 
     Gtk::Button* openButton;
     builder->get_widget("openButton", openButton);

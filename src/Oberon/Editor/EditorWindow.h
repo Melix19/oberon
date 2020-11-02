@@ -26,21 +26,17 @@
 
 #include <gtkmm/builder.h>
 #include <gtkmm/window.h>
-#include <Magnum/Platform/Platform.h>
 
-#include "Oberon/Oberon.h"
 #include "Oberon/Editor/Editor.h"
 
 namespace Oberon { namespace Editor {
 
 class EditorWindow: public Gtk::Window {
     public:
-        explicit EditorWindow(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& builder, Platform::GLContext& context);
+        explicit EditorWindow(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& builder, FileBrowser* fileBrowser);
 
     private:
         void onButtonOpen();
-
-        Platform::GLContext& _context;
 
         FileBrowser* _fileBrowser;
 };
