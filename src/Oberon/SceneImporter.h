@@ -29,16 +29,10 @@
 
 #include "Oberon/Oberon.h"
 
-namespace Oberon {
-
-namespace SceneImporter {
+namespace Oberon { namespace SceneImporter {
 
 void load(const std::string& path, SceneData& data);
 
-void addObject(const std::string& path, SceneData& data, Containers::ArrayView<const Containers::Pointer<Trade::ObjectData3D>> objects, Containers::ArrayView<const Containers::Optional<Trade::PhongMaterialData>> materials, Object3D& parent, UnsignedInt i);
-
-}
-
-}
+}}
 
 #endif

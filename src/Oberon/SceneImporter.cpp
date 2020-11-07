@@ -37,9 +37,49 @@
 #include "Oberon/PhongDrawable.h"
 #include "Oberon/SceneData.h"
 
-namespace Oberon {
+namespace Oberon { namespace SceneImporter {
 
-namespace SceneImporter {
+namespace {
+
+void addObject(const std::string& path, SceneData& data, Containers::ArrayView<const Containers::Pointer<Trade::ObjectData3D>> objects, Containers::ArrayView<const Containers::Optional<Trade::PhongMaterialData>> materials, Object3D& parent, UnsignedInt i) {
+    /* Object failed to import, skip */
+    if(!objects[i]) return;
+
+    const Trade::ObjectData3D& objectData = *objects[i];
+
+    /* Add the object to the scene and set its transformation. If it has a
+       separate TRS, use that to avoid precision issues. */
+    Object3D* object = new Object3D{&parent};
+    if(objectData.flags() & Trade::ObjectFlag3D::HasTranslationRotationScaling)
+        (*object).setTranslation(objectData.translation())
+                 .setRotation(objectData.rotation())
+                 .setScaling(objectData.scaling());
+    else object->setTransformation(objectData.transformation());
+
+    /* Add a drawable if the object has a mesh */
+    if(objectData.instanceType() == Trade::ObjectInstanceType3D::Mesh && objectData.instance() != -1) {
+        const Int materialId = static_cast<const Trade::MeshObjectData3D&>(objectData).material();
+
+        std::string meshKey = path + "#" + std::to_string(objectData.instance());
+        Resource<GL::Mesh> mesh = data.resourceManager.get<GL::Mesh>(meshKey);
+
+        Resource<GL::AbstractShaderProgram, Shaders::Phong> shader =
+            data.resourceManager.get<GL::AbstractShaderProgram, Shaders::Phong>("phong");
+
+       /* Material not available / not loaded */
+        if(materialId == -1 || !materials[materialId]) {
+        /* Material available */
+        } else {
+            new PhongDrawable{*object, shader, mesh, data.opaqueDrawables};
+        }
+    }
+
+    /* Recursively add children */
+    for(std::size_t id: objectData.children())
+        addObject(path, data, objects, materials, *object, id);
+}
+
+}
 
 void load(const std::string& path, SceneData& data) {
     Containers::Pointer<Trade::AbstractImporter> importer =
@@ -110,44 +150,4 @@ void load(const std::string& path, SceneData& data) {
         .setViewport({1280, 720});
 }
 
-void addObject(const std::string& path, SceneData& data, Containers::ArrayView<const Containers::Pointer<Trade::ObjectData3D>> objects, Containers::ArrayView<const Containers::Optional<Trade::PhongMaterialData>> materials, Object3D& parent, UnsignedInt i) {
-    /* Object failed to import, skip */
-    if(!objects[i]) return;
-
-    const Trade::ObjectData3D& objectData = *objects[i];
-
-    /* Add the object to the scene and set its transformation. If it has a
-       separate TRS, use that to avoid precision issues. */
-    Object3D* object = new Object3D{&parent};
-    if(objectData.flags() & Trade::ObjectFlag3D::HasTranslationRotationScaling)
-        (*object).setTranslation(objectData.translation())
-                 .setRotation(objectData.rotation())
-                 .setScaling(objectData.scaling());
-    else object->setTransformation(objectData.transformation());
-
-    /* Add a drawable if the object has a mesh */
-    if(objectData.instanceType() == Trade::ObjectInstanceType3D::Mesh && objectData.instance() != -1) {
-        const Int materialId = static_cast<const Trade::MeshObjectData3D&>(objectData).material();
-
-        std::string meshKey = path + "#" + std::to_string(objectData.instance());
-        Resource<GL::Mesh> mesh = data.resourceManager.get<GL::Mesh>(meshKey);
-
-        Resource<GL::AbstractShaderProgram, Shaders::Phong> shader =
-            data.resourceManager.get<GL::AbstractShaderProgram, Shaders::Phong>("phong");
-
-       /* Material not available / not loaded */
-        if(materialId == -1 || !materials[materialId]) {
-        /* Material available */
-        } else {
-            new PhongDrawable{*object, shader, mesh, data.opaqueDrawables};
-        }
-    }
-
-    /* Recursively add children */
-    for(std::size_t id: objectData.children())
-        addObject(path, data, objects, materials, *object, id);
-}
-
-}
-
-}
+}}
