@@ -1,5 +1,5 @@
-#ifndef Oberon_Editor_Viewport_h
-#define Oberon_Editor_Viewport_h
+#ifndef Oberon_SceneImporter_h
+#define Oberon_SceneImporter_h
 /*
     This file is part of Oberon.
 
@@ -24,28 +24,21 @@
     SOFTWARE.
 */
 
-#include <gtkmm/glarea.h>
-#include <Corrade/Containers/Pointer.h>
-#include <Magnum/Platform/Platform.h>
+#include <string>
+#include <Magnum/Trade/Trade.h>
 
 #include "Oberon/Oberon.h"
 
-namespace Oberon { namespace Editor {
+namespace Oberon {
 
-class Viewport: public Gtk::GLArea {
-    public:
-        explicit Viewport(Platform::GLContext& context, const std::string& path);
+namespace SceneImporter {
 
-    private:
-        void onRealize(const std::string& path);
-        bool onRender(const Glib::RefPtr<Gdk::GLContext>& context);
-        void onResize(int width, int height);
+void load(const std::string& path, SceneData& data);
 
-        Platform::GLContext& _context;
+void addObject(const std::string& path, SceneData& data, Containers::ArrayView<const Containers::Pointer<Trade::ObjectData3D>> objects, Containers::ArrayView<const Containers::Optional<Trade::PhongMaterialData>> materials, Object3D& parent, UnsignedInt i);
 
-        Containers::Pointer<SceneView> _sceneView;
-};
+}
 
-}}
+}
 
 #endif

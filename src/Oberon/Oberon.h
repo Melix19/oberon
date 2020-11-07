@@ -25,12 +25,18 @@
 */
 
 #include <Magnum/Magnum.h>
+#include <Magnum/SceneGraph/SceneGraph.h>
 
 namespace Oberon {
 
 using namespace Magnum;
 
+typedef SceneGraph::Object<SceneGraph::TranslationRotationScalingTransformation3D> Object3D;
+typedef SceneGraph::Scene<SceneGraph::TranslationRotationScalingTransformation3D> Scene3D;
+
 class PhongDrawable;
+
+struct SceneData;
 
 class SceneView;
 

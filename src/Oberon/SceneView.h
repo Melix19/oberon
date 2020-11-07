@@ -24,35 +24,18 @@
     SOFTWARE.
 */
 
-#include <Magnum/ResourceManager.h>
-#include <Magnum/GL/AbstractShaderProgram.h>
-#include <Magnum/GL/Mesh.h>
-#include <Magnum/SceneGraph/Drawable.h>
-#include <Magnum/SceneGraph/Scene.h>
-#include <Magnum/SceneGraph/TranslationRotationScalingTransformation3D.h>
-
-#include "Oberon/Oberon.h"
+#include "Oberon/SceneData.h"
 
 namespace Oberon {
 
-typedef SceneGraph::Object<SceneGraph::TranslationRotationScalingTransformation3D> Object3D;
-typedef SceneGraph::Scene<SceneGraph::TranslationRotationScalingTransformation3D> Scene3D;
-
-typedef ResourceManager<GL::Mesh, GL::AbstractShaderProgram> SceneResourceManager;
-
 class SceneView {
     public:
-        explicit SceneView();
+        explicit SceneView(const std::string& path);
 
         void draw();
 
     private:
-        SceneResourceManager _resourceManager;
-
-        Scene3D _scene;
-        Object3D* _cameraObject;
-        SceneGraph::Camera3D* _camera;
-        SceneGraph::DrawableGroup3D _opaqueDrawables;
+        SceneData _data;
 };
 
 }

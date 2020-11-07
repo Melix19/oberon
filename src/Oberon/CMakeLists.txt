@@ -22,15 +22,18 @@
 #   SOFTWARE.
 #
 
-find_package(Magnum REQUIRED GL SceneGraph Shaders)
+find_package(Magnum REQUIRED GL MeshTools SceneGraph Shaders Trade)
 
 set(Oberon_SRCS
     PhongDrawable.cpp
+    SceneImporter.cpp
     SceneView.cpp)
 
 set(Oberon_HEADERS
     Oberon.h
     PhongDrawable.h
+    SceneData.h
+    SceneImporter.h
     SceneView.h)
 
 add_library(Oberon
@@ -42,7 +45,9 @@ target_include_directories(Oberon PUBLIC
 target_link_libraries(Oberon PUBLIC
     Magnum::GL
     Magnum::Magnum
+    Magnum::MeshTools
     Magnum::SceneGraph
-    Magnum::Shaders)
+    Magnum::Shaders
+    Magnum::Trade)
 
 add_subdirectory(Editor)

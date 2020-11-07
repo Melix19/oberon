@@ -35,13 +35,13 @@ namespace Oberon {
 
 class PhongDrawable: public SceneGraph::Drawable3D {
     public:
-        explicit PhongDrawable(SceneGraph::AbstractObject3D& object, SceneGraph::DrawableGroup3D& group, const Resource<GL::Mesh>& mesh, const Resource<GL::AbstractShaderProgram, Shaders::Phong>& shader): SceneGraph::Drawable3D{object, &group}, _mesh(mesh), _shader(shader) {}
+        explicit PhongDrawable(SceneGraph::AbstractObject3D& object, const Resource<GL::AbstractShaderProgram, Shaders::Phong>& shader, const Resource<GL::Mesh>& mesh, SceneGraph::DrawableGroup3D& group): SceneGraph::Drawable3D{object, &group}, _shader(shader), _mesh(mesh) {}
 
     private:
         void draw(const Matrix4& transformationMatrix, SceneGraph::Camera3D& camera) override;
 
-        Resource<GL::Mesh> _mesh;
         Resource<GL::AbstractShaderProgram, Shaders::Phong> _shader;
+        Resource<GL::Mesh> _mesh;
 };
 
 }

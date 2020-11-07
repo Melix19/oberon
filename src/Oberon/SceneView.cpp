@@ -25,15 +25,18 @@
 #include "SceneView.h"
 
 #include <Magnum/SceneGraph/Camera.h>
+#include <Magnum/Trade/AbstractImporter.h>
+
+#include "Oberon/SceneImporter.h"
 
 namespace Oberon {
 
-SceneView::SceneView() {
-
+SceneView::SceneView(const std::string& path) {
+    SceneImporter::load(path, _data);
 }
 
 void SceneView::draw() {
-    _camera->draw(_opaqueDrawables);
+    _data.camera->draw(_data.opaqueDrawables);
 }
 
 }

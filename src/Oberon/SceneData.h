@@ -1,5 +1,5 @@
-#ifndef Oberon_Editor_Viewport_h
-#define Oberon_Editor_Viewport_h
+#ifndef Oberon_SceneData_h
+#define Oberon_SceneData_h
 /*
     This file is part of Oberon.
 
@@ -24,28 +24,33 @@
     SOFTWARE.
 */
 
-#include <gtkmm/glarea.h>
-#include <Corrade/Containers/Pointer.h>
-#include <Magnum/Platform/Platform.h>
+#include <Corrade/PluginManager/Manager.h>
+#include <Magnum/ResourceManager.h>
+#include <Magnum/GL/AbstractShaderProgram.h>
+#include <Magnum/GL/Mesh.h>
+#include <Magnum/SceneGraph/Drawable.h>
+#include <Magnum/SceneGraph/Scene.h>
+#include <Magnum/SceneGraph/TranslationRotationScalingTransformation3D.h>
+#include <Magnum/Trade/Trade.h>
 
 #include "Oberon/Oberon.h"
 
-namespace Oberon { namespace Editor {
+namespace Oberon {
 
-class Viewport: public Gtk::GLArea {
-    public:
-        explicit Viewport(Platform::GLContext& context, const std::string& path);
+typedef ResourceManager<GL::Mesh, GL::AbstractShaderProgram> SceneResourceManager;
 
-    private:
-        void onRealize(const std::string& path);
-        bool onRender(const Glib::RefPtr<Gdk::GLContext>& context);
-        void onResize(int width, int height);
+struct SceneData {
+    PluginManager::Manager<Trade::AbstractImporter> manager;
 
-        Platform::GLContext& _context;
+    SceneResourceManager resourceManager;
 
-        Containers::Pointer<SceneView> _sceneView;
+    Scene3D scene;
+    Object3D* cameraObject;
+    SceneGraph::Camera3D* camera;
+
+    SceneGraph::DrawableGroup3D opaqueDrawables;
 };
 
-}}
+}
 
 #endif

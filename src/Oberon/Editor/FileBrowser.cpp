@@ -62,8 +62,10 @@ void FileBrowser::setRootPath(const std::string& path) {
 
 void FileBrowser::onRowActivated(const Gtk::TreeModel::Path& path, Gtk::TreeViewColumn* column) {
     Gtk::TreeModel::iterator iter = _treeStore->get_iter(path);
+    std::string filePath = getPathFromRow(iter);
+
     Gtk::Label* label = Gtk::make_managed<Gtk::Label>(iter->get_value(_columns.filename));
-    Viewport* viewport = Gtk::make_managed<Viewport>(_context);
+    Viewport* viewport = Gtk::make_managed<Viewport>(_context, filePath);
 
     label->show();
     viewport->show();
@@ -90,12 +92,18 @@ void FileBrowser::loadDirectory(const Gtk::TreeModel::Row& row) {
 std::string FileBrowser::getPathFromRow(const Gtk::TreeModel::iterator& iter) {
     std::string path;
 
-    /* Iterate with each parent except the root node */
-    for(Gtk::TreeModel::iterator parentIter(iter); parentIter && parentIter->parent(); parentIter = parentIter->parent())
-        path = Utility::Directory::join(parentIter->get_value(_columns.filename), path);
+    if(iter->parent()) {
+        path = iter->get_value(_columns.filename);
 
-    /* Join with the root path after the node iteration is done */
-    path = Utility::Directory::join(_rootPath, path);
+        /* Iterate with each parent except the root node */
+        for(Gtk::TreeModel::iterator parentIter = iter->parent(); parentIter && parentIter->parent(); parentIter = parentIter->parent())
+            path = Utility::Directory::join(parentIter->get_value(_columns.filename), path);
+
+        /* Join with the root path after the node iteration is done */
+        path = Utility::Directory::join(_rootPath, path);
+    } else {
+        path = _rootPath;
+    }
 
     return path;
 }

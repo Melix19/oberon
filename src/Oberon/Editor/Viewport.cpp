@@ -31,7 +31,7 @@
 
 namespace Oberon { namespace Editor {
 
-Viewport::Viewport(Platform::GLContext& context): _context(context) {
+Viewport::Viewport(Platform::GLContext& context, const std::string& path): _context(context) {
     /* Automatically re-render everything every time it needs to be drawn */
     set_auto_render();
 
@@ -45,17 +45,17 @@ Viewport::Viewport(Platform::GLContext& context): _context(context) {
     set_required_version(4, 5);
 
     /* Connect signals to their respective handlers */
-    signal_realize().connect(sigc::mem_fun(this, &Viewport::onRealize));
+    signal_realize().connect(sigc::bind(sigc::mem_fun(this, &Viewport::onRealize), path));
     signal_render().connect(sigc::mem_fun(this, &Viewport::onRender));
     signal_resize().connect(sigc::mem_fun(this, &Viewport::onResize));
 }
 
-void Viewport::onRealize() {
+void Viewport::onRealize(const std::string& path) {
     /* Make sure the OpenGL context is current then configure it */
     make_current();
     _context.create();
 
-    _sceneView = Containers::pointer<SceneView>();
+    _sceneView = Containers::pointer<SceneView>(path);
 }
 
 bool Viewport::onRender(const Glib::RefPtr<Gdk::GLContext>& context) {
