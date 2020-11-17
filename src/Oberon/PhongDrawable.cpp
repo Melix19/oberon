@@ -35,6 +35,8 @@ void PhongDrawable::draw(const Matrix4& transformationMatrix, SceneGraph::Camera
         .setTransformationMatrix(transformationMatrix)
         .setNormalMatrix(transformationMatrix.normalMatrix())
         .setProjectionMatrix(camera.projectionMatrix())
+        .setAmbientColor(_color*0.06f)
+        .setDiffuseColor(_color)
         .draw(*_mesh);
 }
 

@@ -26,6 +26,7 @@
 
 #include <Magnum/Resource.h>
 #include <Magnum/GL/GL.h>
+#include <Magnum/Math/Color.h>
 #include <Magnum/SceneGraph/Drawable.h>
 #include <Magnum/Shaders/Shaders.h>
 
@@ -35,13 +36,14 @@ namespace Oberon {
 
 class PhongDrawable: public SceneGraph::Drawable3D {
     public:
-        explicit PhongDrawable(SceneGraph::AbstractObject3D& object, const Resource<GL::AbstractShaderProgram, Shaders::Phong>& shader, const Resource<GL::Mesh>& mesh, SceneGraph::DrawableGroup3D& group): SceneGraph::Drawable3D{object, &group}, _shader(shader), _mesh(mesh) {}
+        explicit PhongDrawable(SceneGraph::AbstractObject3D& object, const Resource<GL::AbstractShaderProgram, Shaders::Phong>& shader, const Resource<GL::Mesh>& mesh, const Color4& color, SceneGraph::DrawableGroup3D& group): SceneGraph::Drawable3D{object, &group}, _shader(shader), _mesh(mesh), _color{color} {}
 
     private:
         void draw(const Matrix4& transformationMatrix, SceneGraph::Camera3D& camera) override;
 
         Resource<GL::AbstractShaderProgram, Shaders::Phong> _shader;
         Resource<GL::Mesh> _mesh;
+        Color4 _color;
 };
 
 }

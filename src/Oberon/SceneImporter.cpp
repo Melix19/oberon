@@ -70,7 +70,9 @@ void addObject(const std::string& path, SceneData& data, Containers::ArrayView<c
         if(materialId == -1 || !materials[materialId]) {
         /* Material available */
         } else {
-            new PhongDrawable{*object, shader, mesh, data.opaqueDrawables};
+            const Trade::PhongMaterialData& material = *materials[materialId];
+
+            new PhongDrawable{*object, shader, mesh, material.diffuseColor(), data.opaqueDrawables};
         }
     }
 
