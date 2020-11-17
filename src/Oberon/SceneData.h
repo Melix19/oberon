@@ -45,7 +45,7 @@ struct SceneData {
     SceneResourceManager resourceManager;
 
     Scene3D scene;
-    Object3D* cameraObject;
+    Object3D* cameraObject{};
     SceneGraph::Camera3D* camera;
 
     SceneGraph::DrawableGroup3D opaqueDrawables;
