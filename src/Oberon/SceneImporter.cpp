@@ -2,6 +2,7 @@
     This file is part of Oberon.
 
     Copyright (c) 2019-2020 Marco Melorio
+    Copyright (c) 2010-2020 Vladimír Vondruš
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"), to deal
@@ -21,6 +22,9 @@
     OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
     SOFTWARE.
 */
+
+/* Large portions of this code is taken from:
+   https://github.com/mosra/magnum-extras */
 
 #include "SceneImporter.h"
 
@@ -74,6 +78,11 @@ void addObject(const std::string& path, SceneData& data, Containers::ArrayView<c
 
             new PhongDrawable{*object, shader, mesh, material.diffuseColor(), data.opaqueDrawables};
         }
+
+    /* This is a node that holds the default camera -> assign the object to the
+       global camera pointer */
+    } else if(objectData.instanceType() == Trade::ObjectInstanceType3D::Camera && objectData.instance() == 0) {
+        data.cameraObject = object;
     }
 
     /* Recursively add children */
