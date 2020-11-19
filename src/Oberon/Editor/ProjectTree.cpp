@@ -26,6 +26,7 @@
 
 #include <giomm/file.h>
 #include <Corrade/Utility/Directory.h>
+#include <Corrade/Utility/String.h>
 
 #include "Oberon/Editor/Viewport.h"
 
@@ -59,10 +60,13 @@ void ProjectTree::setRootPath(const std::string& path) {
 }
 
 void ProjectTree::onRowActivated(const Gtk::TreeModel::Path& path, Gtk::TreeViewColumn* column) {
-    Gtk::TreeModel::iterator iter = _treeStore->get_iter(path);
-    std::string filePath = getPathFromRow(iter);
+    const Gtk::TreeModel::iterator iter = _treeStore->get_iter(path);
+    const std::string filePath = getPathFromRow(iter);
+    const std::string normalized = Utility::String::lowercase(filePath);
 
-    _viewport->loadScene(filePath);
+    if(Utility::String::endsWith(normalized, ".gltf") ||
+       Utility::String::endsWith(normalized, ".glb"))
+        _viewport->loadScene(filePath);
 }
 
 void ProjectTree::onRowExpanded(const Gtk::TreeModel::iterator& iter, const Gtk::TreeModel::Path& path) {
