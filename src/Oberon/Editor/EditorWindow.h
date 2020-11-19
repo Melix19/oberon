@@ -33,12 +33,12 @@ namespace Oberon { namespace Editor {
 
 class EditorWindow: public Gtk::Window {
     public:
-        explicit EditorWindow(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& builder, FileBrowser* fileBrowser);
+        explicit EditorWindow(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& builder, ProjectTree* projectTree);
 
     private:
         void onButtonOpen();
 
-        FileBrowser* _fileBrowser;
+        ProjectTree* _projectTree;
 };
 
 }}

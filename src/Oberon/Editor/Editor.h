@@ -28,7 +28,7 @@ namespace Oberon { namespace Editor {
 
 class EditorWindow;
 
-class FileBrowser;
+class ProjectTree;
 
 class Viewport;
 

@@ -27,12 +27,12 @@
 #include <gtkmm/button.h>
 #include <gtkmm/filechooserdialog.h>
 
-#include "Oberon/Editor/FileBrowser.h"
+#include "Oberon/Editor/ProjectTree.h"
 
 namespace Oberon { namespace Editor {
 
-EditorWindow::EditorWindow(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& builder, FileBrowser* fileBrowser):
-    Gtk::Window(cobject), _fileBrowser(fileBrowser)
+EditorWindow::EditorWindow(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& builder, ProjectTree* projectTree):
+    Gtk::Window(cobject), _projectTree(projectTree)
 {
     maximize();
 
@@ -51,7 +51,7 @@ void EditorWindow::onButtonOpen() {
 
     int result = dialog.run();
     if(result == Gtk::RESPONSE_OK)
-        _fileBrowser->setRootPath(dialog.get_filename());
+        _projectTree->setRootPath(dialog.get_filename());
 }
 
 }}

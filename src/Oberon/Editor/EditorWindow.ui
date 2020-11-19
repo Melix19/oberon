@@ -22,7 +22,7 @@
                 <property name="margin-end">6</property>
                 <property name="margin-top">9</property>
                 <property name="margin-bottom">6</property>
-                <property name="label" translatable="yes">File Browser</property>
+                <property name="label" translatable="yes">Project Tree</property>
                 <style>
                   <class name="heading"/>
                 </style>
@@ -39,7 +39,7 @@
                 <property name="can-focus">True</property>
                 <property name="vexpand">True</property>
                 <child>
-                  <object class="GtkTreeView" id="FileBrowser">
+                  <object class="GtkTreeView" id="ProjectTree">
                     <property name="visible">True</property>
                     <property name="can-focus">True</property>
                     <property name="headers-visible">False</property>

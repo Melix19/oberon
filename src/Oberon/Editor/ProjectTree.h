@@ -1,5 +1,5 @@
-#ifndef Oberon_Editor_FileBrowser_h
-#define Oberon_Editor_FileBrowser_h
+#ifndef Oberon_Editor_ProjectTree_h
+#define Oberon_Editor_ProjectTree_h
 /*
     This file is part of Oberon.
 
@@ -33,9 +33,9 @@
 
 namespace Oberon { namespace Editor {
 
-class FileBrowser: public Gtk::TreeView {
+class ProjectTree: public Gtk::TreeView {
     public:
-        explicit FileBrowser(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& builder, Viewport* viewport);
+        explicit ProjectTree(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& builder, Viewport* viewport);
 
         void setRootPath(const std::string& path);
 

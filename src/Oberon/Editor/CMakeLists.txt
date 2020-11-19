@@ -42,8 +42,8 @@ corrade_add_resource(OberonEditor_RCS resources.conf)
 
 set(OberonEditor_SRCS
     EditorWindow.cpp
-    FileBrowser.cpp
     main.cpp
+    ProjectTree.cpp
     Viewport.cpp
 
     ${OberonEditor_RCS})
@@ -51,7 +51,7 @@ set(OberonEditor_SRCS
 set(OberonEditor_HEADERS
     Editor.h
     EditorWindow.h
-    FileBrowser.h
+    ProjectTree.h
     Viewport.h)
 
 add_executable(OberonEditor

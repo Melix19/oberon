@@ -26,7 +26,7 @@
 #include <Magnum/Platform/GLContext.h>
 
 #include "Oberon/Editor/EditorWindow.h"
-#include "Oberon/Editor/FileBrowser.h"
+#include "Oberon/Editor/ProjectTree.h"
 #include "Oberon/Editor/Viewport.h"
 
 int main(int argc, char** argv) {
@@ -42,11 +42,11 @@ int main(int argc, char** argv) {
     Oberon::Editor::Viewport* viewport;
     builder->get_widget_derived("Viewport", viewport, context);
 
-    Oberon::Editor::FileBrowser* fileBrowser;
-    builder->get_widget_derived("FileBrowser", fileBrowser, viewport);
+    Oberon::Editor::ProjectTree* projectTree;
+    builder->get_widget_derived("ProjectTree", projectTree, viewport);
 
     Oberon::Editor::EditorWindow* editorWindow;
-    builder->get_widget_derived("EditorWindow", editorWindow, fileBrowser);
+    builder->get_widget_derived("EditorWindow", editorWindow, projectTree);
 
     return app->run(*editorWindow);
 }

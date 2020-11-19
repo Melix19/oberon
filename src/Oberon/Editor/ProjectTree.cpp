@@ -22,7 +22,7 @@
     SOFTWARE.
 */
 
-#include "FileBrowser.h"
+#include "ProjectTree.h"
 
 #include <giomm/file.h>
 #include <Corrade/Utility/Directory.h>
@@ -31,7 +31,7 @@
 
 namespace Oberon { namespace Editor {
 
-FileBrowser::FileBrowser(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& builder, Viewport* viewport):
+ProjectTree::ProjectTree(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& builder, Viewport* viewport):
     Gtk::TreeView(cobject), _viewport(viewport)
 {
     _treeStore = Gtk::TreeStore::create(_columns);
@@ -39,11 +39,11 @@ FileBrowser::FileBrowser(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builde
 
     append_column("", _columns.filename);
 
-    signal_row_activated().connect(sigc::mem_fun(*this, &FileBrowser::onRowActivated));
-    signal_row_expanded().connect(sigc::mem_fun(*this, &FileBrowser::onRowExpanded));
+    signal_row_activated().connect(sigc::mem_fun(*this, &ProjectTree::onRowActivated));
+    signal_row_expanded().connect(sigc::mem_fun(*this, &ProjectTree::onRowExpanded));
 }
 
-void FileBrowser::setRootPath(const std::string& path) {
+void ProjectTree::setRootPath(const std::string& path) {
     _rootPath = path;
 
     /* Clear the current tree */
@@ -58,30 +58,30 @@ void FileBrowser::setRootPath(const std::string& path) {
     _treeStore->append(row->children());
 }
 
-void FileBrowser::onRowActivated(const Gtk::TreeModel::Path& path, Gtk::TreeViewColumn* column) {
+void ProjectTree::onRowActivated(const Gtk::TreeModel::Path& path, Gtk::TreeViewColumn* column) {
     Gtk::TreeModel::iterator iter = _treeStore->get_iter(path);
     std::string filePath = getPathFromRow(iter);
 
     _viewport->loadScene(filePath);
 }
 
-void FileBrowser::onRowExpanded(const Gtk::TreeModel::iterator& iter, const Gtk::TreeModel::Path& path) {
+void ProjectTree::onRowExpanded(const Gtk::TreeModel::iterator& iter, const Gtk::TreeModel::Path& path) {
     /* If the first node is the placeholder (empty node),
        the directory needs to be loaded */
     if(iter->children().begin()->get_value(_columns.filename).empty())
         loadDirectory(*iter);
 }
 
-void FileBrowser::loadDirectory(const Gtk::TreeModel::Row& row) {
+void ProjectTree::loadDirectory(const Gtk::TreeModel::Row& row) {
     /* Get the directory path from the node */
     std::string path = getPathFromRow(Gtk::TreeModel::iterator(row));
     Glib::RefPtr<Gio::File> directory = Gio::File::create_for_path(path);
 
     directory->enumerate_children_async(sigc::bind(sigc::mem_fun(*this,
-        &FileBrowser::onEnumerateChildren), directory, row));
+        &ProjectTree::onEnumerateChildren), directory, row));
 }
 
-std::string FileBrowser::getPathFromRow(const Gtk::TreeModel::iterator& iter) {
+std::string ProjectTree::getPathFromRow(const Gtk::TreeModel::iterator& iter) {
     std::string path;
 
     if(iter->parent()) {
@@ -100,17 +100,17 @@ std::string FileBrowser::getPathFromRow(const Gtk::TreeModel::iterator& iter) {
     return path;
 }
 
-void FileBrowser::onEnumerateChildren(const Glib::RefPtr<Gio::AsyncResult>& result, const Glib::RefPtr<Gio::File>& directory, const Gtk::TreeModel::Row& row) {
+void ProjectTree::onEnumerateChildren(const Glib::RefPtr<Gio::AsyncResult>& result, const Glib::RefPtr<Gio::File>& directory, const Gtk::TreeModel::Row& row) {
     Glib::RefPtr<Gio::FileEnumerator> enumerator = directory->enumerate_children_finish(result);
     requestNextFiles(directory, enumerator, row);
 }
 
-void FileBrowser::requestNextFiles(const Glib::RefPtr<Gio::File>& directory, const Glib::RefPtr<Gio::FileEnumerator>& enumerator, const Gtk::TreeModel::Row& row) {
-    enumerator->next_files_async(sigc::bind(sigc::mem_fun(*this, &FileBrowser::onNextFiles),
+void ProjectTree::requestNextFiles(const Glib::RefPtr<Gio::File>& directory, const Glib::RefPtr<Gio::FileEnumerator>& enumerator, const Gtk::TreeModel::Row& row) {
+    enumerator->next_files_async(sigc::bind(sigc::mem_fun(*this, &ProjectTree::onNextFiles),
         directory, enumerator, row));
 }
 
-void FileBrowser::onNextFiles(const Glib::RefPtr<Gio::AsyncResult>& result, const Glib::RefPtr<Gio::File>& directory, const Glib::RefPtr<Gio::FileEnumerator>& enumerator, const Gtk::TreeModel::Row& row) {
+void ProjectTree::onNextFiles(const Glib::RefPtr<Gio::AsyncResult>& result, const Glib::RefPtr<Gio::File>& directory, const Glib::RefPtr<Gio::FileEnumerator>& enumerator, const Gtk::TreeModel::Row& row) {
     Glib::ListHandle<Glib::RefPtr<Gio::FileInfo>> listInfo = enumerator->next_files_finish(result);
 
     if(listInfo.empty()) { /* If we're done with the loading */
