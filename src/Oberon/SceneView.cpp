@@ -24,6 +24,7 @@
 
 #include "SceneView.h"
 
+#include <Magnum/GL/Renderer.h>
 #include <Magnum/SceneGraph/Camera.h>
 #include <Magnum/Shaders/Phong.h>
 #include <Magnum/Trade/AbstractImporter.h>
@@ -33,6 +34,8 @@
 namespace Oberon {
 
 SceneView::SceneView(const std::string& path, const Vector2i& viewportSize) {
+    GL::Renderer::enable(GL::Renderer::Feature::FaceCulling);
+
     _data.resourceManager.set<GL::AbstractShaderProgram>("phong", new Shaders::Phong{});
 
     SceneImporter::load(path, _data);
