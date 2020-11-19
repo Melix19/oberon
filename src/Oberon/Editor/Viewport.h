@@ -24,6 +24,7 @@
     SOFTWARE.
 */
 
+#include <gtkmm/builder.h>
 #include <gtkmm/glarea.h>
 #include <Corrade/Containers/Pointer.h>
 #include <Magnum/Platform/Platform.h>
@@ -34,10 +35,12 @@ namespace Oberon { namespace Editor {
 
 class Viewport: public Gtk::GLArea {
     public:
-        explicit Viewport(Platform::GLContext& context, const std::string& path);
+        explicit Viewport(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& builder, Platform::GLContext& context);
+
+        void loadScene(const std::string& path);
 
     private:
-        void onRealize(const std::string& path);
+        void onRealize();
         bool onRender(const Glib::RefPtr<Gdk::GLContext>& context);
         void onResize(int width, int height);
 

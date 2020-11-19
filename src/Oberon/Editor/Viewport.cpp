@@ -31,7 +31,9 @@
 
 namespace Oberon { namespace Editor {
 
-Viewport::Viewport(Platform::GLContext& context, const std::string& path): _context(context) {
+Viewport::Viewport(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& builder, Platform::GLContext& context):
+    Gtk::GLArea(cobject), _context(context)
+{
     /* Automatically re-render everything every time it needs to be drawn */
     set_auto_render();
 
@@ -45,17 +47,21 @@ Viewport::Viewport(Platform::GLContext& context, const std::string& path): _cont
     set_required_version(4, 5);
 
     /* Connect signals to their respective handlers */
-    signal_realize().connect(sigc::bind(sigc::mem_fun(this, &Viewport::onRealize), path));
+    signal_realize().connect(sigc::mem_fun(this, &Viewport::onRealize));
     signal_render().connect(sigc::mem_fun(this, &Viewport::onRender));
     signal_resize().connect(sigc::mem_fun(this, &Viewport::onResize));
 }
 
-void Viewport::onRealize(const std::string& path) {
+void Viewport::loadScene(const std::string& path) {
+    /* Make sure the OpenGL context is current then load the scene */
+    make_current();
+    _sceneView = Containers::pointer<SceneView>(path);
+}
+
+void Viewport::onRealize() {
     /* Make sure the OpenGL context is current then configure it */
     make_current();
     _context.create();
-
-    _sceneView = Containers::pointer<SceneView>(path);
 }
 
 bool Viewport::onRender(const Glib::RefPtr<Gdk::GLContext>& context) {
@@ -72,8 +78,8 @@ bool Viewport::onRender(const Glib::RefPtr<Gdk::GLContext>& context) {
     /* Clear the frame */
     gtkmmDefaultFramebuffer.clear(GL::FramebufferClear::Color);
 
-    /* Draw the scene */
-    _sceneView->draw();
+    /* Draw the scene if there is one loaded */
+    if(_sceneView) _sceneView->draw();
 
     /* Clean up Magnum state and back to Gtkmm */
     GL::Context::current().resetState(GL::Context::State::EnterExternal);

@@ -26,18 +26,16 @@
 
 #include <giomm/fileenumerator.h>
 #include <gtkmm/builder.h>
-#include <gtkmm/notebook.h>
 #include <gtkmm/treestore.h>
 #include <gtkmm/treeview.h>
-#include <Magnum/Platform/Platform.h>
 
-#include "Oberon/Oberon.h"
+#include "Oberon/Editor/Editor.h"
 
 namespace Oberon { namespace Editor {
 
 class FileBrowser: public Gtk::TreeView {
     public:
-        explicit FileBrowser(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& builder, Platform::GLContext& context);
+        explicit FileBrowser(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& builder, Viewport* viewport);
 
         void setRootPath(const std::string& path);
 
@@ -61,9 +59,7 @@ class FileBrowser: public Gtk::TreeView {
             Gtk::TreeModelColumn<Glib::ustring> filename;
         };
 
-        Platform::GLContext& _context;
-
-        Gtk::Notebook* _notebook;
+        Viewport* _viewport;
 
         ModelColumns _columns;
 

@@ -31,11 +31,9 @@
 
 namespace Oberon { namespace Editor {
 
-FileBrowser::FileBrowser(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& builder, Platform::GLContext& context):
-    Gtk::TreeView(cobject), _context(context)
+FileBrowser::FileBrowser(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& builder, Viewport* viewport):
+    Gtk::TreeView(cobject), _viewport(viewport)
 {
-    builder->get_widget("notebook", _notebook);
-
     _treeStore = Gtk::TreeStore::create(_columns);
     set_model(_treeStore);
 
@@ -64,13 +62,7 @@ void FileBrowser::onRowActivated(const Gtk::TreeModel::Path& path, Gtk::TreeView
     Gtk::TreeModel::iterator iter = _treeStore->get_iter(path);
     std::string filePath = getPathFromRow(iter);
 
-    Gtk::Label* label = Gtk::make_managed<Gtk::Label>(iter->get_value(_columns.filename));
-    Viewport* viewport = Gtk::make_managed<Viewport>(_context, filePath);
-
-    label->show();
-    viewport->show();
-
-    _notebook->append_page(*viewport, *label);
+    _viewport->loadScene(filePath);
 }
 
 void FileBrowser::onRowExpanded(const Gtk::TreeModel::iterator& iter, const Gtk::TreeModel::Path& path) {

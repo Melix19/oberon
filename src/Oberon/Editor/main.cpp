@@ -27,6 +27,7 @@
 
 #include "Oberon/Editor/EditorWindow.h"
 #include "Oberon/Editor/FileBrowser.h"
+#include "Oberon/Editor/Viewport.h"
 
 int main(int argc, char** argv) {
     Magnum::Platform::GLContext context{Magnum::NoCreate, argc, argv};
@@ -38,8 +39,11 @@ int main(int argc, char** argv) {
     Glib::RefPtr<Gtk::Builder> builder =
         Gtk::Builder::create_from_string(rs.get("EditorWindow.ui"));
 
+    Oberon::Editor::Viewport* viewport;
+    builder->get_widget_derived("Viewport", viewport, context);
+
     Oberon::Editor::FileBrowser* fileBrowser;
-    builder->get_widget_derived("FileBrowser", fileBrowser, context);
+    builder->get_widget_derived("FileBrowser", fileBrowser, viewport);
 
     Oberon::Editor::EditorWindow* editorWindow;
     builder->get_widget_derived("EditorWindow", editorWindow, fileBrowser);
