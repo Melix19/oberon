@@ -55,7 +55,7 @@ Viewport::Viewport(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& bu
 void Viewport::loadScene(const std::string& path) {
     /* Make sure the OpenGL context is current then load the scene */
     make_current();
-    _sceneView = Containers::pointer<SceneView>(path);
+    _sceneView = Containers::pointer<SceneView>(path, _viewportSize);
 }
 
 void Viewport::onRealize() {
@@ -87,7 +87,10 @@ bool Viewport::onRender(const Glib::RefPtr<Gdk::GLContext>& context) {
 }
 
 void Viewport::onResize(int width, int height) {
-    /* TODO: Add your window-resize handling code here */
+    _viewportSize = {width, height};
+
+    /* Update the scene viewport if there is one loaded */
+    if(_sceneView) _sceneView->updateViewport(_viewportSize);
 }
 
 }}

@@ -27,6 +27,7 @@
 #include <gtkmm/builder.h>
 #include <gtkmm/glarea.h>
 #include <Corrade/Containers/Pointer.h>
+#include <Magnum/Math/Vector2.h>
 #include <Magnum/Platform/Platform.h>
 
 #include "Oberon/Oberon.h"
@@ -46,6 +47,7 @@ class Viewport: public Gtk::GLArea {
 
         Platform::GLContext& _context;
 
+        Vector2i _viewportSize;
         Containers::Pointer<SceneView> _sceneView;
 };
 

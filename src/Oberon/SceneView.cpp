@@ -32,14 +32,20 @@
 
 namespace Oberon {
 
-SceneView::SceneView(const std::string& path) {
+SceneView::SceneView(const std::string& path, const Vector2i& viewportSize) {
     _data.resourceManager.set<GL::AbstractShaderProgram>("phong", new Shaders::Phong{});
 
     SceneImporter::load(path, _data);
+
+    _data.camera->setViewport(viewportSize);
 }
 
 void SceneView::draw() {
     _data.camera->draw(_data.opaqueDrawables);
+}
+
+void SceneView::updateViewport(const Vector2i& size) {
+    _data.camera->setViewport(size);
 }
 
 }

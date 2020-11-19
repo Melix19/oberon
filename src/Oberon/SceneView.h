@@ -30,9 +30,10 @@ namespace Oberon {
 
 class SceneView {
     public:
-        explicit SceneView(const std::string& path);
+        explicit SceneView(const std::string& path, const Vector2i& viewportSize);
 
         void draw();
+        void updateViewport(const Vector2i& size);
 
     private:
         SceneData _data;

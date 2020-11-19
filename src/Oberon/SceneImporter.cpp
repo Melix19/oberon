@@ -148,8 +148,7 @@ void load(const std::string& path, SceneData& data) {
     /* Basic camera setup */
     (*(data.camera = new SceneGraph::Camera3D{*data.cameraObject}))
         .setAspectRatioPolicy(SceneGraph::AspectRatioPolicy::Extend)
-        .setProjectionMatrix(Matrix4::perspectiveProjection(Rad(Deg(75)), 1.0f, 0.01f, 1000.0f))
-        .setViewport({1280, 720});
+        .setProjectionMatrix(Matrix4::perspectiveProjection(Rad(Deg(75)), 1.0f, 0.01f, 1000.0f));
 }
 
 }}
