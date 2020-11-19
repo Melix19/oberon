@@ -31,6 +31,7 @@
 #include <Corrade/Utility/DebugStl.h>
 #include <Magnum/MeshTools/Compile.h>
 #include <Magnum/SceneGraph/Camera.h>
+#include <Magnum/Shaders/Phong.h>
 #include <Magnum/Trade/AbstractImporter.h>
 #include <Magnum/Trade/MeshData.h>
 #include <Magnum/Trade/MeshObjectData3D.h>
@@ -44,6 +45,23 @@
 namespace Oberon { namespace SceneImporter {
 
 namespace {
+
+using namespace Math::Literals;
+
+Resource<GL::AbstractShaderProgram, Shaders::Phong> phongShader(SceneData& data) {
+    Resource<GL::AbstractShaderProgram, Shaders::Phong> shader =
+        data.resourceManager.get<GL::AbstractShaderProgram, Shaders::Phong>("phong");
+
+    if(!shader) {
+        data.resourceManager.set<GL::AbstractShaderProgram>(shader.key(), new Shaders::Phong{});
+
+        (*shader)
+            .setSpecularColor(0x11111100_rgbaf)
+            .setShininess(80.0f);
+    }
+
+    return shader;
+}
 
 void addObject(const std::string& path, SceneData& data, Containers::ArrayView<const Containers::Pointer<Trade::ObjectData3D>> objects, Containers::ArrayView<const Containers::Optional<Trade::PhongMaterialData>> materials, Object3D& parent, UnsignedInt i) {
     /* Object failed to import, skip */
@@ -66,9 +84,7 @@ void addObject(const std::string& path, SceneData& data, Containers::ArrayView<c
 
         std::string meshKey = path + "#" + std::to_string(objectData.instance());
         Resource<GL::Mesh> mesh = data.resourceManager.get<GL::Mesh>(meshKey);
-
-        Resource<GL::AbstractShaderProgram, Shaders::Phong> shader =
-            data.resourceManager.get<GL::AbstractShaderProgram, Shaders::Phong>("phong");
+        Resource<GL::AbstractShaderProgram, Shaders::Phong> shader = phongShader(data);
 
        /* Material not available / not loaded */
         if(materialId == -1 || !materials[materialId]) {
@@ -157,7 +173,7 @@ void load(const std::string& path, SceneData& data) {
     /* Basic camera setup */
     (*(data.camera = new SceneGraph::Camera3D{*data.cameraObject}))
         .setAspectRatioPolicy(SceneGraph::AspectRatioPolicy::Extend)
-        .setProjectionMatrix(Matrix4::perspectiveProjection(Rad(Deg(75)), 1.0f, 0.01f, 1000.0f));
+        .setProjectionMatrix(Matrix4::perspectiveProjection(75.0_degf, 1.0f, 0.01f, 1000.0f));
 }
 
 }}
