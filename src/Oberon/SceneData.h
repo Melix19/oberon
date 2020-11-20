@@ -24,6 +24,7 @@
     SOFTWARE.
 */
 
+#include <Corrade/Containers/Array.h>
 #include <Corrade/PluginManager/Manager.h>
 #include <Magnum/ResourceManager.h>
 #include <Magnum/GL/AbstractShaderProgram.h>
@@ -39,6 +40,12 @@ namespace Oberon {
 
 typedef ResourceManager<GL::Mesh, GL::AbstractShaderProgram> SceneResourceManager;
 
+struct ObjectInfo {
+    Object3D* object;
+    std::string name;
+    UnsignedInt childCount;
+};
+
 struct SceneData {
     PluginManager::Manager<Trade::AbstractImporter> manager;
 
@@ -47,8 +54,9 @@ struct SceneData {
     Scene3D scene;
     Object3D* cameraObject{};
     SceneGraph::Camera3D* camera;
-
     SceneGraph::DrawableGroup3D opaqueDrawables;
+
+    Containers::Array<ObjectInfo> objects;
 };
 
 }

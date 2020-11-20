@@ -22,35 +22,43 @@
     SOFTWARE.
 */
 
-#include <Corrade/Utility/Resource.h>
-#include <Magnum/Platform/GLContext.h>
+#include "Outline.h"
 
-#include "Oberon/Editor/EditorWindow.h"
-#include "Oberon/Editor/Outline.h"
-#include "Oberon/Editor/ProjectTree.h"
-#include "Oberon/Editor/Viewport.h"
+#include "Oberon/SceneData.h"
 
-int main(int argc, char** argv) {
-    Magnum::Platform::GLContext context{Magnum::NoCreate, argc, argv};
+namespace Oberon { namespace Editor {
 
-    Glib::RefPtr<Gtk::Application> app =
-        Gtk::Application::create(argc, argv, "org.melix.OberonEditor");
+Outline::Outline(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& builder):
+    Gtk::TreeView(cobject)
+{
+    _treeStore = Gtk::TreeStore::create(_columns);
+    set_model(_treeStore);
 
-    Corrade::Utility::Resource rs("OberonEditor");
-    Glib::RefPtr<Gtk::Builder> builder =
-        Gtk::Builder::create_from_string(rs.get("EditorWindow.ui"));
-
-    Oberon::Editor::Outline* outline;
-    builder->get_widget_derived("Outline", outline);
-
-    Oberon::Editor::Viewport* viewport;
-    builder->get_widget_derived("Viewport", viewport, outline, context);
-
-    Oberon::Editor::ProjectTree* projectTree;
-    builder->get_widget_derived("ProjectTree", projectTree, viewport);
-
-    Oberon::Editor::EditorWindow* editorWindow;
-    builder->get_widget_derived("EditorWindow", editorWindow, projectTree);
-
-    return app->run(*editorWindow);
+    append_column("", _columns.name);
 }
+
+void Outline::updateWithScene(const SceneData& data) {
+    /* Clear the current tree */
+    _treeStore->clear();
+
+    /* Create scene node */
+    Gtk::TreeModel::Row row = *(_treeStore->append());
+    row[_columns.name] = "scene";
+
+    /* Load all objects rows */
+    for(UnsignedInt id = 0; id < data.objects.size(); ++id) {
+        addObjectRow(row, data, id);
+    }
+}
+
+void Outline::addObjectRow(const Gtk::TreeModel::Row& parentRow, const SceneData& data, UnsignedInt& id) {
+    Gtk::TreeModel::Row childRow = *(_treeStore->append(parentRow.children()));
+    childRow[_columns.name] = data.objects[id].name;
+
+    UnsignedInt childCount = data.objects[id].childCount;
+    for(UnsignedInt childId = 0; childId < childCount; ++childId) {
+        addObjectRow(childRow, data, ++id);
+    }
+}
+
+}}

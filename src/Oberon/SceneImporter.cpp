@@ -28,7 +28,7 @@
 
 #include "SceneImporter.h"
 
-#include <Corrade/Utility/DebugStl.h>
+#include <Corrade/Utility/FormatStl.h>
 #include <Magnum/MeshTools/Compile.h>
 #include <Magnum/SceneGraph/Camera.h>
 #include <Magnum/Shaders/Phong.h>
@@ -77,6 +77,9 @@ void addObject(const std::string& path, SceneData& data, Containers::ArrayView<c
                  .setRotation(objectData.rotation())
                  .setScaling(objectData.scaling());
     else object->setTransformation(objectData.transformation());
+
+    /* Save it to the ID -> pointer mapping array */
+    data.objects[i].object = object;
 
     /* Add a drawable if the object has a mesh */
     if(objectData.instanceType() == Trade::ObjectInstanceType3D::Mesh && objectData.instance() != -1) {
@@ -150,6 +153,7 @@ void load(const std::string& path, SceneData& data) {
         }
 
         /* Import all objects */
+        data.objects = Containers::Array<ObjectInfo>{Containers::ValueInit, importer->object3DCount()};
         Containers::Array<Containers::Pointer<Trade::ObjectData3D>> objects{importer->object3DCount()};
         for(UnsignedInt i = 0; i != importer->object3DCount(); ++i) {
             objects[i] = importer->object3D(i);
@@ -157,6 +161,12 @@ void load(const std::string& path, SceneData& data) {
                 Error{} << "Cannot import object" << i << importer->object3DName(i);
                 continue;
             }
+
+            data.objects[i].name = importer->object3DName(i);
+            if(data.objects[i].name.empty())
+                data.objects[i].name = Utility::formatString("object #{}", i);
+
+            data.objects[i].childCount = objects[i]->children().size();
         }
 
         /* Recursively add all children */

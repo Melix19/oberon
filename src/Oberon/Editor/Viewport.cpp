@@ -28,11 +28,12 @@
 #include <Magnum/Platform/GLContext.h>
 
 #include "Oberon/SceneView.h"
+#include "Oberon/Editor/Outline.h"
 
 namespace Oberon { namespace Editor {
 
-Viewport::Viewport(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& builder, Platform::GLContext& context):
-    Gtk::GLArea(cobject), _context(context)
+Viewport::Viewport(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& builder, Outline* outline, Platform::GLContext& context):
+    Gtk::GLArea(cobject), _outline(outline), _context(context)
 {
     /* Automatically re-render everything every time it needs to be drawn */
     set_auto_render();
@@ -56,6 +57,8 @@ void Viewport::loadScene(const std::string& path) {
     /* Make sure the OpenGL context is current then load the scene */
     make_current();
     _sceneView = Containers::pointer<SceneView>(path, _viewportSize);
+
+    _outline->updateWithScene(_sceneView->data());
 }
 
 void Viewport::onRealize() {

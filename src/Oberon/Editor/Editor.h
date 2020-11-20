@@ -28,6 +28,8 @@ namespace Oberon { namespace Editor {
 
 class EditorWindow;
 
+class Outline;
+
 class ProjectTree;
 
 class Viewport;

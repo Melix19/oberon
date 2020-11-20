@@ -31,12 +31,13 @@
 #include <Magnum/Platform/Platform.h>
 
 #include "Oberon/Oberon.h"
+#include "Oberon/Editor/Editor.h"
 
 namespace Oberon { namespace Editor {
 
 class Viewport: public Gtk::GLArea {
     public:
-        explicit Viewport(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& builder, Platform::GLContext& context);
+        explicit Viewport(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& builder, Outline* outline, Platform::GLContext& context);
 
         void loadScene(const std::string& path);
 
@@ -45,6 +46,7 @@ class Viewport: public Gtk::GLArea {
         bool onRender(const Glib::RefPtr<Gdk::GLContext>& context);
         void onResize(int width, int height);
 
+        Outline* _outline;
         Platform::GLContext& _context;
 
         Vector2i _viewportSize;

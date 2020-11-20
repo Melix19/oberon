@@ -43,6 +43,7 @@ corrade_add_resource(OberonEditor_RCS resources.conf)
 set(OberonEditor_SRCS
     EditorWindow.cpp
     main.cpp
+    Outline.cpp
     ProjectTree.cpp
     Viewport.cpp
 
@@ -51,6 +52,7 @@ set(OberonEditor_SRCS
 set(OberonEditor_HEADERS
     Editor.h
     EditorWindow.h
+    Outline.h
     ProjectTree.h
     Viewport.h)
 

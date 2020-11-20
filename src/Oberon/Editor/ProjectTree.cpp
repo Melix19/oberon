@@ -117,15 +117,17 @@ void ProjectTree::requestNextFiles(const Glib::RefPtr<Gio::File>& directory, con
 void ProjectTree::onNextFiles(const Glib::RefPtr<Gio::AsyncResult>& result, const Glib::RefPtr<Gio::File>& directory, const Glib::RefPtr<Gio::FileEnumerator>& enumerator, const Gtk::TreeModel::Row& row) {
     Glib::ListHandle<Glib::RefPtr<Gio::FileInfo>> listInfo = enumerator->next_files_finish(result);
 
-    if(listInfo.empty()) { /* If we're done with the loading */
+    /* If we're done with the loading */
+    if(listInfo.empty()) {
         /* Get the placeholder node (it's always the last children) */
         Gtk::TreeModel::iterator placeholder = --(row.children().end());
 
         /* If the folder only has 1 child it means that it's empty
-           (only the placeholder is present), so set it's child name
-           to "empty". Otherwise just remove the placeholder. */
+           (only the placeholder is present), so set the placeholder's
+           name to "empty". */
         if(row.children().size() == 1)
             (*placeholder)[_columns.filename] = "(Empty)";
+        /* Otherwise just remove the placeholder. */
         else
             _treeStore->erase(placeholder);
     } else {

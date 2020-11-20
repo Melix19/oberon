@@ -1,3 +1,5 @@
+#ifndef Oberon_Editor_Outline_h
+#define Oberon_Editor_Outline_h
 /*
     This file is part of Oberon.
 
@@ -22,35 +24,34 @@
     SOFTWARE.
 */
 
-#include <Corrade/Utility/Resource.h>
-#include <Magnum/Platform/GLContext.h>
+#include <gtkmm/builder.h>
+#include <gtkmm/treestore.h>
+#include <gtkmm/treeview.h>
 
-#include "Oberon/Editor/EditorWindow.h"
-#include "Oberon/Editor/Outline.h"
-#include "Oberon/Editor/ProjectTree.h"
-#include "Oberon/Editor/Viewport.h"
+#include "Oberon/Oberon.h"
 
-int main(int argc, char** argv) {
-    Magnum::Platform::GLContext context{Magnum::NoCreate, argc, argv};
+namespace Oberon { namespace Editor {
 
-    Glib::RefPtr<Gtk::Application> app =
-        Gtk::Application::create(argc, argv, "org.melix.OberonEditor");
+class Outline: public Gtk::TreeView {
+    public:
+        explicit Outline(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& builder);
 
-    Corrade::Utility::Resource rs("OberonEditor");
-    Glib::RefPtr<Gtk::Builder> builder =
-        Gtk::Builder::create_from_string(rs.get("EditorWindow.ui"));
+        void updateWithScene(const SceneData& data);
 
-    Oberon::Editor::Outline* outline;
-    builder->get_widget_derived("Outline", outline);
+    private:
+        void addObjectRow(const Gtk::TreeModel::Row& parentRow, const SceneData& data, UnsignedInt& id);
 
-    Oberon::Editor::Viewport* viewport;
-    builder->get_widget_derived("Viewport", viewport, outline, context);
+    private:
+        struct ModelColumns: public Gtk::TreeModel::ColumnRecord {
+            explicit ModelColumns() { add(name); }
 
-    Oberon::Editor::ProjectTree* projectTree;
-    builder->get_widget_derived("ProjectTree", projectTree, viewport);
+            Gtk::TreeModelColumn<Glib::ustring> name;
+        };
 
-    Oberon::Editor::EditorWindow* editorWindow;
-    builder->get_widget_derived("EditorWindow", editorWindow, projectTree);
+        ModelColumns _columns;
+        Glib::RefPtr<Gtk::TreeStore> _treeStore;
+};
 
-    return app->run(*editorWindow);
-}
+}}
+
+#endif

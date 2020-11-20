@@ -59,11 +59,10 @@ class ProjectTree: public Gtk::TreeView {
             Gtk::TreeModelColumn<Glib::ustring> filename;
         };
 
-        Viewport* _viewport;
-
         ModelColumns _columns;
-
         Glib::RefPtr<Gtk::TreeStore> _treeStore;
+
+        Viewport* _viewport;
 
         std::string _rootPath;
 };
