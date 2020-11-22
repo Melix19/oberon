@@ -33,6 +33,7 @@
 namespace Oberon {
 
 SceneView::SceneView(const std::string& path, const Vector2i& viewportSize) {
+    GL::Renderer::enable(GL::Renderer::Feature::DepthTest);
     GL::Renderer::enable(GL::Renderer::Feature::FaceCulling);
 
     SceneImporter::load(path, _data);

@@ -79,7 +79,7 @@ bool Viewport::onRender(const Glib::RefPtr<Gdk::GLContext>& context) {
     auto gtkmmDefaultFramebuffer = GL::Framebuffer::wrap(framebufferID, {{}, {get_width(), get_height()}});
 
     /* Clear the frame */
-    gtkmmDefaultFramebuffer.clear(GL::FramebufferClear::Color);
+    gtkmmDefaultFramebuffer.clear(GL::FramebufferClear::Color|GL::FramebufferClear::Depth);
 
     /* Draw the scene if there is one loaded */
     if(_sceneView) _sceneView->draw();

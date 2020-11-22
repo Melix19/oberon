@@ -65,6 +65,7 @@
                 <child>
                   <object class="GtkGLArea" id="Viewport">
                     <property name="visible">True</property>
+                    <property name="has_depth_buffer">True</property>
                   </object>
                   <packing>
                     <property name="title">Viewport</property>
@@ -90,37 +91,37 @@
           </packing>
         </child>
         <child>
-          <object class="GtkBox">
-            <property name="visible">True</property>
-            <property name="orientation">vertical</property>
-            <child>
-              <object class="GtkLabel">
+              <object class="GtkBox">
                 <property name="visible">True</property>
-                <property name="label">Outline</property>
-                <property name="halign">start</property>
-                <property name="margin-start">6</property>
-                <property name="margin-end">6</property>
-                <property name="margin-top">9</property>
-                <property name="margin-bottom">6</property>
-                <style>
-                  <class name="heading"/>
-                </style>
-              </object>
-            </child>
-            <child>
-              <object class="GtkScrolledWindow">
-                <property name="visible">True</property>
-                <property name="vexpand">True</property>
+                <property name="orientation">vertical</property>
                 <child>
-                  <object class="GtkTreeView" id="Outline">
+                  <object class="GtkLabel">
                     <property name="visible">True</property>
-                    <property name="headers-visible">False</property>
+                    <property name="label">Outline</property>
+                    <property name="halign">start</property>
+                    <property name="margin-start">6</property>
+                    <property name="margin-end">6</property>
+                    <property name="margin-top">9</property>
+                    <property name="margin-bottom">6</property>
+                    <style>
+                      <class name="heading"/>
+                    </style>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkScrolledWindow">
+                    <property name="visible">True</property>
+                    <property name="vexpand">True</property>
+                    <child>
+                      <object class="GtkTreeView" id="Outline">
+                        <property name="visible">True</property>
+                        <property name="headers-visible">False</property>
+                      </object>
+                    </child>
                   </object>
                 </child>
               </object>
-            </child>
-          </object>
-          <packing>
+              <packing>
             <property name="resize">False</property>
           </packing>
         </child>
