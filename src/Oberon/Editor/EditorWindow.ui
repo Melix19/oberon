@@ -1,181 +1,128 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.38.1 -->
 <interface>
-  <requires lib="gtk+" version="3.24"/>
   <object class="GtkWindow" id="EditorWindow">
-    <property name="can-focus">False</property>
+    <child type="titlebar">
+      <object class="GtkHeaderBar">
+        <property name="visible">True</property>
+        <property name="show-close-button">True</property>
+        <child>
+          <object class="GtkButton" id="open-button">
+            <property name="visible">True</property>
+            <property name="label">Open</property>
+          </object>
+        </child>
+        <child type="title">
+          <object class="GtkStackSwitcher">
+            <property name="visible">True</property>
+            <property name="stack">view-stack</property>
+          </object>
+        </child>
+      </object>
+    </child>
     <child>
       <object class="GtkPaned">
         <property name="visible">True</property>
-        <property name="can-focus">True</property>
         <child>
           <object class="GtkPaned">
             <property name="visible">True</property>
-            <property name="can-focus">True</property>
             <child>
-          <object class="GtkBox">
-            <property name="visible">True</property>
-            <property name="can-focus">False</property>
-            <property name="orientation">vertical</property>
-            <child>
-              <object class="GtkLabel">
+              <object class="GtkBox">
                 <property name="visible">True</property>
-                <property name="can-focus">False</property>
-                <property name="halign">start</property>
-                <property name="margin-start">6</property>
-                <property name="margin-end">6</property>
-                <property name="margin-top">9</property>
-                <property name="margin-bottom">6</property>
-                <property name="label" translatable="yes">Project Tree</property>
-                <style>
-                  <class name="heading"/>
-                </style>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">0</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkScrolledWindow">
-                <property name="visible">True</property>
-                <property name="can-focus">True</property>
-                <property name="vexpand">True</property>
+                <property name="orientation">vertical</property>
                 <child>
-                  <object class="GtkTreeView" id="ProjectTree">
+                  <object class="GtkLabel">
                     <property name="visible">True</property>
-                    <property name="can-focus">True</property>
-                    <property name="headers-visible">False</property>
-                    <child internal-child="selection">
-                      <object class="GtkTreeSelection"/>
+                    <property name="label">Project Tree</property>
+                    <property name="halign">start</property>
+                    <property name="margin-start">6</property>
+                    <property name="margin-end">6</property>
+                    <property name="margin-top">9</property>
+                    <property name="margin-bottom">6</property>
+                    <style>
+                      <class name="heading"/>
+                    </style>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkScrolledWindow">
+                    <property name="visible">True</property>
+                    <property name="vexpand">True</property>
+                    <child>
+                      <object class="GtkTreeView" id="ProjectTree">
+                        <property name="visible">True</property>
+                        <property name="headers-visible">False</property>
+                      </object>
                     </child>
                   </object>
                 </child>
               </object>
               <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">1</property>
-              </packing>
-            </child>
-          </object>
-          <packing>
-            <property name="resize">False</property>
-            <property name="shrink">True</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkStack" id="viewStack">
-            <property name="visible">True</property>
-            <property name="can-focus">False</property>
-            <child>
-              <object class="GtkGLArea" id="Viewport">
-                <property name="visible">True</property>
-                <property name="app-paintable">True</property>
-                <property name="can-focus">False</property>
-              </object>
-              <packing>
-                <property name="title" translatable="yes">Viewport</property>
+                <property name="resize">False</property>
               </packing>
             </child>
             <child>
-              <object class="GtkNotebook" id="notebook">
+              <object class="GtkStack" id="view-stack">
                 <property name="visible">True</property>
-                <property name="can-focus">True</property>
-                <property name="show-border">False</property>
+                <child>
+                  <object class="GtkGLArea" id="Viewport">
+                    <property name="visible">True</property>
+                  </object>
+                  <packing>
+                    <property name="title">Viewport</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkNotebook" id="notebook">
+                    <property name="visible">True</property>
+                    <property name="show-border">False</property>
+                  </object>
+                  <packing>
+                    <property name="title">Scripts</property>
+                  </packing>
+                </child>
               </object>
               <packing>
-                <property name="title" translatable="yes">Scripts</property>
-                <property name="position">1</property>
+                <property name="resize">True</property>
               </packing>
             </child>
           </object>
           <packing>
             <property name="resize">True</property>
-            <property name="shrink">True</property>
-          </packing>
-        </child>
-      </object>
-          <packing>
-            <property name="resize">True</property>
-            <property name="shrink">True</property>
           </packing>
         </child>
         <child>
           <object class="GtkBox">
             <property name="visible">True</property>
-            <property name="can-focus">False</property>
             <property name="orientation">vertical</property>
             <child>
               <object class="GtkLabel">
                 <property name="visible">True</property>
-                <property name="can-focus">False</property>
+                <property name="label">Outline</property>
                 <property name="halign">start</property>
                 <property name="margin-start">6</property>
                 <property name="margin-end">6</property>
                 <property name="margin-top">9</property>
                 <property name="margin-bottom">6</property>
-                <property name="label" translatable="yes">Outline</property>
                 <style>
                   <class name="heading"/>
                 </style>
               </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">0</property>
-              </packing>
             </child>
             <child>
               <object class="GtkScrolledWindow">
                 <property name="visible">True</property>
-                <property name="can-focus">True</property>
                 <property name="vexpand">True</property>
                 <child>
                   <object class="GtkTreeView" id="Outline">
                     <property name="visible">True</property>
-                    <property name="can-focus">True</property>
                     <property name="headers-visible">False</property>
-                    <child internal-child="selection">
-                      <object class="GtkTreeSelection"/>
-                    </child>
                   </object>
                 </child>
               </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">1</property>
-              </packing>
             </child>
           </object>
           <packing>
             <property name="resize">False</property>
-            <property name="shrink">True</property>
           </packing>
-        </child>
-      </object>
-    </child>
-    <child type="titlebar">
-      <object class="GtkHeaderBar">
-        <property name="visible">True</property>
-        <property name="can-focus">False</property>
-        <property name="show-close-button">True</property>
-        <child type="title">
-          <object class="GtkStackSwitcher">
-            <property name="visible">True</property>
-            <property name="can-focus">False</property>
-            <property name="stack">viewStack</property>
-          </object>
-        </child>
-        <child>
-          <object class="GtkButton" id="openButton">
-            <property name="label" translatable="yes">Open</property>
-            <property name="visible">True</property>
-            <property name="can-focus">True</property>
-            <property name="receives-default">True</property>
-          </object>
         </child>
       </object>
     </child>
