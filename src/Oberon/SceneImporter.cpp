@@ -48,12 +48,15 @@ namespace {
 
 using namespace Math::Literals;
 
-Resource<GL::AbstractShaderProgram, Shaders::Phong> phongShader(SceneData& data) {
-    Resource<GL::AbstractShaderProgram, Shaders::Phong> shader =
-        data.resourceManager.get<GL::AbstractShaderProgram, Shaders::Phong>("phong");
+Resource<GL::AbstractShaderProgram, Shaders::Phong> phongShader(SceneData& data, Shaders::Phong::Flags flags) {
+    std::string shaderKey = "phong";
+    if(flags & Shaders::Phong::Flag::VertexColor)
+        shaderKey += "-vertexColor";
 
+    Resource<GL::AbstractShaderProgram, Shaders::Phong> shader =
+        data.resourceManager.get<GL::AbstractShaderProgram, Shaders::Phong>(shaderKey);
     if(!shader) {
-        data.resourceManager.set<GL::AbstractShaderProgram>(shader.key(), new Shaders::Phong{});
+        data.resourceManager.set<GL::AbstractShaderProgram>(shader.key(), new Shaders::Phong{flags});
 
         (*shader)
             .setSpecularColor(0x11111100_rgbaf)
@@ -63,7 +66,7 @@ Resource<GL::AbstractShaderProgram, Shaders::Phong> phongShader(SceneData& data)
     return shader;
 }
 
-void addObject(const std::string& path, SceneData& data, Containers::ArrayView<const Containers::Pointer<Trade::ObjectData3D>> objects, Containers::ArrayView<const Containers::Optional<Trade::PhongMaterialData>> materials, Object3D& parent, UnsignedInt i) {
+void addObject(const std::string& path, SceneData& data, Containers::ArrayView<const Containers::Pointer<Trade::ObjectData3D>> objects, Containers::ArrayView<const Containers::Optional<Trade::PhongMaterialData>> materials, Containers::ArrayView<const bool> hasVertexColors, Object3D& parent, UnsignedInt i) {
     /* Object failed to import, skip */
     if(!objects[i]) return;
 
@@ -87,7 +90,10 @@ void addObject(const std::string& path, SceneData& data, Containers::ArrayView<c
 
         std::string meshKey = Utility::formatString("{}#{}", path, objectData.instance());
         Resource<GL::Mesh> mesh = data.resourceManager.get<GL::Mesh>(meshKey);
-        Resource<GL::AbstractShaderProgram, Shaders::Phong> shader = phongShader(data);
+
+        Shaders::Phong::Flags flags;
+        if(hasVertexColors[objectData.instance()])
+            flags |= Shaders::Phong::Flag::VertexColor;
 
        /* Material not available / not loaded */
         if(materialId == -1 || !materials[materialId]) {
@@ -95,7 +101,8 @@ void addObject(const std::string& path, SceneData& data, Containers::ArrayView<c
         } else {
             const Trade::PhongMaterialData& material = *materials[materialId];
 
-            new PhongDrawable{*object, shader, mesh, material.diffuseColor(), data.opaqueDrawables};
+            new PhongDrawable{*object, phongShader(data, flags),
+                mesh, material.diffuseColor(), data.opaqueDrawables};
         }
 
     /* This is a node that holds the default camera -> assign the object to the
@@ -106,7 +113,7 @@ void addObject(const std::string& path, SceneData& data, Containers::ArrayView<c
 
     /* Recursively add children */
     for(std::size_t id: objectData.children())
-        addObject(path, data, objects, materials, *object, id);
+        addObject(path, data, objects, materials, hasVertexColors, *object, id);
 }
 
 }
@@ -132,7 +139,8 @@ void load(const std::string& path, SceneData& data) {
         materials[i] = std::move(*materialData).as<Trade::PhongMaterialData>();
     }
 
-    /* Load all meshes */
+    /* Load all meshes. Remember which have vertex colors. */
+    Containers::Array<bool> hasVertexColors{Containers::DirectInit, importer->meshCount(), false};
     for(UnsignedInt i = 0; i != importer->meshCount(); ++i) {
         Containers::Optional<Trade::MeshData> meshData = importer->mesh(i);
         if(!meshData) {
@@ -140,6 +148,9 @@ void load(const std::string& path, SceneData& data) {
             continue;
         }
 
+        hasVertexColors[i] = meshData->hasAttribute(Trade::MeshAttribute::Color);
+
+        /* Compile and save the mesh */
         std::string meshKey = Utility::formatString("{}#{}", path, i);
         data.resourceManager.set<GL::Mesh>(meshKey, MeshTools::compile(*meshData));
     }
@@ -171,7 +182,15 @@ void load(const std::string& path, SceneData& data) {
 
         /* Recursively add all children */
         for(UnsignedInt objectId: sceneData->children3D())
-            addObject(path, data, objects, materials, data.scene, objectId);
+            addObject(path, data, objects, materials, hasVertexColors, data.scene, objectId);
+
+    /* The format has no scene support, display just the first loaded mesh with
+       a default material and be done with it */
+    } else if(Resource<GL::Mesh> mesh = data.resourceManager.get<GL::Mesh>(Utility::formatString("{}#0", path))) {
+        data.objects = Containers::Array<ObjectInfo>{Containers::ValueInit, 1};
+        data.objects[0].object = &data.scene;
+        data.objects[0].name = "object #0";
+        new PhongDrawable{data.scene, phongShader(data, hasVertexColors[0] ? Shaders::Phong::Flag::VertexColor : Shaders::Phong::Flags{}), mesh, 0xffffff_rgbf, data.opaqueDrawables};
     }
 
     /* Create a camera object in case it wasn't present in the scene already */
