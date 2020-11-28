@@ -1,5 +1,5 @@
-#ifndef Oberon_Editor_Outline_h
-#define Oberon_Editor_Outline_h
+#ifndef Oberon_Editor_Properties_h
+#define Oberon_Editor_Properties_h
 /*
     This file is part of Oberon.
 
@@ -24,38 +24,39 @@
     SOFTWARE.
 */
 
+#include <gtkmm/box.h>
 #include <gtkmm/builder.h>
-#include <gtkmm/treestore.h>
-#include <gtkmm/treeview.h>
+#include <gtkmm/spinbutton.h>
 
 #include "Oberon/Oberon.h"
-#include "Oberon/Editor/Editor.h"
 
 namespace Oberon { namespace Editor {
 
-class Outline: public Gtk::TreeView {
+class Properties: public Gtk::Box {
     public:
-        explicit Outline(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& builder, Properties* properties);
+        explicit Properties(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& builder);
 
-        void updateWithScene(const SceneData& data);
-
-    private:
-        void onRowActivated(const Gtk::TreeModel::Path& path, Gtk::TreeViewColumn* column);
-
-        void addObjectRow(const Gtk::TreeModel::Row& parentRow, const SceneData& data, UnsignedInt& id);
+        void showObjectProperties(const ObjectInfo* objectInfo);
 
     private:
-        struct ModelColumns: public Gtk::TreeModel::ColumnRecord {
-            explicit ModelColumns() { add(name); add(objectInfo); }
+        void updateTranslation();
+        void updateRotation();
+        void updateScaling();
 
-            Gtk::TreeModelColumn<Glib::ustring> name;
-            Gtk::TreeModelColumn<const ObjectInfo*> objectInfo;
-        };
+    private:
+        Gtk::SpinButton* _translationX;
+        Gtk::SpinButton* _translationY;
+        Gtk::SpinButton* _translationZ;
 
-        ModelColumns _columns;
-        Glib::RefPtr<Gtk::TreeStore> _treeStore;
+        Gtk::SpinButton* _rotationX;
+        Gtk::SpinButton* _rotationY;
+        Gtk::SpinButton* _rotationZ;
 
-        Properties* _properties;
+        Gtk::SpinButton* _scalingX;
+        Gtk::SpinButton* _scalingY;
+        Gtk::SpinButton* _scalingZ;
+
+        Object3D* _object;
 };
 
 }}

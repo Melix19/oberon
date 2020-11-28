@@ -25,16 +25,19 @@
 #include "Outline.h"
 
 #include "Oberon/SceneData.h"
+#include "Oberon/Editor/Properties.h"
 
 namespace Oberon { namespace Editor {
 
-Outline::Outline(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& builder):
-    Gtk::TreeView(cobject)
+Outline::Outline(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& builder, Properties* properties):
+    Gtk::TreeView(cobject), _properties(properties)
 {
     _treeStore = Gtk::TreeStore::create(_columns);
     set_model(_treeStore);
 
     append_column("", _columns.name);
+
+    signal_row_activated().connect(sigc::mem_fun(*this, &Outline::onRowActivated));
 }
 
 void Outline::updateWithScene(const SceneData& data) {
@@ -51,9 +54,15 @@ void Outline::updateWithScene(const SceneData& data) {
     }
 }
 
+void Outline::onRowActivated(const Gtk::TreeModel::Path& path, Gtk::TreeViewColumn* column) {
+    const Gtk::TreeModel::iterator iter = _treeStore->get_iter(path);
+    _properties->showObjectProperties(iter->get_value(_columns.objectInfo));
+}
+
 void Outline::addObjectRow(const Gtk::TreeModel::Row& parentRow, const SceneData& data, UnsignedInt& id) {
     Gtk::TreeModel::Row childRow = *(_treeStore->append(parentRow.children()));
     childRow[_columns.name] = data.objects[id].name;
+    childRow[_columns.objectInfo] = &data.objects[id];
 
     UnsignedInt childCount = data.objects[id].childCount;
     for(UnsignedInt childId = 0; childId < childCount; ++childId) {

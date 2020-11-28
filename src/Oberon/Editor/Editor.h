@@ -32,6 +32,8 @@ class Outline;
 
 class ProjectTree;
 
+class Properties;
+
 class Viewport;
 
 }}

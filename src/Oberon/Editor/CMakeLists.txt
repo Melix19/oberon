@@ -45,6 +45,7 @@ set(OberonEditor_SRCS
     main.cpp
     Outline.cpp
     ProjectTree.cpp
+    Properties.cpp
     Viewport.cpp
 
     ${OberonEditor_RCS})
@@ -54,6 +55,7 @@ set(OberonEditor_HEADERS
     EditorWindow.h
     Outline.h
     ProjectTree.h
+    Properties.h
     Viewport.h)
 
 add_executable(OberonEditor

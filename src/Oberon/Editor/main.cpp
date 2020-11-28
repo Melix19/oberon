@@ -28,6 +28,7 @@
 #include "Oberon/Editor/EditorWindow.h"
 #include "Oberon/Editor/Outline.h"
 #include "Oberon/Editor/ProjectTree.h"
+#include "Oberon/Editor/Properties.h"
 #include "Oberon/Editor/Viewport.h"
 
 int main(int argc, char** argv) {
@@ -40,8 +41,11 @@ int main(int argc, char** argv) {
     Glib::RefPtr<Gtk::Builder> builder =
         Gtk::Builder::create_from_string(rs.get("EditorWindow.ui"));
 
+    Oberon::Editor::Properties* properties;
+    builder->get_widget_derived("Properties", properties);
+
     Oberon::Editor::Outline* outline;
-    builder->get_widget_derived("Outline", outline);
+    builder->get_widget_derived("Outline", outline, properties);
 
     Oberon::Editor::Viewport* viewport;
     builder->get_widget_derived("Viewport", viewport, outline, context);

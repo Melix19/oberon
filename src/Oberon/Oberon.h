@@ -34,6 +34,8 @@ using namespace Magnum;
 typedef SceneGraph::Object<SceneGraph::TranslationRotationScalingTransformation3D> Object3D;
 typedef SceneGraph::Scene<SceneGraph::TranslationRotationScalingTransformation3D> Scene3D;
 
+struct ObjectInfo;
+
 class PhongDrawable;
 
 struct SceneData;
