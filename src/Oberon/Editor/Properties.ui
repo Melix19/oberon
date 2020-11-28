@@ -38,7 +38,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkSpinButton" id="translationX">
+              <object class="GtkSpinButton" id="translation_x">
                 <property name="visible">True</property>
                 <property name="margin-end">6</property>
                 <property name="digits">3</property>
@@ -50,7 +50,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkSpinButton" id="translationY">
+              <object class="GtkSpinButton" id="translation_y">
                 <property name="visible">True</property>
                 <property name="margin-end">6</property>
                 <property name="digits">3</property>
@@ -62,7 +62,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkSpinButton" id="translationZ">
+              <object class="GtkSpinButton" id="translation_z">
                 <property name="visible">True</property>
                 <property name="margin-end">6</property>
                 <property name="digits">3</property>
@@ -94,7 +94,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkSpinButton" id="rotationX">
+              <object class="GtkSpinButton" id="rotation_x">
                 <property name="visible">True</property>
                 <property name="margin-end">6</property>
               </object>
@@ -105,7 +105,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkSpinButton" id="rotationY">
+              <object class="GtkSpinButton" id="rotation_y">
                 <property name="visible">True</property>
                 <property name="margin-end">6</property>
               </object>
@@ -116,7 +116,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkSpinButton" id="rotationZ">
+              <object class="GtkSpinButton" id="rotation_z">
                 <property name="visible">True</property>
                 <property name="margin-end">6</property>
               </object>
@@ -147,7 +147,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkSpinButton" id="scalingX">
+              <object class="GtkSpinButton" id="scaling_x">
                 <property name="visible">True</property>
                 <property name="margin-end">6</property>
                 <property name="digits">3</property>
@@ -159,7 +159,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkSpinButton" id="scalingY">
+              <object class="GtkSpinButton" id="scaling_y">
                 <property name="visible">True</property>
                 <property name="margin-end">6</property>
                 <property name="digits">3</property>
@@ -171,7 +171,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkSpinButton" id="scalingZ">
+              <object class="GtkSpinButton" id="scaling_z">
                 <property name="visible">True</property>
                 <property name="margin-end">6</property>
                 <property name="digits">3</property>

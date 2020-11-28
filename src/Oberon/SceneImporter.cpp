@@ -85,7 +85,7 @@ void addObject(const std::string& path, SceneData& data, Containers::ArrayView<c
     if(objectData.instanceType() == Trade::ObjectInstanceType3D::Mesh && objectData.instance() != -1) {
         const Int materialId = static_cast<const Trade::MeshObjectData3D&>(objectData).material();
 
-        std::string meshKey = path + "#" + std::to_string(objectData.instance());
+        std::string meshKey = Utility::formatString("{}#{}", path, objectData.instance());
         Resource<GL::Mesh> mesh = data.resourceManager.get<GL::Mesh>(meshKey);
         Resource<GL::AbstractShaderProgram, Shaders::Phong> shader = phongShader(data);
 
@@ -140,7 +140,7 @@ void load(const std::string& path, SceneData& data) {
             continue;
         }
 
-        std::string meshKey = path + "#" + std::to_string(i);
+        std::string meshKey = Utility::formatString("{}#{}", path, i);
         data.resourceManager.set<GL::Mesh>(meshKey, MeshTools::compile(*meshData));
     }
 

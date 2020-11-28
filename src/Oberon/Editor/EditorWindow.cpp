@@ -37,7 +37,7 @@ EditorWindow::EditorWindow(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Buil
     maximize();
 
     Gtk::Button* openButton;
-    builder->get_widget("openButton", openButton);
+    builder->get_widget("open_button", openButton);
     openButton->signal_clicked().connect(sigc::mem_fun(*this, &EditorWindow::onButtonOpen));
 }
 

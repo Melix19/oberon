@@ -39,9 +39,9 @@ Properties::Properties(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>
         Gtk::Builder::create_from_string(rs.get("Properties.ui"));
 
     /* Translation adjustaments */
-    propertiesBuilder->get_widget("translationX", _translationX);
-    propertiesBuilder->get_widget("translationY", _translationY);
-    propertiesBuilder->get_widget("translationZ", _translationZ);
+    propertiesBuilder->get_widget("translation_x", _translationX);
+    propertiesBuilder->get_widget("translation_y", _translationY);
+    propertiesBuilder->get_widget("translation_z", _translationZ);
     _translationX->set_adjustment(Gtk::Adjustment::create(0, double(-FLT_MAX), double(FLT_MAX), 0.1));
     _translationY->set_adjustment(Gtk::Adjustment::create(0, double(-FLT_MAX), double(FLT_MAX), 0.1));
     _translationZ->set_adjustment(Gtk::Adjustment::create(0, double(-FLT_MAX), double(FLT_MAX), 0.1));
@@ -50,9 +50,9 @@ Properties::Properties(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>
     _translationZ->signal_value_changed().connect(sigc::mem_fun(*this, &Properties::updateTranslation));
 
     /* Rotation adjustaments */
-    propertiesBuilder->get_widget("rotationX", _rotationX);
-    propertiesBuilder->get_widget("rotationY", _rotationY);
-    propertiesBuilder->get_widget("rotationZ", _rotationZ);
+    propertiesBuilder->get_widget("rotation_x", _rotationX);
+    propertiesBuilder->get_widget("rotation_y", _rotationY);
+    propertiesBuilder->get_widget("rotation_z", _rotationZ);
     _rotationX->set_adjustment(Gtk::Adjustment::create(0, double(-FLT_MAX), double(FLT_MAX)));
     _rotationY->set_adjustment(Gtk::Adjustment::create(0, double(-FLT_MAX), double(FLT_MAX)));
     _rotationZ->set_adjustment(Gtk::Adjustment::create(0, double(-FLT_MAX), double(FLT_MAX)));
@@ -61,9 +61,9 @@ Properties::Properties(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>
     _rotationZ->signal_value_changed().connect(sigc::mem_fun(*this, &Properties::updateRotation));
 
     /* Scaling adjustaments */
-    propertiesBuilder->get_widget("scalingX", _scalingX);
-    propertiesBuilder->get_widget("scalingY", _scalingY);
-    propertiesBuilder->get_widget("scalingZ", _scalingZ);
+    propertiesBuilder->get_widget("scaling_x", _scalingX);
+    propertiesBuilder->get_widget("scaling_y", _scalingY);
+    propertiesBuilder->get_widget("scaling_z", _scalingZ);
     _scalingX->set_adjustment(Gtk::Adjustment::create(0, double(-FLT_MAX), double(FLT_MAX), 0.01));
     _scalingY->set_adjustment(Gtk::Adjustment::create(0, double(-FLT_MAX), double(FLT_MAX), 0.01));
     _scalingZ->set_adjustment(Gtk::Adjustment::create(0, double(-FLT_MAX), double(FLT_MAX), 0.01));

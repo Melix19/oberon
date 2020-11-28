@@ -6,7 +6,7 @@
         <property name="visible">True</property>
         <property name="show-close-button">True</property>
         <child>
-          <object class="GtkButton" id="openButton">
+          <object class="GtkButton" id="open_button">
             <property name="visible">True</property>
             <property name="label">Open</property>
           </object>
@@ -14,7 +14,7 @@
         <child type="title">
           <object class="GtkStackSwitcher">
             <property name="visible">True</property>
-            <property name="stack">viewStack</property>
+            <property name="stack">view_stack</property>
           </object>
         </child>
       </object>
@@ -61,7 +61,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkStack" id="viewStack">
+              <object class="GtkStack" id="view_stack">
                 <property name="visible">True</property>
                 <child>
                   <object class="GtkGLArea" id="Viewport">
