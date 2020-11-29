@@ -103,7 +103,7 @@ void Viewport::onResize(int width, int height) {
 }
 
 bool Viewport::onMotionNotifyEvent(GdkEventMotion* motionEvent) {
-    if(_sceneView && _isDragging) {
+    if(_sceneView && _isMouseDragging) {
         const Vector2 eventPosition{Float(motionEvent->x), Float(motionEvent->y)};
         const Vector2 delta = 3.0f*
             Vector2{eventPosition - _previousMousePosition}/
@@ -125,7 +125,7 @@ bool Viewport::onMotionNotifyEvent(GdkEventMotion* motionEvent) {
 
 bool Viewport::onButtonPressEvent(GdkEventButton* buttonEvent) {
     if(buttonEvent->button == GDK_BUTTON_SECONDARY) {
-        _isDragging = true;
+        _isMouseDragging = true;
         _previousMousePosition = Vector2{Float(buttonEvent->x), Float(buttonEvent->y)};
     }
 
@@ -134,7 +134,7 @@ bool Viewport::onButtonPressEvent(GdkEventButton* buttonEvent) {
 
 bool Viewport::onButtonReleaseEvent(GdkEventButton* releaseEvent) {
     if(releaseEvent->button == GDK_BUTTON_SECONDARY)
-        _isDragging = false;
+        _isMouseDragging = false;
 
     return true;
 }

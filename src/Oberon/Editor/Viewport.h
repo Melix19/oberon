@@ -56,7 +56,7 @@ class Viewport: public Gtk::GLArea {
         Vector2i _viewportSize;
         Containers::Pointer<SceneView> _sceneView;
 
-        bool _isDragging;
+        bool _isMouseDragging;
         Vector2 _previousMousePosition;
 };
 
