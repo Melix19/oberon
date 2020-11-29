@@ -35,12 +35,12 @@ namespace Oberon { namespace Editor {
 
 class Outline: public Gtk::TreeView {
     public:
-        explicit Outline(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& builder, Properties* properties);
+        explicit Outline(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>&, Properties* properties);
 
         void updateWithScene(const SceneData& data);
 
     private:
-        void onRowActivated(const Gtk::TreeModel::Path& path, Gtk::TreeViewColumn* column);
+        void onRowActivated(const Gtk::TreeModel::Path& path, Gtk::TreeViewColumn*);
 
         void addObjectRow(const Gtk::TreeModel::Row& parentRow, const SceneData& data, UnsignedInt& id);
 

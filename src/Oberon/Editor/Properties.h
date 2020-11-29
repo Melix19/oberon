@@ -34,7 +34,7 @@ namespace Oberon { namespace Editor {
 
 class Properties: public Gtk::Box {
     public:
-        explicit Properties(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& builder);
+        explicit Properties(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>&);
 
         void showObjectProperties(const ObjectInfo* objectInfo);
 

@@ -32,7 +32,7 @@
 
 namespace Oberon { namespace Editor {
 
-ProjectTree::ProjectTree(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& builder, Viewport* viewport):
+ProjectTree::ProjectTree(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>&, Viewport* viewport):
     Gtk::TreeView(cobject), _viewport(viewport)
 {
     _treeStore = Gtk::TreeStore::create(_columns);
@@ -59,7 +59,7 @@ void ProjectTree::setRootPath(const std::string& path) {
     _treeStore->append(row->children());
 }
 
-void ProjectTree::onRowActivated(const Gtk::TreeModel::Path& path, Gtk::TreeViewColumn* column) {
+void ProjectTree::onRowActivated(const Gtk::TreeModel::Path& path, Gtk::TreeViewColumn*) {
     const Gtk::TreeModel::iterator iter = _treeStore->get_iter(path);
     const std::string filePath = getPathFromRow(iter);
     const std::string normalized = Utility::String::lowercase(filePath);
@@ -69,7 +69,7 @@ void ProjectTree::onRowActivated(const Gtk::TreeModel::Path& path, Gtk::TreeView
         _viewport->loadScene(filePath);
 }
 
-void ProjectTree::onRowExpanded(const Gtk::TreeModel::iterator& iter, const Gtk::TreeModel::Path& path) {
+void ProjectTree::onRowExpanded(const Gtk::TreeModel::iterator& iter, const Gtk::TreeModel::Path&) {
     /* If the first node is the placeholder (empty node),
        the directory needs to be loaded */
     if(iter->children().begin()->get_value(_columns.filename).empty())

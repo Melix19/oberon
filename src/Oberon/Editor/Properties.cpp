@@ -31,7 +31,7 @@
 
 namespace Oberon { namespace Editor {
 
-Properties::Properties(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& builder):
+Properties::Properties(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>&):
     Gtk::Box(cobject)
 {
     Corrade::Utility::Resource rs("OberonEditor");

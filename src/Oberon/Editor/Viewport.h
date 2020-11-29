@@ -37,20 +37,27 @@ namespace Oberon { namespace Editor {
 
 class Viewport: public Gtk::GLArea {
     public:
-        explicit Viewport(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& builder, Outline* outline, Platform::GLContext& context);
+        explicit Viewport(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>&, Outline* outline, Platform::GLContext& context);
 
         void loadScene(const std::string& path);
 
     private:
         void onRealize();
-        bool onRender(const Glib::RefPtr<Gdk::GLContext>& context);
+        bool onRender(const Glib::RefPtr<Gdk::GLContext>&);
         void onResize(int width, int height);
+
+        bool onMotionNotifyEvent(GdkEventMotion* motionEvent);
+        bool onButtonPressEvent(GdkEventButton* buttonEvent);
+        bool onButtonReleaseEvent(GdkEventButton* releaseEvent);
 
         Outline* _outline;
         Platform::GLContext& _context;
 
         Vector2i _viewportSize;
         Containers::Pointer<SceneView> _sceneView;
+
+        bool _isDragging;
+        Vector2 _previousMousePosition;
 };
 
 }}

@@ -32,8 +32,8 @@
 
 namespace Oberon { namespace Editor {
 
-Viewport::Viewport(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& builder, Outline* outline, Platform::GLContext& context):
-    Gtk::GLArea(cobject), _outline(outline), _context(context)
+Viewport::Viewport(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>&, Outline* outline, Platform::GLContext& context):
+    Gtk::GLArea(cobject), _outline(outline), _context(context), _isDragging{false}
 {
     /* Automatically re-render everything every time it needs to be drawn */
     set_auto_render();
@@ -47,10 +47,16 @@ Viewport::Viewport(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& bu
     /* Set desired OpenGL version */
     set_required_version(4, 5);
 
-    /* Connect signals to their respective handlers */
+    /* Signals for scene rendering */
     signal_realize().connect(sigc::mem_fun(this, &Viewport::onRealize));
     signal_render().connect(sigc::mem_fun(this, &Viewport::onRender));
     signal_resize().connect(sigc::mem_fun(this, &Viewport::onResize));
+
+    /* Signals for event handling */
+    add_events(Gdk::POINTER_MOTION_MASK|Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
+    signal_motion_notify_event().connect(sigc::mem_fun(this, &Viewport::onMotionNotifyEvent));
+    signal_button_press_event().connect(sigc::mem_fun(this, &Viewport::onButtonPressEvent));
+    signal_button_release_event().connect(sigc::mem_fun(this, &Viewport::onButtonReleaseEvent));
 }
 
 void Viewport::loadScene(const std::string& path) {
@@ -67,7 +73,7 @@ void Viewport::onRealize() {
     _context.create();
 }
 
-bool Viewport::onRender(const Glib::RefPtr<Gdk::GLContext>& context) {
+bool Viewport::onRender(const Glib::RefPtr<Gdk::GLContext>&) {
     /* Reset state to avoid Gtkmm affecting Magnum */
     GL::Context::current().resetState(GL::Context::State::ExitExternal);
 
@@ -94,6 +100,43 @@ void Viewport::onResize(int width, int height) {
 
     /* Update the scene viewport if there is one loaded */
     if(_sceneView) _sceneView->updateViewport(_viewportSize);
+}
+
+bool Viewport::onMotionNotifyEvent(GdkEventMotion* motionEvent) {
+    if(_sceneView && _isDragging) {
+        const Vector2 eventPosition{Float(motionEvent->x), Float(motionEvent->y)};
+        const Vector2 delta = 3.0f*
+            Vector2{eventPosition - _previousMousePosition}/
+            Vector2{Float(get_width()), Float(get_height())};
+
+        (*_sceneView->data().cameraObject)
+            .rotate(Rad{delta.y()}, _sceneView->data().cameraObject->transformation().right().normalized())
+            .rotateY(Rad{delta.x()});
+
+        _previousMousePosition = eventPosition;
+
+        /* Force redraw (the auto_render() from gtk doesn't
+           really autoredraws that often...) */
+        queue_render();
+    }
+
+    return true;
+}
+
+bool Viewport::onButtonPressEvent(GdkEventButton* buttonEvent) {
+    if(buttonEvent->button == GDK_BUTTON_SECONDARY) {
+        _isDragging = true;
+        _previousMousePosition = Vector2{Float(buttonEvent->x), Float(buttonEvent->y)};
+    }
+
+    return true;
+}
+
+bool Viewport::onButtonReleaseEvent(GdkEventButton* releaseEvent) {
+    if(releaseEvent->button == GDK_BUTTON_SECONDARY)
+        _isDragging = false;
+
+    return true;
 }
 
 }}

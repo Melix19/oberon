@@ -35,13 +35,13 @@ namespace Oberon { namespace Editor {
 
 class ProjectTree: public Gtk::TreeView {
     public:
-        explicit ProjectTree(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& builder, Viewport* viewport);
+        explicit ProjectTree(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>&, Viewport* viewport);
 
         void setRootPath(const std::string& path);
 
     private:
-        void onRowActivated(const Gtk::TreeModel::Path& path, Gtk::TreeViewColumn* column);
-        void onRowExpanded(const Gtk::TreeModel::iterator& iter, const Gtk::TreeModel::Path& path);
+        void onRowActivated(const Gtk::TreeModel::Path& path, Gtk::TreeViewColumn*);
+        void onRowExpanded(const Gtk::TreeModel::iterator& iter, const Gtk::TreeModel::Path&);
 
         void loadDirectory(const Gtk::TreeModel::Row& row);
 

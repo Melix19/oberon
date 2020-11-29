@@ -29,7 +29,7 @@
 
 namespace Oberon { namespace Editor {
 
-Outline::Outline(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& builder, Properties* properties):
+Outline::Outline(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>&, Properties* properties):
     Gtk::TreeView(cobject), _properties(properties)
 {
     _treeStore = Gtk::TreeStore::create(_columns);
@@ -54,7 +54,7 @@ void Outline::updateWithScene(const SceneData& data) {
     }
 }
 
-void Outline::onRowActivated(const Gtk::TreeModel::Path& path, Gtk::TreeViewColumn* column) {
+void Outline::onRowActivated(const Gtk::TreeModel::Path& path, Gtk::TreeViewColumn*) {
     const Gtk::TreeModel::iterator iter = _treeStore->get_iter(path);
     _properties->showObjectProperties(iter->get_value(_columns.objectInfo));
 }
