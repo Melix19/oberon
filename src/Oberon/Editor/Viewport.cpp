@@ -33,7 +33,7 @@
 namespace Oberon { namespace Editor {
 
 Viewport::Viewport(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>&, Outline* outline, Platform::GLContext& context):
-    Gtk::GLArea(cobject), _outline(outline), _context(context), _isDragging{false}
+    Gtk::GLArea(cobject), _outline(outline), _context(context), _isMouseDragging{false}
 {
     /* Automatically re-render everything every time it needs to be drawn */
     set_auto_render();
@@ -105,7 +105,7 @@ void Viewport::onResize(int width, int height) {
 bool Viewport::onMotionNotifyEvent(GdkEventMotion* motionEvent) {
     if(_sceneView && _isMouseDragging) {
         const Vector2 eventPosition{Float(motionEvent->x), Float(motionEvent->y)};
-        const Vector2 delta = 3.0f*
+        const Vector2 delta = 2.0f*
             Vector2{eventPosition - _previousMousePosition}/
             Vector2{Float(get_width()), Float(get_height())};
 
