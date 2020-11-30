@@ -28,17 +28,20 @@
 
 #include "SceneImporter.h"
 
+#include <Corrade/Containers/GrowableArray.h>
 #include <Corrade/Utility/FormatStl.h>
 #include <Magnum/MeshTools/Compile.h>
 #include <Magnum/SceneGraph/Camera.h>
 #include <Magnum/Shaders/Phong.h>
 #include <Magnum/Trade/AbstractImporter.h>
+#include <Magnum/Trade/LightData.h>
 #include <Magnum/Trade/MeshData.h>
 #include <Magnum/Trade/MeshObjectData3D.h>
 #include <Magnum/Trade/ObjectData3D.h>
 #include <Magnum/Trade/PhongMaterialData.h>
 #include <Magnum/Trade/SceneData.h>
 
+#include "Oberon/LightDrawable.h"
 #include "Oberon/PhongDrawable.h"
 #include "Oberon/SceneData.h"
 
@@ -56,17 +59,20 @@ Resource<GL::AbstractShaderProgram, Shaders::Phong> phongShader(SceneData& data,
     Resource<GL::AbstractShaderProgram, Shaders::Phong> shader =
         data.resourceManager.get<GL::AbstractShaderProgram, Shaders::Phong>(shaderKey);
     if(!shader) {
-        data.resourceManager.set<GL::AbstractShaderProgram>(shader.key(), new Shaders::Phong{flags});
+        data.resourceManager.set<GL::AbstractShaderProgram>(shader.key(),
+            new Shaders::Phong{flags, data.lightCount});
 
         (*shader)
             .setSpecularColor(0x11111100_rgbaf)
             .setShininess(80.0f);
+
+        arrayAppend(data.phongShadersKeys, shaderKey);
     }
 
     return shader;
 }
 
-void addObject(const std::string& path, SceneData& data, Containers::ArrayView<const Containers::Pointer<Trade::ObjectData3D>> objects, Containers::ArrayView<const Containers::Optional<Trade::PhongMaterialData>> materials, Containers::ArrayView<const bool> hasVertexColors, Object3D& parent, UnsignedInt i) {
+void addObject(const std::string& path, SceneData& data, Containers::ArrayView<const Containers::Pointer<Trade::ObjectData3D>> objects, Containers::ArrayView<const Containers::Optional<Trade::PhongMaterialData>> materials, Containers::ArrayView<const Containers::Optional<Trade::LightData>> lights, Containers::ArrayView<const bool> hasVertexColors, Object3D& parent, UnsignedInt i) {
     /* Object failed to import, skip */
     if(!objects[i]) return;
 
@@ -105,6 +111,13 @@ void addObject(const std::string& path, SceneData& data, Containers::ArrayView<c
                 mesh, material.diffuseColor(), data.opaqueDrawables};
         }
 
+    /* Light */
+    } else if(objectData.instanceType() == Trade::ObjectInstanceType3D::Light && objectData.instance() != -1) {
+        /* Add a light drawable, which puts correct camera-relative position
+           to data.lightPositions. */
+        const Trade::LightData& light = *lights[objectData.instance()];
+        new LightDrawable{*object, light.type() == Trade::LightData::Type::Directional ? true : false, light.color()*light.intensity(), light.range(), data.lightPositions, data.lightColors, data.lightRanges, data.lightDrawables};
+
     /* This is a node that holds the default camera -> assign the object to the
        global camera pointer */
     } else if(objectData.instanceType() == Trade::ObjectInstanceType3D::Camera && objectData.instance() == 0) {
@@ -113,7 +126,7 @@ void addObject(const std::string& path, SceneData& data, Containers::ArrayView<c
 
     /* Recursively add children */
     for(std::size_t id: objectData.children())
-        addObject(path, data, objects, materials, hasVertexColors, *object, id);
+        addObject(path, data, objects, materials, lights, hasVertexColors, *object, id);
 }
 
 }
@@ -125,6 +138,18 @@ void load(const std::string& path, SceneData& data) {
     if(!importer->openFile(path)) {
         Error{} << "Cannot open the file" << path;
         return;
+    }
+
+    /* Load all lights */
+    Containers::Array<Containers::Optional<Trade::LightData>> lights{importer->lightCount()};
+    for(UnsignedInt i = 0; i != importer->lightCount(); ++i) {
+        Containers::Optional<Trade::LightData> light = importer->light(i);
+        if(!light) {
+            Warning{} << "Cannot load light" << i << importer->lightName(i);
+            continue;
+        }
+
+        lights[i] = std::move(light);
     }
 
     /* Load all materials */
@@ -163,7 +188,8 @@ void load(const std::string& path, SceneData& data) {
             return;
         }
 
-        /* Import all objects */
+        /* Import all objects and first count how many lights is there first so
+           we know which shaders to instantiate */
         data.objects = Containers::Array<ObjectInfo>{Containers::ValueInit, importer->object3DCount()};
         Containers::Array<Containers::Pointer<Trade::ObjectData3D>> objects{importer->object3DCount()};
         for(UnsignedInt i = 0; i != importer->object3DCount(); ++i) {
@@ -177,12 +203,15 @@ void load(const std::string& path, SceneData& data) {
             if(data.objects[i].name.empty())
                 data.objects[i].name = Utility::formatString("object #{}", i);
 
+            if(objects[i]->instanceType() == Trade::ObjectInstanceType3D::Light)
+                ++data.lightCount;
+
             data.objects[i].childCount = objects[i]->children().size();
         }
 
         /* Recursively add all children */
         for(UnsignedInt objectId: sceneData->children3D())
-            addObject(path, data, objects, materials, hasVertexColors, data.scene, objectId);
+            addObject(path, data, objects, materials, lights, hasVertexColors, data.scene, objectId);
 
     /* The format has no scene support, display just the first loaded mesh with
        a default material and be done with it */

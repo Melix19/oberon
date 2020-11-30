@@ -24,8 +24,11 @@
 
 #include "SceneView.h"
 
+#include <Corrade/Containers/GrowableArray.h>
 #include <Magnum/GL/Renderer.h>
+#include <Magnum/Math/Color.h>
 #include <Magnum/SceneGraph/Camera.h>
+#include <Magnum/Shaders/Phong.h>
 #include <Magnum/Trade/AbstractImporter.h>
 
 #include "Oberon/SceneImporter.h"
@@ -42,6 +45,25 @@ SceneView::SceneView(const std::string& path, const Vector2i& viewportSize) {
 }
 
 void SceneView::draw() {
+    /* Calculate light data and upload them to all shaders */
+    arrayResize(_data.lightPositions, 0);
+    arrayResize(_data.lightColors, 0);
+    arrayResize(_data.lightRanges, 0);
+    _data.camera->draw(_data.lightDrawables);
+    CORRADE_INTERNAL_ASSERT(_data.lightPositions.size() == _data.lightCount);
+    CORRADE_INTERNAL_ASSERT(_data.lightColors.size() == _data.lightCount);
+    CORRADE_INTERNAL_ASSERT(_data.lightRanges.size() == _data.lightCount);
+    for(const std::string& shaderKey: _data.phongShadersKeys) {
+        Resource<GL::AbstractShaderProgram, Shaders::Phong> shader =
+            _data.resourceManager.get<GL::AbstractShaderProgram, Shaders::Phong>(shaderKey);
+        if(shader) {
+            (*shader)
+                .setLightPositions(_data.lightPositions)
+                .setLightColors(_data.lightColors)
+                .setLightRanges(_data.lightRanges);
+        }
+    }
+
     _data.camera->draw(_data.opaqueDrawables);
 }
 

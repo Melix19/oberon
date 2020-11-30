@@ -25,11 +25,13 @@
 find_package(Magnum REQUIRED GL MeshTools SceneGraph Shaders Trade)
 
 set(Oberon_SRCS
+    LightDrawable.cpp
     PhongDrawable.cpp
     SceneImporter.cpp
     SceneView.cpp)
 
 set(Oberon_HEADERS
+    LightDrawable.h
     Oberon.h
     PhongDrawable.h
     SceneData.h

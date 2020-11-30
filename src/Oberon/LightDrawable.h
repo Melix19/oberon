@@ -1,5 +1,5 @@
-#ifndef Oberon_Oberon_h
-#define Oberon_Oberon_h
+#ifndef Oberon_LightDrawable_h
+#define Oberon_LightDrawable_h
 /*
     This file is part of Oberon.
 
@@ -24,25 +24,27 @@
     SOFTWARE.
 */
 
-#include <Magnum/Magnum.h>
-#include <Magnum/SceneGraph/SceneGraph.h>
+#include <Magnum/Math/Color.h>
+#include <Magnum/SceneGraph/Drawable.h>
+
+#include "Oberon/Oberon.h"
 
 namespace Oberon {
 
-using namespace Magnum;
+class LightDrawable: public SceneGraph::Drawable3D {
+    public:
+        explicit LightDrawable(SceneGraph::AbstractObject3D& object, bool directional, const Color3& color, Float range, Containers::Array<Vector4>& positions, Containers::Array<Color3>& colors, Containers::Array<Float>& ranges, SceneGraph::DrawableGroup3D& group): SceneGraph::Drawable3D{object, &group}, _directional{directional}, _color{color}, _range{range}, _positions(positions), _colors(colors), _ranges(ranges) {}
 
-typedef SceneGraph::Object<SceneGraph::TranslationRotationScalingTransformation3D> Object3D;
-typedef SceneGraph::Scene<SceneGraph::TranslationRotationScalingTransformation3D> Scene3D;
+    private:
+        void draw(const Matrix4& transformationMatrix, SceneGraph::Camera3D&) override;
 
-class LightDrawable;
-
-struct ObjectInfo;
-
-class PhongDrawable;
-
-struct SceneData;
-
-class SceneView;
+        bool _directional;
+        Color3 _color;
+        Float _range;
+        Containers::Array<Vector4>& _positions;
+        Containers::Array<Color3>& _colors;
+        Containers::Array<Float>& _ranges;
+};
 
 }
 

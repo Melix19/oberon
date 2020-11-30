@@ -54,9 +54,16 @@ struct SceneData {
     Scene3D scene;
     Object3D* cameraObject{};
     SceneGraph::Camera3D* camera;
-    SceneGraph::DrawableGroup3D opaqueDrawables;
+    SceneGraph::DrawableGroup3D opaqueDrawables, lightDrawables;
 
     Containers::Array<ObjectInfo> objects;
+
+    UnsignedInt lightCount{};
+    Containers::Array<Vector4> lightPositions;
+    Containers::Array<Color3> lightColors;
+    Containers::Array<Float> lightRanges;
+
+    Containers::Array<std::string> phongShadersKeys;
 };
 
 }
