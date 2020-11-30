@@ -29,6 +29,7 @@
               <object class="GtkBox">
                 <property name="visible">True</property>
                 <property name="orientation">vertical</property>
+                <property name="width-request">250</property>
                 <child>
                   <object class="GtkLabel">
                     <property name="visible">True</property>
@@ -100,6 +101,7 @@
               <object class="GtkBox">
                 <property name="visible">True</property>
                 <property name="orientation">vertical</property>
+                <property name="width-request">250</property>
                 <child>
                   <object class="GtkLabel">
                     <property name="visible">True</property>
@@ -135,6 +137,7 @@
               <object class="GtkBox">
                 <property name="visible">True</property>
                 <property name="orientation">vertical</property>
+                <property name="width-request">250</property>
                 <child>
                   <object class="GtkLabel">
                     <property name="visible">True</property>
