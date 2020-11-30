@@ -36,6 +36,7 @@ ProjectTree::ProjectTree(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builde
     Gtk::TreeView(cobject), _viewport(viewport)
 {
     _treeStore = Gtk::TreeStore::create(_columns);
+    _treeStore->set_sort_column(_columns.filename, Gtk::SORT_ASCENDING);
     set_model(_treeStore);
 
     append_column("", _columns.filename);
@@ -117,27 +118,30 @@ void ProjectTree::requestNextFiles(const Glib::RefPtr<Gio::File>& directory, con
 void ProjectTree::onNextFiles(const Glib::RefPtr<Gio::AsyncResult>& result, const Glib::RefPtr<Gio::File>& directory, const Glib::RefPtr<Gio::FileEnumerator>& enumerator, const Gtk::TreeModel::Row& row) {
     Glib::ListHandle<Glib::RefPtr<Gio::FileInfo>> listInfo = enumerator->next_files_finish(result);
 
-    /* If we're done with the loading */
+    /* If the loading is done */
     if(listInfo.empty()) {
-        /* Get the placeholder node (it's always the last children) */
-        Gtk::TreeModel::iterator placeholder = --(row.children().end());
+        /* If the first node is the placeholder (empty node) it means
+           that the directory is empty, so change its name to "(Empty)" */
+        if(row.children().size() == 1 && row.children().begin()->get_value(_columns.filename).empty())
+            (*row.children().begin())[_columns.filename] = "(Empty)";
 
-        /* If the folder only has 1 child it means that it's empty
-           (only the placeholder is present), so set the placeholder's
-           name to "empty". */
-        if(row.children().size() == 1)
-            (*placeholder)[_columns.filename] = "(Empty)";
-        /* Otherwise just remove the placeholder. */
-        else
-            _treeStore->erase(placeholder);
+    /* Otherwise load the files */
     } else {
         for(Glib::RefPtr<Gio::FileInfo> info: listInfo) {
-            Gtk::TreeModel::Row childRow = *(_treeStore->prepend(row.children()));
-            childRow[_columns.filename] = info->get_name();
+            Gtk::TreeModel::iterator childRow;
+
+            /* If the first node is the placeholder (empty node) change
+               its name instead of creating a new one */
+            if(row.children().size() == 1 && row.children().begin()->get_value(_columns.filename).empty())
+                childRow = row.children().begin();
+            else
+                childRow = _treeStore->append(row.children());
+
+            (*childRow)[_columns.filename] = info->get_name();
 
             /* Add a child placeholder if the file is a directory */
             if(info->get_file_type() == Gio::FileType::FILE_TYPE_DIRECTORY)
-                _treeStore->append(childRow.children());
+                _treeStore->append(childRow->children());
         }
 
         requestNextFiles(directory, enumerator, row);
