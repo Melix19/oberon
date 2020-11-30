@@ -1,5 +1,3 @@
-#ifndef Oberon_Oberon_h
-#define Oberon_Oberon_h
 /*
     This file is part of Oberon.
 
@@ -24,26 +22,36 @@
     SOFTWARE.
 */
 
-#include <Magnum/Magnum.h>
-#include <Magnum/SceneGraph/SceneGraph.h>
+#include "EditorWindow.h"
 
-namespace Oberon {
+#include <gtkmm/button.h>
+#include <gtkmm/filechooserdialog.h>
 
-using namespace Magnum;
+#include "Oberon/Editor/ProjectTree.h"
 
-typedef SceneGraph::Object<SceneGraph::TranslationRotationScalingTransformation3D> Object3D;
-typedef SceneGraph::Scene<SceneGraph::TranslationRotationScalingTransformation3D> Scene3D;
+namespace Oberon { namespace Editor {
 
-class LightDrawable;
+EditorWindow::EditorWindow(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& builder, ProjectTree* projectTree):
+    Gtk::Window(cobject), _projectTree(projectTree)
+{
+    maximize();
 
-struct ObjectInfo;
-
-class PhongDrawable;
-
-struct SceneData;
-
-class SceneView;
-
+    Gtk::Button* openButton;
+    builder->get_widget("open_button", openButton);
+    openButton->signal_clicked().connect(sigc::mem_fun(*this, &EditorWindow::onButtonOpen));
 }
 
-#endif
+void EditorWindow::onButtonOpen() {
+    Gtk::FileChooserDialog dialog("Please choose a folder",
+        Gtk::FILE_CHOOSER_ACTION_SELECT_FOLDER);
+    dialog.set_transient_for(*this);
+
+    dialog.add_button("_Cancel", Gtk::RESPONSE_CANCEL);
+    dialog.add_button("_Select", Gtk::RESPONSE_OK);
+
+    int result = dialog.run();
+    if(result == Gtk::RESPONSE_OK)
+        _projectTree->setRootPath(dialog.get_filename());
+}
+
+}}

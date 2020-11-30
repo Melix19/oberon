@@ -22,23 +22,39 @@
     SOFTWARE.
 */
 
-#include "EditorApplication.h"
-#include "ProjectManager.h"
+#include <Corrade/Utility/Resource.h>
+#include <Magnum/Platform/GLContext.h>
 
-using namespace Oberon::Editor;
+#include "Oberon/Editor/EditorWindow.h"
+#include "Oberon/Editor/Outline.h"
+#include "Oberon/Editor/ProjectTree.h"
+#include "Oberon/Editor/Properties.h"
+#include "Oberon/Editor/Viewport.h"
 
 int main(int argc, char** argv) {
-    int exitCode;
-    std::string projectPath;
+    Magnum::Platform::GLContext context{Magnum::NoCreate, argc, argv};
 
-    {
-        ProjectManager projectManager({argc, argv});
-        exitCode = projectManager.exec();
-        projectPath = projectManager.projectPath();
-    }
+    Glib::RefPtr<Gtk::Application> app =
+        Gtk::Application::create(argc, argv, "org.melix.OberonEditor");
 
-    if(exitCode == 0 && !projectPath.empty()) {
-        EditorApplication editor({argc, argv}, projectPath);
-        return editor.exec();
-    } else return exitCode;
+    Corrade::Utility::Resource rs("OberonEditor");
+    Glib::RefPtr<Gtk::Builder> builder =
+        Gtk::Builder::create_from_string(rs.get("EditorWindow.ui"));
+
+    Oberon::Editor::Properties* properties;
+    builder->get_widget_derived("Properties", properties);
+
+    Oberon::Editor::Outline* outline;
+    builder->get_widget_derived("Outline", outline, properties);
+
+    Oberon::Editor::Viewport* viewport;
+    builder->get_widget_derived("Viewport", viewport, outline, context);
+
+    Oberon::Editor::ProjectTree* projectTree;
+    builder->get_widget_derived("ProjectTree", projectTree, viewport);
+
+    Oberon::Editor::EditorWindow* editorWindow;
+    builder->get_widget_derived("EditorWindow", editorWindow, projectTree);
+
+    return app->run(*editorWindow);
 }

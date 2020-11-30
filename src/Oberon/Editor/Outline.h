@@ -1,5 +1,5 @@
-#ifndef Oberon_Oberon_h
-#define Oberon_Oberon_h
+#ifndef Oberon_Editor_Outline_h
+#define Oberon_Editor_Outline_h
 /*
     This file is part of Oberon.
 
@@ -24,26 +24,40 @@
     SOFTWARE.
 */
 
-#include <Magnum/Magnum.h>
-#include <Magnum/SceneGraph/SceneGraph.h>
+#include <gtkmm/builder.h>
+#include <gtkmm/treestore.h>
+#include <gtkmm/treeview.h>
 
-namespace Oberon {
+#include "Oberon/Oberon.h"
+#include "Oberon/Editor/Editor.h"
 
-using namespace Magnum;
+namespace Oberon { namespace Editor {
 
-typedef SceneGraph::Object<SceneGraph::TranslationRotationScalingTransformation3D> Object3D;
-typedef SceneGraph::Scene<SceneGraph::TranslationRotationScalingTransformation3D> Scene3D;
+class Outline: public Gtk::TreeView {
+    public:
+        explicit Outline(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>&, Properties* properties);
 
-class LightDrawable;
+        void updateWithScene(const SceneData& data);
 
-struct ObjectInfo;
+    private:
+        void onRowActivated(const Gtk::TreeModel::Path& path, Gtk::TreeViewColumn*);
 
-class PhongDrawable;
+        void addObjectRow(const Gtk::TreeModel::Row& parentRow, const SceneData& data, UnsignedInt objectId);
 
-struct SceneData;
+    private:
+        struct ModelColumns: public Gtk::TreeModel::ColumnRecord {
+            explicit ModelColumns() { add(name); add(objectInfo); }
 
-class SceneView;
+            Gtk::TreeModelColumn<Glib::ustring> name;
+            Gtk::TreeModelColumn<const ObjectInfo*> objectInfo;
+        };
 
-}
+        ModelColumns _columns;
+        Glib::RefPtr<Gtk::TreeStore> _treeStore;
+
+        Properties* _properties;
+};
+
+}}
 
 #endif

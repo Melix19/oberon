@@ -22,71 +22,49 @@
 #   SOFTWARE.
 #
 
-find_package(ImGui REQUIRED SourcesMiscCpp)
-find_package(Magnum REQUIRED Sdl2Application)
-find_package(MagnumIntegration REQUIRED ImGui)
-find_package(LibZip REQUIRED)
+if(MAGNUM_TARGET_GLES AND NOT MAGNUM_TARGET_DESKTOP_GLES)
+    find_package(Magnum REQUIRED EglContext)
+elseif(CORRADE_TARGET_WINDOWS)
+    find_package(Magnum REQUIRED WglContext)
+elseif(CORRADE_TARGET_APPLE)
+    find_package(Magnum REQUIRED CglContext)
+elseif(CORRADE_TARGET_UNIX)
+    find_package(Magnum REQUIRED GlxContext)
+else()
+    message(FATAL_ERROR "Magnum context creation is not supported on this platform")
+endif()
+
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(GTKMM gtkmm-3.0)
+include_directories(SYSTEM ${GTKMM_INCLUDE_DIRS})
 
 corrade_add_resource(OberonEditor_RCS resources.conf)
 
 set(OberonEditor_SRCS
-    CollectionPanel.cpp
-    Console.cpp
-    EditorApplication.cpp
-    Explorer.cpp
-    Export.cpp
-    Inspector.cpp
-    Outliner.cpp
-    ProjectManager.cpp
-    PropertiesPanel.cpp
-    Theme.cpp
+    EditorWindow.cpp
     main.cpp
+    Outline.cpp
+    ProjectTree.cpp
+    Properties.cpp
+    Viewport.cpp
 
     ${OberonEditor_RCS})
 
 set(OberonEditor_HEADERS
-    AbstractPanel.h
-    CollectionPanel.h
-    CollectionPanel.hpp
-    Console.h
     Editor.h
-    EditorApplication.h
-    Explorer.h
-    Export.h
-    FileNode.h
-    Inspector.h
-    ObjectNode.h
-    Outliner.h
-    ProjectManager.h
-    PropertiesPanel.h
-    Theme.h)
+    EditorWindow.h
+    Outline.h
+    ProjectTree.h
+    Properties.h
+    Viewport.h)
 
-add_executable(OberonEditor MACOSX_BUNDLE
+add_executable(OberonEditor
     ${OberonEditor_SRCS}
     ${OberonEditor_HEADERS})
-
-set_target_properties(OberonEditor PROPERTIES OUTPUT_NAME "Oberon")
-
-# Windows generates import libraries that will result in the same name
-# as the Oberon library so we output them in a different directory
-if(CORRADE_TARGET_WINDOWS)
-    set_target_properties(OberonEditor PROPERTIES ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/$<CONFIG>/temp)
-endif()
-
 target_link_libraries(OberonEditor PRIVATE
+    Magnum::GLContext
     Oberon
-    Magnum::Application
-    MagnumIntegration::ImGui
-    ImGui::SourcesMiscCpp
-    LibZip::LibZip
-    portable_file_dialogs)
-
-if(CORRADE_TARGET_APPLE)
-    set_target_properties(OberonEditor PROPERTIES
-        MACOSX_BUNDLE ON
-        MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/MacOSXBundleInfo.plist.in
-        XCODE_ATTRIBUTE_CODE_SIGNING_REQUIRED "YES")
-endif()
+    ${GTKMM_LIBRARIES})
 
 # Make the executable a default target to build & run in Visual Studio
-set_property(DIRECTORY ${PROJECT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT Oberon)
+set_property(DIRECTORY ${PROJECT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT OberonEditor)

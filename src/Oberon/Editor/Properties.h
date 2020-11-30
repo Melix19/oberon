@@ -1,5 +1,5 @@
-#ifndef Oberon_Oberon_h
-#define Oberon_Oberon_h
+#ifndef Oberon_Editor_Properties_h
+#define Oberon_Editor_Properties_h
 /*
     This file is part of Oberon.
 
@@ -24,26 +24,41 @@
     SOFTWARE.
 */
 
-#include <Magnum/Magnum.h>
-#include <Magnum/SceneGraph/SceneGraph.h>
+#include <gtkmm/box.h>
+#include <gtkmm/builder.h>
+#include <gtkmm/spinbutton.h>
 
-namespace Oberon {
+#include "Oberon/Oberon.h"
 
-using namespace Magnum;
+namespace Oberon { namespace Editor {
 
-typedef SceneGraph::Object<SceneGraph::TranslationRotationScalingTransformation3D> Object3D;
-typedef SceneGraph::Scene<SceneGraph::TranslationRotationScalingTransformation3D> Scene3D;
+class Properties: public Gtk::Box {
+    public:
+        explicit Properties(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>&);
 
-class LightDrawable;
+        void showObjectProperties(const ObjectInfo* objectInfo);
 
-struct ObjectInfo;
+    private:
+        void updateTranslation();
+        void updateRotation();
+        void updateScaling();
 
-class PhongDrawable;
+    private:
+        Gtk::SpinButton* _translationX;
+        Gtk::SpinButton* _translationY;
+        Gtk::SpinButton* _translationZ;
 
-struct SceneData;
+        Gtk::SpinButton* _rotationX;
+        Gtk::SpinButton* _rotationY;
+        Gtk::SpinButton* _rotationZ;
 
-class SceneView;
+        Gtk::SpinButton* _scalingX;
+        Gtk::SpinButton* _scalingY;
+        Gtk::SpinButton* _scalingZ;
 
-}
+        Object3D* _object;
+};
+
+}}
 
 #endif

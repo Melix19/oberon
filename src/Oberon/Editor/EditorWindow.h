@@ -1,5 +1,5 @@
-#ifndef Oberon_Oberon_h
-#define Oberon_Oberon_h
+#ifndef Oberon_Editor_EditorWindow_h
+#define Oberon_Editor_EditorWindow_h
 /*
     This file is part of Oberon.
 
@@ -24,26 +24,23 @@
     SOFTWARE.
 */
 
-#include <Magnum/Magnum.h>
-#include <Magnum/SceneGraph/SceneGraph.h>
+#include <gtkmm/builder.h>
+#include <gtkmm/window.h>
 
-namespace Oberon {
+#include "Oberon/Editor/Editor.h"
 
-using namespace Magnum;
+namespace Oberon { namespace Editor {
 
-typedef SceneGraph::Object<SceneGraph::TranslationRotationScalingTransformation3D> Object3D;
-typedef SceneGraph::Scene<SceneGraph::TranslationRotationScalingTransformation3D> Scene3D;
+class EditorWindow: public Gtk::Window {
+    public:
+        explicit EditorWindow(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& builder, ProjectTree* projectTree);
 
-class LightDrawable;
+    private:
+        void onButtonOpen();
 
-struct ObjectInfo;
+        ProjectTree* _projectTree;
+};
 
-class PhongDrawable;
-
-struct SceneData;
-
-class SceneView;
-
-}
+}}
 
 #endif

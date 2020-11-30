@@ -1,3 +1,5 @@
+#ifndef Oberon_Editor_Editor_h
+#define Oberon_Editor_Editor_h
 /*
     This file is part of Oberon.
 
@@ -22,32 +24,18 @@
     SOFTWARE.
 */
 
-#pragma once
-
-#include <Oberon/Oberon.h>
-
 namespace Oberon { namespace Editor {
 
-class AbstractPanel;
+class EditorWindow;
 
-class CollectionPanel;
+class Outline;
 
-class Console;
+class ProjectTree;
 
-class EditorApplication;
+class Properties;
 
-class Explorer;
-
-class FileNode;
-
-class Inspector;
-
-class ObjectNode;
-
-class Outliner;
-
-class ProjectManager;
-
-class PropertiesPanel;
+class Viewport;
 
 }}
+
+#endif

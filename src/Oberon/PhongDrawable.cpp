@@ -1,5 +1,3 @@
-#ifndef Oberon_Oberon_h
-#define Oberon_Oberon_h
 /*
     This file is part of Oberon.
 
@@ -24,26 +22,22 @@
     SOFTWARE.
 */
 
-#include <Magnum/Magnum.h>
-#include <Magnum/SceneGraph/SceneGraph.h>
+#include "PhongDrawable.h"
+
+#include <Magnum/GL/Mesh.h>
+#include <Magnum/SceneGraph/Camera.h>
+#include <Magnum/Shaders/Phong.h>
 
 namespace Oberon {
 
-using namespace Magnum;
-
-typedef SceneGraph::Object<SceneGraph::TranslationRotationScalingTransformation3D> Object3D;
-typedef SceneGraph::Scene<SceneGraph::TranslationRotationScalingTransformation3D> Scene3D;
-
-class LightDrawable;
-
-struct ObjectInfo;
-
-class PhongDrawable;
-
-struct SceneData;
-
-class SceneView;
-
+void PhongDrawable::draw(const Matrix4& transformationMatrix, SceneGraph::Camera3D& camera) {
+    (*_shader)
+        .setTransformationMatrix(transformationMatrix)
+        .setNormalMatrix(transformationMatrix.normalMatrix())
+        .setProjectionMatrix(camera.projectionMatrix())
+        .setAmbientColor(_color*0.06f)
+        .setDiffuseColor(_color)
+        .draw(*_mesh);
 }
 
-#endif
+}

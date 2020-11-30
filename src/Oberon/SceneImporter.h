@@ -1,5 +1,5 @@
-#ifndef Oberon_Oberon_h
-#define Oberon_Oberon_h
+#ifndef Oberon_SceneImporter_h
+#define Oberon_SceneImporter_h
 /*
     This file is part of Oberon.
 
@@ -24,26 +24,15 @@
     SOFTWARE.
 */
 
-#include <Magnum/Magnum.h>
-#include <Magnum/SceneGraph/SceneGraph.h>
+#include <string>
+#include <Magnum/Trade/Trade.h>
 
-namespace Oberon {
+#include "Oberon/Oberon.h"
 
-using namespace Magnum;
+namespace Oberon { namespace SceneImporter {
 
-typedef SceneGraph::Object<SceneGraph::TranslationRotationScalingTransformation3D> Object3D;
-typedef SceneGraph::Scene<SceneGraph::TranslationRotationScalingTransformation3D> Scene3D;
+void load(const std::string& path, SceneData& data);
 
-class LightDrawable;
-
-struct ObjectInfo;
-
-class PhongDrawable;
-
-struct SceneData;
-
-class SceneView;
-
-}
+}}
 
 #endif

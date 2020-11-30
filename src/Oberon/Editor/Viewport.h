@@ -1,5 +1,5 @@
-#ifndef Oberon_Oberon_h
-#define Oberon_Oberon_h
+#ifndef Oberon_Editor_Viewport_h
+#define Oberon_Editor_Viewport_h
 /*
     This file is part of Oberon.
 
@@ -24,26 +24,44 @@
     SOFTWARE.
 */
 
-#include <Magnum/Magnum.h>
-#include <Magnum/SceneGraph/SceneGraph.h>
+#include <gtkmm/builder.h>
+#include <gtkmm/glarea.h>
+#include <Corrade/Containers/Pointer.h>
+#include <Magnum/Math/Vector2.h>
+#include <Magnum/Platform/Platform.h>
 
-namespace Oberon {
+#include "Oberon/Oberon.h"
+#include "Oberon/Editor/Editor.h"
 
-using namespace Magnum;
+namespace Oberon { namespace Editor {
 
-typedef SceneGraph::Object<SceneGraph::TranslationRotationScalingTransformation3D> Object3D;
-typedef SceneGraph::Scene<SceneGraph::TranslationRotationScalingTransformation3D> Scene3D;
+class Viewport: public Gtk::GLArea {
+    public:
+        explicit Viewport(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>&, Outline* outline, Platform::GLContext& context);
 
-class LightDrawable;
+        void loadScene(const std::string& path);
 
-struct ObjectInfo;
+    private:
+        void onRealize();
+        bool onRender(const Glib::RefPtr<Gdk::GLContext>&);
+        void onResize(int width, int height);
 
-class PhongDrawable;
+        bool onMotionNotifyEvent(GdkEventMotion* motionEvent);
+        bool onButtonPressEvent(GdkEventButton* buttonEvent);
+        bool onButtonReleaseEvent(GdkEventButton* releaseEvent);
 
-struct SceneData;
+        bool onKeyPressEvent(GdkEventKey* keyEvent);
 
-class SceneView;
+        Outline* _outline;
+        Platform::GLContext& _context;
 
-}
+        Vector2i _viewportSize;
+        Containers::Pointer<SceneView> _sceneView;
+
+        bool _isMouseDragging;
+        Vector2 _previousMousePosition;
+};
+
+}}
 
 #endif

@@ -1,5 +1,5 @@
-#ifndef Oberon_Oberon_h
-#define Oberon_Oberon_h
+#ifndef Oberon_PhongDrawable_h
+#define Oberon_PhongDrawable_h
 /*
     This file is part of Oberon.
 
@@ -24,25 +24,27 @@
     SOFTWARE.
 */
 
-#include <Magnum/Magnum.h>
-#include <Magnum/SceneGraph/SceneGraph.h>
+#include <Magnum/Resource.h>
+#include <Magnum/GL/GL.h>
+#include <Magnum/Math/Color.h>
+#include <Magnum/SceneGraph/Drawable.h>
+#include <Magnum/Shaders/Shaders.h>
+
+#include "Oberon/Oberon.h"
 
 namespace Oberon {
 
-using namespace Magnum;
+class PhongDrawable: public SceneGraph::Drawable3D {
+    public:
+        explicit PhongDrawable(SceneGraph::AbstractObject3D& object, const Resource<GL::AbstractShaderProgram, Shaders::Phong>& shader, const Resource<GL::Mesh>& mesh, const Color4& color, SceneGraph::DrawableGroup3D& group): SceneGraph::Drawable3D{object, &group}, _shader(shader), _mesh(mesh), _color{color} {}
 
-typedef SceneGraph::Object<SceneGraph::TranslationRotationScalingTransformation3D> Object3D;
-typedef SceneGraph::Scene<SceneGraph::TranslationRotationScalingTransformation3D> Scene3D;
+    private:
+        void draw(const Matrix4& transformationMatrix, SceneGraph::Camera3D& camera) override;
 
-class LightDrawable;
-
-struct ObjectInfo;
-
-class PhongDrawable;
-
-struct SceneData;
-
-class SceneView;
+        Resource<GL::AbstractShaderProgram, Shaders::Phong> _shader;
+        Resource<GL::Mesh> _mesh;
+        Color4 _color;
+};
 
 }
 

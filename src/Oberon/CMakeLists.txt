@@ -22,52 +22,34 @@
 #   SOFTWARE.
 #
 
-find_package(Magnum REQUIRED
-    MeshTools
-    Primitives
-    SceneGraph
-    Shaders)
-
-corrade_add_resource(Oberon_RCS resources.conf)
+find_package(Magnum REQUIRED GL MeshTools SceneGraph Shaders Trade)
 
 set(Oberon_SRCS
-    Importer.cpp
-    MeshPrimitives.cpp
-    MeshRenderer.cpp
-    SceneShader.cpp
-
-    ${Oberon_RCS})
+    LightDrawable.cpp
+    PhongDrawable.cpp
+    SceneImporter.cpp
+    SceneView.cpp)
 
 set(Oberon_HEADERS
-    Importer.h
-    Light.h
-    MeshPrimitives.h
-    MeshRenderer.h
+    LightDrawable.h
     Oberon.h
-    SceneShader.h)
+    PhongDrawable.h
+    SceneData.h
+    SceneImporter.h
+    SceneView.h)
 
 add_library(Oberon
     ${Oberon_SRCS}
     ${Oberon_HEADERS})
-
 target_include_directories(Oberon PUBLIC
     ${PROJECT_SOURCE_DIR}/src
     ${PROJECT_BINARY_DIR}/src)
-
-target_link_libraries(Oberon PRIVATE
+target_link_libraries(Oberon PUBLIC
+    Magnum::GL
     Magnum::Magnum
     Magnum::MeshTools
-    Magnum::Primitives
     Magnum::SceneGraph
-    Magnum::Shaders)
+    Magnum::Shaders
+    Magnum::Trade)
 
-if(WITH_EDITOR)
-    add_subdirectory(Editor)
-endif()
-
-if(WITH_EXPORT_TEMPLATE)
-    add_subdirectory(ExportTemplate)
-endif()
-
-# Oberon library target alias for superprojects
-add_library(Oberon::Oberon ALIAS Oberon)
+add_subdirectory(Editor)

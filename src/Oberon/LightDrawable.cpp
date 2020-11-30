@@ -1,5 +1,3 @@
-#ifndef Oberon_Oberon_h
-#define Oberon_Oberon_h
 /*
     This file is part of Oberon.
 
@@ -24,26 +22,21 @@
     SOFTWARE.
 */
 
-#include <Magnum/Magnum.h>
-#include <Magnum/SceneGraph/SceneGraph.h>
+#include "LightDrawable.h"
+
+#include <Corrade/Containers/GrowableArray.h>
+#include <Magnum/Math/Matrix4.h>
 
 namespace Oberon {
 
-using namespace Magnum;
+void LightDrawable::draw(const Matrix4& transformationMatrix, SceneGraph::Camera3D&) {
+    arrayAppend(_positions, _directional ?
+        Vector4{transformationMatrix.backward(), 0.0f} :
+        Vector4{transformationMatrix.translation(), 1.0f});
 
-typedef SceneGraph::Object<SceneGraph::TranslationRotationScalingTransformation3D> Object3D;
-typedef SceneGraph::Scene<SceneGraph::TranslationRotationScalingTransformation3D> Scene3D;
+    arrayAppend(_colors, _color);
 
-class LightDrawable;
-
-struct ObjectInfo;
-
-class PhongDrawable;
-
-struct SceneData;
-
-class SceneView;
-
+    arrayAppend(_ranges, _range);
 }
 
-#endif
+}

@@ -1,5 +1,5 @@
-#ifndef Oberon_Oberon_h
-#define Oberon_Oberon_h
+#ifndef Oberon_SceneView_h
+#define Oberon_SceneView_h
 /*
     This file is part of Oberon.
 
@@ -24,25 +24,22 @@
     SOFTWARE.
 */
 
-#include <Magnum/Magnum.h>
-#include <Magnum/SceneGraph/SceneGraph.h>
+#include "Oberon/SceneData.h"
 
 namespace Oberon {
 
-using namespace Magnum;
+class SceneView {
+    public:
+        explicit SceneView(const std::string& path, const Vector2i& viewportSize);
 
-typedef SceneGraph::Object<SceneGraph::TranslationRotationScalingTransformation3D> Object3D;
-typedef SceneGraph::Scene<SceneGraph::TranslationRotationScalingTransformation3D> Scene3D;
+        void draw();
+        void updateViewport(const Vector2i& size);
 
-class LightDrawable;
+        const SceneData& data() const { return _data; }
 
-struct ObjectInfo;
-
-class PhongDrawable;
-
-struct SceneData;
-
-class SceneView;
+    private:
+        SceneData _data;
+};
 
 }
 
