@@ -47,16 +47,20 @@ Viewport::Viewport(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>&, O
     /* Set desired OpenGL version */
     set_required_version(4, 5);
 
-    /* Signals for scene rendering */
+    /* Connect signals for scene rendering */
     signal_realize().connect(sigc::mem_fun(this, &Viewport::onRealize));
     signal_render().connect(sigc::mem_fun(this, &Viewport::onRender));
     signal_resize().connect(sigc::mem_fun(this, &Viewport::onResize));
 
-    /* Signals for event handling */
-    add_events(Gdk::POINTER_MOTION_MASK|Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
+    /* Set masks for event handling */
+    add_events(Gdk::POINTER_MOTION_MASK|Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|
+        Gdk::KEY_PRESS_MASK);
+
+    /* Connect signals for event handling */
     signal_motion_notify_event().connect(sigc::mem_fun(this, &Viewport::onMotionNotifyEvent));
     signal_button_press_event().connect(sigc::mem_fun(this, &Viewport::onButtonPressEvent));
     signal_button_release_event().connect(sigc::mem_fun(this, &Viewport::onButtonReleaseEvent));
+    signal_key_press_event().connect(sigc::mem_fun(this, &Viewport::onKeyPressEvent));
 }
 
 void Viewport::loadScene(const std::string& path) {
@@ -110,8 +114,8 @@ bool Viewport::onMotionNotifyEvent(GdkEventMotion* motionEvent) {
             Vector2{Float(get_width()), Float(get_height())};
 
         (*_sceneView->data().cameraObject)
-            .rotate(Rad{delta.y()}, _sceneView->data().cameraObject->transformation().right().normalized())
-            .rotateY(Rad{delta.x()});
+            .rotate(Rad{-delta.y()}, _sceneView->data().cameraObject->transformation().right().normalized())
+            .rotateY(Rad{-delta.x()});
 
         _previousMousePosition = eventPosition;
 
@@ -125,6 +129,9 @@ bool Viewport::onMotionNotifyEvent(GdkEventMotion* motionEvent) {
 
 bool Viewport::onButtonPressEvent(GdkEventButton* buttonEvent) {
     if(buttonEvent->button == GDK_BUTTON_SECONDARY) {
+        /* Grab focus so that key events work */
+        grab_focus();
+
         _isMouseDragging = true;
         _previousMousePosition = Vector2{Float(buttonEvent->x), Float(buttonEvent->y)};
     }
@@ -137,6 +144,38 @@ bool Viewport::onButtonReleaseEvent(GdkEventButton* releaseEvent) {
         _isMouseDragging = false;
 
     return true;
+}
+
+bool Viewport::onKeyPressEvent(GdkEventKey* keyEvent) {
+    if(keyEvent->type == GDK_KEY_PRESS) {
+        const Float speed = 0.1f;
+        bool anyKeyPressed = true;
+
+        if(keyEvent->keyval == GDK_KEY_w || keyEvent->keyval == GDK_KEY_W)
+            _sceneView->data().cameraObject->translate(-_sceneView->data().cameraObject->transformation().backward()*speed);
+        else if(keyEvent->keyval == GDK_KEY_s || keyEvent->keyval == GDK_KEY_S)
+            _sceneView->data().cameraObject->translate(_sceneView->data().cameraObject->transformation().backward()*speed);
+        else if(keyEvent->keyval == GDK_KEY_a || keyEvent->keyval == GDK_KEY_A)
+            _sceneView->data().cameraObject->translate(-_sceneView->data().cameraObject->transformation().right()*speed);
+        else if(keyEvent->keyval == GDK_KEY_d || keyEvent->keyval == GDK_KEY_D)
+            _sceneView->data().cameraObject->translate(_sceneView->data().cameraObject->transformation().right()*speed);
+        else if(keyEvent->keyval == GDK_KEY_q || keyEvent->keyval == GDK_KEY_Q)
+            _sceneView->data().cameraObject->translate(-_sceneView->data().cameraObject->transformation().up()*speed);
+        else if(keyEvent->keyval == GDK_KEY_e || keyEvent->keyval == GDK_KEY_E)
+            _sceneView->data().cameraObject->translate(_sceneView->data().cameraObject->transformation().up()*speed);
+        else
+            anyKeyPressed = false;
+
+        if(anyKeyPressed) {
+            /* Force redraw (the auto_render() from gtk doesn't
+            really autoredraws that often...) */
+            queue_render();
+
+            return true;
+        }
+    }
+
+    return false;
 }
 
 }}

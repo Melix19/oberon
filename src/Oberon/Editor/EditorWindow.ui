@@ -66,6 +66,7 @@
                 <child>
                   <object class="GtkGLArea" id="Viewport">
                     <property name="visible">True</property>
+                    <property name="can-focus">True</property>
                     <property name="has-depth-buffer">True</property>
                   </object>
                   <packing>

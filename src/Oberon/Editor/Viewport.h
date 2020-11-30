@@ -50,6 +50,8 @@ class Viewport: public Gtk::GLArea {
         bool onButtonPressEvent(GdkEventButton* buttonEvent);
         bool onButtonReleaseEvent(GdkEventButton* releaseEvent);
 
+        bool onKeyPressEvent(GdkEventKey* keyEvent);
+
         Outline* _outline;
         Platform::GLContext& _context;
 
