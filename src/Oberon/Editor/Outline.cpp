@@ -44,30 +44,32 @@ void Outline::updateWithScene(const SceneData& data) {
     /* Clear the current tree */
     _treeStore->clear();
 
-    /* Create scene node */
+    /* Create scene node (without objectInfo because the scene
+       cannot have a non-default transformation or features) */
     Gtk::TreeModel::Row row = *(_treeStore->append());
-    row[_columns.name] = "scene";
+    row[_columns.name] = data.objects[data.sceneObjectId].name;
 
-    /* Load all objects rows */
-    for(UnsignedInt id = 0; id < data.objects.size(); ++id) {
-        addObjectRow(row, data, id);
-    }
+    /* Load scene children */
+    for(UnsignedInt objectId: data.objects[data.sceneObjectId].children)
+        addObjectRow(row, data, objectId);
+
+    /* Expand all nodes */
+    expand_all();
 }
 
 void Outline::onRowActivated(const Gtk::TreeModel::Path& path, Gtk::TreeViewColumn*) {
     const Gtk::TreeModel::iterator iter = _treeStore->get_iter(path);
-    _properties->showObjectProperties(iter->get_value(_columns.objectInfo));
+    const ObjectInfo* objectInfo = iter->get_value(_columns.objectInfo);
+    if(objectInfo) _properties->showObjectProperties(objectInfo);
 }
 
-void Outline::addObjectRow(const Gtk::TreeModel::Row& parentRow, const SceneData& data, UnsignedInt& id) {
+void Outline::addObjectRow(const Gtk::TreeModel::Row& parentRow, const SceneData& data, UnsignedInt objectId) {
     Gtk::TreeModel::Row childRow = *(_treeStore->append(parentRow.children()));
-    childRow[_columns.name] = data.objects[id].name;
-    childRow[_columns.objectInfo] = &data.objects[id];
+    childRow[_columns.name] = data.objects[objectId].name;
+    childRow[_columns.objectInfo] = &data.objects[objectId];
 
-    UnsignedInt childCount = data.objects[id].childCount;
-    for(UnsignedInt childId = 0; childId < childCount; ++childId) {
-        addObjectRow(childRow, data, ++id);
-    }
+    for(UnsignedInt childObjectId: data.objects[objectId].children)
+        addObjectRow(childRow, data, childObjectId);
 }
 
 }}

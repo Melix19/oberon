@@ -43,7 +43,7 @@ typedef ResourceManager<GL::Mesh, GL::AbstractShaderProgram> SceneResourceManage
 struct ObjectInfo {
     Object3D* object;
     std::string name;
-    UnsignedInt childCount;
+    std::vector<UnsignedInt> children;
 };
 
 struct SceneData {
@@ -57,6 +57,7 @@ struct SceneData {
     SceneGraph::DrawableGroup3D opaqueDrawables, lightDrawables;
 
     Containers::Array<ObjectInfo> objects;
+    UnsignedInt sceneObjectId{};
 
     UnsignedInt lightCount{};
     Containers::Array<Vector4> lightPositions;

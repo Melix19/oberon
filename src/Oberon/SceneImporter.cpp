@@ -189,8 +189,9 @@ void load(const std::string& path, SceneData& data) {
         }
 
         /* Import all objects and first count how many lights is there first so
-           we know which shaders to instantiate */
-        data.objects = Containers::Array<ObjectInfo>{Containers::ValueInit, importer->object3DCount()};
+           we know which shaders to instantiate. Also initialize the ObjectInfo array
+           with the object count + 1 for the scene. */
+        data.objects = Containers::Array<ObjectInfo>{Containers::ValueInit, importer->object3DCount() + 1};
         Containers::Array<Containers::Pointer<Trade::ObjectData3D>> objects{importer->object3DCount()};
         for(UnsignedInt i = 0; i != importer->object3DCount(); ++i) {
             objects[i] = importer->object3D(i);
@@ -206,8 +207,12 @@ void load(const std::string& path, SceneData& data) {
             if(objects[i]->instanceType() == Trade::ObjectInstanceType3D::Light)
                 ++data.lightCount;
 
-            data.objects[i].childCount = objects[i]->children().size();
+            data.objects[i].children = objects[i]->children();
         }
+
+        /* Set scene info */
+        data.sceneObjectId = data.objects.size() - 1;
+        data.objects[data.sceneObjectId].children = sceneData->children3D();
 
         /* Recursively add all children */
         for(UnsignedInt objectId: sceneData->children3D())
@@ -216,11 +221,21 @@ void load(const std::string& path, SceneData& data) {
     /* The format has no scene support, display just the first loaded mesh with
        a default material and be done with it */
     } else if(Resource<GL::Mesh> mesh = data.resourceManager.get<GL::Mesh>(Utility::formatString("{}#0", path))) {
-        data.objects = Containers::Array<ObjectInfo>{Containers::ValueInit, 1};
-        data.objects[0].object = &data.scene;
+        /* Create a scene child and add the mesh */
+        Object3D* object = new Object3D{&data.scene};
+        data.objects = Containers::Array<ObjectInfo>{Containers::ValueInit, 2};
+        data.objects[0].object = object;
         data.objects[0].name = "object #0";
-        new PhongDrawable{data.scene, phongShader(data, hasVertexColors[0] ? Shaders::Phong::Flag::VertexColor : Shaders::Phong::Flags{}), mesh, 0xffffff_rgbf, data.opaqueDrawables};
+        new PhongDrawable{*object, phongShader(data, hasVertexColors[0] ? Shaders::Phong::Flag::VertexColor : Shaders::Phong::Flags{}), mesh, 0xffffff_rgbf, data.opaqueDrawables};
+
+        /* Set scene info */
+        data.sceneObjectId = 1;
+        data.objects[data.sceneObjectId].children = {0};
     }
+
+    /* Complete scene info */
+    data.objects[data.sceneObjectId].object = &data.scene;
+    data.objects[data.sceneObjectId].name = "scene";
 
     /* Create a camera object in case it wasn't present in the scene already */
     if(!data.cameraObject) {

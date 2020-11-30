@@ -42,7 +42,7 @@ class Outline: public Gtk::TreeView {
     private:
         void onRowActivated(const Gtk::TreeModel::Path& path, Gtk::TreeViewColumn*);
 
-        void addObjectRow(const Gtk::TreeModel::Row& parentRow, const SceneData& data, UnsignedInt& id);
+        void addObjectRow(const Gtk::TreeModel::Row& parentRow, const SceneData& data, UnsignedInt objectId);
 
     private:
         struct ModelColumns: public Gtk::TreeModel::ColumnRecord {
