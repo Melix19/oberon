@@ -25,6 +25,7 @@
 #include "PhongDrawable.h"
 
 #include <Magnum/GL/Mesh.h>
+#include <Magnum/GL/Texture.h>
 #include <Magnum/SceneGraph/Camera.h>
 #include <Magnum/Shaders/Phong.h>
 
@@ -36,8 +37,16 @@ void PhongDrawable::draw(const Matrix4& transformationMatrix, SceneGraph::Camera
         .setNormalMatrix(transformationMatrix.normalMatrix())
         .setProjectionMatrix(camera.projectionMatrix())
         .setAmbientColor(_color*0.06f)
-        .setDiffuseColor(_color)
-        .draw(*_mesh);
+        .setDiffuseColor(_color);
+
+    if(_diffuseTexture) (*_shader)
+        .bindAmbientTexture(*_diffuseTexture)
+        .bindDiffuseTexture(*_diffuseTexture);
+    if(_normalTexture) (*_shader)
+        .bindNormalTexture(*_normalTexture)
+        .setNormalTextureScale(_normalTextureScale);
+
+    _shader->draw(*_mesh);
 }
 
 }

@@ -30,16 +30,21 @@
 
 #include <Corrade/Containers/GrowableArray.h>
 #include <Corrade/Utility/FormatStl.h>
+#include <Magnum/ImageView.h>
+#include <Magnum/PixelFormat.h>
+#include <Magnum/GL/TextureFormat.h>
 #include <Magnum/MeshTools/Compile.h>
 #include <Magnum/SceneGraph/Camera.h>
 #include <Magnum/Shaders/Phong.h>
 #include <Magnum/Trade/AbstractImporter.h>
+#include <Magnum/Trade/ImageData.h>
 #include <Magnum/Trade/LightData.h>
 #include <Magnum/Trade/MeshData.h>
 #include <Magnum/Trade/MeshObjectData3D.h>
 #include <Magnum/Trade/ObjectData3D.h>
 #include <Magnum/Trade/PhongMaterialData.h>
 #include <Magnum/Trade/SceneData.h>
+#include <Magnum/Trade/TextureData.h>
 
 #include "Oberon/LightDrawable.h"
 #include "Oberon/PhongDrawable.h"
@@ -70,6 +75,65 @@ Resource<GL::AbstractShaderProgram, Shaders::Phong> phongShader(SceneData& data,
     }
 
     return shader;
+}
+
+void loadImage(GL::Texture2D& texture, Trade::ImageData2D& image) {
+    if(!image.isCompressed()) {
+        /* Whitelist only things we *can* display */
+        GL::TextureFormat format;
+        switch(image.format()) {
+            case PixelFormat::R8Unorm:
+            case PixelFormat::RG8Unorm:
+            case PixelFormat::RGB8Unorm:
+            case PixelFormat::RGB8Srgb:
+            case PixelFormat::RGBA8Unorm:
+            case PixelFormat::RGBA8Srgb:
+                format = GL::textureFormat(image.format());
+                break;
+            default:
+                Warning{} << "Cannot load an image of format" << image.format();
+                return;
+        }
+
+        texture
+            .setStorage(Math::log2(image.size().max()) + 1, format, image.size())
+            .setSubImage(0, {}, image)
+            .generateMipmap();
+
+    } else {
+        /* Blacklist things we *cannot* display */
+        GL::TextureFormat format;
+        switch(image.compressedFormat()) {
+            case CompressedPixelFormat::Bc4RSnorm:
+            case CompressedPixelFormat::Bc5RGSnorm:
+            case CompressedPixelFormat::EacR11Snorm:
+            case CompressedPixelFormat::EacRG11Snorm:
+            case CompressedPixelFormat::Bc6hRGBUfloat:
+            case CompressedPixelFormat::Bc6hRGBSfloat:
+            case CompressedPixelFormat::Astc4x4RGBAF:
+            case CompressedPixelFormat::Astc5x4RGBAF:
+            case CompressedPixelFormat::Astc5x5RGBAF:
+            case CompressedPixelFormat::Astc6x5RGBAF:
+            case CompressedPixelFormat::Astc6x6RGBAF:
+            case CompressedPixelFormat::Astc8x5RGBAF:
+            case CompressedPixelFormat::Astc8x6RGBAF:
+            case CompressedPixelFormat::Astc8x8RGBAF:
+            case CompressedPixelFormat::Astc10x5RGBAF:
+            case CompressedPixelFormat::Astc10x6RGBAF:
+            case CompressedPixelFormat::Astc10x8RGBAF:
+            case CompressedPixelFormat::Astc10x10RGBAF:
+            case CompressedPixelFormat::Astc12x10RGBAF:
+            case CompressedPixelFormat::Astc12x12RGBAF:
+                Warning{} << "Cannot load an image of format" << image.compressedFormat();
+                return;
+
+            default: format = GL::textureFormat(image.compressedFormat());
+        }
+
+        texture
+            .setStorage(1, format, image.size())
+            .setCompressedSubImage(0, {}, image);
+    }
 }
 
 void addObject(const std::string& path, SceneData& data, Containers::ArrayView<const Containers::Pointer<Trade::ObjectData3D>> objects, Containers::ArrayView<const Containers::Optional<Trade::PhongMaterialData>> materials, Containers::ArrayView<const Containers::Optional<Trade::LightData>> lights, Containers::ArrayView<const bool> hasVertexColors, Object3D& parent, UnsignedInt i) {
@@ -107,8 +171,32 @@ void addObject(const std::string& path, SceneData& data, Containers::ArrayView<c
         } else {
             const Trade::PhongMaterialData& material = *materials[materialId];
 
-            new PhongDrawable{*object, phongShader(data, flags),
-                mesh, material.diffuseColor(), data.opaqueDrawables};
+            /* Textured material */
+            Resource<GL::Texture2D> diffuseTexture;
+            Resource<GL::Texture2D> normalTexture;
+            Float normalTextureScale = 1.0f;
+            if(material.hasAttribute(Trade::MaterialAttribute::DiffuseTexture)) {
+                std::string textureKey = Utility::formatString("{}#{}", path, material.diffuseTexture());
+                diffuseTexture = data.resourceManager.get<GL::Texture2D>(textureKey);
+                if(diffuseTexture) {
+                    flags |= Shaders::Phong::Flag::AmbientTexture|
+                        Shaders::Phong::Flag::DiffuseTexture;
+                }
+            }
+
+            /* Normal textured material */
+            if(material.hasAttribute(Trade::MaterialAttribute::NormalTexture)) {
+                std::string textureKey = Utility::formatString("{}#{}", path, material.normalTexture());
+                normalTexture = data.resourceManager.get<GL::Texture2D>(textureKey);
+                if(normalTexture) {
+                    normalTextureScale = material.normalTextureScale();
+                    flags |= Shaders::Phong::Flag::NormalTexture;
+                }
+            }
+
+            new PhongDrawable{*object, phongShader(data, flags), mesh,
+                material.diffuseColor(), diffuseTexture, normalTexture,
+                normalTextureScale, data.opaqueDrawables};
         }
 
     /* Light */
@@ -138,6 +226,34 @@ void load(const std::string& path, SceneData& data) {
     if(!importer->openFile(path)) {
         Error{} << "Cannot open the file" << path;
         return;
+    }
+
+    /* Load all textures */
+    for(UnsignedInt i = 0; i != importer->textureCount(); ++i) {
+        Containers::Optional<Trade::TextureData> textureData = importer->texture(i);
+        if(!textureData || textureData->type() != Trade::TextureData::Type::Texture2D) {
+            Warning{} << "Cannot load texture" << i << importer->textureName(i);
+            continue;
+        }
+
+        Containers::Optional<Trade::ImageData2D> imageData = importer->image2D(textureData->image());
+        if(!imageData) {
+            Warning{} << "Cannot load texture" << i << importer->image2DName(textureData->image());
+            continue;
+        }
+
+        /* Configure the texture */
+        GL::Texture2D texture;
+        texture
+            .setMagnificationFilter(textureData->magnificationFilter())
+            .setMinificationFilter(textureData->minificationFilter(), textureData->mipmapFilter())
+            .setWrapping(textureData->wrapping().xy());
+
+        loadImage(texture, *imageData);
+
+        /* Save the texture */
+        std::string textureKey = Utility::formatString("{}#{}", path, i);
+        data.resourceManager.set<GL::Texture2D>(textureKey, std::move(texture));
     }
 
     /* Load all lights */

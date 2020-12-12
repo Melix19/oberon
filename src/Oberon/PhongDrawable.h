@@ -36,6 +36,8 @@ namespace Oberon {
 
 class PhongDrawable: public SceneGraph::Drawable3D {
     public:
+        explicit PhongDrawable(SceneGraph::AbstractObject3D& object, const Resource<GL::AbstractShaderProgram, Shaders::Phong>& shader, const Resource<GL::Mesh>& mesh, const Color4& color, const Resource<GL::Texture2D>& diffuseTexture, const Resource<GL::Texture2D>& normalTexture, Float normalTextureScale, SceneGraph::DrawableGroup3D& group): SceneGraph::Drawable3D{object, &group}, _shader{shader}, _mesh{mesh}, _color{color}, _diffuseTexture{diffuseTexture}, _normalTexture{normalTexture}, _normalTextureScale{normalTextureScale} {}
+
         explicit PhongDrawable(SceneGraph::AbstractObject3D& object, const Resource<GL::AbstractShaderProgram, Shaders::Phong>& shader, const Resource<GL::Mesh>& mesh, const Color4& color, SceneGraph::DrawableGroup3D& group): SceneGraph::Drawable3D{object, &group}, _shader(shader), _mesh(mesh), _color{color} {}
 
     private:
@@ -44,6 +46,9 @@ class PhongDrawable: public SceneGraph::Drawable3D {
         Resource<GL::AbstractShaderProgram, Shaders::Phong> _shader;
         Resource<GL::Mesh> _mesh;
         Color4 _color;
+        Resource<GL::Texture2D> _diffuseTexture;
+        Resource<GL::Texture2D> _normalTexture;
+        Float _normalTextureScale;
 };
 
 }

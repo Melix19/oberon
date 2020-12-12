@@ -29,6 +29,7 @@
 #include <Magnum/ResourceManager.h>
 #include <Magnum/GL/AbstractShaderProgram.h>
 #include <Magnum/GL/Mesh.h>
+#include <Magnum/GL/Texture.h>
 #include <Magnum/SceneGraph/Drawable.h>
 #include <Magnum/SceneGraph/Scene.h>
 #include <Magnum/SceneGraph/TranslationRotationScalingTransformation3D.h>
@@ -38,7 +39,7 @@
 
 namespace Oberon {
 
-typedef ResourceManager<GL::Mesh, GL::AbstractShaderProgram> SceneResourceManager;
+typedef ResourceManager<GL::AbstractShaderProgram, GL::Mesh, GL::Texture2D> SceneResourceManager;
 
 struct ObjectInfo {
     Object3D* object;

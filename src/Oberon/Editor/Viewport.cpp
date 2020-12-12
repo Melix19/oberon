@@ -69,6 +69,10 @@ void Viewport::loadScene(const std::string& path) {
     _sceneView = Containers::pointer<SceneView>(path, _viewportSize);
 
     _outline->updateWithScene(_sceneView->data());
+
+    /* Force redraw (the auto_render() from gtk doesn't
+       really autoredraws that often...) */
+    queue_render();
 }
 
 void Viewport::onRealize() {
@@ -168,7 +172,7 @@ bool Viewport::onKeyPressEvent(GdkEventKey* keyEvent) {
 
         if(anyKeyPressed) {
             /* Force redraw (the auto_render() from gtk doesn't
-            really autoredraws that often...) */
+               really autoredraws that often...) */
             queue_render();
 
             return true;
