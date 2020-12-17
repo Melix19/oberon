@@ -14,4 +14,4 @@ This project requires the following libraries and tools to be built:
 - Corrade (master branch)
 - Magnum (master branch)
 - Magnum Plugins (master branch)
-- gtkmm
+- gtkmm3
