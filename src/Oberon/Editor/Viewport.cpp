@@ -35,9 +35,6 @@ namespace Oberon { namespace Editor {
 Viewport::Viewport(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>&, Outline* outline, Platform::GLContext& context):
     Gtk::GLArea(cobject), _outline(outline), _context(context), _isMouseDragging{false}
 {
-    /* Automatically re-render everything every time it needs to be drawn */
-    set_auto_render();
-
     /* Set size requests and scaling behavior */
     set_hexpand();
     set_vexpand();
@@ -70,8 +67,7 @@ void Viewport::loadScene(const std::string& path) {
 
     _outline->updateWithScene(_sceneView->data());
 
-    /* Force redraw (the auto_render() from gtk doesn't
-       really autoredraws that often...) */
+    /* Force queue redraw */
     queue_render();
 }
 
@@ -96,7 +92,12 @@ bool Viewport::onRender(const Glib::RefPtr<Gdk::GLContext>&) {
     gtkmmDefaultFramebuffer.clear(GL::FramebufferClear::Color|GL::FramebufferClear::Depth);
 
     /* Draw the scene if there is one loaded */
-    if(_sceneView) _sceneView->draw();
+    if(_sceneView) {
+        _sceneView->draw();
+
+        /* Force queue redraw */
+        queue_render();
+    }
 
     /* Clean up Magnum state and back to Gtkmm */
     GL::Context::current().resetState(GL::Context::State::EnterExternal);
@@ -122,10 +123,6 @@ bool Viewport::onMotionNotifyEvent(GdkEventMotion* motionEvent) {
             .rotateY(Rad{-delta.x()});
 
         _previousMousePosition = eventPosition;
-
-        /* Force redraw (the auto_render() from gtk doesn't
-           really autoredraws that often...) */
-        queue_render();
     }
 
     return true;
@@ -153,7 +150,7 @@ bool Viewport::onButtonReleaseEvent(GdkEventButton* releaseEvent) {
 bool Viewport::onKeyPressEvent(GdkEventKey* keyEvent) {
     if(keyEvent->type == GDK_KEY_PRESS) {
         const Float speed = 0.1f;
-        bool anyKeyPressed = true;
+        bool isAnyKeyPressed = true;
 
         if(keyEvent->keyval == GDK_KEY_w || keyEvent->keyval == GDK_KEY_W)
             _sceneView->data().cameraObject->translate(-_sceneView->data().cameraObject->transformation().backward()*speed);
@@ -167,16 +164,9 @@ bool Viewport::onKeyPressEvent(GdkEventKey* keyEvent) {
             _sceneView->data().cameraObject->translate(-_sceneView->data().cameraObject->transformation().up()*speed);
         else if(keyEvent->keyval == GDK_KEY_e || keyEvent->keyval == GDK_KEY_E)
             _sceneView->data().cameraObject->translate(_sceneView->data().cameraObject->transformation().up()*speed);
-        else
-            anyKeyPressed = false;
+        else isAnyKeyPressed = false;
 
-        if(anyKeyPressed) {
-            /* Force redraw (the auto_render() from gtk doesn't
-               really autoredraws that often...) */
-            queue_render();
-
-            return true;
-        }
+        if(isAnyKeyPressed) return true;
     }
 
     return false;
