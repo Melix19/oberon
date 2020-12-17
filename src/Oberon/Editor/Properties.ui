@@ -17,59 +17,93 @@
     <child>
       <object class="GtkBox">
         <property name="visible">True</property>
+        <property name="margin-start">12</property>
+        <property name="margin-end">6</property>
+        <property name="margin-top">6</property>
+        <property name="margin-bottom">6</property>
         <property name="orientation">vertical</property>
         <property name="spacing">12</property>
         <child>
           <object class="GtkGrid">
             <property name="visible">True</property>
             <property name="row-spacing">6</property>
+            <property name="column-spacing">6</property>
             <property name="column-homogeneous">True</property>
             <child>
               <object class="GtkLabel">
                 <property name="visible">True</property>
                 <property name="halign">start</property>
-                <property name="margin-start">6</property>
                 <property name="label">Translation</property>
               </object>
               <packing>
                 <property name="left-attach">0</property>
                 <property name="top-attach">0</property>
-                <property name="height">3</property>
+                <property name="width">3</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel">
+                <property name="visible">True</property>
+                <property name="halign">end</property>
+                <property name="label">x</property>
+              </object>
+              <packing>
+                <property name="left-attach">0</property>
+                <property name="top-attach">1</property>
               </packing>
             </child>
             <child>
               <object class="GtkSpinButton" id="translation_x">
                 <property name="visible">True</property>
-                <property name="margin-end">6</property>
                 <property name="digits">3</property>
               </object>
               <packing>
                 <property name="left-attach">1</property>
-                <property name="top-attach">0</property>
+                <property name="top-attach">1</property>
                 <property name="width">2</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel">
+                <property name="visible">True</property>
+                <property name="halign">end</property>
+                <property name="label">y</property>
+              </object>
+              <packing>
+                <property name="left-attach">0</property>
+                <property name="top-attach">2</property>
               </packing>
             </child>
             <child>
               <object class="GtkSpinButton" id="translation_y">
                 <property name="visible">True</property>
-                <property name="margin-end">6</property>
                 <property name="digits">3</property>
               </object>
               <packing>
                 <property name="left-attach">1</property>
-                <property name="top-attach">1</property>
+                <property name="top-attach">2</property>
                 <property name="width">2</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel">
+                <property name="visible">True</property>
+                <property name="halign">end</property>
+                <property name="label">z</property>
+              </object>
+              <packing>
+                <property name="left-attach">0</property>
+                <property name="top-attach">3</property>
               </packing>
             </child>
             <child>
               <object class="GtkSpinButton" id="translation_z">
                 <property name="visible">True</property>
-                <property name="margin-end">6</property>
                 <property name="digits">3</property>
               </object>
               <packing>
                 <property name="left-attach">1</property>
-                <property name="top-attach">2</property>
+                <property name="top-attach">3</property>
                 <property name="width">2</property>
               </packing>
             </child>
@@ -79,35 +113,34 @@
           <object class="GtkGrid">
             <property name="visible">True</property>
             <property name="row-spacing">6</property>
+            <property name="column-spacing">6</property>
             <property name="column-homogeneous">True</property>
             <child>
               <object class="GtkLabel">
                 <property name="visible">True</property>
                 <property name="halign">start</property>
-                <property name="margin-start">6</property>
                 <property name="label">Rotation</property>
               </object>
               <packing>
                 <property name="left-attach">0</property>
                 <property name="top-attach">0</property>
-                <property name="height">3</property>
+                <property name="width">3</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel">
+                <property name="visible">True</property>
+                <property name="halign">end</property>
+                <property name="label">x</property>
+              </object>
+              <packing>
+                <property name="left-attach">0</property>
+                <property name="top-attach">1</property>
               </packing>
             </child>
             <child>
               <object class="GtkSpinButton" id="rotation_x">
                 <property name="visible">True</property>
-                <property name="margin-end">6</property>
-              </object>
-              <packing>
-                <property name="left-attach">1</property>
-                <property name="top-attach">0</property>
-                <property name="width">2</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkSpinButton" id="rotation_y">
-                <property name="visible">True</property>
-                <property name="margin-end">6</property>
               </object>
               <packing>
                 <property name="left-attach">1</property>
@@ -116,13 +149,44 @@
               </packing>
             </child>
             <child>
-              <object class="GtkSpinButton" id="rotation_z">
+              <object class="GtkLabel">
                 <property name="visible">True</property>
-                <property name="margin-end">6</property>
+                <property name="halign">end</property>
+                <property name="label">y</property>
+              </object>
+              <packing>
+                <property name="left-attach">0</property>
+                <property name="top-attach">2</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkSpinButton" id="rotation_y">
+                <property name="visible">True</property>
               </object>
               <packing>
                 <property name="left-attach">1</property>
                 <property name="top-attach">2</property>
+                <property name="width">2</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel">
+                <property name="visible">True</property>
+                <property name="halign">end</property>
+                <property name="label">z</property>
+              </object>
+              <packing>
+                <property name="left-attach">0</property>
+                <property name="top-attach">3</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkSpinButton" id="rotation_z">
+                <property name="visible">True</property>
+              </object>
+              <packing>
+                <property name="left-attach">1</property>
+                <property name="top-attach">3</property>
                 <property name="width">2</property>
               </packing>
             </child>
@@ -132,36 +196,34 @@
           <object class="GtkGrid">
             <property name="visible">True</property>
             <property name="row-spacing">6</property>
+            <property name="column-spacing">6</property>
             <property name="column-homogeneous">True</property>
             <child>
               <object class="GtkLabel">
                 <property name="visible">True</property>
                 <property name="halign">start</property>
-                <property name="margin-start">6</property>
                 <property name="label">Scaling</property>
               </object>
               <packing>
                 <property name="left-attach">0</property>
                 <property name="top-attach">0</property>
-                <property name="height">3</property>
+                <property name="width">3</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel">
+                <property name="visible">True</property>
+                <property name="halign">end</property>
+                <property name="label">x</property>
+              </object>
+              <packing>
+                <property name="left-attach">0</property>
+                <property name="top-attach">1</property>
               </packing>
             </child>
             <child>
               <object class="GtkSpinButton" id="scaling_x">
                 <property name="visible">True</property>
-                <property name="margin-end">6</property>
-                <property name="digits">3</property>
-              </object>
-              <packing>
-                <property name="left-attach">1</property>
-                <property name="top-attach">0</property>
-                <property name="width">2</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkSpinButton" id="scaling_y">
-                <property name="visible">True</property>
-                <property name="margin-end">6</property>
                 <property name="digits">3</property>
               </object>
               <packing>
@@ -171,14 +233,46 @@
               </packing>
             </child>
             <child>
-              <object class="GtkSpinButton" id="scaling_z">
+              <object class="GtkLabel">
                 <property name="visible">True</property>
-                <property name="margin-end">6</property>
+                <property name="halign">end</property>
+                <property name="label">y</property>
+              </object>
+              <packing>
+                <property name="left-attach">0</property>
+                <property name="top-attach">2</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkSpinButton" id="scaling_y">
+                <property name="visible">True</property>
                 <property name="digits">3</property>
               </object>
               <packing>
                 <property name="left-attach">1</property>
                 <property name="top-attach">2</property>
+                <property name="width">2</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel">
+                <property name="visible">True</property>
+                <property name="halign">end</property>
+                <property name="label">z</property>
+              </object>
+              <packing>
+                <property name="left-attach">0</property>
+                <property name="top-attach">3</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkSpinButton" id="scaling_z">
+                <property name="visible">True</property>
+                <property name="digits">3</property>
+              </object>
+              <packing>
+                <property name="left-attach">1</property>
+                <property name="top-attach">3</property>
                 <property name="width">2</property>
               </packing>
             </child>
