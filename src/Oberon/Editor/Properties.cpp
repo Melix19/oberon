@@ -25,23 +25,18 @@
 #include "Properties.h"
 
 #include <gtkmm/expander.h>
-#include <Corrade/Utility/Resource.h>
 
 #include "Oberon/SceneData.h"
 
 namespace Oberon { namespace Editor {
 
-Properties::Properties(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>&):
+Properties::Properties(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& builder):
     Gtk::Box(cobject)
 {
-    Corrade::Utility::Resource rs("OberonEditor");
-    Glib::RefPtr<Gtk::Builder> propertiesBuilder =
-        Gtk::Builder::create_from_string(rs.get("Properties.ui"));
-
     /* Translation adjustaments */
-    propertiesBuilder->get_widget("translation_x", _translationX);
-    propertiesBuilder->get_widget("translation_y", _translationY);
-    propertiesBuilder->get_widget("translation_z", _translationZ);
+    builder->get_widget("translation_x", _translationX);
+    builder->get_widget("translation_y", _translationY);
+    builder->get_widget("translation_z", _translationZ);
     _translationX->set_adjustment(Gtk::Adjustment::create(0, double(-FLT_MAX), double(FLT_MAX), 0.1));
     _translationY->set_adjustment(Gtk::Adjustment::create(0, double(-FLT_MAX), double(FLT_MAX), 0.1));
     _translationZ->set_adjustment(Gtk::Adjustment::create(0, double(-FLT_MAX), double(FLT_MAX), 0.1));
@@ -50,9 +45,9 @@ Properties::Properties(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>
     _translationZ->signal_value_changed().connect(sigc::mem_fun(*this, &Properties::updateTranslation));
 
     /* Rotation adjustaments */
-    propertiesBuilder->get_widget("rotation_x", _rotationX);
-    propertiesBuilder->get_widget("rotation_y", _rotationY);
-    propertiesBuilder->get_widget("rotation_z", _rotationZ);
+    builder->get_widget("rotation_x", _rotationX);
+    builder->get_widget("rotation_y", _rotationY);
+    builder->get_widget("rotation_z", _rotationZ);
     _rotationX->set_adjustment(Gtk::Adjustment::create(0, double(-FLT_MAX), double(FLT_MAX)));
     _rotationY->set_adjustment(Gtk::Adjustment::create(0, double(-FLT_MAX), double(FLT_MAX)));
     _rotationZ->set_adjustment(Gtk::Adjustment::create(0, double(-FLT_MAX), double(FLT_MAX)));
@@ -61,9 +56,9 @@ Properties::Properties(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>
     _rotationZ->signal_value_changed().connect(sigc::mem_fun(*this, &Properties::updateRotation));
 
     /* Scaling adjustaments */
-    propertiesBuilder->get_widget("scaling_x", _scalingX);
-    propertiesBuilder->get_widget("scaling_y", _scalingY);
-    propertiesBuilder->get_widget("scaling_z", _scalingZ);
+    builder->get_widget("scaling_x", _scalingX);
+    builder->get_widget("scaling_y", _scalingY);
+    builder->get_widget("scaling_z", _scalingZ);
     _scalingX->set_adjustment(Gtk::Adjustment::create(0, double(-FLT_MAX), double(FLT_MAX), 0.01));
     _scalingY->set_adjustment(Gtk::Adjustment::create(0, double(-FLT_MAX), double(FLT_MAX), 0.01));
     _scalingZ->set_adjustment(Gtk::Adjustment::create(0, double(-FLT_MAX), double(FLT_MAX), 0.01));
@@ -72,7 +67,7 @@ Properties::Properties(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>
     _scalingZ->signal_value_changed().connect(sigc::mem_fun(*this, &Properties::updateScaling));
 
     Gtk::Expander* transformation;
-    propertiesBuilder->get_widget("transformation", transformation);
+    builder->get_widget("transformation", transformation);
     add(*transformation);
 }
 
