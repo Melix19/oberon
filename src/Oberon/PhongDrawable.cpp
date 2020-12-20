@@ -48,6 +48,8 @@ void PhongDrawable::draw(const Matrix4& transformationMatrix, SceneGraph::Camera
 
     if(_shader->flags() & Shaders::Phong::Flag::TextureTransformation)
         _shader->setTextureMatrix(_textureMatrix);
+    if(_shader->flags() & Shaders::Phong::Flag::AlphaMask)
+        _shader->setAlphaMask(_alphaMask);
 
     _shader->draw(*_mesh);
 }

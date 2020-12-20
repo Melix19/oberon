@@ -24,6 +24,7 @@
 
 #include "SceneView.h"
 
+#include <algorithm>
 #include <Corrade/Containers/GrowableArray.h>
 #include <Magnum/GL/Renderer.h>
 #include <Magnum/Math/Color.h>
@@ -64,7 +65,28 @@ void SceneView::draw() {
         }
     }
 
+    /* Draw opaque stuff */
     _data.camera->draw(_data.opaqueDrawables);
+
+    /* Draw transparent stuff back-to-front with blending enabled */
+    if(!_data.transparentDrawables.isEmpty()) {
+        GL::Renderer::setDepthMask(false);
+        GL::Renderer::enable(GL::Renderer::Feature::Blending);
+        GL::Renderer::setBlendFunction(GL::Renderer::BlendFunction::SourceAlpha, GL::Renderer::BlendFunction::OneMinusSourceAlpha);
+
+        std::vector<std::pair<std::reference_wrapper<SceneGraph::Drawable3D>, Matrix4>>
+            drawableTransformations = _data.camera->drawableTransformations(_data.transparentDrawables);
+        std::sort(drawableTransformations.begin(), drawableTransformations.end(),
+            [](const std::pair<std::reference_wrapper<SceneGraph::Drawable3D>, Matrix4>& a,
+                const std::pair<std::reference_wrapper<SceneGraph::Drawable3D>, Matrix4>& b) {
+                return a.second.translation().z() > b.second.translation().z();
+            });
+        _data.camera->draw(drawableTransformations);
+
+        GL::Renderer::setBlendFunction(GL::Renderer::BlendFunction::One, GL::Renderer::BlendFunction::Zero);
+        GL::Renderer::disable(GL::Renderer::Feature::Blending);
+        GL::Renderer::setDepthMask(true);
+    }
 }
 
 void SceneView::updateViewport(const Vector2i& size) {

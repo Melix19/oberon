@@ -55,7 +55,8 @@ struct SceneData {
     Scene3D scene;
     Object3D* cameraObject{};
     SceneGraph::Camera3D* camera;
-    SceneGraph::DrawableGroup3D opaqueDrawables, lightDrawables;
+    SceneGraph::DrawableGroup3D opaqueDrawables, transparentDrawables,
+        lightDrawables;
 
     Containers::Array<ObjectInfo> objects;
     UnsignedInt sceneObjectId{};

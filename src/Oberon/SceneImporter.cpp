@@ -58,6 +58,16 @@ using namespace Math::Literals;
 
 Resource<GL::AbstractShaderProgram, Shaders::Phong> phongShader(SceneData& data, Shaders::Phong::Flags flags) {
     std::string shaderKey = "phong";
+    if(flags & Shaders::Phong::Flag::AlphaMask)
+        shaderKey += "-alphaMask";
+    if(flags & Shaders::Phong::Flag::AmbientTexture)
+        shaderKey += "-ambientTexture";
+    if(flags & Shaders::Phong::Flag::DiffuseTexture)
+        shaderKey += "-fiffuseTexture";
+    if(flags & Shaders::Phong::Flag::NormalTexture)
+        shaderKey += "-normalTexture";
+    if(flags & Shaders::Phong::Flag::TextureTransformation)
+        shaderKey += "-textureTransformation";
     if(flags & Shaders::Phong::Flag::VertexColor)
         shaderKey += "-vertexColor";
 
@@ -185,6 +195,8 @@ void addObject(const std::string& path, SceneData& data, Containers::ArrayView<c
                         Shaders::Phong::Flag::DiffuseTexture;
                     if(material.hasTextureTransformation())
                         flags |= Shaders::Phong::Flag::TextureTransformation;
+                    if(material.alphaMode() == Trade::MaterialAlphaMode::Mask)
+                        flags |= Shaders::Phong::Flag::AlphaMask;
                 }
             }
 
@@ -204,8 +216,10 @@ void addObject(const std::string& path, SceneData& data, Containers::ArrayView<c
 
             new PhongDrawable{*object, phongShader(data, flags), mesh,
                 material.diffuseColor(), diffuseTexture, normalTexture,
-                normalTextureScale, material.commonTextureMatrix(),
-                data.opaqueDrawables};
+                normalTextureScale, material.alphaMask(),
+                material.commonTextureMatrix(),
+                material.alphaMode() == Trade::MaterialAlphaMode::Blend ?
+                    data.transparentDrawables : data.opaqueDrawables};
         }
 
     /* Light */
