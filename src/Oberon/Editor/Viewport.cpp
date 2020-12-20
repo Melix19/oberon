@@ -33,7 +33,7 @@
 namespace Oberon { namespace Editor {
 
 Viewport::Viewport(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>&, Outline* outline, Platform::GLContext& context):
-    Gtk::GLArea(cobject), _outline(outline), _context(context), _isMouseDragging{false}
+    Gtk::GLArea(cobject), _outline(outline), _context(context), _isDragging{false}
 {
     /* Set size requests and scaling behavior */
     set_hexpand();
@@ -112,7 +112,7 @@ void Viewport::onResize(int width, int height) {
 }
 
 bool Viewport::onMotionNotifyEvent(GdkEventMotion* motionEvent) {
-    if(_sceneView && _isMouseDragging) {
+    if(_sceneView && _isDragging) {
         const Vector2 eventPosition{Float(motionEvent->x), Float(motionEvent->y)};
         const Vector2 delta = 2.0f*
             Vector2{eventPosition - _previousMousePosition}/
@@ -129,11 +129,11 @@ bool Viewport::onMotionNotifyEvent(GdkEventMotion* motionEvent) {
 }
 
 bool Viewport::onButtonPressEvent(GdkEventButton* buttonEvent) {
-    if(buttonEvent->button == GDK_BUTTON_SECONDARY) {
+    if(_sceneView && buttonEvent->button == GDK_BUTTON_SECONDARY) {
         /* Grab focus so that key events work */
         grab_focus();
 
-        _isMouseDragging = true;
+        _isDragging = true;
         _previousMousePosition = Vector2{Float(buttonEvent->x), Float(buttonEvent->y)};
     }
 
@@ -141,16 +141,15 @@ bool Viewport::onButtonPressEvent(GdkEventButton* buttonEvent) {
 }
 
 bool Viewport::onButtonReleaseEvent(GdkEventButton* releaseEvent) {
-    if(releaseEvent->button == GDK_BUTTON_SECONDARY)
-        _isMouseDragging = false;
+    if(_sceneView && releaseEvent->button == GDK_BUTTON_SECONDARY)
+        _isDragging = false;
 
     return true;
 }
 
 bool Viewport::onKeyPressEvent(GdkEventKey* keyEvent) {
-    if(keyEvent->type == GDK_KEY_PRESS) {
+    if(_sceneView && _isDragging && keyEvent->type == GDK_KEY_PRESS) {
         const Float speed = 0.1f;
-        bool isAnyKeyPressed = true;
 
         if(keyEvent->keyval == GDK_KEY_w || keyEvent->keyval == GDK_KEY_W)
             _sceneView->data().cameraObject->translate(-_sceneView->data().cameraObject->transformation().backward()*speed);
@@ -164,12 +163,9 @@ bool Viewport::onKeyPressEvent(GdkEventKey* keyEvent) {
             _sceneView->data().cameraObject->translate(-_sceneView->data().cameraObject->transformation().up()*speed);
         else if(keyEvent->keyval == GDK_KEY_e || keyEvent->keyval == GDK_KEY_E)
             _sceneView->data().cameraObject->translate(_sceneView->data().cameraObject->transformation().up()*speed);
-        else isAnyKeyPressed = false;
-
-        if(isAnyKeyPressed) return true;
     }
 
-    return false;
+    return true;
 }
 
 }}
