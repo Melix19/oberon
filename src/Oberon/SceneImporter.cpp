@@ -171,32 +171,41 @@ void addObject(const std::string& path, SceneData& data, Containers::ArrayView<c
         } else {
             const Trade::PhongMaterialData& material = *materials[materialId];
 
-            /* Textured material */
+            /* Textured material. If the texture failed to load, just use
+               a default-colored material. */
             Resource<GL::Texture2D> diffuseTexture;
             Resource<GL::Texture2D> normalTexture;
             Float normalTextureScale = 1.0f;
             if(material.hasAttribute(Trade::MaterialAttribute::DiffuseTexture)) {
                 std::string textureKey = Utility::formatString("{}#{}", path, material.diffuseTexture());
-                diffuseTexture = data.resourceManager.get<GL::Texture2D>(textureKey);
-                if(diffuseTexture) {
+                Resource<GL::Texture2D> texture = data.resourceManager.get<GL::Texture2D>(textureKey);
+                if(texture) {
+                    diffuseTexture = texture;
                     flags |= Shaders::Phong::Flag::AmbientTexture|
                         Shaders::Phong::Flag::DiffuseTexture;
+                    if(material.hasTextureTransformation())
+                        flags |= Shaders::Phong::Flag::TextureTransformation;
                 }
             }
 
-            /* Normal textured material */
+            /* Normal textured material. If the textures failed to load, just
+               use a default-colored material. */
             if(material.hasAttribute(Trade::MaterialAttribute::NormalTexture)) {
                 std::string textureKey = Utility::formatString("{}#{}", path, material.normalTexture());
-                normalTexture = data.resourceManager.get<GL::Texture2D>(textureKey);
-                if(normalTexture) {
+                Resource<GL::Texture2D> texture = data.resourceManager.get<GL::Texture2D>(textureKey);
+                if(texture) {
+                    normalTexture = texture;
                     normalTextureScale = material.normalTextureScale();
                     flags |= Shaders::Phong::Flag::NormalTexture;
+                    if(material.hasTextureTransformation())
+                        flags |= Shaders::Phong::Flag::TextureTransformation;
                 }
             }
 
             new PhongDrawable{*object, phongShader(data, flags), mesh,
                 material.diffuseColor(), diffuseTexture, normalTexture,
-                normalTextureScale, data.opaqueDrawables};
+                normalTextureScale, material.commonTextureMatrix(),
+                data.opaqueDrawables};
         }
 
     /* Light */
@@ -272,7 +281,7 @@ void load(const std::string& path, SceneData& data) {
     Containers::Array<Containers::Optional<Trade::PhongMaterialData>> materials{importer->materialCount()};
     for(UnsignedInt i = 0; i != importer->materialCount(); ++i) {
         Containers::Optional<Trade::MaterialData> materialData = importer->material(i);
-        if(!materialData || !(materialData->types() & Trade::MaterialType::Phong)) {
+        if(!materialData || !(materialData->types() & Trade::MaterialType::Phong) || (materialData->as<Trade::PhongMaterialData>().hasTextureTransformation() && !materialData->as<Trade::PhongMaterialData>().hasCommonTextureTransformation()) || materialData->as<Trade::PhongMaterialData>().hasTextureCoordinates()) {
             Warning{} << "Cannot load material" << i << importer->materialName(i);
             continue;
         }

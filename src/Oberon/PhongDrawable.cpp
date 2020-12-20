@@ -46,6 +46,9 @@ void PhongDrawable::draw(const Matrix4& transformationMatrix, SceneGraph::Camera
         .bindNormalTexture(*_normalTexture)
         .setNormalTextureScale(_normalTextureScale);
 
+    if(_shader->flags() & Shaders::Phong::Flag::TextureTransformation)
+        _shader->setTextureMatrix(_textureMatrix);
+
     _shader->draw(*_mesh);
 }
 
