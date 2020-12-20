@@ -35,25 +35,32 @@ namespace Oberon { namespace Editor {
 
 class Outline: public Gtk::TreeView {
     public:
-        explicit Outline(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>&, Properties* properties);
+        explicit Outline(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& builder, Properties* properties);
 
-        void updateWithScene(const SceneData& data);
+        void updateWithSceneData(SceneData& data);
 
     private:
         void onRowActivated(const Gtk::TreeModel::Path& path, Gtk::TreeViewColumn*);
+        void onButtonPressEvent(GdkEventButton* buttonEvent);
 
-        void addObjectRow(const Gtk::TreeModel::Row& parentRow, const SceneData& data, UnsignedInt objectId);
+        void onAddChildItemActivate();
+        void onDeleteItemActivate();
+
+        void addObjectRow(const Gtk::TreeModel::Row& parentRow, UnsignedInt objectId);
 
     private:
         struct ModelColumns: public Gtk::TreeModel::ColumnRecord {
-            explicit ModelColumns() { add(name); add(objectInfo); }
+            explicit ModelColumns() { add(name); add(objectId); }
 
-            Gtk::TreeModelColumn<Glib::ustring> name;
-            Gtk::TreeModelColumn<const ObjectInfo*> objectInfo;
+            Gtk::TreeModelColumn<std::string> name;
+            Gtk::TreeModelColumn<UnsignedInt> objectId;
         };
 
         ModelColumns _columns;
         Glib::RefPtr<Gtk::TreeStore> _treeStore;
+        Gtk::Menu* _menuPopup;
+
+        SceneData* _sceneData;
 
         Properties* _properties;
 };

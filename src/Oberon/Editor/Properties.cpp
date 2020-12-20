@@ -71,8 +71,8 @@ Properties::Properties(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>
     add(*transformation);
 }
 
-void Properties::showObjectProperties(const ObjectInfo* objectInfo) {
-    _object = objectInfo->object;
+void Properties::showObjectProperties(const ObjectInfo& objectInfo) {
+    _object = objectInfo.object;
 
     Vector3 translation = _object->translation();
     _translationX->set_value(double(translation.x()));

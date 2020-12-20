@@ -40,6 +40,7 @@ int main(int argc, char** argv) {
     Corrade::Utility::Resource rs("OberonEditor");
     Glib::RefPtr<Gtk::Builder> builder =
         Gtk::Builder::create_from_string(rs.get("EditorWindow.ui"));
+    builder->add_from_string(rs.get("Outline.ui"));
     builder->add_from_string(rs.get("Properties.ui"));
 
     Oberon::Editor::Properties* properties;

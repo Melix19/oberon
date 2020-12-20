@@ -65,7 +65,7 @@ void Viewport::loadScene(const std::string& path) {
     make_current();
     _sceneView = Containers::pointer<SceneView>(path, _viewportSize);
 
-    _outline->updateWithScene(_sceneView->data());
+    _outline->updateWithSceneData(_sceneView->data());
 
     /* Force queue redraw */
     queue_render();

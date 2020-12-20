@@ -36,7 +36,7 @@ class Properties: public Gtk::Box {
     public:
         explicit Properties(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& builder);
 
-        void showObjectProperties(const ObjectInfo* objectInfo);
+        void showObjectProperties(const ObjectInfo& objectInfo);
 
     private:
         void updateTranslation();

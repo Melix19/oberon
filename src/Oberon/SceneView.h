@@ -35,7 +35,7 @@ class SceneView {
         void draw();
         void updateViewport(const Vector2i& size);
 
-        const SceneData& data() const { return _data; }
+        SceneData& data() { return _data; }
 
     private:
         SceneData _data;

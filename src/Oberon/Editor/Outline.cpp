@@ -24,34 +24,46 @@
 
 #include "Outline.h"
 
+#include <Corrade/Containers/GrowableArray.h>
+
 #include "Oberon/SceneData.h"
 #include "Oberon/Editor/Properties.h"
 
 namespace Oberon { namespace Editor {
 
-Outline::Outline(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>&, Properties* properties):
+Outline::Outline(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& builder, Properties* properties):
     Gtk::TreeView(cobject), _properties(properties)
 {
+    builder->get_widget("outlineMenuPopup", _menuPopup);
+
+    Gtk::MenuItem* deleteItem;
+    builder->get_widget("outlineDeleteItem", deleteItem);
+    deleteItem->signal_activate().connect(sigc::mem_fun(*this, &Outline::onDeleteItemActivate));
+
     _treeStore = Gtk::TreeStore::create(_columns);
     set_model(_treeStore);
 
     append_column("", _columns.name);
 
     signal_row_activated().connect(sigc::mem_fun(*this, &Outline::onRowActivated));
+    signal_button_press_event().connect_notify(sigc::mem_fun(*this, &Outline::onButtonPressEvent));
 }
 
-void Outline::updateWithScene(const SceneData& data) {
+void Outline::updateWithSceneData(SceneData& data) {
+    _sceneData = &data;
+
     /* Clear the current tree */
     _treeStore->clear();
 
     /* Create scene node (without objectInfo because the scene
        cannot have a non-default transformation or features) */
     Gtk::TreeModel::Row row = *(_treeStore->append());
-    row[_columns.name] = data.objects[data.sceneObjectId].name;
+    row[_columns.name] = _sceneData->objects[_sceneData->sceneObjectId].name;
+    row[_columns.objectId] = _sceneData->sceneObjectId;
 
     /* Load scene children */
-    for(UnsignedInt objectId: data.objects[data.sceneObjectId].children)
-        addObjectRow(row, data, objectId);
+    for(UnsignedInt objectId: _sceneData->objects[_sceneData->sceneObjectId].children)
+        addObjectRow(row, objectId);
 
     /* Expand all nodes */
     expand_all();
@@ -59,17 +71,46 @@ void Outline::updateWithScene(const SceneData& data) {
 
 void Outline::onRowActivated(const Gtk::TreeModel::Path& path, Gtk::TreeViewColumn*) {
     const Gtk::TreeModel::iterator iter = _treeStore->get_iter(path);
-    const ObjectInfo* objectInfo = iter->get_value(_columns.objectInfo);
-    if(objectInfo) _properties->showObjectProperties(objectInfo);
+    UnsignedInt objectId = iter->get_value(_columns.objectId);
+    _properties->showObjectProperties(_sceneData->objects[objectId]);
 }
 
-void Outline::addObjectRow(const Gtk::TreeModel::Row& parentRow, const SceneData& data, UnsignedInt objectId) {
-    Gtk::TreeModel::Row childRow = *(_treeStore->append(parentRow.children()));
-    childRow[_columns.name] = data.objects[objectId].name;
-    childRow[_columns.objectInfo] = &data.objects[objectId];
+void Outline::onButtonPressEvent(GdkEventButton* buttonEvent) {
+    if(buttonEvent->type == GDK_BUTTON_PRESS && buttonEvent->button == GDK_BUTTON_SECONDARY)
+        _menuPopup->popup_at_pointer(reinterpret_cast<GdkEvent*>(buttonEvent));
+}
 
-    for(UnsignedInt childObjectId: data.objects[objectId].children)
-        addObjectRow(childRow, data, childObjectId);
+void Outline::onDeleteItemActivate() {
+    Glib::RefPtr<Gtk::TreeSelection> treeSelection = get_selection();
+    if(treeSelection) {
+        Gtk::TreeModel::iterator iter = treeSelection->get_selected();
+        if(iter) {
+            UnsignedInt objectId = iter->get_value(_columns.objectId);
+            UnsignedInt parentObjectId = iter->parent()->get_value(_columns.objectId);
+
+            /* Delete the object id from the parent's children array */
+            std::vector<UnsignedInt>::iterator childIdIter = std::find(
+                _sceneData->objects[parentObjectId].children.begin(),
+                _sceneData->objects[parentObjectId].children.end(), objectId);
+            _sceneData->objects[parentObjectId].children.erase(childIdIter);
+
+            /* Delete object and objectInfo from the scene */
+            delete _sceneData->objects[objectId].object;
+            arrayRemoveSuffix(_sceneData->objects, objectId);
+
+            /* Delete row from the tree */
+            _treeStore->erase(iter);
+        }
+    }
+}
+
+void Outline::addObjectRow(const Gtk::TreeModel::Row& parentRow, UnsignedInt objectId) {
+    Gtk::TreeModel::Row childRow = *(_treeStore->append(parentRow.children()));
+    childRow[_columns.name] = _sceneData->objects[objectId].name;
+    childRow[_columns.objectId] = objectId;
+
+    for(UnsignedInt childObjectId: _sceneData->objects[objectId].children)
+        addObjectRow(childRow, childObjectId);
 }
 
 }}
