@@ -165,11 +165,10 @@ void addObject(const std::string& path, SceneData& data, Containers::ArrayView<c
     data.objects[i].object = object;
 
     /* Add a drawable if the object has a mesh */
-    if(objectData.instanceType() == Trade::ObjectInstanceType3D::Mesh && objectData.instance() != -1) {
+    std::string meshKey = Utility::formatString("{}#{}", path, objectData.instance());
+    Resource<GL::Mesh> mesh = data.resourceManager.get<GL::Mesh>(meshKey);
+    if(objectData.instanceType() == Trade::ObjectInstanceType3D::Mesh && objectData.instance() != -1 && mesh) {
         const Int materialId = static_cast<const Trade::MeshObjectData3D&>(objectData).material();
-
-        std::string meshKey = Utility::formatString("{}#{}", path, objectData.instance());
-        Resource<GL::Mesh> mesh = data.resourceManager.get<GL::Mesh>(meshKey);
 
         Shaders::Phong::Flags flags;
         if(hasVertexColors[objectData.instance()])
@@ -360,7 +359,7 @@ void load(const std::string& path, SceneData& data) {
     /* The format has no scene support, display just the first loaded mesh with
        a default material and be done with it */
     } else if(Resource<GL::Mesh> mesh = data.resourceManager.get<GL::Mesh>(Utility::formatString("{}#0", path))) {
-        /* Create a scene child and add the mesh */
+        /* Create an object and add the mesh */
         Object3D* object = new Object3D{&data.scene};
         data.objects = Containers::Array<ObjectInfo>{Containers::ValueInit, 2};
         data.objects[0].object = object;
@@ -369,10 +368,13 @@ void load(const std::string& path, SceneData& data) {
 
         /* Set scene info */
         data.sceneObjectId = 1;
-        data.objects[data.sceneObjectId].children = {0};
+        data.objects[data.sceneObjectId].children.push_back(0);
     }
 
-    /* Complete scene info */
+    /* Complete scene info, initialize the ObjectInfo array if
+       they weren't any objects in the scene */
+    if(data.objects.size() < 1)
+        data.objects = Containers::Array<ObjectInfo>{Containers::ValueInit, 1};
     data.objects[data.sceneObjectId].object = &data.scene;
     data.objects[data.sceneObjectId].name = "scene";
 

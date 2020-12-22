@@ -24,8 +24,6 @@
 
 #include "Outline.h"
 
-#include <Corrade/Containers/GrowableArray.h>
-
 #include "Oberon/SceneData.h"
 #include "Oberon/Editor/Properties.h"
 
@@ -94,9 +92,10 @@ void Outline::onDeleteItemActivate() {
                 _sceneData->objects[parentObjectId].children.end(), objectId);
             _sceneData->objects[parentObjectId].children.erase(childIdIter);
 
-            /* Delete object and objectInfo from the scene */
+            /* Delete object from the scene */
+            /* TODO: also delete the objectInfo from the sceneData when
+               corrade will have arbitrary deletion of the Arrays. */
             delete _sceneData->objects[objectId].object;
-            arrayRemoveSuffix(_sceneData->objects, objectId);
 
             /* Delete row from the tree */
             _treeStore->erase(iter);
