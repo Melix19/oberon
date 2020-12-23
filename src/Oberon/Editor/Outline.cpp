@@ -53,6 +53,9 @@ void Outline::updateWithSceneData(SceneData& data) {
     /* Clear the current tree */
     _treeStore->clear();
 
+    /* Empty selected objects array */
+    _selectedObjects.clear();
+
     /* Create scene node (without objectInfo because the scene
        cannot have a non-default transformation or features) */
     Gtk::TreeModel::Row row = *(_treeStore->append());
@@ -71,6 +74,11 @@ void Outline::onRowActivated(const Gtk::TreeModel::Path& path, Gtk::TreeViewColu
     const Gtk::TreeModel::iterator iter = _treeStore->get_iter(path);
     UnsignedInt objectId = iter->get_value(_columns.objectId);
     _properties->showObjectProperties(_sceneData->objects[objectId]);
+
+    /* Empty selected objects array and insert the
+       selected object */
+    _selectedObjects.clear();
+    _selectedObjects.push_back(objectId);
 }
 
 void Outline::onButtonPressEvent(GdkEventButton* buttonEvent) {

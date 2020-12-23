@@ -22,9 +22,14 @@
 #   SOFTWARE.
 #
 
-set_directory_properties(PROPERTIES
-    CORRADE_CXX_STANDARD 11
-    CORRADE_USE_PEDANTIC_FLAGS ON)
+set(im3d_SRCS
+    im3d.cpp)
 
-add_subdirectory(OberonExternal)
-add_subdirectory(Oberon)
+set(im3d_HEADERS
+    im3d.h
+    im3d_config.h
+    im3d_math.h)
+
+add_library(im3d
+    ${im3d_SRCS}
+    ${im3d_HEADERS})

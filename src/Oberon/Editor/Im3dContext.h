@@ -1,5 +1,5 @@
-#ifndef Oberon_Editor_Editor_h
-#define Oberon_Editor_Editor_h
+#ifndef Oberon_Editor_Im3dContext_h
+#define Oberon_Editor_Im3dContext_h
 /*
     This file is part of Oberon.
 
@@ -24,19 +24,45 @@
     SOFTWARE.
 */
 
+#include <Magnum/Timeline.h>
+#include <Magnum/GL/AbstractShaderProgram.h>
+#include <Magnum/GL/Mesh.h>
+
+#include "Oberon/Oberon.h"
+
 namespace Oberon { namespace Editor {
 
-class EditorWindow;
+class Im3dShader: public GL::AbstractShaderProgram {
+    public:
+        typedef GL::Attribute<0, Vector4> PositionSize;
+        typedef GL::Attribute<1, Vector4> Color;
 
-class Im3dContext;
+        explicit Im3dShader();
 
-class Outline;
+        Im3dShader& setTransformationProjectionMatrix(const Matrix4& matrix);
 
-class ProjectTree;
+    private:
+        Int _transformationProjectionMatrixUniform{0};
+};
 
-class Properties;
+class Im3dContext {
+    public:
+        Im3dContext();
 
-class Viewport;
+        void newFrame();
+        void drawFrame();
+
+        Im3dContext& setViewportSize(const Vector2i& size);
+        Im3dContext& setTransformationProjectionMatrix(const Matrix4& matrix);
+        Im3dContext& setCameraTranslation(const Vector3& translation);
+        Im3dContext& setCameraDirection(const Vector3& direction);
+
+    private:
+        Im3dShader _shader;
+        GL::Buffer _vertexBuffer{GL::Buffer::TargetHint::Array};
+        Timeline _timeline;
+        GL::Mesh _mesh;
+};
 
 }}
 

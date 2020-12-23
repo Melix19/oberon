@@ -42,6 +42,7 @@ corrade_add_resource(OberonEditor_RCS resources.conf)
 
 set(OberonEditor_SRCS
     EditorWindow.cpp
+    Im3dContext.cpp
     main.cpp
     Outline.cpp
     ProjectTree.cpp
@@ -53,6 +54,8 @@ set(OberonEditor_SRCS
 set(OberonEditor_HEADERS
     Editor.h
     EditorWindow.h
+    Im3dContext.h
+    Im3dIntegration.h
     Outline.h
     ProjectTree.h
     Properties.h
@@ -64,6 +67,7 @@ add_executable(OberonEditor
 target_link_libraries(OberonEditor PRIVATE
     Magnum::GLContext
     Oberon
+    im3d
     ${GTKMM_LIBRARIES})
 
 # Make the executable a default target to build & run in Visual Studio

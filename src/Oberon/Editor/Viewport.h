@@ -30,14 +30,15 @@
 #include <Magnum/Math/Vector2.h>
 #include <Magnum/Platform/Platform.h>
 
-#include "Oberon/Oberon.h"
 #include "Oberon/Editor/Editor.h"
+#include "Oberon/Editor/Im3dContext.h"
+#include "OberonExternal/im3d/im3d_math.h"
 
 namespace Oberon { namespace Editor {
 
 class Viewport: public Gtk::GLArea {
     public:
-        explicit Viewport(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>&, Outline* outline, Platform::GLContext& context);
+        explicit Viewport(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>&, Outline& outline, Platform::GLContext& context);
 
         void loadScene(const std::string& path);
 
@@ -52,8 +53,10 @@ class Viewport: public Gtk::GLArea {
 
         bool onKeyPressEvent(GdkEventKey* keyEvent);
 
-        Outline* _outline;
+        Outline& _outline;
         Platform::GLContext& _context;
+
+        Containers::Pointer<Im3dContext> _im3d;
 
         Vector2i _viewportSize;
         Containers::Pointer<SceneView> _sceneView;

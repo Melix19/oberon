@@ -39,6 +39,8 @@ class Outline: public Gtk::TreeView {
 
         void updateWithSceneData(SceneData& data);
 
+        std::vector<UnsignedInt>& selectedObjects() { return _selectedObjects; }
+
     private:
         void onRowActivated(const Gtk::TreeModel::Path& path, Gtk::TreeViewColumn*);
         void onButtonPressEvent(GdkEventButton* buttonEvent);
@@ -63,6 +65,8 @@ class Outline: public Gtk::TreeView {
         SceneData* _sceneData;
 
         Properties* _properties;
+
+        std::vector<UnsignedInt> _selectedObjects;
 };
 
 }}

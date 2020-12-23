@@ -1,5 +1,3 @@
-#ifndef Oberon_Editor_Editor_h
-#define Oberon_Editor_Editor_h
 /*
     This file is part of Oberon.
 
@@ -24,20 +22,10 @@
     SOFTWARE.
 */
 
-namespace Oberon { namespace Editor {
+in lowp vec4 interpolatedColor;
 
-class EditorWindow;
+out lowp vec4 fragmentColor;
 
-class Im3dContext;
-
-class Outline;
-
-class ProjectTree;
-
-class Properties;
-
-class Viewport;
-
-}}
-
-#endif
+void main() {
+    fragmentColor = interpolatedColor;
+}

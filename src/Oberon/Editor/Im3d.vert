@@ -1,5 +1,3 @@
-#ifndef Oberon_Editor_Editor_h
-#define Oberon_Editor_Editor_h
 /*
     This file is part of Oberon.
 
@@ -24,20 +22,15 @@
     SOFTWARE.
 */
 
-namespace Oberon { namespace Editor {
+uniform highp mat4 transformationProjectionMatrix;
 
-class EditorWindow;
+in highp vec4 positionSize;
+in lowp vec4 color;
 
-class Im3dContext;
+out lowp vec4 interpolatedColor;
 
-class Outline;
+void main() {
+    gl_Position = transformationProjectionMatrix*vec4(positionSize.xyz, 1.0);
 
-class ProjectTree;
-
-class Properties;
-
-class Viewport;
-
-}}
-
-#endif
+    interpolatedColor = color.abgr;
+}

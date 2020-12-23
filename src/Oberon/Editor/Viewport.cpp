@@ -25,14 +25,17 @@
 #include "Viewport.h"
 
 #include <Magnum/GL/Framebuffer.h>
+#include <Magnum/GL/Renderer.h>
 #include <Magnum/Platform/GLContext.h>
+#include <Magnum/SceneGraph/Camera.h>
 
 #include "Oberon/SceneView.h"
+#include "Oberon/Editor/Im3dIntegration.h"
 #include "Oberon/Editor/Outline.h"
 
 namespace Oberon { namespace Editor {
 
-Viewport::Viewport(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>&, Outline* outline, Platform::GLContext& context):
+Viewport::Viewport(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>&, Outline& outline, Platform::GLContext& context):
     Gtk::GLArea(cobject), _outline(outline), _context(context), _isDragging{false}
 {
     /* Set size requests and scaling behavior */
@@ -42,7 +45,7 @@ Viewport::Viewport(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>&, O
     set_valign(Gtk::ALIGN_FILL);
 
     /* Set desired OpenGL version */
-    set_required_version(4, 5);
+    set_required_version(3, 2);
 
     /* Connect signals for scene rendering */
     signal_realize().connect(sigc::mem_fun(this, &Viewport::onRealize));
@@ -65,7 +68,7 @@ void Viewport::loadScene(const std::string& path) {
     make_current();
     _sceneView = Containers::pointer<SceneView>(path, _viewportSize);
 
-    _outline->updateWithSceneData(_sceneView->data());
+    _outline.updateWithSceneData(_sceneView->data());
 
     /* Force queue redraw */
     queue_render();
@@ -75,6 +78,8 @@ void Viewport::onRealize() {
     /* Make sure the OpenGL context is current then configure it */
     make_current();
     _context.create();
+
+    _im3d = Containers::pointer<Im3dContext>();
 }
 
 bool Viewport::onRender(const Glib::RefPtr<Gdk::GLContext>&) {
@@ -95,7 +100,28 @@ bool Viewport::onRender(const Glib::RefPtr<Gdk::GLContext>&) {
     if(_sceneView) {
         _sceneView->draw();
 
+        if(_outline.selectedObjects().size() > 0) {
+            /* Configure im3d gizmo */
+            (*_im3d)
+                .setCameraTranslation(_sceneView->data().cameraObject->translation())
+                .setTransformationProjectionMatrix(_sceneView->data().camera->projectionMatrix()*_sceneView->data().camera->cameraMatrix())
+                .setCameraDirection(-_sceneView->data().cameraObject->transformation().backward())
+                .setViewportSize(_viewportSize)
+                .newFrame();
+
+            /* Show gizmo for the first selected object */
+            /* TODO: make the gizmo work for multiple selected objects */
+            Object3D* object = _sceneView->data().objects[*_outline.selectedObjects().begin()].object;
+            Im3d::Gizmo("GizmoUnified", Im3d::Mat4(object->transformation()));
+
+            /* Render gizmo without depth test */
+            GL::Renderer::disable(GL::Renderer::Feature::DepthTest);
+            _im3d->drawFrame();
+            GL::Renderer::enable(GL::Renderer::Feature::DepthTest);
+        }
+
         /* Force queue redraw */
+        /* TODO: force the redraw only when necessary */
         queue_render();
     }
 
