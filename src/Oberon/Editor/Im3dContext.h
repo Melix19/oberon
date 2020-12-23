@@ -52,16 +52,28 @@ class Im3dContext {
         void newFrame();
         void drawFrame();
 
+        void updateCursorRay(const Vector2& cursorPosition);
+
+        Im3dContext& setCameraObject(Object3D* object) {
+            _cameraObject = object;
+            return *this;
+        }
+
+        Im3dContext& setCamera(SceneGraph::Camera3D* camera) {
+            _camera = camera;
+            return *this;
+        }
+
         Im3dContext& setViewportSize(const Vector2i& size);
-        Im3dContext& setTransformationProjectionMatrix(const Matrix4& matrix);
-        Im3dContext& setCameraTranslation(const Vector3& translation);
-        Im3dContext& setCameraDirection(const Vector3& direction);
 
     private:
         Im3dShader _shader;
         GL::Buffer _vertexBuffer{GL::Buffer::TargetHint::Array};
         Timeline _timeline;
         GL::Mesh _mesh;
+
+        Object3D* _cameraObject{};
+        SceneGraph::Camera3D* _camera{};
 };
 
 }}

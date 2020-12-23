@@ -31,6 +31,17 @@
 
 namespace Magnum { namespace Math { namespace Implementation {
 
+/* Im3d::Vec2 */
+template<> struct VectorConverter<2, Float, Im3d::Vec2> {
+    static Vector<2, Float> from(const Im3d::Vec2& other) {
+        return {other.x, other.y};
+    }
+
+    static Im3d::Vec2 to(const Vector<2, Float>& other) {
+        return {other[0], other[1]};
+    }
+};
+
 /* Im3d::Vec3 */
 template<> struct VectorConverter<3, Float, Im3d::Vec3> {
     static Vector<3, Float> from(const Im3d::Vec3& other) {
@@ -45,10 +56,10 @@ template<> struct VectorConverter<3, Float, Im3d::Vec3> {
 /* Im3d::Mat4 */
 template<> struct RectangularMatrixConverter<4, 4, Float, Im3d::Mat4> {
     static Matrix<4, Float> from(const Im3d::Mat4& other) {
-        return {Vector<4, Float>{other(0, 0), other(0, 1), other(0, 2), other(0, 3)},
-                Vector<4, Float>{other(1, 0), other(1, 1), other(1, 2), other(1, 3)},
-                Vector<4, Float>{other(2, 0), other(2, 1), other(2, 2), other(2, 3)},
-                Vector<4, Float>{other(3, 0), other(3, 1), other(3, 2), other(3, 3)}};
+        return {Vector<4, Float>{other(0, 0), other(1, 0), other(2, 0), other(3, 0)},
+                Vector<4, Float>{other(0, 1), other(1, 1), other(2, 1), other(3, 1)},
+                Vector<4, Float>{other(0, 2), other(1, 2), other(2, 2), other(3, 2)},
+                Vector<4, Float>{other(0, 3), other(1, 3), other(2, 3), other(3, 3)}};
     }
 
     static Im3d::Mat4 to(const Matrix<4, Float>& other) {

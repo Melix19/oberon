@@ -28,10 +28,11 @@
 #include <Corrade/Utility/Resource.h>
 #include <Magnum/GL/Shader.h>
 #include <Magnum/GL/Version.h>
-#include <Magnum/Math/Matrix4.h>
-#include <Magnum/Math/Vector3.h>
+#include <Magnum/SceneGraph/TranslationRotationScalingTransformation3D.h>
+#include <Magnum/SceneGraph/Camera.h>
 
 #include "Oberon/Editor/Im3dIntegration.h"
+#include "OberonExternal/im3d/im3d_math.h"
 
 namespace Oberon { namespace Editor {
 
@@ -76,12 +77,16 @@ void Im3dContext::newFrame() {
 
     Im3d::AppData& ad = Im3d::GetAppData();
     ad.m_deltaTime = _timeline.previousFrameDuration();
+    ad.m_viewOrigin = Im3d::Vec3(_cameraObject->translation());
+    ad.m_viewDirection = Im3d::Vec3(-_cameraObject->transformation().backward());
 
     Im3d::NewFrame();
 }
 
 void Im3dContext::drawFrame() {
     Im3d::EndFrame();
+
+    _shader.setTransformationProjectionMatrix(_camera->projectionMatrix()*_camera->cameraMatrix());
 
     for(Im3d::U32 i = 0; i < Im3d::GetDrawListCount(); ++i) {
         const Im3d::DrawList& drawList = Im3d::GetDrawLists()[i];
@@ -110,26 +115,26 @@ void Im3dContext::drawFrame() {
     }
 }
 
+void Im3dContext::updateCursorRay(const Vector2& cursorPosition) {
+    Im3d::AppData& ad = Im3d::GetAppData();
+    Im3d::Vec2 cursorPos(cursorPosition);
+    cursorPos = (cursorPos / ad.m_viewportSize) * 2.0f - 1.0f;
+    cursorPos.y = -cursorPos.y;
+
+    Im3d::Vec3 rayOrigin, rayDirection;
+    rayOrigin = ad.m_viewOrigin;
+    rayDirection.x = cursorPos.x / _camera->projectionMatrix()[0][0];
+    rayDirection.y = cursorPos.y / _camera->projectionMatrix()[1][1];
+    rayDirection.z = -1.0f;
+    rayDirection = Im3d::Mat4(_cameraObject->transformation()) * Im3d::Vec4(Normalize(rayDirection), 0.0f);
+
+    ad.m_cursorRayOrigin = rayOrigin;
+    ad.m_cursorRayDirection = rayDirection;
+}
+
 Im3dContext& Im3dContext::setViewportSize(const Vector2i& size) {
     Im3d::AppData& ad = Im3d::GetAppData();
     ad.m_viewportSize = Im3d::Vec2(size.x(), size.y());
-    return *this;
-}
-
-Im3dContext& Im3dContext::setTransformationProjectionMatrix(const Matrix4& matrix) {
-    _shader.setTransformationProjectionMatrix(matrix);
-    return *this;
-}
-
-Im3dContext& Im3dContext::setCameraTranslation(const Vector3& translation) {
-    Im3d::AppData& ad = Im3d::GetAppData();
-    ad.m_viewOrigin = Im3d::Vec3(translation);
-    return *this;
-}
-
-Im3dContext& Im3dContext::setCameraDirection(const Vector3& direction) {
-    Im3d::AppData& ad = Im3d::GetAppData();
-    ad.m_viewDirection = Im3d::Vec3(direction);
     return *this;
 }
 

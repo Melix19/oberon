@@ -70,6 +70,10 @@ void Viewport::loadScene(const std::string& path) {
 
     _outline.updateWithSceneData(_sceneView->data());
 
+    (*_im3d)
+        .setCameraObject(_sceneView->data().cameraObject)
+        .setCamera(_sceneView->data().camera);
+
     /* Force queue redraw */
     queue_render();
 }
@@ -103,16 +107,16 @@ bool Viewport::onRender(const Glib::RefPtr<Gdk::GLContext>&) {
         if(_outline.selectedObjects().size() > 0) {
             /* Configure im3d gizmo */
             (*_im3d)
-                .setCameraTranslation(_sceneView->data().cameraObject->translation())
-                .setTransformationProjectionMatrix(_sceneView->data().camera->projectionMatrix()*_sceneView->data().camera->cameraMatrix())
-                .setCameraDirection(-_sceneView->data().cameraObject->transformation().backward())
                 .setViewportSize(_viewportSize)
                 .newFrame();
 
             /* Show gizmo for the first selected object */
             /* TODO: make the gizmo work for multiple selected objects */
             Object3D* object = _sceneView->data().objects[*_outline.selectedObjects().begin()].object;
-            Im3d::Gizmo("GizmoUnified", Im3d::Mat4(object->transformation()));
+            Im3d::Mat4 gizmoTransformation(object->transformation());
+            if(Im3d::Gizmo("ViewportGizmo", gizmoTransformation)) {
+                object->setTransformation(Matrix4{gizmoTransformation});
+            }
 
             /* Render gizmo without depth test */
             GL::Renderer::disable(GL::Renderer::Feature::DepthTest);
@@ -138,57 +142,82 @@ void Viewport::onResize(int width, int height) {
 }
 
 bool Viewport::onMotionNotifyEvent(GdkEventMotion* motionEvent) {
-    if(_sceneView && _isDragging) {
+    if(_sceneView) {
         const Vector2 eventPosition{Float(motionEvent->x), Float(motionEvent->y)};
-        const Vector2 delta = 2.0f*
-            Vector2{eventPosition - _previousMousePosition}/
-            Vector2{Float(get_width()), Float(get_height())};
 
-        (*_sceneView->data().cameraObject)
-            .rotate(Rad{-delta.y()}, _sceneView->data().cameraObject->transformation().right().normalized())
-            .rotateY(Rad{-delta.x()});
+        if(_isDragging) {
+            const Vector2 delta = 2.0f*
+                Vector2{eventPosition - _previousMousePosition}/
+                Vector2{Float(get_width()), Float(get_height())};
 
-        _previousMousePosition = eventPosition;
+            (*_sceneView->data().cameraObject)
+                .rotate(Rad{-delta.y()}, _sceneView->data().cameraObject->transformation().right().normalized())
+                .rotateY(Rad{-delta.x()});
+
+            _previousMousePosition = eventPosition;
+        } else if(_outline.selectedObjects().size() > 0) {
+            _im3d->updateCursorRay(eventPosition);
+        }
     }
 
     return true;
 }
 
 bool Viewport::onButtonPressEvent(GdkEventButton* buttonEvent) {
-    if(_sceneView && buttonEvent->button == GDK_BUTTON_SECONDARY) {
-        /* Grab focus so that key events work */
-        grab_focus();
+    if(_sceneView) {
+        if(buttonEvent->button == GDK_BUTTON_PRIMARY) {
+            Im3d::AppData& ad = Im3d::GetAppData();
+            ad.m_keyDown[Im3d::Mouse_Left] = true;
+        } else if(buttonEvent->button == GDK_BUTTON_SECONDARY) {
+            /* Grab focus so that key events work */
+            grab_focus();
 
-        _isDragging = true;
-        _previousMousePosition = Vector2{Float(buttonEvent->x), Float(buttonEvent->y)};
+            _isDragging = true;
+            _previousMousePosition = Vector2{Float(buttonEvent->x), Float(buttonEvent->y)};
+        }
     }
 
     return true;
 }
 
 bool Viewport::onButtonReleaseEvent(GdkEventButton* releaseEvent) {
-    if(_sceneView && releaseEvent->button == GDK_BUTTON_SECONDARY)
-        _isDragging = false;
+    if(_sceneView) {
+        if(releaseEvent->button == GDK_BUTTON_PRIMARY) {
+            Im3d::AppData& ad = Im3d::GetAppData();
+            ad.m_keyDown[Im3d::Mouse_Left] = false;
+        } else if(releaseEvent->button == GDK_BUTTON_SECONDARY) {
+            _isDragging = false;
+        }
+    }
 
     return true;
 }
 
 bool Viewport::onKeyPressEvent(GdkEventKey* keyEvent) {
-    if(_sceneView && _isDragging && keyEvent->type == GDK_KEY_PRESS) {
-        const Float speed = 0.1f;
+    if(_sceneView) {
+        if(_isDragging) {
+            const Float speed = 0.1f;
 
-        if(keyEvent->keyval == GDK_KEY_w || keyEvent->keyval == GDK_KEY_W)
-            _sceneView->data().cameraObject->translate(-_sceneView->data().cameraObject->transformation().backward()*speed);
-        else if(keyEvent->keyval == GDK_KEY_s || keyEvent->keyval == GDK_KEY_S)
-            _sceneView->data().cameraObject->translate(_sceneView->data().cameraObject->transformation().backward()*speed);
-        else if(keyEvent->keyval == GDK_KEY_a || keyEvent->keyval == GDK_KEY_A)
-            _sceneView->data().cameraObject->translate(-_sceneView->data().cameraObject->transformation().right()*speed);
-        else if(keyEvent->keyval == GDK_KEY_d || keyEvent->keyval == GDK_KEY_D)
-            _sceneView->data().cameraObject->translate(_sceneView->data().cameraObject->transformation().right()*speed);
-        else if(keyEvent->keyval == GDK_KEY_q || keyEvent->keyval == GDK_KEY_Q)
-            _sceneView->data().cameraObject->translate(-_sceneView->data().cameraObject->transformation().up()*speed);
-        else if(keyEvent->keyval == GDK_KEY_e || keyEvent->keyval == GDK_KEY_E)
-            _sceneView->data().cameraObject->translate(_sceneView->data().cameraObject->transformation().up()*speed);
+            if(keyEvent->keyval == GDK_KEY_w || keyEvent->keyval == GDK_KEY_W)
+                _sceneView->data().cameraObject->translate(-_sceneView->data().cameraObject->transformation().backward()*speed);
+            else if(keyEvent->keyval == GDK_KEY_s || keyEvent->keyval == GDK_KEY_S)
+                _sceneView->data().cameraObject->translate(_sceneView->data().cameraObject->transformation().backward()*speed);
+            else if(keyEvent->keyval == GDK_KEY_a || keyEvent->keyval == GDK_KEY_A)
+                _sceneView->data().cameraObject->translate(-_sceneView->data().cameraObject->transformation().right()*speed);
+            else if(keyEvent->keyval == GDK_KEY_d || keyEvent->keyval == GDK_KEY_D)
+                _sceneView->data().cameraObject->translate(_sceneView->data().cameraObject->transformation().right()*speed);
+            else if(keyEvent->keyval == GDK_KEY_q || keyEvent->keyval == GDK_KEY_Q)
+                _sceneView->data().cameraObject->translate(-_sceneView->data().cameraObject->transformation().up()*speed);
+            else if(keyEvent->keyval == GDK_KEY_e || keyEvent->keyval == GDK_KEY_E)
+                _sceneView->data().cameraObject->translate(_sceneView->data().cameraObject->transformation().up()*speed);
+        } else {
+            if(keyEvent->keyval == GDK_KEY_g || keyEvent->keyval == GDK_KEY_G)
+                Im3d::GetContext().m_gizmoMode = Im3d::GizmoMode_Translation;
+            if(keyEvent->keyval == GDK_KEY_r || keyEvent->keyval == GDK_KEY_R)
+                Im3d::GetContext().m_gizmoMode = Im3d::GizmoMode_Rotation;
+            if(keyEvent->keyval == GDK_KEY_s || keyEvent->keyval == GDK_KEY_S)
+                Im3d::GetContext().m_gizmoMode = Im3d::GizmoMode_Scale;
+        }
     }
 
     return true;

@@ -32,7 +32,6 @@
 
 #include "Oberon/Editor/Editor.h"
 #include "Oberon/Editor/Im3dContext.h"
-#include "OberonExternal/im3d/im3d_math.h"
 
 namespace Oberon { namespace Editor {
 
