@@ -50,7 +50,7 @@ int main(int argc, char** argv) {
     builder->get_widget_derived("Outline", outline, properties);
 
     Oberon::Editor::Viewport* viewport;
-    builder->get_widget_derived("Viewport", viewport, outline, context);
+    builder->get_widget_derived("Viewport", viewport, *outline, context);
 
     Oberon::Editor::ProjectTree* projectTree;
     builder->get_widget_derived("ProjectTree", projectTree, viewport);
