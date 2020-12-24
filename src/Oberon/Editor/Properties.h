@@ -37,11 +37,12 @@ class Properties: public Gtk::Box {
         explicit Properties(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& builder);
 
         void showObjectProperties(const ObjectInfo& objectInfo);
+        void updateTransformation();
 
     private:
-        void updateTranslation();
-        void updateRotation();
-        void updateScaling();
+        void onTranslationChanged();
+        void onRotationChanged();
+        void onScalingChanged();
 
     private:
         Gtk::SpinButton* _translationX;

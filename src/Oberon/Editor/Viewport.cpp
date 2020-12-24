@@ -32,11 +32,12 @@
 #include "Oberon/SceneView.h"
 #include "Oberon/Editor/Im3dIntegration.h"
 #include "Oberon/Editor/Outline.h"
+#include "Oberon/Editor/Properties.h"
 
 namespace Oberon { namespace Editor {
 
-Viewport::Viewport(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>&, Outline& outline, Platform::GLContext& context):
-    Gtk::GLArea(cobject), _outline(outline), _context(context), _isDragging{false}
+Viewport::Viewport(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>&, Outline& outline, Properties& properties, Platform::GLContext& context):
+    Gtk::GLArea(cobject), _outline(outline), _properties(properties), _context(context), _isDragging{false}
 {
     /* Set size requests and scaling behavior */
     set_hexpand();
@@ -116,6 +117,7 @@ bool Viewport::onRender(const Glib::RefPtr<Gdk::GLContext>&) {
             Im3d::Mat4 gizmoTransformation(object->transformation());
             if(Im3d::Gizmo("ViewportGizmo", gizmoTransformation)) {
                 object->setTransformation(Matrix4{gizmoTransformation});
+                _properties.updateTransformation();
             }
 
             /* Render gizmo without depth test and with blending enabled */

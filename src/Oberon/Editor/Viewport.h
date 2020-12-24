@@ -37,7 +37,7 @@ namespace Oberon { namespace Editor {
 
 class Viewport: public Gtk::GLArea {
     public:
-        explicit Viewport(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>&, Outline& outline, Platform::GLContext& context);
+        explicit Viewport(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>&, Outline& outline, Properties& properties, Platform::GLContext& context);
 
         void loadScene(const std::string& path);
 
@@ -53,6 +53,7 @@ class Viewport: public Gtk::GLArea {
         bool onKeyPressEvent(GdkEventKey* keyEvent);
 
         Outline& _outline;
+        Properties& _properties;
         Platform::GLContext& _context;
 
         Containers::Pointer<Im3dContext> _im3d;

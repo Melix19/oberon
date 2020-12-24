@@ -40,9 +40,9 @@ Properties::Properties(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>
     _translationX->set_adjustment(Gtk::Adjustment::create(0, double(-FLT_MAX), double(FLT_MAX), 0.1));
     _translationY->set_adjustment(Gtk::Adjustment::create(0, double(-FLT_MAX), double(FLT_MAX), 0.1));
     _translationZ->set_adjustment(Gtk::Adjustment::create(0, double(-FLT_MAX), double(FLT_MAX), 0.1));
-    _translationX->signal_value_changed().connect(sigc::mem_fun(*this, &Properties::updateTranslation));
-    _translationY->signal_value_changed().connect(sigc::mem_fun(*this, &Properties::updateTranslation));
-    _translationZ->signal_value_changed().connect(sigc::mem_fun(*this, &Properties::updateTranslation));
+    _translationX->signal_value_changed().connect(sigc::mem_fun(*this, &Properties::onTranslationChanged));
+    _translationY->signal_value_changed().connect(sigc::mem_fun(*this, &Properties::onTranslationChanged));
+    _translationZ->signal_value_changed().connect(sigc::mem_fun(*this, &Properties::onTranslationChanged));
 
     /* Rotation adjustaments */
     builder->get_widget("rotation_x", _rotationX);
@@ -51,9 +51,9 @@ Properties::Properties(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>
     _rotationX->set_adjustment(Gtk::Adjustment::create(0, double(-FLT_MAX), double(FLT_MAX)));
     _rotationY->set_adjustment(Gtk::Adjustment::create(0, double(-FLT_MAX), double(FLT_MAX)));
     _rotationZ->set_adjustment(Gtk::Adjustment::create(0, double(-FLT_MAX), double(FLT_MAX)));
-    _rotationX->signal_value_changed().connect(sigc::mem_fun(*this, &Properties::updateRotation));
-    _rotationY->signal_value_changed().connect(sigc::mem_fun(*this, &Properties::updateRotation));
-    _rotationZ->signal_value_changed().connect(sigc::mem_fun(*this, &Properties::updateRotation));
+    _rotationX->signal_value_changed().connect(sigc::mem_fun(*this, &Properties::onRotationChanged));
+    _rotationY->signal_value_changed().connect(sigc::mem_fun(*this, &Properties::onRotationChanged));
+    _rotationZ->signal_value_changed().connect(sigc::mem_fun(*this, &Properties::onRotationChanged));
 
     /* Scaling adjustaments */
     builder->get_widget("scaling_x", _scalingX);
@@ -62,9 +62,9 @@ Properties::Properties(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>
     _scalingX->set_adjustment(Gtk::Adjustment::create(0, double(-FLT_MAX), double(FLT_MAX), 0.01));
     _scalingY->set_adjustment(Gtk::Adjustment::create(0, double(-FLT_MAX), double(FLT_MAX), 0.01));
     _scalingZ->set_adjustment(Gtk::Adjustment::create(0, double(-FLT_MAX), double(FLT_MAX), 0.01));
-    _scalingX->signal_value_changed().connect(sigc::mem_fun(*this, &Properties::updateScaling));
-    _scalingY->signal_value_changed().connect(sigc::mem_fun(*this, &Properties::updateScaling));
-    _scalingZ->signal_value_changed().connect(sigc::mem_fun(*this, &Properties::updateScaling));
+    _scalingX->signal_value_changed().connect(sigc::mem_fun(*this, &Properties::onScalingChanged));
+    _scalingY->signal_value_changed().connect(sigc::mem_fun(*this, &Properties::onScalingChanged));
+    _scalingZ->signal_value_changed().connect(sigc::mem_fun(*this, &Properties::onScalingChanged));
 
     Gtk::Expander* transformation;
     builder->get_widget("transformation", transformation);
@@ -74,6 +74,11 @@ Properties::Properties(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>
 void Properties::showObjectProperties(const ObjectInfo& objectInfo) {
     _object = objectInfo.object;
 
+    updateTransformation();
+    show();
+}
+
+void Properties::updateTransformation() {
     Vector3 translation = _object->translation();
     _translationX->set_value(double(translation.x()));
     _translationY->set_value(double(translation.y()));
@@ -88,17 +93,15 @@ void Properties::showObjectProperties(const ObjectInfo& objectInfo) {
     _scalingX->set_value(double(scaling.x()));
     _scalingY->set_value(double(scaling.y()));
     _scalingZ->set_value(double(scaling.z()));
-
-    show();
 }
 
-void Properties::updateTranslation() {
+void Properties::onTranslationChanged() {
     _object->setTranslation({Float(_translationX->get_value()),
         Float(_translationY->get_value()),
         Float(_translationZ->get_value())});
 }
 
-void Properties::updateRotation() {
+void Properties::onRotationChanged() {
     Math::Vector3<Rad> euler{Rad(Deg(_rotationX->get_value())),
         Rad(Deg(_rotationY->get_value())),
         Rad(Deg(_rotationZ->get_value()))};
@@ -108,7 +111,7 @@ void Properties::updateRotation() {
         Quaternion::rotation(Rad(euler.x()), Vector3::xAxis()));
 }
 
-void Properties::updateScaling() {
+void Properties::onScalingChanged() {
     _object->setScaling({Float(_scalingX->get_value()),
         Float(_scalingY->get_value()),
         Float(_scalingZ->get_value())});
