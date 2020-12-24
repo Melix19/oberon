@@ -118,9 +118,13 @@ bool Viewport::onRender(const Glib::RefPtr<Gdk::GLContext>&) {
                 object->setTransformation(Matrix4{gizmoTransformation});
             }
 
-            /* Render gizmo without depth test */
+            /* Render gizmo without depth test and with blending enabled */
             GL::Renderer::disable(GL::Renderer::Feature::DepthTest);
+            GL::Renderer::enable(GL::Renderer::Feature::Blending);
+            GL::Renderer::setBlendFunction(GL::Renderer::BlendFunction::SourceAlpha, GL::Renderer::BlendFunction::OneMinusSourceAlpha);
             _im3d->drawFrame();
+            GL::Renderer::setBlendFunction(GL::Renderer::BlendFunction::One, GL::Renderer::BlendFunction::Zero);
+            GL::Renderer::disable(GL::Renderer::Feature::Blending);
             GL::Renderer::enable(GL::Renderer::Feature::DepthTest);
         }
 
