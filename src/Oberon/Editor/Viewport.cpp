@@ -166,6 +166,9 @@ bool Viewport::onMotionNotifyEvent(GdkEventMotion* motionEvent) {
 bool Viewport::onButtonPressEvent(GdkEventButton* buttonEvent) {
     if(_sceneView) {
         if(buttonEvent->button == GDK_BUTTON_PRIMARY) {
+            /* Grab focus so that key events work */
+            grab_focus();
+
             Im3d::AppData& ad = Im3d::GetAppData();
             ad.m_keyDown[Im3d::Mouse_Left] = true;
         } else if(buttonEvent->button == GDK_BUTTON_SECONDARY) {
