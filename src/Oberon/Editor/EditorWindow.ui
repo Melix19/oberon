@@ -85,6 +85,7 @@
                 <child>
                   <object class="GtkTreeView" id="Outline">
                     <property name="visible">True</property>
+                    <property name="activate-on-single-click">True</property>
                     <property name="headers-visible">False</property>
                   </object>
                 </child>
