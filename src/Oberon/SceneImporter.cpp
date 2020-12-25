@@ -154,15 +154,15 @@ void addObject(const std::string& path, SceneData& data, Containers::ArrayView<c
 
     /* Add the object to the scene and set its transformation. If it has a
        separate TRS, use that to avoid precision issues. */
-    Object3D* object = new Object3D{&parent};
+    Object3D& object = parent.addChild<Object3D>();
     if(objectData.flags() & Trade::ObjectFlag3D::HasTranslationRotationScaling)
-        (*object).setTranslation(objectData.translation())
-                 .setRotation(objectData.rotation())
-                 .setScaling(objectData.scaling());
-    else object->setTransformation(objectData.transformation());
+        object.setTranslation(objectData.translation())
+              .setRotation(objectData.rotation())
+              .setScaling(objectData.scaling());
+    else object.setTransformation(objectData.transformation());
 
     /* Save it to the ID -> pointer mapping array */
-    data.objects[i].object = object;
+    data.objects[i].object = &object;
 
     /* Add a drawable if the object has a mesh */
     std::string meshKey = Utility::formatString("{}#{}", path, objectData.instance());
@@ -213,12 +213,13 @@ void addObject(const std::string& path, SceneData& data, Containers::ArrayView<c
                 }
             }
 
-            new PhongDrawable{*object, phongShader(data, flags), mesh,
+            PhongDrawable& phongDrawable = object.addFeature<PhongDrawable>(phongShader(data, flags), mesh,
                 material.diffuseColor(), diffuseTexture, normalTexture,
                 normalTextureScale, material.alphaMask(),
                 material.commonTextureMatrix(),
                 material.alphaMode() == Trade::MaterialAlphaMode::Blend ?
-                    data.transparentDrawables : data.opaqueDrawables};
+                    data.transparentDrawables : data.opaqueDrawables);
+            data.objects[i].features[UnsignedInt(ObjectInfo::FeatureTypes::PhongDrawable)] = &phongDrawable;
         }
 
     /* Light */
@@ -226,17 +227,20 @@ void addObject(const std::string& path, SceneData& data, Containers::ArrayView<c
         /* Add a light drawable, which puts correct camera-relative position
            to data.lightPositions. */
         const Trade::LightData& light = *lights[objectData.instance()];
-        new LightDrawable{*object, light.type() == Trade::LightData::Type::Directional ? true : false, light.color()*light.intensity(), light.range(), data.lightPositions, data.lightColors, data.lightRanges, data.lightDrawables};
+        LightDrawable& lightDrawable = object.addFeature<LightDrawable>(
+            light.type() == Trade::LightData::Type::Directional ? true : false, light.color()*light.intensity(),
+            light.range(), data.lightPositions, data.lightColors, data.lightRanges, data.lightDrawables);
+        data.objects[i].features[UnsignedInt(ObjectInfo::FeatureTypes::LightDrawable)] = &lightDrawable;
 
     /* This is a node that holds the default camera -> assign the object to the
        global camera pointer */
     } else if(objectData.instanceType() == Trade::ObjectInstanceType3D::Camera && objectData.instance() == 0) {
-        data.cameraObject = object;
+        data.cameraObject = &object;
     }
 
     /* Recursively add children */
     for(std::size_t id: objectData.children())
-        addObject(path, data, objects, materials, lights, hasVertexColors, *object, id);
+        addObject(path, data, objects, materials, lights, hasVertexColors, object, id);
 }
 
 }
@@ -360,11 +364,14 @@ void load(const std::string& path, SceneData& data) {
        a default material and be done with it */
     } else if(Resource<GL::Mesh> mesh = data.resourceManager.get<GL::Mesh>(Utility::formatString("{}#0", path))) {
         /* Create an object and add the mesh */
-        Object3D* object = new Object3D{&data.scene};
+        Object3D& object = data.scene.addChild<Object3D>();
         data.objects = Containers::Array<ObjectInfo>{Containers::ValueInit, 2};
-        data.objects[0].object = object;
+        data.objects[0].object = &object;
         data.objects[0].name = "object #0";
-        new PhongDrawable{*object, phongShader(data, hasVertexColors[0] ? Shaders::Phong::Flag::VertexColor : Shaders::Phong::Flags{}), mesh, 0xffffff_rgbf, data.opaqueDrawables};
+        PhongDrawable& phongDrawable = object.addFeature<PhongDrawable>(phongShader(
+            data, hasVertexColors[0] ? Shaders::Phong::Flag::VertexColor : Shaders::Phong::Flags{}),
+            mesh, 0xffffff_rgbf, data.opaqueDrawables);
+        data.objects[0].features[UnsignedInt(ObjectInfo::FeatureTypes::PhongDrawable)] = &phongDrawable;
 
         /* Set scene info */
         data.sceneObjectId = 1;
@@ -380,7 +387,7 @@ void load(const std::string& path, SceneData& data) {
 
     /* Create a camera object in case it wasn't present in the scene already */
     if(!data.cameraObject) {
-        data.cameraObject = new Object3D{&data.scene};
+        data.cameraObject = &data.scene.addChild<Object3D>();
         data.cameraObject->translate(Vector3::zAxis(5.0f));
     }
 

@@ -45,6 +45,12 @@ struct ObjectInfo {
     Object3D* object;
     std::string name;
     std::vector<UnsignedInt> children;
+
+    enum class FeatureTypes: UnsignedInt {
+        PhongDrawable,
+        LightDrawable
+    };
+    Containers::Array<SceneGraph::AbstractFeature3D*> features{Containers::ValueInit, 2};
 };
 
 struct SceneData {
