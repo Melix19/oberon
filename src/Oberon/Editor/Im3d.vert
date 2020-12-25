@@ -22,15 +22,25 @@
     SOFTWARE.
 */
 
+#define ANTIALIASING 2.0
+
 uniform highp mat4 transformationProjectionMatrix;
 
 in highp vec4 positionSize;
 in lowp vec4 color;
 
 out lowp vec4 interpolatedColor;
+out highp float size;
 
 void main() {
-    gl_Position = transformationProjectionMatrix*vec4(positionSize.xyz, 1.0);
-
     interpolatedColor = color.abgr;
+    #ifndef TRIANGLES
+    interpolatedColor.a *= smoothstep(0.0, 1.0, positionSize.w/ANTIALIASING);
+    #endif
+    size = max(positionSize.w, ANTIALIASING);
+
+    gl_Position = transformationProjectionMatrix*vec4(positionSize.xyz, 1.0);
+    #ifdef POINTS
+    gl_PointSize = size;
+    #endif
 }

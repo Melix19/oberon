@@ -37,7 +37,13 @@ class Im3dShader: public GL::AbstractShaderProgram {
         typedef GL::Attribute<0, Vector4> PositionSize;
         typedef GL::Attribute<1, Vector4> Color;
 
-        explicit Im3dShader();
+        enum class Type: UnsignedByte {
+            Triangles,
+            Lines,
+            Points
+        };
+
+        explicit Im3dShader(Type type);
 
         Im3dShader& setTransformationProjectionMatrix(const Matrix4& matrix);
 
@@ -67,7 +73,9 @@ class Im3dContext {
         Im3dContext& setViewportSize(const Vector2i& size);
 
     private:
-        Im3dShader _shader;
+        Im3dShader _trianglesShader{Im3dShader::Type::Triangles};
+        Im3dShader _linesShader{Im3dShader::Type::Lines};
+        Im3dShader _pointsShader{Im3dShader::Type::Points};
         GL::Buffer _vertexBuffer{GL::Buffer::TargetHint::Array};
         Timeline _timeline;
         GL::Mesh _mesh;

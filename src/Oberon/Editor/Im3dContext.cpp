@@ -36,11 +36,26 @@
 
 namespace Oberon { namespace Editor {
 
-Im3dShader::Im3dShader() {
+Im3dShader::Im3dShader(Type type) {
     Utility::Resource rs("OberonEditor");
 
     GL::Shader vert(GL::Version::GL320, GL::Shader::Type::Vertex);
     GL::Shader frag(GL::Version::GL320, GL::Shader::Type::Fragment);
+
+    switch(type) {
+        case Type::Points:
+            vert.addSource("#define POINTS\n");
+            frag.addSource("#define POINTS\n");
+            break;
+        case Type::Lines:
+            vert.addSource("#define LINES\n");
+            frag.addSource("#define LINES\n");
+            break;
+        case Type::Triangles:
+            vert.addSource("#define TRIANGLES\n");
+            frag.addSource("#define TRIANGLES\n");
+            break;
+    }
 
     vert.addSource(rs.get("Im3d.vert"));
     frag.addSource(rs.get("Im3d.frag"));
@@ -86,24 +101,12 @@ void Im3dContext::newFrame() {
 void Im3dContext::drawFrame() {
     Im3d::EndFrame();
 
-    _shader.setTransformationProjectionMatrix(_camera->projectionMatrix()*_camera->cameraMatrix());
+    _trianglesShader.setTransformationProjectionMatrix(_camera->projectionMatrix()*_camera->cameraMatrix());
+    _linesShader.setTransformationProjectionMatrix(_camera->projectionMatrix()*_camera->cameraMatrix());
+    _pointsShader.setTransformationProjectionMatrix(_camera->projectionMatrix()*_camera->cameraMatrix());
 
     for(Im3d::U32 i = 0; i < Im3d::GetDrawListCount(); ++i) {
         const Im3d::DrawList& drawList = Im3d::GetDrawLists()[i];
-
-        switch(drawList.m_primType) {
-            case Im3d::DrawPrimitive_Points:
-                _mesh.setPrimitive(GL::MeshPrimitive::Points);
-                break;
-            case Im3d::DrawPrimitive_Lines:
-                _mesh.setPrimitive(GL::MeshPrimitive::Lines);
-                break;
-            case Im3d::DrawPrimitive_Triangles:
-                _mesh.setPrimitive(GL::MeshPrimitive::Triangles);
-                break;
-            default:
-                return;
-        }
 
         _vertexBuffer.setData(
             {drawList.m_vertexData, std::size_t(drawList.m_vertexCount)},
@@ -111,22 +114,37 @@ void Im3dContext::drawFrame() {
 
         _mesh.setCount(drawList.m_vertexCount);
 
-        _shader.draw(_mesh);
+        switch(drawList.m_primType) {
+            case Im3d::DrawPrimitive_Points:
+                _mesh.setPrimitive(GL::MeshPrimitive::Points);
+                _pointsShader.draw(_mesh);
+                break;
+            case Im3d::DrawPrimitive_Lines:
+                _mesh.setPrimitive(GL::MeshPrimitive::Lines);
+                _linesShader.draw(_mesh);
+                break;
+            case Im3d::DrawPrimitive_Triangles:
+                _mesh.setPrimitive(GL::MeshPrimitive::Triangles);
+                _trianglesShader.draw(_mesh);
+                break;
+            default:
+                return;
+        }
     }
 }
 
 void Im3dContext::updateCursorRay(const Vector2& cursorPosition) {
     Im3d::AppData& ad = Im3d::GetAppData();
     Im3d::Vec2 cursorPos(cursorPosition);
-    cursorPos = (cursorPos / ad.m_viewportSize) * 2.0f - 1.0f;
+    cursorPos = (cursorPos/ad.m_viewportSize)*2.0f - 1.0f;
     cursorPos.y = -cursorPos.y;
 
     Im3d::Vec3 rayOrigin, rayDirection;
     rayOrigin = ad.m_viewOrigin;
-    rayDirection.x = cursorPos.x / _camera->projectionMatrix()[0][0];
-    rayDirection.y = cursorPos.y / _camera->projectionMatrix()[1][1];
+    rayDirection.x = cursorPos.x/_camera->projectionMatrix()[0][0];
+    rayDirection.y = cursorPos.y/_camera->projectionMatrix()[1][1];
     rayDirection.z = -1.0f;
-    rayDirection = Im3d::Mat4(_cameraObject->transformation()) * Im3d::Vec4(Normalize(rayDirection), 0.0f);
+    rayDirection = Im3d::Mat4(_cameraObject->transformation())*Im3d::Vec4(Normalize(rayDirection), 0.0f);
 
     ad.m_cursorRayOrigin = rayOrigin;
     ad.m_cursorRayDirection = rayDirection;

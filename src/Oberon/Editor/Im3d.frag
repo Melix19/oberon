@@ -22,10 +22,19 @@
     SOFTWARE.
 */
 
+#define ANTIALIASING 2.0
+
 in lowp vec4 interpolatedColor;
+in highp float size;
 
 out lowp vec4 fragmentColor;
 
 void main() {
     fragmentColor = interpolatedColor;
+
+    #ifdef POINTS
+    float d = length(gl_PointCoord.xy - vec2(0.5));
+    d = smoothstep(0.5, 0.5 - (ANTIALIASING/size), d);
+    fragmentColor.a *= d;
+    #endif
 }
