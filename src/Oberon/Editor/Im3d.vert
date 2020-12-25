@@ -24,23 +24,27 @@
 
 #define ANTIALIASING 2.0
 
+#define VertexData _VertexData { \
+    noperspective highp float edgeDistance; \
+    noperspective highp float size; \
+    smooth lowp vec4 color; \
+}
+
 uniform highp mat4 transformationProjectionMatrix;
 
 in highp vec4 positionSize;
 in lowp vec4 color;
 
-out lowp vec4 interpolatedColor;
-out highp float size;
+out VertexData data;
 
 void main() {
-    interpolatedColor = color.abgr;
+    data.color = color.abgr;
     #ifndef TRIANGLES
-    interpolatedColor.a *= smoothstep(0.0, 1.0, positionSize.w/ANTIALIASING);
+    data.color.a *= smoothstep(0.0, 1.0, positionSize.w/ANTIALIASING);
     #endif
-    size = max(positionSize.w, ANTIALIASING);
-
+    data.size = max(positionSize.w, ANTIALIASING);
     gl_Position = transformationProjectionMatrix*vec4(positionSize.xyz, 1.0);
     #ifdef POINTS
-    gl_PointSize = size;
+    gl_PointSize = data.size;
     #endif
 }

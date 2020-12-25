@@ -25,7 +25,6 @@
 #include "Viewport.h"
 
 #include <Magnum/GL/Framebuffer.h>
-#include <Magnum/GL/Renderer.h>
 #include <Magnum/Platform/GLContext.h>
 #include <Magnum/SceneGraph/Camera.h>
 
@@ -120,17 +119,8 @@ bool Viewport::onRender(const Glib::RefPtr<Gdk::GLContext>&) {
                 _properties.updateTransformation();
             }
 
-            /* Render gizmo without DepthTest and with Blending and
-               ProgramPointSize enabled */
-            GL::Renderer::enable(GL::Renderer::Feature::ProgramPointSize);
-            GL::Renderer::disable(GL::Renderer::Feature::DepthTest);
-            GL::Renderer::enable(GL::Renderer::Feature::Blending);
-            GL::Renderer::setBlendFunction(GL::Renderer::BlendFunction::SourceAlpha, GL::Renderer::BlendFunction::OneMinusSourceAlpha);
+            /* Draw gizmo */
             _im3d->drawFrame();
-            GL::Renderer::setBlendFunction(GL::Renderer::BlendFunction::One, GL::Renderer::BlendFunction::Zero);
-            GL::Renderer::disable(GL::Renderer::Feature::Blending);
-            GL::Renderer::enable(GL::Renderer::Feature::DepthTest);
-            GL::Renderer::disable(GL::Renderer::Feature::ProgramPointSize);
         }
 
         /* Force queue redraw */

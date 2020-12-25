@@ -46,9 +46,11 @@ class Im3dShader: public GL::AbstractShaderProgram {
         explicit Im3dShader(Type type);
 
         Im3dShader& setTransformationProjectionMatrix(const Matrix4& matrix);
+        Im3dShader& setViewport(const Vector2& size);
 
     private:
-        Int _transformationProjectionMatrixUniform{0};
+        Int _transformationProjectionMatrixUniform{0},
+            _viewportUniform{1};
 };
 
 class Im3dContext {

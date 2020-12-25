@@ -26,6 +26,7 @@
 
 #include <Corrade/Containers/Reference.h>
 #include <Corrade/Utility/Resource.h>
+#include <Magnum/GL/Renderer.h>
 #include <Magnum/GL/Shader.h>
 #include <Magnum/GL/Version.h>
 #include <Magnum/SceneGraph/TranslationRotationScalingTransformation3D.h>
@@ -60,15 +61,27 @@ Im3dShader::Im3dShader(Type type) {
     vert.addSource(rs.get("Im3d.vert"));
     frag.addSource(rs.get("Im3d.frag"));
 
-    CORRADE_INTERNAL_ASSERT_OUTPUT(GL::Shader::compile({vert, frag}));
+    if(type == Type::Lines) {
+        GL::Shader geom(GL::Version::GL320, GL::Shader::Type::Geometry);
+        geom.addSource(rs.get("Im3d.geom"));
 
-    attachShaders({vert, frag});
+        CORRADE_INTERNAL_ASSERT_OUTPUT(GL::Shader::compile({vert, geom, frag}));
+        attachShaders({vert, geom, frag});
+    } else {
+        CORRADE_INTERNAL_ASSERT_OUTPUT(GL::Shader::compile({vert, frag}));
+        attachShaders({vert, frag});
+    }
 
     CORRADE_INTERNAL_ASSERT_OUTPUT(link());
 }
 
 Im3dShader& Im3dShader::setTransformationProjectionMatrix(const Matrix4& matrix) {
     setUniform(_transformationProjectionMatrixUniform, matrix);
+    return *this;
+}
+
+Im3dShader& Im3dShader::setViewport(const Vector2& size) {
+    setUniform(_viewportUniform, size);
     return *this;
 }
 
@@ -101,6 +114,11 @@ void Im3dContext::newFrame() {
 void Im3dContext::drawFrame() {
     Im3d::EndFrame();
 
+    GL::Renderer::disable(GL::Renderer::Feature::DepthTest);
+    GL::Renderer::enable(GL::Renderer::Feature::ProgramPointSize);
+    GL::Renderer::enable(GL::Renderer::Feature::Blending);
+    GL::Renderer::setBlendFunction(GL::Renderer::BlendFunction::SourceAlpha, GL::Renderer::BlendFunction::OneMinusSourceAlpha);
+
     _trianglesShader.setTransformationProjectionMatrix(_camera->projectionMatrix()*_camera->cameraMatrix());
     _linesShader.setTransformationProjectionMatrix(_camera->projectionMatrix()*_camera->cameraMatrix());
     _pointsShader.setTransformationProjectionMatrix(_camera->projectionMatrix()*_camera->cameraMatrix());
@@ -116,14 +134,20 @@ void Im3dContext::drawFrame() {
 
         switch(drawList.m_primType) {
             case Im3d::DrawPrimitive_Points:
+                GL::Renderer::disable(GL::Renderer::Feature::FaceCulling);
+
                 _mesh.setPrimitive(GL::MeshPrimitive::Points);
                 _pointsShader.draw(_mesh);
                 break;
             case Im3d::DrawPrimitive_Lines:
+                GL::Renderer::disable(GL::Renderer::Feature::FaceCulling);
+
                 _mesh.setPrimitive(GL::MeshPrimitive::Lines);
                 _linesShader.draw(_mesh);
                 break;
             case Im3d::DrawPrimitive_Triangles:
+                GL::Renderer::enable(GL::Renderer::Feature::FaceCulling);
+
                 _mesh.setPrimitive(GL::MeshPrimitive::Triangles);
                 _trianglesShader.draw(_mesh);
                 break;
@@ -131,6 +155,12 @@ void Im3dContext::drawFrame() {
                 return;
         }
     }
+
+    GL::Renderer::setBlendFunction(GL::Renderer::BlendFunction::One, GL::Renderer::BlendFunction::Zero);
+    GL::Renderer::disable(GL::Renderer::Feature::Blending);
+    GL::Renderer::disable(GL::Renderer::Feature::ProgramPointSize);
+    GL::Renderer::enable(GL::Renderer::Feature::DepthTest);
+    GL::Renderer::enable(GL::Renderer::Feature::FaceCulling);
 }
 
 void Im3dContext::updateCursorRay(const Vector2& cursorPosition) {
@@ -152,7 +182,8 @@ void Im3dContext::updateCursorRay(const Vector2& cursorPosition) {
 
 Im3dContext& Im3dContext::setViewportSize(const Vector2i& size) {
     Im3d::AppData& ad = Im3d::GetAppData();
-    ad.m_viewportSize = Im3d::Vec2(size.x(), size.y());
+    ad.m_viewportSize = Im3d::Vec2(Vector2{size});
+    _linesShader.setViewport(Vector2{size});
     return *this;
 }
 
