@@ -46,7 +46,7 @@ struct ObjectInfo {
     std::string name;
     std::vector<UnsignedInt> children;
 
-    enum class FeatureTypes: UnsignedInt {
+    enum class FeatureType: UnsignedByte {
         PhongDrawable,
         LightDrawable
     };

@@ -219,7 +219,7 @@ void addObject(const std::string& path, SceneData& data, Containers::ArrayView<c
                 material.commonTextureMatrix(),
                 material.alphaMode() == Trade::MaterialAlphaMode::Blend ?
                     data.transparentDrawables : data.opaqueDrawables);
-            data.objects[i].features[UnsignedInt(ObjectInfo::FeatureTypes::PhongDrawable)] = &phongDrawable;
+            data.objects[i].features[UnsignedByte(ObjectInfo::FeatureType::PhongDrawable)] = &phongDrawable;
         }
 
     /* Light */
@@ -230,7 +230,7 @@ void addObject(const std::string& path, SceneData& data, Containers::ArrayView<c
         LightDrawable& lightDrawable = object.addFeature<LightDrawable>(
             light.type() == Trade::LightData::Type::Directional ? true : false, light.color()*light.intensity(),
             light.range(), data.lightPositions, data.lightColors, data.lightRanges, data.lightDrawables);
-        data.objects[i].features[UnsignedInt(ObjectInfo::FeatureTypes::LightDrawable)] = &lightDrawable;
+        data.objects[i].features[UnsignedByte(ObjectInfo::FeatureType::LightDrawable)] = &lightDrawable;
 
     /* This is a node that holds the default camera -> assign the object to the
        global camera pointer */
@@ -371,7 +371,7 @@ void load(const std::string& path, SceneData& data) {
         PhongDrawable& phongDrawable = object.addFeature<PhongDrawable>(phongShader(
             data, hasVertexColors[0] ? Shaders::Phong::Flag::VertexColor : Shaders::Phong::Flags{}),
             mesh, 0xffffff_rgbf, data.opaqueDrawables);
-        data.objects[0].features[UnsignedInt(ObjectInfo::FeatureTypes::PhongDrawable)] = &phongDrawable;
+        data.objects[0].features[UnsignedByte(ObjectInfo::FeatureType::PhongDrawable)] = &phongDrawable;
 
         /* Set scene info */
         data.sceneObjectId = 1;
