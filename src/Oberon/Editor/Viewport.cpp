@@ -72,7 +72,8 @@ void Viewport::loadScene(const std::string& path) {
 
     (*_im3d)
         .setCameraObject(_sceneView->data().cameraObject)
-        .setCamera(_sceneView->data().camera);
+        .setCamera(_sceneView->data().camera)
+        .setViewportSize(_viewportSize);
 
     /* Force queue redraw */
     queue_render();
@@ -106,9 +107,7 @@ bool Viewport::onRender(const Glib::RefPtr<Gdk::GLContext>&) {
 
         if(_outline.selectedObjects().size() > 0) {
             /* Configure im3d gizmo */
-            (*_im3d)
-                .setViewportSize(_viewportSize)
-                .newFrame();
+            _im3d->newFrame();
 
             /* Show gizmo for the first selected object */
             /* TODO: make the gizmo work for multiple selected objects */
@@ -136,8 +135,10 @@ bool Viewport::onRender(const Glib::RefPtr<Gdk::GLContext>&) {
 void Viewport::onResize(int width, int height) {
     _viewportSize = {width, height};
 
-    /* Update the scene viewport if there is one loaded */
-    if(_sceneView) _sceneView->updateViewport(_viewportSize);
+    if(_sceneView) {
+        _sceneView->updateViewport(_viewportSize);
+        _im3d->setViewportSize(_viewportSize);
+    }
 }
 
 bool Viewport::onMotionNotifyEvent(GdkEventMotion* motionEvent) {
