@@ -41,7 +41,7 @@ int main(int argc, char** argv) {
     Glib::RefPtr<Gtk::Builder> builder =
         Gtk::Builder::create_from_string(rs.get("EditorWindow.ui"));
     builder->add_from_string(rs.get("Outline.ui"));
-    builder->add_from_string(rs.get("Properties.ui"));
+    builder->add_from_string(rs.get("PropertiesEditors.ui"));
 
     Oberon::Editor::Properties* properties;
     builder->get_widget_derived("Properties", properties);

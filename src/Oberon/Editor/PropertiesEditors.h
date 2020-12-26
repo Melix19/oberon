@@ -1,5 +1,5 @@
-#ifndef Oberon_Editor_Properties_h
-#define Oberon_Editor_Properties_h
+#ifndef Oberon_Editor_PropertiesEditors_h
+#define Oberon_Editor_PropertiesEditors_h
 /*
     This file is part of Oberon.
 
@@ -24,21 +24,40 @@
     SOFTWARE.
 */
 
-#include <gtkmm/box.h>
+#include <gtkmm/builder.h>
+#include <gtkmm/expander.h>
+#include <gtkmm/spinbutton.h>
 
-#include "Oberon/Editor/PropertiesEditors.h"
+#include "Oberon/Oberon.h"
 
 namespace Oberon { namespace Editor {
 
-class Properties: public Gtk::Box {
+class TransformationEditor: public Gtk::Expander {
     public:
-        explicit Properties(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& builder);
+        explicit TransformationEditor(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& builder);
 
-        void showObjectProperties(const ObjectInfo& objectInfo);
-        void updateTransformation();
+        void show(const ObjectInfo& objectInfo);
+        void update();
 
     private:
-        TransformationEditor* _transformationEditor;
+        void onTranslationChanged();
+        void onRotationChanged();
+        void onScalingChanged();
+
+    private:
+        Gtk::SpinButton* _translationX;
+        Gtk::SpinButton* _translationY;
+        Gtk::SpinButton* _translationZ;
+
+        Gtk::SpinButton* _rotationX;
+        Gtk::SpinButton* _rotationY;
+        Gtk::SpinButton* _rotationZ;
+
+        Gtk::SpinButton* _scalingX;
+        Gtk::SpinButton* _scalingY;
+        Gtk::SpinButton* _scalingZ;
+
+        Object3D* _object;
 };
 
 }}
