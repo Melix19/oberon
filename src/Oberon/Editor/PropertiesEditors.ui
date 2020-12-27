@@ -281,4 +281,59 @@
       </object>
     </child>
   </object>
+  <object class="GtkExpander" id="PhongDrawableEditor">
+    <property name="visible">True</property>
+    <child type="label">
+      <object class="GtkLabel">
+        <property name="visible">True</property>
+        <property name="margin-start">6</property>
+        <property name="margin-top">9</property>
+        <property name="margin-bottom">6</property>
+        <property name="label">Phong Drawable</property>
+        <style>
+          <class name="heading"/>
+        </style>
+      </object>
+    </child>
+    <child>
+      <object class="GtkBox">
+        <property name="visible">True</property>
+        <property name="margin-start">12</property>
+        <property name="margin-end">6</property>
+        <property name="margin-top">6</property>
+        <property name="margin-bottom">6</property>
+        <property name="orientation">vertical</property>
+        <property name="spacing">12</property>
+        <child>
+          <object class="GtkGrid">
+            <property name="visible">True</property>
+            <property name="row-spacing">6</property>
+            <property name="column-spacing">6</property>
+            <property name="column-homogeneous">True</property>
+            <child>
+              <object class="GtkLabel">
+                <property name="visible">True</property>
+                <property name="halign">end</property>
+                <property name="label">Color</property>
+              </object>
+              <packing>
+                <property name="left-attach">0</property>
+                <property name="top-attach">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkColorButton" id="phong_drawable_color">
+                <property name="visible">True</property>
+              </object>
+              <packing>
+                <property name="left-attach">1</property>
+                <property name="top-attach">0</property>
+                <property name="width">2</property>
+              </packing>
+            </child>
+          </object>
+        </child>
+      </object>
+    </child>
+  </object>
 </interface>

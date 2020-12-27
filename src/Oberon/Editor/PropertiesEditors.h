@@ -25,6 +25,7 @@
 */
 
 #include <gtkmm/builder.h>
+#include <gtkmm/colorbutton.h>
 #include <gtkmm/expander.h>
 #include <gtkmm/spinbutton.h>
 
@@ -36,8 +37,8 @@ class TransformationEditor: public Gtk::Expander {
     public:
         explicit TransformationEditor(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& builder);
 
-        void show(const ObjectInfo& objectInfo);
-        void update();
+        void showEditor(const ObjectInfo& objectInfo);
+        void updateEditor();
 
     private:
         void onTranslationChanged();
@@ -58,6 +59,22 @@ class TransformationEditor: public Gtk::Expander {
         Gtk::SpinButton* _scalingZ;
 
         Object3D* _object;
+};
+
+class PhongDrawableEditor: public Gtk::Expander {
+    public:
+        explicit PhongDrawableEditor(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& builder);
+
+        void showEditor(const ObjectInfo& objectInfo);
+        void updateEditor();
+
+    private:
+        void onColorChanged();
+
+    private:
+        Gtk::ColorButton* _colorButton;
+
+        PhongDrawable* _phongDrawable;
 };
 
 }}

@@ -24,6 +24,7 @@
 
 #include "PropertiesEditors.h"
 
+#include "Oberon/PhongDrawable.h"
 #include "Oberon/SceneData.h"
 
 namespace Oberon { namespace Editor {
@@ -65,12 +66,12 @@ TransformationEditor::TransformationEditor(BaseObjectType* cobject, const Glib::
     _scalingZ->signal_value_changed().connect(sigc::mem_fun(*this, &TransformationEditor::onScalingChanged));
 }
 
-void TransformationEditor::show(const ObjectInfo& objectInfo) {
+void TransformationEditor::showEditor(const ObjectInfo& objectInfo) {
     _object = objectInfo.object;
-    update();
+    updateEditor();
 }
 
-void TransformationEditor::update() {
+void TransformationEditor::updateEditor() {
     Vector3 translation = _object->translation();
     _translationX->set_value(double(translation.x()));
     _translationY->set_value(double(translation.y()));
@@ -107,6 +108,36 @@ void TransformationEditor::onScalingChanged() {
     _object->setScaling({Float(_scalingX->get_value()),
         Float(_scalingY->get_value()),
         Float(_scalingZ->get_value())});
+}
+
+PhongDrawableEditor::PhongDrawableEditor(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& builder):
+    Gtk::Expander(cobject)
+{
+    builder->get_widget("phong_drawable_color", _colorButton);
+    _colorButton->signal_color_set().connect(sigc::mem_fun(*this, &PhongDrawableEditor::onColorChanged));
+}
+
+void PhongDrawableEditor::showEditor(const ObjectInfo& objectInfo) {
+    SceneGraph::AbstractFeature3D* feature = objectInfo.features[UnsignedByte(ObjectInfo::FeatureType::PhongDrawable)];
+    if(feature) {
+        _phongDrawable = reinterpret_cast<PhongDrawable*>(feature);
+        updateEditor();
+        show();
+    } else {
+        hide();
+    }
+}
+
+void PhongDrawableEditor::updateEditor() {
+    Gdk::RGBA gdkColor;
+    Color4 color = _phongDrawable->color();
+    gdkColor.set_rgba(double(color.r()), double(color.g()), double(color.b()), double(color.a()));
+    _colorButton->set_rgba(gdkColor);
+}
+
+void PhongDrawableEditor::onColorChanged() {
+    Gdk::RGBA gdkColor = _colorButton->get_rgba();
+    _phongDrawable->setColor({Float(gdkColor.get_red()), Float(gdkColor.get_green()), Float(gdkColor.get_blue()), Float(gdkColor.get_alpha())});
 }
 
 }}

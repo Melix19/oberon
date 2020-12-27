@@ -31,15 +31,21 @@ Properties::Properties(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>
 {
     builder->get_widget_derived("TransformationEditor", _transformationEditor);
     add(*_transformationEditor);
+    signalShowEditor().connect(sigc::mem_fun(_transformationEditor, &TransformationEditor::showEditor));
+
+    PhongDrawableEditor* phongDrawableEditor;
+    builder->get_widget_derived("PhongDrawableEditor", phongDrawableEditor);
+    add(*phongDrawableEditor);
+    signalShowEditor().connect(sigc::mem_fun(phongDrawableEditor, &PhongDrawableEditor::showEditor));
 }
 
 void Properties::showObjectProperties(const ObjectInfo& objectInfo) {
-    _transformationEditor->show(objectInfo);
+    _signalShowEditor.emit(objectInfo);
     show();
 }
 
 void Properties::updateTransformation() {
-    _transformationEditor->update();
+    _transformationEditor->updateEditor();
 }
 
 }}

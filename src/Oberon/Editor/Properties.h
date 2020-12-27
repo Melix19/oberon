@@ -37,7 +37,11 @@ class Properties: public Gtk::Box {
         void showObjectProperties(const ObjectInfo& objectInfo);
         void updateTransformation();
 
+        sigc::signal<void(const ObjectInfo&)> signalShowEditor() { return _signalShowEditor; }
+
     private:
+        sigc::signal<void(const ObjectInfo&)> _signalShowEditor;
+
         TransformationEditor* _transformationEditor;
 };
 
