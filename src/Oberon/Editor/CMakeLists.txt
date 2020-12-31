@@ -72,5 +72,10 @@ target_link_libraries(OberonEditor PRIVATE
     im3d
     ${GTKMM_LIBRARIES})
 
+install(TARGETS OberonEditor
+    RUNTIME DESTINATION ${OBERON_BINARY_INSTALL_DIR}
+    LIBRARY DESTINATION ${OBERON_LIBRARY_INSTALL_DIR}
+    ARCHIVE DESTINATION ${OBERON_LIBRARY_INSTALL_DIR})
+
 # Make the executable a default target to build & run in Visual Studio
 set_property(DIRECTORY ${PROJECT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT OberonEditor)

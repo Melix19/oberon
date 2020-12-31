@@ -52,4 +52,9 @@ target_link_libraries(Oberon PUBLIC
     Magnum::Shaders
     Magnum::Trade)
 
+install(TARGETS Oberon
+    RUNTIME DESTINATION ${OBERON_BINARY_INSTALL_DIR}
+    LIBRARY DESTINATION ${OBERON_LIBRARY_INSTALL_DIR}
+    ARCHIVE DESTINATION ${OBERON_LIBRARY_INSTALL_DIR})
+
 add_subdirectory(Editor)

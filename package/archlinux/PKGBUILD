@@ -1,0 +1,33 @@
+# Author: melix99 <marco.melorio@pm.me>
+pkgname=oberon
+pkgver=dev
+pkgrel=1
+pkgdesc="A cross-platform 2D/3D game engine built with magnum and gtkmm"
+arch=('i686' 'x86_64')
+url="https://github.com/melix99/oberon"
+license=('MIT')
+depends=('magnum-plugins' 'gtkmm3')
+makedepends=('cmake' 'ninja')
+options=('!strip')
+
+_rootdir=$startdir/../../
+
+build() {
+    mkdir -p "$_rootdir/build"
+    cd "$_rootdir/build"
+
+    # Disable optimization (saves A LOT of compilation time)
+    newcxxflags=$(echo $CXXFLAGS | sed s/-O.//g | sed s/-D_FORTIFY_SOURCE=.//g)
+    export CXXFLAGS="$newcxxflags"
+
+    cmake .. \
+        -DCMAKE_BUILD_TYPE=Debug \
+        -DCMAKE_INSTALL_PREFIX=/usr \
+        -G Ninja
+    ninja
+}
+
+package() {
+    cd "$_rootdir/build"
+    DESTDIR="$pkgdir/" ninja install
+}
